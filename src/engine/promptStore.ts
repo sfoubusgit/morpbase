@@ -19,6 +19,9 @@ const toSavedPrompt = (row: any): SavedPrompt => ({
   positive: row.positive,
   negative: row.negative ?? undefined,
   tags: row.tags ?? undefined,
+  model: row.model ?? undefined,
+  purpose: row.purpose ?? undefined,
+  usedAt: row.used_at ?? undefined,
   note: row.note ?? undefined,
   createdAt: new Date(row.created_at).getTime(),
   updatedAt: new Date(row.updated_at).getTime(),
@@ -41,6 +44,9 @@ export const createPrompt = async (input: {
   positive: string;
   negative?: string;
   tags?: string[];
+  model?: string;
+  purpose?: string;
+  usedAt?: string;
   note?: string;
 }): Promise<SavedPrompt> => {
   const name = normalizeText(input.name);
@@ -58,6 +64,9 @@ export const createPrompt = async (input: {
     positive,
     negative: input.negative ? normalizeText(input.negative) : null,
     tags: input.tags?.map(normalizeText).filter(Boolean) ?? null,
+    model: input.model ? normalizeText(input.model) : null,
+    purpose: input.purpose ? normalizeText(input.purpose) : null,
+    used_at: input.usedAt ? normalizeText(input.usedAt) : new Date().toISOString(),
     note: input.note ? normalizeText(input.note) : null,
   };
   const { data, error } = await supabase
@@ -97,6 +106,9 @@ export const importPromptsPayload = async (payload: SavedPromptStore): Promise<S
       positive: normalizeText(prompt.positive),
       negative: prompt.negative ? normalizeText(prompt.negative) : null,
       tags: prompt.tags?.map(normalizeText).filter(Boolean) ?? null,
+      model: prompt.model ? normalizeText(prompt.model) : null,
+      purpose: prompt.purpose ? normalizeText(prompt.purpose) : null,
+      used_at: prompt.usedAt ? normalizeText(prompt.usedAt) : null,
       note: prompt.note ? normalizeText(prompt.note) : null,
     }))
     .filter(prompt => !existingNames.has(prompt.name));

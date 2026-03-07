@@ -34,6 +34,7 @@ import { PromptLibrary } from './components/PromptLibrary';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
 import { WorkingSetsPage } from './components/WorkingSetsPage';
+import { PromptsPage } from './components/PromptsPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import {
   changeUserPassword,
@@ -77,9 +78,10 @@ const DEFAULT_MODEL_PROFILE: ModelProfile = {
  */
 
 export function App() {
-  const [activePage, setActivePage] = useState<'generator' | 'user-pools' | 'pool-hub' | 'working-sets'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'working-sets'>(() => {
     try {
       const saved = window.localStorage.getItem('promptgen:active_page');
+      if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
       if (saved === 'pool-hub') return 'pool-hub';
       if (saved === 'working-sets') return 'working-sets';
@@ -1337,6 +1339,15 @@ export function App() {
           </button>
           <button
             type="button"
+            className={`app-page-toggle-btn ${activePage === 'prompts' ? 'active' : ''}`}
+            onClick={() => setActivePage('prompts')}
+            role="tab"
+            aria-selected={activePage === 'prompts'}
+          >
+            Prompts
+          </button>
+          <button
+            type="button"
             className={`app-page-toggle-btn ${activePage === 'working-sets' ? 'active' : ''}`}
             onClick={() => setActivePage('working-sets')}
             role="tab"
@@ -1390,6 +1401,20 @@ export function App() {
           onRequestLogin={handleOpenAuth}
           userName={authUser?.name ?? null}
           userId={authUser?.id ?? null}
+          isPro={isPro}
+        />
+      ) : activePage === 'prompts' ? (
+        <PromptsPage
+          manualUrl={manualUrl}
+          prompt={prompt}
+          customAdditions={poolAdditionTexts}
+          freeformPrompt={freeformPrompt}
+          onFreeformPromptChange={setFreeformPrompt}
+          onClearPrompt={handleClearPrompt}
+          onUndoClearPrompt={handleUndoClearPrompt}
+          canUndoClearPrompt={Boolean(clearUndoState)}
+          onAddToPrompt={handleAddPoolItem}
+          authUser={authUser}
           isPro={isPro}
         />
       ) : activePage === 'working-sets' ? (
@@ -1522,6 +1547,8 @@ export function App() {
                 authUser={authUser}
                 isPro={isPro}
                 manualUrl={manualUrl}
+                showCloudPrompts={false}
+                showLocalPrompts={true}
               />
             </div>
             

@@ -59,6 +59,18 @@
   cursor: pointer;
 }
 
+.prompt-library-save-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.prompt-library-save-actions button:last-child {
+  background: rgba(110, 86, 249, 0.2);
+  border: 1px solid rgba(110, 86, 249, 0.5);
+  color: #e9ddff;
+}
+
 .prompt-library-save button:hover {
   background: #7b65ff;
 }
@@ -117,6 +129,18 @@
   gap: 10px;
 }
 
+.prompt-library-section {
+  display: grid;
+  gap: 8px;
+}
+
+.prompt-library-section-title {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .prompt-library-item {
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 12px;
@@ -136,6 +160,14 @@
 .prompt-library-item-text {
   font-size: 12px;
   color: #cbd5f5;
+}
+
+.prompt-library-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 11px;
+  color: #9ca3af;
 }
 
 .prompt-library-item-tags {

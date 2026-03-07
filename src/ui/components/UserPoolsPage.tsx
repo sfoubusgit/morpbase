@@ -862,6 +862,8 @@ export function UserPoolsPage({
             onAddToPrompt={onAddToPrompt}
             authUser={authUser}
             manualUrl={manualUrl}
+            showCloudPrompts={false}
+            showLocalPrompts={false}
           />
         </aside>
       </div>

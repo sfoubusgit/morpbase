@@ -16,6 +16,30 @@ type PromptLibraryProps = {
   authUser?: { id: string } | null;
   isPro?: boolean;
   manualUrl?: string;
+  showCloudPrompts?: boolean;
+  showLocalPrompts?: boolean;
+};
+
+const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
+
+const loadLocalPrompts = (): SavedPrompt[] => {
+  try {
+    const raw = window.localStorage.getItem(LOCAL_STORE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { prompts?: SavedPrompt[] };
+    if (!parsed || !Array.isArray(parsed.prompts)) return [];
+    return parsed.prompts;
+  } catch {
+    return [];
+  }
+};
+
+const saveLocalPrompts = (prompts: SavedPrompt[]) => {
+  try {
+    window.localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({ prompts }));
+  } catch {
+    // ignore storage errors
+  }
 };
 
 const buildPromptText = (prompt: any, customAdditions: string[]) => {
@@ -34,10 +58,22 @@ const buildPromptText = (prompt: any, customAdditions: string[]) => {
   };
 };
 
-export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, authUser, isPro = false, manualUrl }: PromptLibraryProps) {
+export function PromptLibrary({
+  prompt,
+  customAdditions = [],
+  onAddToPrompt,
+  authUser,
+  isPro = false,
+  manualUrl,
+  showCloudPrompts = false,
+  showLocalPrompts = true,
+}: PromptLibraryProps) {
   const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
+  const [localPrompts, setLocalPrompts] = useState<SavedPrompt[]>([]);
   const [name, setName] = useState('');
   const [tags, setTags] = useState('');
+  const [model, setModel] = useState('');
+  const [purpose, setPurpose] = useState('');
   const [note, setNote] = useState('');
   const [libraryJson, setLibraryJson] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -55,6 +91,7 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
   };
 
   useEffect(() => {
+    setLocalPrompts(loadLocalPrompts());
     if (authUser) {
       refresh();
     } else {
@@ -70,7 +107,7 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
 
   const handleSave = async () => {
     if (!authUser || !isPro) {
-      setError('Upgrade to Pro to save prompts.');
+      setError('Upgrade to Pro to save prompts to the cloud.');
       return;
     }
     setError(null);
@@ -81,13 +118,85 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
         positive: currentText.positive,
         negative: currentText.negative,
         tags: parseTags(tags),
+        model,
+        purpose,
         note,
       });
       setName('');
       setTags('');
+      setModel('');
+      setPurpose('');
       setNote('');
       await refresh();
-      setMessage('Saved prompt.');
+      setMessage('Saved to cloud.');
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to save prompt.');
+    }
+  };
+
+  const handleSaveLocal = () => {
+    setError(null);
+    setMessage(null);
+    const trimmedName = name.trim();
+    const positive = currentText.positive.trim();
+    if (!trimmedName) {
+      setError('Prompt name cannot be empty.');
+      return;
+    }
+    if (!positive) {
+      setError('Prompt text cannot be empty.');
+      return;
+    }
+    const now = Date.now();
+    const nextPrompt: SavedPrompt = {
+      id: `local_${now}_${Math.random().toString(36).slice(2, 6)}`,
+      name: trimmedName,
+      positive,
+      negative: currentText.negative || undefined,
+      tags: parseTags(tags),
+      model: model.trim() || undefined,
+      purpose: purpose.trim() || undefined,
+      usedAt: new Date(now).toISOString(),
+      note: note.trim() || undefined,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const next = [nextPrompt, ...localPrompts];
+    setLocalPrompts(next);
+    saveLocalPrompts(next);
+    setName('');
+    setTags('');
+    setModel('');
+    setPurpose('');
+    setNote('');
+    setMessage('Saved locally.');
+  };
+
+  const handleDeleteLocal = (promptId: string) => {
+    const next = localPrompts.filter(item => item.id !== promptId);
+    setLocalPrompts(next);
+    saveLocalPrompts(next);
+  };
+
+  const handleSaveLocalToCloud = async (prompt: SavedPrompt) => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to save prompts to the cloud.');
+      return;
+    }
+    setError(null);
+    setMessage(null);
+    try {
+      await createPrompt({
+        name: prompt.name,
+        positive: prompt.positive,
+        negative: prompt.negative,
+        tags: prompt.tags,
+        model: prompt.model,
+        purpose: prompt.purpose,
+        note: prompt.note,
+      });
+      await refresh();
+      setMessage('Saved to cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }
@@ -148,10 +257,6 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
   };
 
   const handleCopy = (prompt: SavedPrompt) => {
-    if (!authUser || !isPro) {
-      setError('Upgrade to Pro to copy prompts.');
-      return;
-    }
     const full = prompt.negative
       ? `${prompt.positive}\n\nNEGATIVE PROMPT:\n${prompt.negative}`
       : prompt.positive;
@@ -192,13 +297,30 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
         />
         <input
           type="text"
+          placeholder="Model (free text)"
+          value={model}
+          onChange={event => setModel(event.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Purpose (free text)"
+          value={purpose}
+          onChange={event => setPurpose(event.target.value)}
+        />
+        <input
+          type="text"
           placeholder="Note (optional)"
           value={note}
           onChange={event => setNote(event.target.value)}
         />
-        <button type="button" onClick={handleSave}>
-          Save Current Prompt
-        </button>
+        <div className="prompt-library-save-actions">
+          <button type="button" onClick={handleSaveLocal}>
+            Save Locally
+          </button>
+          <button type="button" onClick={handleSave}>
+            Save to Cloud
+          </button>
+        </div>
       </div>
       <details className="prompt-library-io">
         <summary>Import / Export</summary>
@@ -223,38 +345,91 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, aut
       {error && <div className="prompt-library-error">{error}</div>}
       {message && <div className="prompt-library-message">{message}</div>}
       <div className="prompt-library-list">
-        {!authUser ? (
-          <div className="prompt-library-empty">Log in to access your saved prompts.</div>
-        ) : !isPro ? (
-          <div className="prompt-library-empty">Upgrade to Pro to unlock Saved Prompts.</div>
-        ) : prompts.length === 0 ? (
-          <div className="prompt-library-empty">No saved prompts yet.</div>
-        ) : (
-          prompts.map(item => (
-            <div key={item.id} className="prompt-library-item">
-              <div className="prompt-library-item-main">
-                <div className="prompt-library-item-title">{item.name}</div>
-                <div className="prompt-library-item-text">{item.positive}</div>
-                {item.tags && item.tags.length > 0 && (
-                  <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
-                )}
-              </div>
-              <div className="prompt-library-item-actions">
-                <button type="button" onClick={() => handleCopy(item)}>
-                  Copy
-                </button>
-                <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
-                  Add to Prompt
-                </button>
-                <button type="button" onClick={async () => {
-                  await deletePrompt(item.id);
-                  await refresh();
-                }}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          ))
+        {showLocalPrompts && (
+          <div className="prompt-library-section">
+            <div className="prompt-library-section-title">Local Prompts</div>
+            {localPrompts.length === 0 ? (
+              <div className="prompt-library-empty">No local prompts yet.</div>
+            ) : (
+              localPrompts.map(item => (
+                <div key={item.id} className="prompt-library-item">
+                  <div className="prompt-library-item-main">
+                    <div className="prompt-library-item-title">{item.name}</div>
+                    <div className="prompt-library-item-text">{item.positive}</div>
+                    {(item.model || item.purpose || item.usedAt) && (
+                      <div className="prompt-library-item-meta">
+                        {item.model && <span>Model: {item.model}</span>}
+                        {item.purpose && <span>Purpose: {item.purpose}</span>}
+                        {item.usedAt && <span>Used: {item.usedAt}</span>}
+                      </div>
+                    )}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                    )}
+                  </div>
+                  <div className="prompt-library-item-actions">
+                    <button type="button" onClick={() => handleCopy(item)}>
+                      Copy
+                    </button>
+                    <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
+                      Add to Prompt
+                    </button>
+                    <button type="button" onClick={() => handleSaveLocalToCloud(item)}>
+                      Save to Cloud
+                    </button>
+                    <button type="button" onClick={() => handleDeleteLocal(item.id)}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+        {showCloudPrompts && (
+          <div className="prompt-library-section">
+            <div className="prompt-library-section-title">Cloud Prompts</div>
+            {!authUser ? (
+              <div className="prompt-library-empty">Log in to access your cloud prompts.</div>
+            ) : !isPro ? (
+              <div className="prompt-library-empty">Upgrade to Pro to unlock cloud prompts.</div>
+            ) : prompts.length === 0 ? (
+              <div className="prompt-library-empty">No cloud prompts yet.</div>
+            ) : (
+              prompts.map(item => (
+                <div key={item.id} className="prompt-library-item">
+                  <div className="prompt-library-item-main">
+                    <div className="prompt-library-item-title">{item.name}</div>
+                    <div className="prompt-library-item-text">{item.positive}</div>
+                    {(item.model || item.purpose || item.usedAt) && (
+                      <div className="prompt-library-item-meta">
+                        {item.model && <span>Model: {item.model}</span>}
+                        {item.purpose && <span>Purpose: {item.purpose}</span>}
+                        {item.usedAt && <span>Used: {item.usedAt}</span>}
+                      </div>
+                    )}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                    )}
+                  </div>
+                  <div className="prompt-library-item-actions">
+                    <button type="button" onClick={() => handleCopy(item)}>
+                      Copy
+                    </button>
+                    <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
+                      Add to Prompt
+                    </button>
+                    <button type="button" onClick={async () => {
+                      await deletePrompt(item.id);
+                      await refresh();
+                    }}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
     </div>

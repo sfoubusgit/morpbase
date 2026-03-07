@@ -1,0 +1,88 @@
+.prompts-page {
+  min-height: 100vh;
+  padding: 24px 32px 32px 32px;
+  color: #ffffff;
+}
+
+.prompts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.prompts-header h2 {
+  margin: 0 0 6px 0;
+  font-size: 24px;
+}
+
+.prompts-header p {
+  margin: 0;
+  color: #b0b0c3;
+  font-size: 14px;
+}
+
+.prompts-manual-link {
+  font-size: 12px;
+  color: #8aa5ff;
+  text-decoration: none;
+}
+
+.prompts-manual-link:hover {
+  text-decoration: underline;
+}
+
+.prompts-layout {
+  display: grid;
+  grid-template-columns: 2.4fr 1fr;
+  gap: 20px;
+}
+
+.prompts-panel {
+  background: #1a1a1f;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 360px;
+}
+
+.prompts-panel-sidebar {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.prompts-library-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prompts-library-intro h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+  color: #f3f4f6;
+}
+
+.prompts-library-intro p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+  .prompts-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prompts-panel-sidebar {
+    position: relative;
+    top: 0;
+    max-height: none;
+  }
+}

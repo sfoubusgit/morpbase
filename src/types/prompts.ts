@@ -4,6 +4,9 @@ export type SavedPrompt = {
   positive: string;
   negative?: string;
   tags?: string[];
+  model?: string;
+  purpose?: string;
+  usedAt?: string;
   note?: string;
   createdAt: number;
   updatedAt: number;
