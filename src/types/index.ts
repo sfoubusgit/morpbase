@@ -6,6 +6,7 @@
 
 export * from './entities';
 export * from './errors';
+export * from './profiles';
 export * from './pools';
 export * from './poolHub';
 export * from './prompts';

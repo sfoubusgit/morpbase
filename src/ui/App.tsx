@@ -35,6 +35,7 @@ import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
 import { WorkingSetsPage } from './components/WorkingSetsPage';
 import { PromptsPage } from './components/PromptsPage';
+import { LandingPage } from './components/LandingPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import {
   changeUserPassword,
@@ -78,6 +79,13 @@ const DEFAULT_MODEL_PROFILE: ModelProfile = {
  */
 
 export function App() {
+  const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem('morpbase:seen_landing') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'working-sets'>(() => {
     try {
       const saved = window.localStorage.getItem('promptgen:active_page');
@@ -1193,6 +1201,15 @@ export function App() {
     }
   }, [activePage]);
 
+  const handleEnterApp = () => {
+    setHasSeenLanding(true);
+    try {
+      window.localStorage.setItem('morpbase:seen_landing', '1');
+    } catch {
+      // ignore
+    }
+  };
+
   useEffect(() => {
     if (activePage === 'working-sets' || activePage === 'generator') {
       if (authUser) {
@@ -1219,6 +1236,10 @@ export function App() {
   return (
     <>
       <div className="app-root">
+      {!hasSeenLanding ? (
+        <LandingPage manualUrl={manualUrl} onEnter={handleEnterApp} />
+      ) : (
+      <>
       {isDevMode && (
         <div className="app-dev-banner">
           <span>DEV MODE: All features unlocked</span>
@@ -1683,6 +1704,8 @@ export function App() {
             </Modal>
           </div>
         </div>
+      )}
+      </>
       )}
       </div>
       <Modal

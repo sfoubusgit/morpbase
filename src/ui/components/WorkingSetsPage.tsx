@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Pool, PoolItem, WorkingSet } from '../../types';
+import type { Pool, PoolItem, WorkingSet, PublicProfile } from '../../types';
 import { listPools } from '../../engine/poolStore';
 import {
   addWorkingSetHubEntry,
   listWorkingSetHubEntries,
 } from '../../engine/workingSetHubStore';
 import { exportWorkingSetPayload } from '../../engine/workingSetStore';
+import { getMyPublicProfile } from '../../engine/profileStore';
 import { Modal } from './Modal';
 import './WorkingSetsPage.css';
 
@@ -21,7 +22,7 @@ type WorkingSetsPageProps = {
   onRemoveWorkingSetItem: (setId: string, categoryId: string, itemId: string) => Promise<void>;
   onClearWorkingSetCategory: (setId: string, categoryId: string) => Promise<void>;
   authReady?: boolean;
-  authUser?: { id: string } | null;
+  authUser?: { id: string; name?: string } | null;
   isPro?: boolean;
   workingSetsLoading?: boolean;
   manualUrl?: string;
@@ -74,6 +75,7 @@ export function WorkingSetsPage({
   });
   const [confirmRights, setConfirmRights] = useState(false);
   const [confirmPrivacy, setConfirmPrivacy] = useState(false);
+  const [publicProfile, setPublicProfile] = useState<PublicProfile | null>(null);
   const gateMessage = !authReady
     ? 'Loading working sets...'
     : !authUser
@@ -86,6 +88,32 @@ export function WorkingSetsPage({
     if (selectedSetId && workingSets.some(set => set.id === selectedSetId)) return;
     setSelectedSetId(workingSets[0]?.id ?? null);
   }, [selectedSetId, workingSets]);
+
+  useEffect(() => {
+    let isActive = true;
+    if (!authUser) {
+      setPublicProfile(null);
+      return () => {
+        isActive = false;
+      };
+    }
+    const loadProfile = async () => {
+      try {
+        const profile = await getMyPublicProfile();
+        if (isActive) {
+          setPublicProfile(profile);
+        }
+      } catch {
+        if (isActive) {
+          setPublicProfile(null);
+        }
+      }
+    };
+    loadProfile();
+    return () => {
+      isActive = false;
+    };
+  }, [authUser?.id]);
 
   useEffect(() => {
     const target = workingSets.find(set => set.id === selectedSetId);
@@ -207,9 +235,13 @@ export function WorkingSetsPage({
         return;
       }
       const now = Date.now();
+      const creatorName = publicProfile?.displayName?.trim()
+        || authUser?.name
+        || 'You';
       addWorkingSetHubEntry({
         id: `hub_ws_${now}_${Math.random().toString(36).slice(2, 6)}`,
-        creator: 'You',
+        creator: creatorName,
+        creatorId: authUser?.id,
         title,
         summary,
         description,

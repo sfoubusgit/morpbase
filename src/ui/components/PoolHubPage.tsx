@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry } from '../../types';
+import type { Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile, SavedPrompt } from '../../types';
 import {
   addHubEntry,
   addHubComment,
@@ -37,6 +37,12 @@ import {
   listWorkingSets,
   setActiveWorkingSetId,
 } from '../../engine/workingSetStore';
+import {
+  getMyPublicProfile,
+  listPublicProfiles,
+  upsertMyPublicProfile,
+} from '../../engine/profileStore';
+import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { Modal } from './Modal';
 import './PoolHubPage.css';
 
@@ -206,6 +212,28 @@ const parseWorkingSetPayload = (raw: string, fallbackName: string): WorkingSet =
   };
 };
 
+const profileLinksToText = (links?: Record<string, string> | null) => {
+  if (!links) return '';
+  return Object.entries(links)
+    .map(([label, url]) => `${label}: ${url}`)
+    .join('\n');
+};
+
+const parseProfileLinks = (raw: string) => {
+  const lines = raw.split('\n').map(line => line.trim()).filter(Boolean);
+  if (lines.length === 0) return null;
+  const links: Record<string, string> = {};
+  lines.forEach((line, index) => {
+    const parts = line.split(':');
+    if (parts.length < 2) return;
+    const label = parts.shift()?.trim();
+    const url = parts.join(':').trim();
+    if (!label || !url) return;
+    links[label || `Link ${index + 1}`] = url;
+  });
+  return Object.keys(links).length > 0 ? links : null;
+};
+
 type PoolHubPageProps = {
   onGoToUserPools?: () => void;
   isLoggedIn?: boolean;
@@ -272,6 +300,25 @@ export function PoolHubPage({
   const [editingCommentBody, setEditingCommentBody] = useState('');
   const [reportReason, setReportReason] = useState('');
   const [authNotice, setAuthNotice] = useState<string | null>(null);
+  const [creatorSearchTerm, setCreatorSearchTerm] = useState('');
+  const [isCreatorProfileOpen, setIsCreatorProfileOpen] = useState(false);
+  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
+  const [publicProfiles, setPublicProfiles] = useState<PublicProfile[]>([]);
+  const [myProfile, setMyProfile] = useState<PublicProfile | null>(null);
+  const [isProfileEditorOpen, setIsProfileEditorOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    displayName: '',
+    bio: '',
+    avatarUrl: '',
+    tags: '',
+    links: '',
+    showPublicPrompts: false,
+  });
+  const [profileMessage, setProfileMessage] = useState<string | null>(null);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
+  const [publicPromptsLoading, setPublicPromptsLoading] = useState(false);
+  const [publicPromptsError, setPublicPromptsError] = useState<string | null>(null);
 
   const refreshUserPools = async () => {
     try {
@@ -296,6 +343,102 @@ export function PoolHubPage({
   };
 
   useEffect(() => {
+    let isActive = true;
+    const loadProfiles = async () => {
+      try {
+        const profiles = await listPublicProfiles();
+        if (isActive) {
+          setPublicProfiles(profiles);
+        }
+      } catch {
+        if (isActive) {
+          setProfileError('Failed to load public profiles.');
+        }
+      }
+    };
+    loadProfiles();
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+    if (!isLoggedIn) {
+      setMyProfile(null);
+      return () => {
+        isActive = false;
+      };
+    }
+    const loadMyProfile = async () => {
+      try {
+        const profile = await getMyPublicProfile();
+        if (isActive) {
+          setMyProfile(profile);
+        }
+      } catch {
+        if (isActive) {
+          setProfileError('Failed to load your public profile.');
+        }
+      }
+    };
+    loadMyProfile();
+    return () => {
+      isActive = false;
+    };
+  }, [isLoggedIn]);
+
+  const publicProfileByUserId = useMemo(() => {
+    const map = new Map<string, PublicProfile>();
+    publicProfiles.forEach(profile => {
+      map.set(profile.userId, profile);
+    });
+    return map;
+  }, [publicProfiles]);
+
+  const publicProfileByName = useMemo(() => {
+    const map = new Map<string, PublicProfile>();
+    publicProfiles.forEach(profile => {
+      map.set(profile.displayName.toLowerCase(), profile);
+    });
+    return map;
+  }, [publicProfiles]);
+
+  const resolveCreatorProfile = (entry: { creator?: string; creatorId?: string }) => {
+    if (entry.creatorId) {
+      return publicProfileByUserId.get(entry.creatorId) ?? null;
+    }
+    if (entry.creator) {
+      return publicProfileByName.get(entry.creator.toLowerCase()) ?? null;
+    }
+    return null;
+  };
+
+  const resolveCreatorName = (entry: { creator?: string; creatorId?: string }) => {
+    const profile = resolveCreatorProfile(entry);
+    return profile?.displayName ?? entry.creator ?? 'Unknown creator';
+  };
+
+  const handleOpenProfileEditor = () => {
+    if (!isLoggedIn) {
+      setAuthNotice('Log in to create your public profile.');
+      onRequestLogin?.();
+      return;
+    }
+    setProfileError(null);
+    setProfileMessage(null);
+    setProfileForm({
+      displayName: myProfile?.displayName ?? userName ?? '',
+      bio: myProfile?.bio ?? '',
+      avatarUrl: myProfile?.avatarUrl ?? '',
+      tags: myProfile?.tags?.join(', ') ?? '',
+      links: profileLinksToText(myProfile?.links),
+      showPublicPrompts: Boolean(myProfile?.showPublicPrompts),
+    });
+    setIsProfileEditorOpen(true);
+  };
+
+  useEffect(() => {
     if (hubMode === 'working-sets') {
       setSelectedWorkingSetId(workingSetEntries[0]?.id ?? '');
       refreshUserWorkingSets();
@@ -316,6 +459,110 @@ export function PoolHubPage({
     const source = hubMode === 'working-sets' ? workingSetEntries : entries;
     return Array.from(new Set(source.flatMap(entry => entry.languages))).sort();
   }, [entries, workingSetEntries, hubMode]);
+
+  const creatorProfiles = useMemo(() => {
+    const source = hubMode === 'working-sets' ? workingSetEntries : entries;
+    const profiles = new Map<string, {
+      id: string;
+      name: string;
+      userId?: string;
+      profile?: PublicProfile | null;
+      uploads: number;
+      totalDownloads: number;
+      avgRating: number;
+      entries: typeof source;
+      tags: Record<string, number>;
+    }>();
+
+    source.forEach(entry => {
+      const profile = resolveCreatorProfile(entry);
+      const name = profile?.displayName ?? entry.creator;
+      if (!name) return;
+      const id = entry.creatorId ? `id:${entry.creatorId}` : `name:${name}`;
+      const existing = profiles.get(id);
+      const next = existing ?? {
+        id,
+        name,
+        userId: entry.creatorId,
+        profile,
+        uploads: 0,
+        totalDownloads: 0,
+        avgRating: 0,
+        entries: [] as typeof source,
+        tags: {},
+      };
+      next.uploads += 1;
+      next.totalDownloads += entry.downloads;
+      next.avgRating = next.avgRating === 0
+        ? entry.ratingAvg
+        : (next.avgRating * (next.uploads - 1) + entry.ratingAvg) / next.uploads;
+      next.entries.push(entry);
+      entry.tags.forEach(tag => {
+        next.tags[tag] = (next.tags[tag] ?? 0) + 1;
+      });
+      profiles.set(id, next);
+    });
+
+    return Array.from(profiles.values()).sort((a, b) => b.uploads - a.uploads);
+  }, [entries, workingSetEntries, hubMode, publicProfileByUserId, publicProfileByName]);
+
+  const filteredCreators = useMemo(() => {
+    const term = creatorSearchTerm.trim().toLowerCase();
+    if (!term) return creatorProfiles;
+    return creatorProfiles.filter(profile => {
+      if (profile.name.toLowerCase().includes(term)) return true;
+      const bio = profile.profile?.bio?.toLowerCase() ?? '';
+      if (bio.includes(term)) return true;
+      const tags = profile.profile?.tags ?? [];
+      return tags.some(tag => tag.toLowerCase().includes(term));
+    });
+  }, [creatorProfiles, creatorSearchTerm]);
+
+  const selectedCreatorProfile = useMemo(() => {
+    if (!selectedCreatorId) return null;
+    return creatorProfiles.find(profile => profile.id === selectedCreatorId) ?? null;
+  }, [creatorProfiles, selectedCreatorId]);
+
+  const openCreatorProfile = (creatorId: string) => {
+    setSelectedCreatorId(creatorId);
+    setIsCreatorProfileOpen(true);
+  };
+
+  useEffect(() => {
+    let isActive = true;
+    const loadPrompts = async () => {
+      if (!isCreatorProfileOpen || !selectedCreatorProfile?.userId) {
+        setPublicPrompts([]);
+        setPublicPromptsError(null);
+        return;
+      }
+      if (!selectedCreatorProfile.profile?.showPublicPrompts) {
+        setPublicPrompts([]);
+        setPublicPromptsError(null);
+        return;
+      }
+      setPublicPromptsLoading(true);
+      try {
+        const prompts = await listPublicPromptsByUser(selectedCreatorProfile.userId);
+        if (isActive) {
+          setPublicPrompts(prompts);
+          setPublicPromptsError(null);
+        }
+      } catch (err: any) {
+        if (isActive) {
+          setPublicPromptsError(err?.message ?? 'Failed to load public prompts.');
+        }
+      } finally {
+        if (isActive) {
+          setPublicPromptsLoading(false);
+        }
+      }
+    };
+    loadPrompts();
+    return () => {
+      isActive = false;
+    };
+  }, [isCreatorProfileOpen, selectedCreatorProfile?.userId, selectedCreatorProfile?.profile?.showPublicPrompts]);
 
   const filteredEntries = useMemo(() => {
     const activeEntries = hubMode === 'working-sets' ? workingSetEntries : entries;
@@ -431,6 +678,43 @@ export function PoolHubPage({
     setCommentError(null);
     setCommentBody('');
   }, [selectedEntry?.id, userId, entries, workingSetEntries, hubMode]);
+
+  const handleSaveProfile = async () => {
+    if (!isLoggedIn) {
+      setProfileError('Log in to save your profile.');
+      return;
+    }
+    const displayName = profileForm.displayName.trim();
+    if (!displayName) {
+      setProfileError('Display name is required.');
+      return;
+    }
+    try {
+      const tags = profileForm.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(Boolean);
+      const links = parseProfileLinks(profileForm.links);
+      const saved = await upsertMyPublicProfile({
+        displayName,
+        bio: profileForm.bio.trim() || null,
+        avatarUrl: profileForm.avatarUrl.trim() || null,
+        tags: tags.length > 0 ? tags : null,
+        links,
+        showPublicPrompts: profileForm.showPublicPrompts,
+      });
+      setMyProfile(saved);
+      setPublicProfiles(prev => {
+        const next = prev.filter(profile => profile.userId !== saved.userId);
+        return [saved, ...next];
+      });
+      setProfileMessage('Profile updated.');
+      setProfileError(null);
+      setIsProfileEditorOpen(false);
+    } catch (err: any) {
+      setProfileError(err?.message ?? 'Failed to save profile.');
+    }
+  };
 
   const handleAddToActive = async () => {
     if (!isLoggedIn) {
@@ -645,9 +929,16 @@ export function PoolHubPage({
           throw new Error('A Working Set with this title already exists.');
         }
         const now = Date.now();
+        const creatorName = myProfile?.displayName?.trim()
+          || workingSetUploadState.creator.trim()
+          || userName
+          || '';
+        if (!creatorName) {
+          throw new Error('Creator name is required. Create a public profile or enter a creator name.');
+        }
         const entry: WorkingSetHubEntry = {
           id: createId('hub_ws'),
-          creator: workingSetUploadState.creator.trim() || userName || undefined,
+          creator: creatorName,
           creatorId: userId || undefined,
           title: trimmedTitle,
           summary: workingSetUploadState.summary.trim() || 'New community working set upload.',
@@ -690,9 +981,16 @@ export function PoolHubPage({
         throw new Error('A pool with this title already exists.');
       }
       const now = Date.now();
+      const creatorName = myProfile?.displayName?.trim()
+        || uploadState.creator.trim()
+        || userName
+        || '';
+      if (!creatorName) {
+        throw new Error('Creator name is required. Create a public profile or enter a creator name.');
+      }
       const entry: PoolHubEntry = {
         id: createId('hub_entry'),
-        creator: uploadState.creator.trim() || userName || undefined,
+        creator: creatorName,
         creatorId: userId || undefined,
         title: trimmedTitle,
         summary: uploadState.summary.trim() || 'New community pool upload.',
@@ -802,6 +1100,8 @@ export function PoolHubPage({
     return showAllItems ? items : items.slice(0, 8);
   }, [selectedEntry, showAllItems, hubMode]);
 
+  const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
+
   return (
     <div className="pool-hub-page">
       <header className="pool-hub-header">
@@ -862,10 +1162,16 @@ export function PoolHubPage({
               setUploadError(null);
               setUploadSuccess(null);
               if (hubMode === 'working-sets') {
-                setWorkingSetUploadState(DEFAULT_WS_UPLOAD_STATE);
+                setWorkingSetUploadState({
+                  ...DEFAULT_WS_UPLOAD_STATE,
+                  creator: creatorDisplayName,
+                });
                 setIsWorkingSetUploadOpen(true);
               } else {
-                setUploadState(DEFAULT_UPLOAD_STATE);
+                setUploadState({
+                  ...DEFAULT_UPLOAD_STATE,
+                  creator: creatorDisplayName,
+                });
                 setIsUploadOpen(true);
               }
             }}
@@ -942,6 +1248,80 @@ export function PoolHubPage({
           My uploads
         </label>
       </div>
+      <div className="pool-hub-profile-panel">
+        <div className="pool-hub-profile-info">
+          <div className="pool-hub-profile-title">Public creator profile</div>
+          <div className="pool-hub-profile-hint">
+            Your profile name appears on Hub uploads and creator search.
+          </div>
+        </div>
+        <div className="pool-hub-profile-actions">
+          {isLoggedIn ? (
+            <>
+              <div className="pool-hub-profile-name">
+                {myProfile?.displayName ?? userName ?? 'Unnamed'}
+              </div>
+              <button
+                type="button"
+                className="pool-hub-secondary"
+                onClick={handleOpenProfileEditor}
+              >
+                Edit profile
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="pool-hub-profile-name">Log in to create a profile</div>
+              <button type="button" className="pool-hub-secondary" onClick={onRequestLogin}>
+                Log in
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="pool-hub-creator-search">
+        <label>
+          Search creators
+          <input
+            type="text"
+            placeholder="Creator name"
+            value={creatorSearchTerm}
+            onChange={event => setCreatorSearchTerm(event.target.value)}
+          />
+        </label>
+        {creatorSearchTerm.trim() && (
+          <div className="pool-hub-creator-results">
+            {filteredCreators.length === 0 ? (
+              <div className="pool-hub-empty">No creators match that search.</div>
+            ) : (
+              filteredCreators.slice(0, 8).map(profile => (
+                <button
+                  key={profile.id}
+                  type="button"
+                  className="pool-hub-creator-result"
+                  onClick={() => openCreatorProfile(profile.id)}
+                >
+                  <span className="pool-hub-creator-result-name">
+                    {profile.profile?.avatarUrl ? (
+                      <img
+                        src={profile.profile.avatarUrl}
+                        alt={profile.name}
+                        className="pool-hub-creator-avatar"
+                      />
+                    ) : (
+                      <span className="pool-hub-creator-avatar-fallback">
+                        {profile.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    {profile.name}
+                  </span>
+                  <span>{profile.uploads} uploads</span>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="pool-hub-layout">
         <section className="pool-hub-panel pool-hub-panel-grid">
@@ -972,9 +1352,21 @@ export function PoolHubPage({
                   <div className="pool-hub-card-body">
                     <div className="pool-hub-card-title">{entry.title}</div>
                     <div className="pool-hub-card-summary">{entry.summary}</div>
-                    {entry.creator && (
+                    {(entry.creator || entry.creatorId) && (
                       <div className="pool-hub-card-creator">
-                        by {entry.creator}
+                        <button
+                          type="button"
+                          className="pool-hub-link-button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            const creatorId = entry.creatorId
+                              ? `id:${entry.creatorId}`
+                              : `name:${resolveCreatorName(entry)}`;
+                            openCreatorProfile(creatorId);
+                          }}
+                        >
+                          by {resolveCreatorName(entry)}
+                        </button>
                         {((userId && entry.creatorId === userId) || (!userId && userName && entry.creator === userName)) && (
                           <span className="pool-hub-owner-badge">Your upload</span>
                         )}
@@ -1049,7 +1441,20 @@ export function PoolHubPage({
                 </div>
               )}
               <div className="pool-hub-detail-meta">
-                {selectedEntry.creator && <span>By {selectedEntry.creator}</span>}
+                {(selectedEntry.creator || selectedEntry.creatorId) && (
+                  <button
+                    type="button"
+                    className="pool-hub-link-button"
+                    onClick={() => {
+                      const creatorId = selectedEntry.creatorId
+                        ? `id:${selectedEntry.creatorId}`
+                        : `name:${resolveCreatorName(selectedEntry)}`;
+                      openCreatorProfile(creatorId);
+                    }}
+                  >
+                    By {resolveCreatorName(selectedEntry)}
+                  </button>
+                )}
                 {((userId && selectedEntry.creatorId === userId) || (!userId && userName && selectedEntry.creator === userName)) && (
                   <span className="pool-hub-owner-badge">Your upload</span>
                 )}
@@ -1059,9 +1464,9 @@ export function PoolHubPage({
                 <span>{selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})</span>
               </div>
               <p className="pool-hub-detail-description">{selectedEntry.description}</p>
-              {selectedEntry.creator && (
+              {(selectedEntry.creator || selectedEntry.creatorId) && (
                 <div className="pool-hub-creator-card">
-                  <div className="pool-hub-creator-title">{selectedEntry.creator}</div>
+                  <div className="pool-hub-creator-title">{resolveCreatorName(selectedEntry)}</div>
                   <div className="pool-hub-creator-meta">
                     <span>{(hubMode === 'working-sets' ? workingSetCreatorStats : creatorStats).uploads} uploads</span>
                     <span>{(hubMode === 'working-sets' ? workingSetCreatorStats : creatorStats).totalDownloads} downloads</span>
@@ -1308,8 +1713,11 @@ export function PoolHubPage({
                 type="text"
                 value={uploadState.creator}
                 onChange={event => setUploadState(prev => ({ ...prev, creator: event.target.value }))}
-                placeholder="Studio Name"
+                placeholder={creatorDisplayName || 'Studio Name'}
               />
+              {myProfile?.displayName && (
+                <span className="pool-hub-muted">Using your public profile name.</span>
+              )}
             </label>
             <label>
               Title
@@ -1493,8 +1901,11 @@ export function PoolHubPage({
                 type="text"
                 value={workingSetUploadState.creator}
                 onChange={event => setWorkingSetUploadState(prev => ({ ...prev, creator: event.target.value }))}
-                placeholder="Studio Name"
+                placeholder={creatorDisplayName || 'Studio Name'}
               />
+              {myProfile?.displayName && (
+                <span className="pool-hub-muted">Using your public profile name.</span>
+              )}
             </label>
             <label>
               Title
@@ -1690,6 +2101,188 @@ export function PoolHubPage({
           {adminError && <div className="pool-hub-error">{adminError}</div>}
         </div>
       </details>
+      <Modal
+        isOpen={isProfileEditorOpen}
+        onClose={() => setIsProfileEditorOpen(false)}
+        title="Public Creator Profile"
+        className="pool-hub-profile-modal"
+      >
+        <div className="pool-hub-profile-form">
+          <label>
+            Display name
+            <input
+              type="text"
+              value={profileForm.displayName}
+              onChange={event => setProfileForm(prev => ({ ...prev, displayName: event.target.value }))}
+              placeholder="Studio or creator name"
+            />
+          </label>
+          <label>
+            Bio
+            <textarea
+              rows={3}
+              value={profileForm.bio}
+              onChange={event => setProfileForm(prev => ({ ...prev, bio: event.target.value }))}
+              placeholder="What do you create?"
+            />
+          </label>
+          <label>
+            Avatar URL
+            <input
+              type="text"
+              value={profileForm.avatarUrl}
+              onChange={event => setProfileForm(prev => ({ ...prev, avatarUrl: event.target.value }))}
+              placeholder="https://..."
+            />
+          </label>
+          <label>
+            Tags (comma)
+            <input
+              type="text"
+              value={profileForm.tags}
+              onChange={event => setProfileForm(prev => ({ ...prev, tags: event.target.value }))}
+              placeholder="cinematic, portrait, VFX"
+            />
+          </label>
+          <label>
+            Links (one per line)
+            <textarea
+              rows={3}
+              value={profileForm.links}
+              onChange={event => setProfileForm(prev => ({ ...prev, links: event.target.value }))}
+              placeholder="Portfolio: https://...&#10;Twitter: https://..."
+            />
+          </label>
+          <label className="pool-hub-toggle">
+            <input
+              type="checkbox"
+              checked={profileForm.showPublicPrompts}
+              onChange={event => setProfileForm(prev => ({ ...prev, showPublicPrompts: event.target.checked }))}
+            />
+            Show my cloud prompts publicly
+          </label>
+          {profileError && <div className="pool-hub-error">{profileError}</div>}
+          {profileMessage && <div className="pool-hub-message">{profileMessage}</div>}
+          <div className="pool-hub-upload-actions">
+            <button type="button" className="pool-hub-secondary" onClick={() => setIsProfileEditorOpen(false)}>
+              Cancel
+            </button>
+            <button type="button" className="pool-hub-primary" onClick={handleSaveProfile}>
+              Save profile
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isCreatorProfileOpen}
+        onClose={() => setIsCreatorProfileOpen(false)}
+        title="Creator Profile"
+        className="pool-hub-creator-modal"
+      >
+        {selectedCreatorProfile ? (
+          <div className="pool-hub-creator-profile">
+            <div className="pool-hub-creator-header">
+              <div className="pool-hub-creator-identity">
+                {selectedCreatorProfile.profile?.avatarUrl ? (
+                  <img
+                    src={selectedCreatorProfile.profile.avatarUrl}
+                    alt={selectedCreatorProfile.name}
+                    className="pool-hub-creator-avatar-lg"
+                  />
+                ) : (
+                  <span className="pool-hub-creator-avatar-lg pool-hub-creator-avatar-fallback">
+                    {selectedCreatorProfile.name.charAt(0).toUpperCase()}
+                  </span>
+                )}
+                <div>
+                  <h3>{selectedCreatorProfile.name}</h3>
+                  {selectedCreatorProfile.profile?.bio && (
+                    <p className="pool-hub-creator-bio">{selectedCreatorProfile.profile.bio}</p>
+                  )}
+                </div>
+              </div>
+              <div className="pool-hub-creator-stats">
+                <span>{selectedCreatorProfile.uploads} uploads</span>
+                <span>{selectedCreatorProfile.totalDownloads} downloads</span>
+                <span>{selectedCreatorProfile.avgRating.toFixed(1)} avg rating</span>
+              </div>
+            </div>
+            {selectedCreatorProfile.profile?.links && (
+              <div className="pool-hub-creator-links">
+                {Object.entries(selectedCreatorProfile.profile.links).map(([label, url]) => (
+                  <a key={label} href={url} target="_blank" rel="noreferrer">
+                    {label}
+                  </a>
+                ))}
+              </div>
+            )}
+            <div className="pool-hub-creator-tags">
+              {(selectedCreatorProfile.profile?.tags && selectedCreatorProfile.profile.tags.length > 0
+                ? selectedCreatorProfile.profile.tags
+                : Object.entries(selectedCreatorProfile.tags)
+                  .sort((a, b) => b[1] - a[1])
+                  .slice(0, 8)
+                  .map(([tag]) => tag)
+              ).map(tag => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+            <div className="pool-hub-creator-uploads">
+              {selectedCreatorProfile.entries.map(entry => (
+                <button
+                  key={entry.id}
+                  type="button"
+                  className="pool-hub-creator-upload"
+                  onClick={() => {
+                    if (hubMode === 'working-sets') {
+                      setSelectedWorkingSetId(entry.id);
+                    } else {
+                      setSelectedId(entry.id);
+                    }
+                    setIsCreatorProfileOpen(false);
+                  }}
+                >
+                  <div>
+                    <div className="pool-hub-creator-upload-title">{entry.title}</div>
+                    <div className="pool-hub-creator-upload-summary">{entry.summary}</div>
+                  </div>
+                  <span>{entry.ratingAvg.toFixed(1)}</span>
+                </button>
+              ))}
+            </div>
+            <div className="pool-hub-creator-prompts">
+              <div className="pool-hub-section-title">Public prompts</div>
+              {!selectedCreatorProfile.profile?.showPublicPrompts ? (
+                <div className="pool-hub-empty">This creator keeps prompts private.</div>
+              ) : publicPromptsLoading ? (
+                <div className="pool-hub-empty">Loading prompts...</div>
+              ) : publicPromptsError ? (
+                <div className="pool-hub-error">{publicPromptsError}</div>
+              ) : publicPrompts.length === 0 ? (
+                <div className="pool-hub-empty">No public prompts yet.</div>
+              ) : (
+                <div className="pool-hub-creator-prompt-list">
+                  {publicPrompts.map(prompt => (
+                    <div key={prompt.id} className="pool-hub-creator-prompt">
+                      <div className="pool-hub-creator-prompt-title">{prompt.name}</div>
+                      <div className="pool-hub-creator-prompt-text">{prompt.positive}</div>
+                      {(prompt.model || prompt.purpose || prompt.usedAt) && (
+                        <div className="pool-hub-creator-prompt-meta">
+                          {prompt.model && <span>Model: {prompt.model}</span>}
+                          {prompt.purpose && <span>Purpose: {prompt.purpose}</span>}
+                          {prompt.usedAt && <span>Used: {prompt.usedAt}</span>}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="pool-hub-empty">Creator profile not found.</div>
+        )}
+      </Modal>
     </div>
   );
 }

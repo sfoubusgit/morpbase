@@ -86,6 +86,17 @@ export const deletePrompt = async (promptId: string): Promise<void> => {
   if (error) throw error;
 };
 
+export const listPublicPromptsByUser = async (userId: string): Promise<SavedPrompt[]> => {
+  const { data, error } = await supabase
+    .from('saved_prompts')
+    .select('*')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(toSavedPrompt);
+};
+
 export const exportPromptsPayload = async (): Promise<SavedPromptStore> => {
   const prompts = await listPrompts();
   return { version: 1, prompts };

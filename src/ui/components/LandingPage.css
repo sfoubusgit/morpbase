@@ -1,0 +1,244 @@
+.landing-page {
+  min-height: 100vh;
+  padding: 48px 64px 72px 64px;
+  color: #f5f5f5;
+  background:
+    radial-gradient(circle at top left, rgba(92, 68, 245, 0.2), transparent 45%),
+    radial-gradient(circle at top right, rgba(16, 185, 129, 0.18), transparent 40%),
+    #0d0d12;
+}
+
+.landing-hero {
+  max-width: 720px;
+  display: grid;
+  gap: 16px;
+}
+
+.landing-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-size: 12px;
+  color: #a5b4fc;
+}
+
+.landing-hero h1 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+.landing-hero p {
+  margin: 0;
+  font-size: 16px;
+  color: #cbd5f5;
+}
+
+.landing-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.landing-primary {
+  background: #6e56f9;
+  border: 1px solid #6e56f9;
+  color: #fff;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.landing-primary:hover {
+  background: #7c66ff;
+}
+
+.landing-secondary {
+  color: #cbd5f5;
+  text-decoration: none;
+  border: 1px solid rgba(203, 213, 245, 0.35);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+
+.landing-secondary:hover {
+  border-color: rgba(110, 86, 249, 0.7);
+}
+
+.landing-subtext {
+  font-size: 12px;
+  color: #9fa0b8;
+}
+
+.landing-pipeline {
+  margin-top: 48px;
+  display: grid;
+  gap: 16px;
+}
+
+.landing-pipeline-title {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #a5b4fc;
+}
+
+.landing-pipeline-track {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.landing-node {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  display: grid;
+  gap: 8px;
+  min-height: 140px;
+}
+
+.landing-node-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f3f4f6;
+}
+
+.landing-node p {
+  margin: 0;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.landing-benefits {
+  margin-top: 40px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.landing-benefit {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.landing-benefit h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.landing-benefit p {
+  margin: 0;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.landing-community {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 24px;
+  align-items: center;
+}
+
+.landing-community h2 {
+  margin: 0 0 10px 0;
+  font-size: 24px;
+}
+
+.landing-community p {
+  margin: 0;
+  font-size: 14px;
+  color: #cbd5f5;
+}
+
+.landing-community-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.landing-community-title {
+  font-size: 13px;
+  color: #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.landing-community-card ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #cbd5f5;
+  display: grid;
+  gap: 6px;
+}
+
+.landing-footer {
+  margin-top: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 20px 24px;
+}
+
+.landing-footer h2 {
+  margin: 0 0 6px 0;
+  font-size: 22px;
+}
+
+.landing-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #cbd5f5;
+}
+
+@media (max-width: 1100px) {
+  .landing-pipeline-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-benefits {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-community {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .landing-page {
+    padding: 32px 24px 48px 24px;
+  }
+
+  .landing-hero h1 {
+    font-size: 32px;
+  }
+
+  .landing-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .landing-pipeline-track {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

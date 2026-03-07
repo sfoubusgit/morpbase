@@ -148,6 +148,126 @@
   font-size: 12px;
 }
 
+.pool-hub-creator-search {
+  display: grid;
+  margin-bottom: 18px;
+}
+
+.pool-hub-profile-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.pool-hub-profile-info {
+  display: grid;
+  gap: 4px;
+}
+
+.pool-hub-profile-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f3f4f6;
+}
+
+.pool-hub-profile-hint {
+  font-size: 11px;
+  color: #9fa0b8;
+}
+
+.pool-hub-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pool-hub-profile-name {
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.pool-hub-creator-search label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.pool-hub-creator-search input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.pool-hub-creator-results {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.pool-hub-creator-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: #e5e7eb;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.pool-hub-creator-result-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pool-hub-creator-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pool-hub-creator-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(110, 86, 249, 0.3);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pool-hub-creator-result:hover {
+  border-color: rgba(110, 86, 249, 0.6);
+}
+
+.pool-hub-link-button {
+  background: transparent;
+  border: none;
+  color: #cbd5f5;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+  text-decoration: underline;
+}
+
 .pool-hub-toggle {
   display: inline-flex;
   align-items: center;
@@ -683,6 +803,113 @@
   gap: 10px;
 }
 
+.pool-hub-creator-profile {
+  display: grid;
+  gap: 14px;
+}
+
+.pool-hub-creator-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pool-hub-creator-avatar-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pool-hub-creator-avatar-lg.pool-hub-creator-avatar-fallback {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+}
+
+.pool-hub-creator-bio {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #b0b0c3;
+}
+
+.pool-hub-creator-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pool-hub-creator-links a {
+  font-size: 11px;
+  color: #8aa5ff;
+  text-decoration: none;
+  border: 1px solid rgba(110, 86, 249, 0.3);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.pool-hub-creator-links a:hover {
+  text-decoration: underline;
+}
+
+.pool-hub-creator-header h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  color: #f3f4f6;
+}
+
+.pool-hub-creator-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.pool-hub-creator-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pool-hub-creator-tags span {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: #cbd5f5;
+}
+
+.pool-hub-creator-uploads {
+  display: grid;
+  gap: 8px;
+}
+
+.pool-hub-creator-upload {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #e5e7eb;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pool-hub-creator-upload-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pool-hub-creator-upload-summary {
+  font-size: 11px;
+  color: #9fa0b8;
+}
+
 .pool-hub-upload-preview {
   display: grid;
   gap: 4px;
@@ -690,6 +917,69 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: rgba(255, 255, 255, 0.03);
+}
+
+.pool-hub-profile-modal {
+  max-width: 560px;
+}
+
+.pool-hub-profile-form {
+  display: grid;
+  gap: 12px;
+}
+
+.pool-hub-profile-form label {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+.pool-hub-profile-form input,
+.pool-hub-profile-form textarea {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.pool-hub-creator-prompts {
+  display: grid;
+  gap: 8px;
+}
+
+.pool-hub-creator-prompt-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pool-hub-creator-prompt {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.pool-hub-creator-prompt-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pool-hub-creator-prompt-text {
+  font-size: 11px;
+  color: #cbd5f5;
+}
+
+.pool-hub-creator-prompt-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 10px;
+  color: #9fa0b8;
 }
 
 .pool-hub-admin {
@@ -736,6 +1026,16 @@
 @media (max-width: 960px) {
   .pool-hub-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .pool-hub-profile-panel {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pool-hub-profile-actions {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .pool-hub-card {
