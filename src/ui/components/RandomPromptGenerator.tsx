@@ -24,6 +24,7 @@ interface RandomPromptGeneratorProps {
   attributeDefinitions: AttributeDefinition[];
   questionNodes: QuestionNode[];
   onRandomize: (selections: AttributeSelection[]) => void;
+  manualUrl?: string;
 }
 
 interface CategoryState {
@@ -223,6 +224,7 @@ export function RandomPromptGenerator({
   attributeDefinitions,
   questionNodes,
   onRandomize,
+  manualUrl,
 }: RandomPromptGeneratorProps) {
   // State for category/subcategory expansion and selection
   const [categoryStates, setCategoryStates] = useState<Map<string, CategoryState>>(() => {
@@ -458,6 +460,16 @@ export function RandomPromptGenerator({
     <div className="random-prompt-generator">
       <div className="random-prompt-generator-header">
         <h3 className="random-prompt-generator-title">Random Prompt Generator</h3>
+        {manualUrl && (
+          <a
+            className="random-prompt-generator-manual"
+            href={`${manualUrl}#random-prompt-generator`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Manual
+          </a>
+        )}
         <button
           className="random-prompt-tutorial-button"
           onClick={() => setShowTutorial(true)}

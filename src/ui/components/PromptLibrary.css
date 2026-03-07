@@ -20,6 +20,16 @@
   color: #f3f4f6;
 }
 
+.prompt-library-manual-link {
+  font-size: 12px;
+  color: #8aa5ff;
+  text-decoration: none;
+}
+
+.prompt-library-manual-link:hover {
+  text-decoration: underline;
+}
+
 .prompt-library-count {
   font-size: 12px;
   color: #9ca3af;

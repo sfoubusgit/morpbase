@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'promptgen:auth_store:v1';
+import { supabase } from './supabaseClient';
 
 export type AuthUser = {
   id: string;
@@ -6,58 +6,92 @@ export type AuthUser = {
   email: string;
 };
 
-type StoredUser = AuthUser & { password: string };
-
-type AuthStore = {
-  version: 1;
-  users: StoredUser[];
-  currentUserId: string | null;
+type ProfileRow = {
+  id: string;
+  auth_user_id: string;
+  email: string;
+  display_name: string;
 };
 
-const blankStore = (): AuthStore => ({
-  version: 1,
-  users: [],
-  currentUserId: null,
+const toAuthUser = (profile: ProfileRow): AuthUser => ({
+  id: profile.id,
+  name: profile.display_name,
+  email: profile.email,
 });
 
-const loadStore = (): AuthStore => {
+export type AuthProfile = ProfileRow;
+
+export const getProfile = async (): Promise<AuthProfile | null> => {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const user = sessionData.session?.user;
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, auth_user_id, email, display_name')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') {
+    throw error;
+  }
+  return (data as ProfileRow) ?? null;
+};
+
+const ensureProfile = async (): Promise<AuthUser> => {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+  const user = sessionData.session?.user;
+  if (!user) {
+    throw new Error('No active session.');
+  }
+
+  const { data: existing, error: selectError } = await supabase
+    .from('users')
+    .select('id, auth_user_id, email, display_name')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (selectError && selectError.code !== 'PGRST116') {
+    throw selectError;
+  }
+
+  if (existing) {
+    return toAuthUser(existing as ProfileRow);
+  }
+
+  const displayName =
+    (typeof user.user_metadata?.display_name === 'string' && user.user_metadata.display_name.trim()) ||
+    (typeof user.user_metadata?.name === 'string' && user.user_metadata.name.trim()) ||
+    (user.email ? user.email.split('@')[0] : 'User');
+
+  const { data: inserted, error: insertError } = await supabase
+    .from('users')
+    .insert({
+      auth_user_id: user.id,
+      email: user.email ?? '',
+      display_name: displayName,
+    })
+    .select('id, auth_user_id, email, display_name')
+    .single();
+
+  if (insertError) throw insertError;
+  return toAuthUser(inserted as ProfileRow);
+};
+
+export const getCurrentUser = async (): Promise<AuthUser | null> => {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return blankStore();
-    const parsed = JSON.parse(raw) as AuthStore;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.users)) {
-      return blankStore();
-    }
-    return parsed;
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) throw sessionError;
+    if (!sessionData.session?.user) return null;
+    return await ensureProfile();
   } catch {
-    return blankStore();
+    return null;
   }
 };
 
-const saveStore = (store: AuthStore) => {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-  } catch {
-    // ignore
-  }
-};
-
-const makeId = () => `user_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-
-const stripPassword = (user: StoredUser): AuthUser => {
-  const { password: _pw, ...rest } = user;
-  return rest;
-};
-
-export const getCurrentUser = (): AuthUser | null => {
-  const store = loadStore();
-  if (!store.currentUserId) return null;
-  const match = store.users.find(user => user.id === store.currentUserId);
-  if (!match) return null;
-  return stripPassword(match);
-};
-
-export const registerUser = (name: string, email: string, password: string): AuthUser => {
+export const registerUser = async (name: string, email: string, password: string): Promise<AuthUser> => {
   const trimmedName = name.trim();
   const trimmedEmail = email.trim().toLowerCase();
   const trimmedPassword = password.trim();
@@ -65,81 +99,74 @@ export const registerUser = (name: string, email: string, password: string): Aut
   if (!trimmedEmail) throw new Error('Email is required.');
   if (trimmedPassword.length < 6) throw new Error('Password must be at least 6 characters.');
 
-  const store = loadStore();
-  if (store.users.some(user => user.email === trimmedEmail)) {
-    throw new Error('Email is already registered.');
-  }
-
-  const next: StoredUser = {
-    id: makeId(),
-    name: trimmedName,
+  const { data, error } = await supabase.auth.signUp({
     email: trimmedEmail,
     password: trimmedPassword,
-  };
+    options: {
+      data: { display_name: trimmedName },
+    },
+  });
 
-  store.users = [next, ...store.users];
-  store.currentUserId = next.id;
-  saveStore(store);
+  if (error) throw error;
 
-  return stripPassword(next);
+  if (!data.session?.user) {
+    throw new Error('Check your email to confirm your account, then log in.');
+  }
+
+  return ensureProfile();
 };
 
-export const loginUser = (email: string, password: string): AuthUser => {
+export const loginUser = async (email: string, password: string): Promise<AuthUser> => {
   const trimmedEmail = email.trim().toLowerCase();
   const trimmedPassword = password.trim();
-  const store = loadStore();
-  const match = store.users.find(
-    user => user.email === trimmedEmail && user.password === trimmedPassword
-  );
-  if (!match) throw new Error('Invalid email or password.');
-  store.currentUserId = match.id;
-  saveStore(store);
-  return stripPassword(match);
+  const { error } = await supabase.auth.signInWithPassword({
+    email: trimmedEmail,
+    password: trimmedPassword,
+  });
+  if (error) throw error;
+  return ensureProfile();
 };
 
-export const logoutUser = (): void => {
-  const store = loadStore();
-  store.currentUserId = null;
-  saveStore(store);
+export const logoutUser = async (): Promise<void> => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
 };
 
-export const updateUserName = (name: string): AuthUser => {
+export const updateUserName = async (name: string): Promise<AuthUser> => {
   const trimmed = name.trim();
   if (!trimmed) throw new Error('Name is required.');
-  const store = loadStore();
-  if (!store.currentUserId) throw new Error('No active session.');
-  const idx = store.users.findIndex(user => user.id === store.currentUserId);
-  if (idx === -1) throw new Error('User not found.');
-  store.users[idx] = { ...store.users[idx], name: trimmed };
-  saveStore(store);
-  return stripPassword(store.users[idx]);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+  if (!user) throw new Error('No active session.');
+
+  const { data, error } = await supabase
+    .from('users')
+    .update({ display_name: trimmed })
+    .eq('auth_user_id', user.id)
+    .select('id, auth_user_id, email, display_name')
+    .single();
+  if (error) throw error;
+  return toAuthUser(data as ProfileRow);
 };
 
-export const changeUserPassword = (currentPassword: string, nextPassword: string): void => {
+export const changeUserPassword = async (currentPassword: string, nextPassword: string): Promise<void> => {
   const current = currentPassword.trim();
   const next = nextPassword.trim();
   if (next.length < 6) throw new Error('Password must be at least 6 characters.');
-  const store = loadStore();
-  if (!store.currentUserId) throw new Error('No active session.');
-  const idx = store.users.findIndex(user => user.id === store.currentUserId);
-  if (idx === -1) throw new Error('User not found.');
-  if (store.users[idx].password !== current) {
-    throw new Error('Current password is incorrect.');
-  }
-  store.users[idx] = { ...store.users[idx], password: next };
-  saveStore(store);
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+  if (!user || !user.email) throw new Error('No active session.');
+
+  const { error: reauthError } = await supabase.auth.signInWithPassword({
+    email: user.email,
+    password: current,
+  });
+  if (reauthError) throw new Error('Current password is incorrect.');
+
+  const { error } = await supabase.auth.updateUser({ password: next });
+  if (error) throw error;
 };
 
-export const deleteCurrentUser = (currentPassword: string): void => {
-  const current = currentPassword.trim();
-  const store = loadStore();
-  if (!store.currentUserId) throw new Error('No active session.');
-  const idx = store.users.findIndex(user => user.id === store.currentUserId);
-  if (idx === -1) throw new Error('User not found.');
-  if (store.users[idx].password !== current) {
-    throw new Error('Current password is incorrect.');
-  }
-  store.users.splice(idx, 1);
-  store.currentUserId = null;
-  saveStore(store);
+export const deleteCurrentUser = async (_currentPassword: string): Promise<void> => {
+  throw new Error('Account deletion is not available yet.');
 };

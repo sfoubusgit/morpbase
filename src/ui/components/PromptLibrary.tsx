@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { SavedPrompt } from '../../types';
 import {
   createPrompt,
@@ -13,6 +13,9 @@ type PromptLibraryProps = {
   prompt: any | null;
   customAdditions?: string[];
   onAddToPrompt?: (text: string) => void;
+  authUser?: { id: string } | null;
+  isPro?: boolean;
+  manualUrl?: string;
 };
 
 const buildPromptText = (prompt: any, customAdditions: string[]) => {
@@ -31,8 +34,8 @@ const buildPromptText = (prompt: any, customAdditions: string[]) => {
   };
 };
 
-export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: PromptLibraryProps) {
-  const [prompts, setPrompts] = useState<SavedPrompt[]>(() => listPrompts());
+export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt, authUser, isPro = false, manualUrl }: PromptLibraryProps) {
+  const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
   const [name, setName] = useState('');
   const [tags, setTags] = useState('');
   const [note, setNote] = useState('');
@@ -42,9 +45,22 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
 
   const currentText = useMemo(() => buildPromptText(prompt, customAdditions), [prompt, customAdditions]);
 
-  const refresh = () => {
-    setPrompts(listPrompts());
+  const refresh = async () => {
+    try {
+      const next = await listPrompts();
+      setPrompts(next);
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to load prompts.');
+    }
   };
+
+  useEffect(() => {
+    if (authUser) {
+      refresh();
+    } else {
+      setPrompts([]);
+    }
+  }, [authUser]);
 
   const parseTags = (raw: string) =>
     raw
@@ -52,11 +68,15 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
       .map(tag => tag.trim())
       .filter(Boolean);
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to save prompts.');
+      return;
+    }
     setError(null);
     setMessage(null);
     try {
-      createPrompt({
+      await createPrompt({
         name,
         positive: currentText.positive,
         negative: currentText.negative,
@@ -66,16 +86,20 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
       setName('');
       setTags('');
       setNote('');
-      refresh();
+      await refresh();
       setMessage('Saved prompt.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to export prompts.');
+      return;
+    }
     try {
-      const payload = exportPromptsPayload();
+      const payload = await exportPromptsPayload();
       setLibraryJson(JSON.stringify(payload, null, 2));
       setMessage('Exported prompts.');
       setError(null);
@@ -84,11 +108,15 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to import prompts.');
+      return;
+    }
     try {
       const parsed = JSON.parse(libraryJson);
-      importPromptsPayload(parsed);
-      refresh();
+      await importPromptsPayload(parsed);
+      await refresh();
       setMessage('Imported prompts.');
       setError(null);
     } catch (err: any) {
@@ -96,9 +124,13 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to download prompts.');
+      return;
+    }
     try {
-      const payload = exportPromptsPayload();
+      const payload = await exportPromptsPayload();
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -116,6 +148,10 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
   };
 
   const handleCopy = (prompt: SavedPrompt) => {
+    if (!authUser || !isPro) {
+      setError('Upgrade to Pro to copy prompts.');
+      return;
+    }
     const full = prompt.negative
       ? `${prompt.positive}\n\nNEGATIVE PROMPT:\n${prompt.negative}`
       : prompt.positive;
@@ -129,6 +165,16 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
     <div className="prompt-library">
       <div className="prompt-library-header">
         <h3>Saved Prompts</h3>
+        {manualUrl && (
+          <a
+            className="prompt-library-manual-link"
+            href={`${manualUrl}#prompt-library`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Learn more
+          </a>
+        )}
         <span className="prompt-library-count">{prompts.length}</span>
       </div>
       <div className="prompt-library-save">
@@ -177,7 +223,11 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
       {error && <div className="prompt-library-error">{error}</div>}
       {message && <div className="prompt-library-message">{message}</div>}
       <div className="prompt-library-list">
-        {prompts.length === 0 ? (
+        {!authUser ? (
+          <div className="prompt-library-empty">Log in to access your saved prompts.</div>
+        ) : !isPro ? (
+          <div className="prompt-library-empty">Upgrade to Pro to unlock Saved Prompts.</div>
+        ) : prompts.length === 0 ? (
           <div className="prompt-library-empty">No saved prompts yet.</div>
         ) : (
           prompts.map(item => (
@@ -196,7 +246,10 @@ export function PromptLibrary({ prompt, customAdditions = [], onAddToPrompt }: P
                 <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
                   Add to Prompt
                 </button>
-                <button type="button" onClick={() => deletePrompt(item.id) && refresh()}>
+                <button type="button" onClick={async () => {
+                  await deletePrompt(item.id);
+                  await refresh();
+                }}>
                   Delete
                 </button>
               </div>

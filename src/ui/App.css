@@ -54,6 +54,43 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   overflow: hidden;
 }
 
+.app-dev-banner {
+  background: #1f1b2e;
+  color: #e9ddff;
+  border: 1px solid rgba(110, 86, 249, 0.35);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin: 12px 16px 0 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  text-align: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.app-dev-toggle {
+  background: rgba(110, 86, 249, 0.2);
+  border: 1px solid rgba(110, 86, 249, 0.5);
+  color: #e9ddff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+}
+
+.app-dev-toggle:hover {
+  background: rgba(110, 86, 249, 0.35);
+}
+
 .app-root::before {
   content: '';
   position: fixed;
@@ -549,6 +586,76 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 
 .app-tutorial-body p:last-child {
   margin-bottom: 0;
+}
+
+/* Feedback modal */
+.app-feedback-modal {
+  max-width: 720px;
+}
+
+.app-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #e5e7eb;
+}
+
+.app-feedback-text {
+  font-size: 13px;
+  color: #cbd5f5;
+  margin: 0;
+}
+
+.app-feedback-textarea {
+  width: 100%;
+  background: rgba(20, 20, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  color: #e5e7eb;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.app-feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.app-feedback-primary,
+.app-feedback-secondary {
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.app-feedback-primary {
+  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(123, 101, 255, 0.9));
+  border: 1px solid rgba(110, 86, 249, 0.6);
+  color: #fff;
+}
+
+.app-feedback-secondary {
+  background: rgba(20, 20, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
+.app-feedback-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.app-feedback-hint a {
+  color: #8aa5ff;
+  text-decoration: none;
+}
+
+.app-feedback-hint a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 1200px) {

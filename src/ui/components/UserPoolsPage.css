@@ -22,6 +22,16 @@
   font-size: 14px;
 }
 
+.user-pools-manual-link {
+  font-size: 12px;
+  color: #8aa5ff;
+  text-decoration: none;
+}
+
+.user-pools-manual-link:hover {
+  text-decoration: underline;
+}
+
 .user-pools-guide {
   background: rgba(110, 86, 249, 0.08);
   border: 1px solid rgba(110, 86, 249, 0.2);

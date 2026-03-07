@@ -28,6 +28,10 @@ type UserPoolsPageProps = {
   canUndoClearPrompt?: boolean;
   freeformPrompt?: string;
   onFreeformPromptChange?: (value: string) => void;
+  authUser?: { id: string } | null;
+  authReady?: boolean;
+  isPro?: boolean;
+  manualUrl?: string;
 };
 
 export function UserPoolsPage({
@@ -42,9 +46,14 @@ export function UserPoolsPage({
   canUndoClearPrompt = false,
   freeformPrompt = '',
   onFreeformPromptChange,
+  authUser,
+  authReady = false,
+  isPro = false,
+  manualUrl,
 }: UserPoolsPageProps) {
-  const [pools, setPools] = useState<Pool[]>(() => listPools());
-  const [activePoolId, setActivePoolId] = useState<string | null>(pools[0]?.id ?? null);
+  const [pools, setPools] = useState<Pool[]>([]);
+  const [poolsLoading, setPoolsLoading] = useState(false);
+  const [activePoolId, setActivePoolId] = useState<string | null>(null);
   const [newPoolName, setNewPoolName] = useState('');
   const [editingPoolId, setEditingPoolId] = useState<string | null>(null);
   const [editingPoolName, setEditingPoolName] = useState('');
@@ -77,6 +86,13 @@ export function UserPoolsPage({
   const [randomizerTagInput, setRandomizerTagInput] = useState('');
   const [randomizerAppendMode, setRandomizerAppendMode] = useState<'replace' | 'append'>('replace');
   const [appendTargetId, setAppendTargetId] = useState<string>('last');
+  const gateMessage = !authReady
+    ? 'Loading your pools...'
+    : !authUser
+      ? 'Log in to view and manage your pools.'
+      : !isPro
+        ? 'Upgrade to Pro to use User Pools.'
+        : null;
 
   const activePool = useMemo(
     () => pools.find(pool => pool.id === activePoolId) ?? null,
@@ -95,13 +111,20 @@ export function UserPoolsPage({
     });
   }, [activePool, searchTerm, tagFilter]);
 
-  const refreshPools = () => {
-    const next = listPools();
-    setPools(next);
-    if (next.length === 0) {
-      setActivePoolId(null);
-    } else if (!next.find(pool => pool.id === activePoolId)) {
-      setActivePoolId(next[0].id);
+  const refreshPools = async () => {
+    setPoolsLoading(true);
+    try {
+      const next = await listPools();
+      setPools(next);
+      if (next.length === 0) {
+        setActivePoolId(null);
+      } else if (!next.find(pool => pool.id === activePoolId)) {
+        setActivePoolId(next[0].id);
+      }
+    } catch (err: any) {
+      setPoolError(err?.message ?? 'Failed to load pools.');
+    } finally {
+      setPoolsLoading(false);
     }
   };
 
@@ -117,21 +140,39 @@ export function UserPoolsPage({
     });
   }, [pools]);
 
-  const handleCreatePool = () => {
+  useEffect(() => {
+    if (authUser) {
+      refreshPools();
+    } else {
+      setPools([]);
+      setActivePoolId(null);
+      setPoolsLoading(false);
+    }
+  }, [authUser]);
+
+  const handleCreatePool = async () => {
+    if (!authUser || !isPro) {
+      setPoolError('Upgrade to Pro to create pools.');
+      return;
+    }
     setPoolError(null);
     try {
-      const created = createPool(newPoolName);
+      const created = await createPool(newPoolName);
       setNewPoolName('');
-      refreshPools();
+      await refreshPools();
       setActivePoolId(created.id);
     } catch (err: any) {
       setPoolError(err?.message ?? 'Failed to create pool.');
     }
   };
 
-  const handleDeletePool = (poolId: string) => {
-    deletePool(poolId);
-    refreshPools();
+  const handleDeletePool = async (poolId: string) => {
+    if (!authUser || !isPro) {
+      setPoolError('Upgrade to Pro to manage pools.');
+      return;
+    }
+    await deletePool(poolId);
+    await refreshPools();
   };
 
   const handleStartRename = (pool: Pool) => {
@@ -139,13 +180,17 @@ export function UserPoolsPage({
     setEditingPoolName(pool.name);
   };
 
-  const handleRenamePool = (poolId: string) => {
+  const handleRenamePool = async (poolId: string) => {
+    if (!authUser || !isPro) {
+      setPoolError('Upgrade to Pro to manage pools.');
+      return;
+    }
     setPoolError(null);
     try {
-      renamePool(poolId, editingPoolName);
+      await renamePool(poolId, editingPoolName);
       setEditingPoolId(null);
       setEditingPoolName('');
-      refreshPools();
+      await refreshPools();
     } catch (err: any) {
       setPoolError(err?.message ?? 'Failed to rename pool.');
     }
@@ -157,18 +202,22 @@ export function UserPoolsPage({
       .map(tag => tag.trim())
       .filter(Boolean);
 
-  const handleAddItem = () => {
+  const handleAddItem = async () => {
+    if (!authUser || !isPro) {
+      setItemError('Upgrade to Pro to add items.');
+      return;
+    }
     if (!activePool) {
       setItemError('Select a pool first.');
       return;
     }
     setItemError(null);
     try {
-      addItemToPool(activePool.id, newItemText, parseTags(newItemTags), newItemNote);
+      await addItemToPool(activePool.id, newItemText, parseTags(newItemTags), newItemNote);
       setNewItemText('');
       setNewItemTags('');
       setNewItemNote('');
-      refreshPools();
+      await refreshPools();
     } catch (err: any) {
       setItemError(err?.message ?? 'Failed to add item.');
     }
@@ -183,7 +232,11 @@ export function UserPoolsPage({
     return { text: textPart, tags };
   };
 
-  const handleBulkAdd = () => {
+  const handleBulkAdd = async () => {
+    if (!authUser || !isPro) {
+      setBulkError('Upgrade to Pro to bulk add items.');
+      return;
+    }
     if (!activePool) {
       setBulkError('Select a pool first.');
       return;
@@ -195,26 +248,30 @@ export function UserPoolsPage({
       return;
     }
     try {
-      lines.forEach(line => {
+      for (const line of lines) {
         const parsed = parseBulkLine(line);
         if (parsed) {
-          addItemToPool(activePool.id, parsed.text, parsed.tags);
+          await addItemToPool(activePool.id, parsed.text, parsed.tags);
         }
-      });
+      }
       setBulkText('');
-      refreshPools();
+      await refreshPools();
     } catch (err: any) {
       setBulkError(err?.message ?? 'Failed to bulk add items.');
     }
   };
 
-  const handleExportPoolJson = () => {
+  const handleExportPoolJson = async () => {
+    if (!authUser || !isPro) {
+      setPoolJsonError('Upgrade to Pro to export pools.');
+      return;
+    }
     if (!activePool) {
       setPoolJsonError('Select a pool first.');
       return;
     }
     try {
-      const payload = exportPoolPayload(activePool.id);
+      const payload = await exportPoolPayload(activePool.id);
       setPoolJson(JSON.stringify(payload, null, 2));
       setPoolJsonMessage('Exported pool JSON.');
       setPoolJsonError(null);
@@ -223,26 +280,34 @@ export function UserPoolsPage({
     }
   };
 
-  const handleImportPoolJson = () => {
+  const handleImportPoolJson = async () => {
+    if (!authUser || !isPro) {
+      setPoolJsonError('Upgrade to Pro to import pools.');
+      return;
+    }
     try {
       const parsed = JSON.parse(poolJson);
-      const imported = importPoolPayload(parsed, 'replace');
+      const imported = await importPoolPayload(parsed, 'replace');
       setPoolJsonMessage(`Imported pool "${imported.name}".`);
       setPoolJsonError(null);
-      refreshPools();
+      await refreshPools();
       setActivePoolId(imported.id);
     } catch (err: any) {
       setPoolJsonError(err?.message ?? 'Invalid pool JSON.');
     }
   };
 
-  const handleDownloadPoolJson = () => {
+  const handleDownloadPoolJson = async () => {
+    if (!authUser || !isPro) {
+      setPoolJsonError('Upgrade to Pro to download pools.');
+      return;
+    }
     if (!activePool) {
       setPoolJsonError('Select a pool first.');
       return;
     }
     try {
-      const payload = exportPoolPayload(activePool.id);
+      const payload = await exportPoolPayload(activePool.id);
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -295,7 +360,11 @@ export function UserPoolsPage({
     setEditingAddItemText('');
   };
 
-  const handleSaveItem = (poolId: string, item: PoolItem) => {
+  const handleSaveItem = async (poolId: string, item: PoolItem) => {
+    if (!authUser || !isPro) {
+      setItemError('Upgrade to Pro to edit items.');
+      return;
+    }
     setItemError(null);
     try {
       const updated: PoolItem = {
@@ -304,12 +373,12 @@ export function UserPoolsPage({
         tags: parseTags(editingItemTags),
         note: editingItemNote.trim() || undefined,
       };
-      updatePoolItem(poolId, updated);
+      await updatePoolItem(poolId, updated);
       setEditingItemId(null);
       setEditingItemText('');
       setEditingItemTags('');
       setEditingItemNote('');
-      refreshPools();
+      await refreshPools();
     } catch (err: any) {
       setItemError(err?.message ?? 'Failed to update item.');
     }
@@ -438,11 +507,25 @@ export function UserPoolsPage({
 
   return (
     <div className="user-pools-page">
+      {gateMessage ? (
+        <div className="user-pools-empty">{gateMessage}</div>
+      ) : (
+        <>
       <header className="user-pools-header">
         <div>
           <h2>User Pools</h2>
           <p>Create and manage your own prompt element pools.</p>
         </div>
+        {manualUrl && (
+          <a
+            className="user-pools-manual-link"
+            href={`${manualUrl}#user-pools`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            See the full User Pools guide
+          </a>
+        )}
       </header>
 
       <div className="user-pools-guide">
@@ -458,9 +541,9 @@ export function UserPoolsPage({
               Pools
               <span className="user-pools-title-icon" aria-hidden="true" />
             </h3>
-            <button type="button" onClick={() => setIsRandomizerOpen(true)}>
-              Randomize
-            </button>
+                <button type="button" onClick={() => setIsRandomizerOpen(true)} disabled={poolsLoading}>
+                  Randomize
+                </button>
           </div>
           <div className="user-pools-create">
             <input
@@ -475,9 +558,11 @@ export function UserPoolsPage({
           </div>
           {poolError && <div className="user-pools-error">{poolError}</div>}
           <div className="user-pools-list">
-            {pools.length === 0 ? (
-              <div className="user-pools-empty">No pools yet. Create one above.</div>
-            ) : (
+            {poolsLoading ? (
+            <div className="user-pools-empty">Loading pools...</div>
+          ) : pools.length === 0 ? (
+            <div className="user-pools-empty">No pools yet. Create one above.</div>
+          ) : (
               pools.map(pool => (
                 <div
                   key={pool.id}
@@ -724,7 +809,17 @@ export function UserPoolsPage({
                             <button type="button" onClick={() => handleStartEditItem(item)}>
                               Edit
                             </button>
-                            <button type="button" onClick={() => deletePoolItem(activePool.id, item.id)}>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                if (!authUser || !isPro) {
+                                  setItemError('Upgrade to Pro to delete items.');
+                                  return;
+                                }
+                                await deletePoolItem(activePool.id, item.id);
+                                await refreshPools();
+                              }}
+                            >
                               Delete
                             </button>
                           </>
@@ -765,6 +860,8 @@ export function UserPoolsPage({
             prompt={prompt ?? null}
             customAdditions={customAdditions}
             onAddToPrompt={onAddToPrompt}
+            authUser={authUser}
+            manualUrl={manualUrl}
           />
         </aside>
       </div>
@@ -778,7 +875,9 @@ export function UserPoolsPage({
         <div className="user-pools-randomizer">
           <div className="user-pools-randomizer-section">
             <div className="user-pools-randomizer-label">Pools to include</div>
-            {pools.length === 0 ? (
+            {poolsLoading ? (
+              <div className="user-pools-empty">Loading pools...</div>
+            ) : pools.length === 0 ? (
               <div className="user-pools-empty">No pools available.</div>
             ) : (
               <div className="user-pools-randomizer-pools">
@@ -892,6 +991,12 @@ export function UserPoolsPage({
           </div>
         </div>
       </Modal>
+        </>
+      )}
     </div>
   );
 }
+
+
+
+

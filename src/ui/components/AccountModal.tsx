@@ -7,9 +7,9 @@ type AccountModalProps = {
   isOpen: boolean;
   user: AuthUser;
   onClose: () => void;
-  onUpdateName: (name: string) => void;
-  onChangePassword: (currentPassword: string, nextPassword: string) => void;
-  onDeleteAccount: (currentPassword: string) => void;
+  onUpdateName: (name: string) => Promise<void>;
+  onChangePassword: (currentPassword: string, nextPassword: string) => Promise<void>;
+  onDeleteAccount: (currentPassword: string) => Promise<void>;
   error?: string | null;
   message?: string | null;
 };
@@ -65,7 +65,7 @@ export function AccountModal({
           <button
             type="button"
             className="account-primary"
-            onClick={() => onUpdateName(name)}
+            onClick={async () => onUpdateName(name)}
           >
             Save Profile
           </button>
@@ -92,8 +92,8 @@ export function AccountModal({
           <button
             type="button"
             className="account-secondary"
-            onClick={() => {
-              onChangePassword(currentPassword, nextPassword);
+            onClick={async () => {
+              await onChangePassword(currentPassword, nextPassword);
               setCurrentPassword('');
               setNextPassword('');
             }}
@@ -124,8 +124,8 @@ export function AccountModal({
             type="button"
             className="account-danger-button"
             disabled={confirmDelete.trim().toUpperCase() !== 'DELETE'}
-            onClick={() => {
-              onDeleteAccount(deletePassword);
+            onClick={async () => {
+              await onDeleteAccount(deletePassword);
               setDeletePassword('');
               setConfirmDelete('');
             }}

@@ -13,13 +13,18 @@ type WorkingSetsPageProps = {
   workingSets: WorkingSet[];
   activeWorkingSetId: string | null;
   categoryOrder: string[];
-  onCreateWorkingSet: (name: string) => WorkingSet | null;
-  onRenameWorkingSet: (id: string, name: string) => void;
-  onDeleteWorkingSet: (id: string) => void;
+  onCreateWorkingSet: (name: string) => Promise<WorkingSet | null>;
+  onRenameWorkingSet: (id: string, name: string) => Promise<void>;
+  onDeleteWorkingSet: (id: string) => Promise<void>;
   onSetActiveWorkingSet: (id: string | null) => void;
-  onAddWorkingSetItem: (setId: string, categoryId: string, poolId: string, item: PoolItem) => void;
-  onRemoveWorkingSetItem: (setId: string, categoryId: string, itemId: string) => void;
-  onClearWorkingSetCategory: (setId: string, categoryId: string) => void;
+  onAddWorkingSetItem: (setId: string, categoryId: string, poolId: string, item: PoolItem) => Promise<void>;
+  onRemoveWorkingSetItem: (setId: string, categoryId: string, itemId: string) => Promise<void>;
+  onClearWorkingSetCategory: (setId: string, categoryId: string) => Promise<void>;
+  authReady?: boolean;
+  authUser?: { id: string } | null;
+  isPro?: boolean;
+  workingSetsLoading?: boolean;
+  manualUrl?: string;
 };
 
 const formatCategoryLabel = (categoryId: string) =>
@@ -39,12 +44,18 @@ export function WorkingSetsPage({
   onAddWorkingSetItem,
   onRemoveWorkingSetItem,
   onClearWorkingSetCategory,
+  authReady = false,
+  authUser,
+  isPro = false,
+  workingSetsLoading = false,
+  manualUrl,
 }: WorkingSetsPageProps) {
-  const [pools, setPools] = useState<Pool[]>(() => listPools());
+  const [pools, setPools] = useState<Pool[]>([]);
+  const [poolsLoading, setPoolsLoading] = useState(false);
   const [selectedSetId, setSelectedSetId] = useState<string | null>(workingSets[0]?.id ?? null);
   const [newSetName, setNewSetName] = useState('');
   const [renameValue, setRenameValue] = useState('');
-  const [poolId, setPoolId] = useState<string | null>(pools[0]?.id ?? null);
+  const [poolId, setPoolId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string>(categoryOrder[0] ?? 'subject');
   const [itemFilter, setItemFilter] = useState('');
   const [pageMessage, setPageMessage] = useState<string | null>(null);
@@ -63,6 +74,13 @@ export function WorkingSetsPage({
   });
   const [confirmRights, setConfirmRights] = useState(false);
   const [confirmPrivacy, setConfirmPrivacy] = useState(false);
+  const gateMessage = !authReady
+    ? 'Loading working sets...'
+    : !authUser
+      ? 'Log in to access your working sets.'
+      : !isPro
+        ? 'Upgrade to Pro to use Working Sets.'
+        : null;
 
   useEffect(() => {
     if (selectedSetId && workingSets.some(set => set.id === selectedSetId)) return;
@@ -90,13 +108,17 @@ export function WorkingSetsPage({
     return selectedPool.items.filter(item => item.text.toLowerCase().includes(trimmed));
   }, [selectedPool, itemFilter]);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
+    if (!authUser || !isPro) {
+      setPageMessage('Upgrade to Pro to create Working Sets.');
+      return;
+    }
     const trimmed = newSetName.trim();
     if (!trimmed) {
       setPageMessage('Enter a name for the working set.');
       return;
     }
-    const created = onCreateWorkingSet(trimmed);
+    const created = await onCreateWorkingSet(trimmed);
     if (created) {
       setSelectedSetId(created.id);
       setNewSetName('');
@@ -104,21 +126,33 @@ export function WorkingSetsPage({
     }
   };
 
-  const handleRename = () => {
+  const handleRename = async () => {
+    if (!authUser || !isPro) {
+      setPageMessage('Upgrade to Pro to manage Working Sets.');
+      return;
+    }
     if (!selectedSet) return;
     const trimmed = renameValue.trim();
     if (!trimmed) return;
-    onRenameWorkingSet(selectedSet.id, trimmed);
+    await onRenameWorkingSet(selectedSet.id, trimmed);
     setPageMessage('Working set renamed.');
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (!authUser || !isPro) {
+      setPageMessage('Upgrade to Pro to manage Working Sets.');
+      return;
+    }
     if (!selectedSet) return;
-    onDeleteWorkingSet(selectedSet.id);
+    await onDeleteWorkingSet(selectedSet.id);
     setPageMessage('Working set deleted.');
   };
 
   const handlePublish = () => {
+    if (!authUser || !isPro) {
+      setPublishError('Upgrade to Pro to publish Working Sets.');
+      return;
+    }
     if (!selectedSet) return;
     setPublishError(null);
     setPublishMessage(null);
@@ -137,7 +171,11 @@ export function WorkingSetsPage({
     setIsPublishOpen(true);
   };
 
-  const handleConfirmPublish = () => {
+  const handleConfirmPublish = async () => {
+    if (!authUser || !isPro) {
+      setPublishError('Upgrade to Pro to publish Working Sets.');
+      return;
+    }
     if (!selectedSet) return;
     const title = publishForm.title.trim();
     const summary = publishForm.summary.trim();
@@ -160,7 +198,7 @@ export function WorkingSetsPage({
     }
 
     try {
-      const payload = exportWorkingSetPayload(selectedSet.id);
+      const payload = await exportWorkingSetPayload(selectedSet.id);
       const existing = listWorkingSetHubEntries().some(entry =>
         entry.title.toLowerCase() === title.toLowerCase()
       );
@@ -195,33 +233,73 @@ export function WorkingSetsPage({
     }
   };
 
-  const handleAddItem = (item: PoolItem) => {
+  const handleAddItem = async (item: PoolItem) => {
+    if (!authUser || !isPro) {
+      setPageMessage('Upgrade to Pro to add items.');
+      return;
+    }
     if (!selectedSet || !selectedPool) {
       setPageMessage('Select a working set and pool first.');
       return;
     }
-    onAddWorkingSetItem(selectedSet.id, categoryId, selectedPool.id, item);
+    await onAddWorkingSetItem(selectedSet.id, categoryId, selectedPool.id, item);
     setPageMessage(`Added to ${formatCategoryLabel(categoryId)}.`);
   };
 
   const handleActivate = () => {
+    if (!authUser || !isPro) {
+      setPageMessage('Upgrade to Pro to activate Working Sets.');
+      return;
+    }
     if (!selectedSet) return;
     onSetActiveWorkingSet(selectedSet.id);
     setPageMessage(`"${selectedSet.name}" is now active.`);
   };
 
-  const handleRefreshPools = () => {
-    setPools(listPools());
-    setPageMessage('Pools refreshed.');
+  const handleRefreshPools = async () => {
+    setPoolsLoading(true);
+    try {
+      const next = await listPools();
+      setPools(next);
+      setPageMessage('Pools refreshed.');
+    } catch (err: any) {
+      setPageMessage(err?.message ?? 'Failed to refresh pools.');
+    } finally {
+      setPoolsLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (authUser && isPro) {
+      handleRefreshPools();
+    } else {
+      setPools([]);
+      setPoolId(null);
+      setPoolsLoading(false);
+    }
+  }, [authUser, isPro]);
 
   return (
     <div className="working-sets-page">
+      {gateMessage ? (
+        <div className="working-sets-empty">{gateMessage}</div>
+      ) : (
+        <>
       <header className="working-sets-header">
         <div>
           <h1>Working Sets</h1>
           <p>Create structured sets of prompt elements and activate them inside the Builder.</p>
         </div>
+        {manualUrl && (
+          <a
+            className="working-sets-manual-link"
+            href={`${manualUrl}#working-sets`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open Working Sets manual
+          </a>
+        )}
         <div className="working-sets-create">
           <input
             type="text"
@@ -241,12 +319,19 @@ export function WorkingSetsPage({
         <section className="working-sets-panel working-sets-panel-list">
           <div className="working-sets-panel-title">
             <h2>Your Sets</h2>
-            <button type="button" className="working-sets-refresh" onClick={handleRefreshPools}>
-              Refresh Pools
+            <button
+              type="button"
+              className="working-sets-refresh"
+              onClick={handleRefreshPools}
+              disabled={poolsLoading}
+            >
+              {poolsLoading ? 'Refreshing...' : 'Refresh Pools'}
             </button>
           </div>
           <div className="working-sets-list">
-            {workingSets.length === 0 ? (
+            {workingSetsLoading ? (
+              <div className="working-sets-empty">Loading working sets...</div>
+            ) : workingSets.length === 0 ? (
               <div className="working-sets-empty">No working sets yet.</div>
             ) : (
               workingSets.map(set => (
@@ -307,7 +392,9 @@ export function WorkingSetsPage({
               {publishError && <div className="working-sets-error">{publishError}</div>}
 
               <div className="working-sets-add">
-                {pools.length === 0 ? (
+                {poolsLoading ? (
+                  <div className="working-sets-empty">Loading pools...</div>
+                ) : pools.length === 0 ? (
                   <div className="working-sets-empty">No pools available. Create a pool in User Pools first.</div>
                 ) : (
                   <>
@@ -383,7 +470,13 @@ export function WorkingSetsPage({
                           <button
                             type="button"
                             className="working-sets-clear"
-                            onClick={() => onClearWorkingSetCategory(selectedSet.id, cat)}
+                              onClick={async () => {
+                                if (!authUser || !isPro) {
+                                  setPageMessage('Upgrade to Pro to manage Working Sets.');
+                                  return;
+                                }
+                                await onClearWorkingSetCategory(selectedSet.id, cat);
+                              }}
                           >
                             Clear
                           </button>
@@ -398,7 +491,13 @@ export function WorkingSetsPage({
                               <span>{item.text}</span>
                               <button
                                 type="button"
-                                onClick={() => onRemoveWorkingSetItem(selectedSet.id, cat, item.id)}
+                                onClick={async () => {
+                                  if (!authUser || !isPro) {
+                                    setPageMessage('Upgrade to Pro to manage Working Sets.');
+                                    return;
+                                  }
+                                  await onRemoveWorkingSetItem(selectedSet.id, cat, item.id);
+                                }}
                               >
                                 Remove
                               </button>
@@ -543,6 +642,17 @@ export function WorkingSetsPage({
           </div>
         </div>
       </Modal>
+        </>
+      )}
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

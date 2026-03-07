@@ -44,6 +44,7 @@ import {
   registerUser,
   updateUserName,
 } from '../engine/authStore';
+import { captureError } from '../engine/errorTracker';
 import {
   addWorkingSetItem,
   clearWorkingSetCategory,
@@ -116,13 +117,88 @@ export function App() {
   
   // UI State: Model Profile
   const [modelProfile, setModelProfile] = useState<ModelProfile>(DEFAULT_MODEL_PROFILE);
-  const [authUser, setAuthUser] = useState(() => getCurrentUser());
+  const [authUser, setAuthUser] = useState<Awaited<ReturnType<typeof getCurrentUser>>>(null);
+  const [authReady, setAuthReady] = useState(false);
+  const envDevMode = import.meta.env.VITE_DEV_MODE === '1';
+  const [devModeOverride, setDevModeOverride] = useState<boolean | null>(() => {
+    try {
+      const raw = window.localStorage.getItem('morpbase:dev_mode');
+      if (raw === '1') return true;
+      if (raw === '0') return false;
+      return null;
+    } catch {
+      return null;
+    }
+  });
+  const isDevMode = devModeOverride ?? envDevMode;
+  const [isPro] = useState<boolean>(isDevMode);
+  const manualUrl = `${import.meta.env.BASE_URL}manual.md`;
+  const manualLink = (anchor: string) => `${manualUrl}#${anchor}`;
+  const feedbackSchema = `Feedback Schema (v1)
+
+1) Tester Context
+- Name / handle:
+- Experience level (Beginner / Intermediate / Advanced):
+- Primary use case (IMG / VIDEO / Both):
+- Tools/models used (e.g., SDXL, ComfyUI, A1111, Runway):
+- Device + OS + Browser:
+
+2) Session Overview
+- Date:
+- Time spent:
+- Goals for this session:
+
+3) What Worked Well
+- Feature(s) used:
+- What felt smooth or valuable:
+- Any standout moments:
+
+4) Issues / Bugs
+- Summary (short title):
+- Steps to reproduce:
+- Expected result:
+- Actual result:
+- Severity (Low / Medium / High / Blocker):
+- Frequency (Once / Sometimes / Always):
+- Screenshots / clips (if available):
+
+5) Usability / UX Feedback
+- Confusing flows or labels:
+- Friction points:
+- Missing guidance or clarity:
+
+6) Prompt Quality
+- Did outputs match intent? (Yes / Partially / No)
+- Where it fell short:
+- Any notable improvements when using Working Sets / User Pools:
+
+7) Feature-Specific Feedback
+- Working Sets:
+- Builder:
+- User Pools:
+- Random Prompt Generator:
+- Prompt Library (save/import/export):
+
+8) Suggestions / Requests
+- Top 3 improvements you want:
+1.
+2.
+3.
+
+9) Overall
+- Satisfaction (1–10):
+- Would you continue using it? (Yes / Maybe / No)
+- Would you recommend it? (Yes / Maybe / No)
+- Any final notes:`;
   const [authError, setAuthError] = useState<string | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [feedbackCopied, setFeedbackCopied] = useState(false);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
-  const [workingSets, setWorkingSets] = useState<WorkingSet[]>(() => listWorkingSets());
+  const [workingSets, setWorkingSets] = useState<WorkingSet[]>([]);
+  const [workingSetsLoading, setWorkingSetsLoading] = useState(false);
   const [activeWorkingSetId, setActiveWorkingSet] = useState<string | null>(() => getActiveWorkingSetId());
 
   // UI State: Engine Result
@@ -790,9 +866,27 @@ export function App() {
     setIsAccountModalOpen(true);
   };
 
-  const handleLogin = (email: string, password: string) => {
+  useEffect(() => {
+    let isMounted = true;
+    getCurrentUser()
+      .then(user => {
+        if (!isMounted) return;
+        setAuthUser(user);
+        setAuthReady(true);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setAuthUser(null);
+        setAuthReady(true);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleLogin = async (email: string, password: string) => {
     try {
-      const user = loginUser(email, password);
+      const user = await loginUser(email, password);
       setAuthUser(user);
       setAuthError(null);
       setIsAuthModalOpen(false);
@@ -803,9 +897,9 @@ export function App() {
     }
   };
 
-  const handleRegister = (name: string, email: string, password: string) => {
+  const handleRegister = async (name: string, email: string, password: string) => {
     try {
-      const user = registerUser(name, email, password);
+      const user = await registerUser(name, email, password);
       setAuthUser(user);
       setAuthError(null);
       setIsAuthModalOpen(false);
@@ -816,14 +910,17 @@ export function App() {
     }
   };
 
-  const handleLogout = () => {
-    logoutUser();
-    setAuthUser(null);
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } finally {
+      setAuthUser(null);
+    }
   };
 
-  const handleUpdateName = (name: string) => {
+  const handleUpdateName = async (name: string) => {
     try {
-      const user = updateUserName(name);
+      const user = await updateUserName(name);
       setAuthUser(user);
       setAccountError(null);
       setAccountMessage('Profile updated.');
@@ -832,9 +929,9 @@ export function App() {
     }
   };
 
-  const handleChangePassword = (currentPassword: string, nextPassword: string) => {
+  const handleChangePassword = async (currentPassword: string, nextPassword: string) => {
     try {
-      changeUserPassword(currentPassword, nextPassword);
+      await changeUserPassword(currentPassword, nextPassword);
       setAccountError(null);
       setAccountMessage('Password updated.');
     } catch (err: any) {
@@ -842,9 +939,9 @@ export function App() {
     }
   };
 
-  const handleDeleteAccount = (currentPassword: string) => {
+  const handleDeleteAccount = async (currentPassword: string) => {
     try {
-      deleteCurrentUser(currentPassword);
+      await deleteCurrentUser(currentPassword);
       setAuthUser(null);
       setAccountError(null);
       setAccountMessage(null);
@@ -854,8 +951,16 @@ export function App() {
     }
   };
 
-  const refreshWorkingSets = useCallback(() => {
-    setWorkingSets(listWorkingSets());
+  const refreshWorkingSets = useCallback(async () => {
+    setWorkingSetsLoading(true);
+    try {
+      const next = await listWorkingSets();
+      setWorkingSets(next);
+    } catch {
+      setWorkingSets([]);
+    } finally {
+      setWorkingSetsLoading(false);
+    }
   }, []);
 
   const handleSetActiveWorkingSet = (id: string | null) => {
@@ -868,10 +973,10 @@ export function App() {
     persistActiveWorkingSetId(id);
   };
 
-  const handleCreateWorkingSet = (name: string) => {
+  const handleCreateWorkingSet = async (name: string) => {
     try {
-      const created = createWorkingSet(name);
-      refreshWorkingSets();
+      const created = await createWorkingSet(name);
+      await refreshWorkingSets();
       setActiveWorkingSet(created.id);
       return created;
     } catch {
@@ -879,34 +984,34 @@ export function App() {
     }
   };
 
-  const handleRenameWorkingSet = (id: string, name: string) => {
-    updateWorkingSet(id, { name });
-    refreshWorkingSets();
+  const handleRenameWorkingSet = async (id: string, name: string) => {
+    await updateWorkingSet(id, { name });
+    await refreshWorkingSets();
   };
 
-  const handleDeleteWorkingSet = (id: string) => {
-    deleteWorkingSet(id);
-    refreshWorkingSets();
+  const handleDeleteWorkingSet = async (id: string) => {
+    await deleteWorkingSet(id);
+    await refreshWorkingSets();
     setActiveWorkingSet(getActiveWorkingSetId());
   };
 
-  const handleAddWorkingSetItem = (setId: string, categoryId: string, poolId: string, item: PoolItem) => {
-    addWorkingSetItem(setId, categoryId, {
+  const handleAddWorkingSetItem = async (setId: string, categoryId: string, poolId: string, item: PoolItem) => {
+    await addWorkingSetItem(setId, categoryId, {
       poolId,
       poolItemId: item.id,
       text: item.text,
     });
-    refreshWorkingSets();
+    await refreshWorkingSets();
   };
 
-  const handleRemoveWorkingSetItem = (setId: string, categoryId: string, itemId: string) => {
-    removeWorkingSetItem(setId, categoryId, itemId);
-    refreshWorkingSets();
+  const handleRemoveWorkingSetItem = async (setId: string, categoryId: string, itemId: string) => {
+    await removeWorkingSetItem(setId, categoryId, itemId);
+    await refreshWorkingSets();
   };
 
-  const handleClearWorkingSetCategory = (setId: string, categoryId: string) => {
-    clearWorkingSetCategory(setId, categoryId);
-    refreshWorkingSets();
+  const handleClearWorkingSetCategory = async (setId: string, categoryId: string) => {
+    await clearWorkingSetCategory(setId, categoryId);
+    await refreshWorkingSets();
   };
 
   useEffect(() => {
@@ -1088,17 +1193,84 @@ export function App() {
 
   useEffect(() => {
     if (activePage === 'working-sets' || activePage === 'generator') {
-      setWorkingSets(listWorkingSets());
-      setActiveWorkingSet(getActiveWorkingSetId());
+      if (authUser) {
+        refreshWorkingSets();
+        setActiveWorkingSet(getActiveWorkingSetId());
+      } else {
+        setWorkingSets([]);
+        setActiveWorkingSet(null);
+        setWorkingSetsLoading(false);
+      }
     }
-  }, [activePage]);
+  }, [activePage, authUser]);
+
+  useEffect(() => {
+    if (authUser) {
+      refreshWorkingSets();
+    } else {
+      setWorkingSets([]);
+      setActiveWorkingSet(null);
+      setWorkingSetsLoading(false);
+    }
+  }, [authUser]);
 
   return (
     <>
       <div className="app-root">
+      {isDevMode && (
+        <div className="app-dev-banner">
+          <span>DEV MODE: All features unlocked</span>
+          <button
+            type="button"
+            className="app-dev-toggle"
+            onClick={() => {
+              captureError(new Error('Manual test error'), { source: 'DevTest' });
+            }}
+          >
+            Test Error
+          </button>
+          <button
+            type="button"
+            className="app-dev-toggle"
+            onClick={() => {
+              const next = false;
+              setDevModeOverride(next);
+              try {
+                window.localStorage.setItem('morpbase:dev_mode', next ? '1' : '0');
+              } catch {
+                // ignore
+              }
+              window.location.reload();
+            }}
+          >
+            Disable
+          </button>
+        </div>
+      )}
+      {!isDevMode && envDevMode && (
+        <div className="app-dev-banner">
+          <span>DEV MODE is OFF (override)</span>
+          <button
+            type="button"
+            className="app-dev-toggle"
+            onClick={() => {
+              const next = true;
+              setDevModeOverride(next);
+              try {
+                window.localStorage.setItem('morpbase:dev_mode', next ? '1' : '0');
+              } catch {
+                // ignore
+              }
+              window.location.reload();
+            }}
+          >
+            Enable
+          </button>
+        </div>
+      )}
       <div className="app-page-toggle">
         <div className="app-page-toggle-left">
-          {authUser ? (
+          {authReady && authUser ? (
             <>
               <button
                 type="button"
@@ -1118,16 +1290,40 @@ export function App() {
             </>
           ) : (
             <div className="app-page-toggle-auth-hint">
-              <button
-                type="button"
-                className="app-page-toggle-action-button"
-                onClick={handleOpenAuth}
-              >
-                Log in
-              </button>
-              <span>(demo only)</span>
+              {authReady ? (
+                <>
+                  <button
+                    type="button"
+                    className="app-page-toggle-action-button"
+                    onClick={handleOpenAuth}
+                  >
+                    Beta login
+                  </button>
+                  <span>(beta)</span>
+                </>
+              ) : (
+                <span>Checking session...</span>
+              )}
             </div>
           )}
+          <a
+            className="app-page-toggle-action-button"
+            href={manualLink('quick-start')}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Manual
+          </a>
+          <button
+            type="button"
+            className="app-page-toggle-action-button"
+            onClick={() => {
+              setFeedbackCopied(false);
+              setIsFeedbackModalOpen(true);
+            }}
+          >
+            Feedback
+          </button>
         </div>
         <div className="app-page-toggle-group" role="tablist" aria-label="App mode">
           <button
@@ -1170,6 +1366,7 @@ export function App() {
       </div>
       {activePage === 'user-pools' ? (
         <UserPoolsPage
+          manualUrl={manualUrl}
           onAddToPrompt={handleAddPoolItem}
           onAppendToPrompt={handleAppendPoolItem}
           onRandomizePoolItems={handleRandomizePoolItems}
@@ -1181,18 +1378,25 @@ export function App() {
           canUndoClearPrompt={Boolean(clearUndoState)}
           freeformPrompt={freeformPrompt}
           onFreeformPromptChange={setFreeformPrompt}
+          authUser={authUser}
+          authReady={authReady}
+          isPro={isPro}
         />
       ) : activePage === 'pool-hub' ? (
         <PoolHubPage
+          manualUrl={manualUrl}
           onGoToUserPools={() => setActivePage('user-pools')}
-          isLoggedIn={Boolean(authUser)}
+          isLoggedIn={authReady && Boolean(authUser)}
           onRequestLogin={handleOpenAuth}
           userName={authUser?.name ?? null}
           userId={authUser?.id ?? null}
+          isPro={isPro}
         />
       ) : activePage === 'working-sets' ? (
         <WorkingSetsPage
+          manualUrl={manualUrl}
           workingSets={workingSets}
+          workingSetsLoading={workingSetsLoading}
           activeWorkingSetId={activeWorkingSetId}
           categoryOrder={CATEGORY_ORDER}
           onCreateWorkingSet={handleCreateWorkingSet}
@@ -1202,17 +1406,20 @@ export function App() {
           onAddWorkingSetItem={handleAddWorkingSetItem}
           onRemoveWorkingSetItem={handleRemoveWorkingSetItem}
           onClearWorkingSetCategory={handleClearWorkingSetCategory}
+          authReady={authReady}
+          authUser={authUser}
+          isPro={isPro}
         />
       ) : (
         <div className="interview-layout">
-          <CategorySidebar
-            categoryMap={CATEGORY_MAP}
-            currentNodeId={currentNodeId}
-            selections={selectionsMap}
-            onJumpToCategory={handleJumpToCategory}
-            onOpenRandom={() => setIsRandomPromptModalOpen(true)}
-            onOpenTutorial={() => setIsAppTutorialOpen(true)}
-          />
+              <CategorySidebar
+                categoryMap={CATEGORY_MAP}
+                currentNodeId={currentNodeId}
+                selections={selectionsMap}
+                onJumpToCategory={handleJumpToCategory}
+                onOpenRandom={() => setIsRandomPromptModalOpen(true)}
+                onOpenTutorial={() => setIsAppTutorialOpen(true)}
+              />
           <div className="interview-container">
             <div className="app-main">
               <div className="working-set-banner">
@@ -1312,6 +1519,9 @@ export function App() {
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
                 onAddToPrompt={handleAddPoolItem}
+                authUser={authUser}
+                isPro={isPro}
+                manualUrl={manualUrl}
               />
             </div>
             
@@ -1345,6 +1555,7 @@ export function App() {
                 <RandomPromptGenerator
                   attributeDefinitions={attributeDefinitions}
                   questionNodes={questionNodes}
+                  manualUrl={manualUrl}
                   onRandomize={(selections) => {
                     handleRandomize(selections);
                     setIsRandomPromptModalOpen(false);
@@ -1366,6 +1577,14 @@ export function App() {
                     This tool helps you build high-quality text prompts for image generation models such as Stable Diffusion.
                     Instead of writing a long, complex prompt from scratch, you answer a series of focused questions
                     about your image (Subject, Style, Lighting, Camera, Environment, Quality, Effects, and more).
+                  </p>
+                  <p>
+                    Want the full guide? Open the manual section on the Builder.
+                    {' '}
+                    <a href={manualLink('builder')} target="_blank" rel="noreferrer">
+                      Deep dive in the manual
+                    </a>
+                    .
                   </p>
                 </section>
 
@@ -1415,6 +1634,12 @@ export function App() {
                   <p>
                     This is perfect for exploring new ideas, getting inspiration, or quickly generating variations to see what works best.
                   </p>
+                  <p>
+                    <a href={manualLink('random-prompt-generator')} target="_blank" rel="noreferrer">
+                      See Random Prompt Generator in the manual
+                    </a>
+                    .
+                  </p>
                 </section>
 
                 <section className="app-tutorial-section">
@@ -1433,6 +1658,53 @@ export function App() {
         </div>
       )}
       </div>
+      <Modal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        title="Beta Feedback"
+        className="app-feedback-modal"
+      >
+        <div className="app-feedback">
+          <p className="app-feedback-text">
+            Use this template to send high-signal feedback. Paste it into Discord or your preferred channel.
+          </p>
+          <textarea
+            className="app-feedback-textarea"
+            rows={18}
+            readOnly
+            value={feedbackSchema}
+          />
+          <div className="app-feedback-actions">
+            <button
+              type="button"
+              className="app-feedback-secondary"
+              onClick={() => setIsFeedbackModalOpen(false)}
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              className="app-feedback-primary"
+              onClick={() => {
+                navigator.clipboard.writeText(feedbackSchema).then(() => {
+                  setFeedbackCopied(true);
+                }).catch(() => {
+                  setFeedbackCopied(false);
+                });
+              }}
+            >
+              {feedbackCopied ? 'Copied' : 'Copy Template'}
+            </button>
+          </div>
+          <div className="app-feedback-hint">
+            Need full guidance?{' '}
+            <a href={manualLink('support-notes')} target="_blank" rel="noreferrer">
+              Open the manual
+            </a>
+            .
+          </div>
+        </div>
+      </Modal>
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

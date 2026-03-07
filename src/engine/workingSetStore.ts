@@ -1,99 +1,208 @@
 import type { WorkingSet, WorkingSetItemRef, WorkingSetStore } from '../types';
+import { supabase } from './supabaseClient';
+import { getProfile } from './authStore';
 
-const STORAGE_KEY = 'promptgen:working_sets:v2';
+const ACTIVE_KEY = 'promptgen:working_sets:active_id';
 
-const blankStore = (): WorkingSetStore => ({
-  version: 2,
-  activeId: null,
-  sets: [],
+const normalizeText = (value: string): string =>
+  value.replace(/\s+/g, ' ').trim();
+
+const requireProfileId = async (): Promise<string> => {
+  const profile = await getProfile();
+  if (!profile) {
+    throw new Error('You must be logged in.');
+  }
+  return profile.id;
+};
+
+type WorkingSetItemRow = WorkingSetItemRef & { categoryId: string };
+
+const toWorkingSet = (row: any, items: WorkingSetItemRow[]): WorkingSet => {
+  const categoryBuckets: WorkingSet['categoryBuckets'] = {};
+  items.forEach(item => {
+    const bucket = categoryBuckets[item.categoryId] ?? [];
+    bucket.push({
+      id: item.id,
+      poolId: item.poolId,
+      poolItemId: item.poolItemId,
+      text: item.text,
+      addedAt: item.addedAt,
+    });
+    categoryBuckets[item.categoryId] = bucket;
+  });
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: new Date(row.created_at).getTime(),
+    updatedAt: new Date(row.updated_at).getTime(),
+    categoryBuckets,
+  };
+};
+
+const toWorkingSetItem = (row: any): WorkingSetItemRow => ({
+  id: row.id,
+  poolId: row.pool_id ?? '',
+  poolItemId: row.pool_item_id ?? '',
+  text: row.text,
+  addedAt: new Date(row.created_at).getTime(),
+  categoryId: row.category_id,
 });
 
-const loadStore = (): WorkingSetStore => {
+export const listWorkingSets = async (): Promise<WorkingSet[]> => {
+  const userId = await requireProfileId();
+  const { data: sets, error } = await supabase
+    .from('working_sets')
+    .select('*')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  if (!sets || sets.length === 0) return [];
+
+  const setIds = sets.map(set => set.id);
+  const { data: items, error: itemsError } = await supabase
+    .from('working_set_items')
+    .select('*')
+    .in('working_set_id', setIds)
+    .order('created_at', { ascending: false });
+  if (itemsError) throw itemsError;
+
+  const itemsBySet = new Map<string, WorkingSetItemRow[]>();
+  (items ?? []).forEach(row => {
+    const setId = row.working_set_id as string;
+    const list = itemsBySet.get(setId) ?? [];
+    list.push(toWorkingSetItem(row));
+    itemsBySet.set(setId, list);
+  });
+
+  return sets.map(set => {
+    const mapped = itemsBySet.get(set.id) ?? [];
+    return toWorkingSet(set, mapped);
+  });
+};
+
+export const getActiveWorkingSetId = (): string | null => {
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return blankStore();
-    const parsed = JSON.parse(raw) as WorkingSetStore;
-    if (!parsed || parsed.version !== 2 || !Array.isArray(parsed.sets)) {
-      return blankStore();
-    }
-    return parsed;
+    return window.localStorage.getItem(ACTIVE_KEY);
   } catch {
-    return blankStore();
+    return null;
   }
 };
 
-const saveStore = (store: WorkingSetStore) => {
+export const setActiveWorkingSetId = (id: string | null) => {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    if (!id) {
+      window.localStorage.removeItem(ACTIVE_KEY);
+      return;
+    }
+    window.localStorage.setItem(ACTIVE_KEY, id);
   } catch {
     // ignore
   }
 };
 
-const makeId = () => `ws_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-const makeItemId = () => `wsi_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-
-export const listWorkingSets = (): WorkingSet[] => loadStore().sets;
-
-export const getActiveWorkingSetId = (): string | null => loadStore().activeId;
-
-export const setActiveWorkingSetId = (id: string | null) => {
-  const store = loadStore();
-  store.activeId = id;
-  saveStore(store);
-};
-
-export const createWorkingSet = (name: string, payload?: Partial<Omit<WorkingSet, 'id' | 'name' | 'createdAt' | 'updatedAt'>>) => {
+export const createWorkingSet = async (
+  name: string,
+  payload?: Partial<Omit<WorkingSet, 'id' | 'name' | 'createdAt' | 'updatedAt'>>
+): Promise<WorkingSet> => {
   const trimmed = name.trim();
   if (!trimmed) throw new Error('Working Set name is required.');
-  const now = Date.now();
-  const next: WorkingSet = {
-    id: makeId(),
-    name: trimmed,
-    createdAt: now,
-    updatedAt: now,
-    categoryBuckets: payload?.categoryBuckets ?? {},
-  };
-  const store = loadStore();
-  store.sets = [next, ...store.sets];
-  store.activeId = next.id;
-  saveStore(store);
-  return next;
-};
+  const userId = await requireProfileId();
+  const { data, error } = await supabase
+    .from('working_sets')
+    .insert({ user_id: userId, name: trimmed })
+    .select('*')
+    .single();
+  if (error) throw error;
 
-export const updateWorkingSet = (id: string, patch: Partial<Omit<WorkingSet, 'id' | 'createdAt'>>) => {
-  const store = loadStore();
-  const idx = store.sets.findIndex(item => item.id === id);
-  if (idx === -1) return null;
-  store.sets[idx] = {
-    ...store.sets[idx],
-    ...patch,
-    updatedAt: Date.now(),
-  };
-  saveStore(store);
-  return store.sets[idx];
-};
+  const categoryBuckets = payload?.categoryBuckets ?? {};
+  const itemRows: Array<{
+    working_set_id: string;
+    pool_id: string | null;
+    pool_item_id: string | null;
+    category_id: string;
+    text: string;
+  }> = [];
 
-export const deleteWorkingSet = (id: string) => {
-  const store = loadStore();
-  store.sets = store.sets.filter(item => item.id !== id);
-  if (store.activeId === id) {
-    store.activeId = store.sets[0]?.id ?? null;
+  Object.entries(categoryBuckets).forEach(([categoryId, items]) => {
+    items.forEach(item => {
+      itemRows.push({
+        working_set_id: data.id,
+        pool_id: item.poolId ?? null,
+        pool_item_id: item.poolItemId ?? null,
+        category_id: categoryId,
+        text: normalizeText(item.text),
+      });
+    });
+  });
+
+  if (itemRows.length > 0) {
+    const { error: itemsError } = await supabase.from('working_set_items').insert(itemRows);
+    if (itemsError) throw itemsError;
   }
-  saveStore(store);
-  return store.sets;
+
+  return {
+    id: data.id,
+    name: data.name,
+    createdAt: new Date(data.created_at).getTime(),
+    updatedAt: new Date(data.updated_at).getTime(),
+    categoryBuckets,
+  };
 };
 
-export const exportWorkingSetPayload = (id: string): { version: 2; workingSet: WorkingSet } => {
-  const store = loadStore();
-  const workingSet = store.sets.find(set => set.id === id);
-  if (!workingSet) {
+export const updateWorkingSet = async (
+  id: string,
+  patch: Partial<Omit<WorkingSet, 'id' | 'createdAt'>>
+): Promise<WorkingSet | null> => {
+  const updates: { name?: string } = {};
+  if (typeof patch.name === 'string') {
+    const trimmed = patch.name.trim();
+    if (!trimmed) throw new Error('Working Set name is required.');
+    updates.name = trimmed;
+  }
+  const { data, error } = await supabase
+    .from('working_sets')
+    .update(updates)
+    .eq('id', id)
+    .select('*')
+    .single();
+  if (error) throw error;
+  if (!data) return null;
+
+  const workingSet = await exportWorkingSetPayload(id);
+  return workingSet.workingSet;
+};
+
+export const deleteWorkingSet = async (id: string) => {
+  const { error } = await supabase
+    .from('working_sets')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) throw error;
+};
+
+export const exportWorkingSetPayload = async (id: string): Promise<{ version: 2; workingSet: WorkingSet }> => {
+  const { data: setRow, error } = await supabase
+    .from('working_sets')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (error) throw error;
+  if (!setRow) {
     throw new Error('Working Set not found.');
   }
+  const { data: items, error: itemsError } = await supabase
+    .from('working_set_items')
+    .select('*')
+    .eq('working_set_id', id);
+  if (itemsError) throw itemsError;
+
+  const mapped = (items ?? []).map(toWorkingSetItem);
+  const workingSet = toWorkingSet(setRow, mapped);
   return { version: 2, workingSet };
 };
 
-export const importWorkingSetPayload = (
+export const importWorkingSetPayload = async (
   payload: { version: number; workingSet: WorkingSet },
   mode: 'merge' | 'replace'
 ) => {
@@ -102,110 +211,121 @@ export const importWorkingSetPayload = (
   }
 
   const incoming = payload.workingSet;
-  const store = loadStore();
-  const existingIndex = store.sets.findIndex(set => set.name === incoming.name);
+  const existing = await listWorkingSets();
+  const existingIndex = existing.findIndex(set => set.name === incoming.name);
 
   const sanitizeBuckets = (buckets: WorkingSet['categoryBuckets']) => {
     const next: WorkingSet['categoryBuckets'] = {};
     Object.entries(buckets).forEach(([categoryId, items]) => {
       next[categoryId] = items.map(item => ({
         ...item,
-        id: makeItemId(),
-        addedAt: Date.now(),
+        id: item.id,
+        text: normalizeText(item.text),
       }));
     });
     return next;
   };
 
-  const nextSet: WorkingSet = {
-    ...incoming,
-    id: makeId(),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    categoryBuckets: sanitizeBuckets(incoming.categoryBuckets || {}),
-  };
-
   if (existingIndex === -1) {
-    store.sets.unshift(nextSet);
-    store.activeId = nextSet.id;
-    saveStore(store);
-    return nextSet;
+    const created = await createWorkingSet(incoming.name, {
+      categoryBuckets: sanitizeBuckets(incoming.categoryBuckets || {}),
+    });
+    setActiveWorkingSetId(created.id);
+    return created;
   }
 
+  const target = existing[existingIndex];
   if (mode === 'replace') {
-    store.sets[existingIndex] = { ...nextSet, name: incoming.name };
-    store.activeId = store.sets[existingIndex].id;
-    saveStore(store);
-    return store.sets[existingIndex];
+    await supabase.from('working_set_items').delete().eq('working_set_id', target.id);
   }
 
-  const existing = store.sets[existingIndex];
-  const mergedBuckets: WorkingSet['categoryBuckets'] = { ...existing.categoryBuckets };
-  Object.entries(nextSet.categoryBuckets).forEach(([categoryId, items]) => {
-    mergedBuckets[categoryId] = [...(mergedBuckets[categoryId] ?? []), ...items];
+  const buckets = sanitizeBuckets(incoming.categoryBuckets || {});
+  const itemRows: Array<{
+    working_set_id: string;
+    pool_id: string | null;
+    pool_item_id: string | null;
+    category_id: string;
+    text: string;
+  }> = [];
+
+  Object.entries(buckets).forEach(([categoryId, items]) => {
+    items.forEach(item => {
+      itemRows.push({
+        working_set_id: target.id,
+        pool_id: item.poolId ?? null,
+        pool_item_id: item.poolItemId ?? null,
+        category_id: categoryId,
+        text: normalizeText(item.text),
+      });
+    });
   });
-  store.sets[existingIndex] = {
-    ...existing,
-    categoryBuckets: mergedBuckets,
-    updatedAt: Date.now(),
-  };
-  store.activeId = store.sets[existingIndex].id;
-  saveStore(store);
-  return store.sets[existingIndex];
+
+  if (itemRows.length > 0) {
+    const { error } = await supabase.from('working_set_items').insert(itemRows);
+    if (error) throw error;
+  }
+
+  setActiveWorkingSetId(target.id);
+  return exportWorkingSetPayload(target.id).then(result => result.workingSet);
 };
 
-export const addWorkingSetItem = (
+export const addWorkingSetItem = async (
   setId: string,
   categoryId: string,
   item: Omit<WorkingSetItemRef, 'id' | 'addedAt'>
 ) => {
-  const store = loadStore();
-  const idx = store.sets.findIndex(set => set.id === setId);
-  if (idx === -1) return null;
-  const next = { ...store.sets[idx] };
-  const bucket = next.categoryBuckets[categoryId] ?? [];
-  if (bucket.some(existing => existing.poolId === item.poolId && existing.poolItemId === item.poolItemId)) {
-    return next;
+  const { data: existing, error } = await supabase
+    .from('working_set_items')
+    .select('id')
+    .eq('working_set_id', setId)
+    .eq('category_id', categoryId)
+    .eq('pool_id', item.poolId)
+    .eq('pool_item_id', item.poolItemId)
+    .maybeSingle();
+  if (error) throw error;
+  if (existing) {
+    return null;
   }
-  const nextItem: WorkingSetItemRef = {
-    ...item,
-    id: makeItemId(),
-    addedAt: Date.now(),
-  };
-  next.categoryBuckets = {
-    ...next.categoryBuckets,
-    [categoryId]: [...bucket, nextItem],
-  };
-  next.updatedAt = Date.now();
-  store.sets[idx] = next;
-  saveStore(store);
-  return next;
+
+  const { data, error: insertError } = await supabase
+    .from('working_set_items')
+    .insert({
+      working_set_id: setId,
+      category_id: categoryId,
+      pool_id: item.poolId,
+      pool_item_id: item.poolItemId,
+      text: normalizeText(item.text),
+    })
+    .select('*')
+    .single();
+  if (insertError) throw insertError;
+
+  await supabase.from('working_sets').update({ updated_at: new Date().toISOString() }).eq('id', setId);
+  return data ? toWorkingSetItem(data) : null;
 };
 
-export const removeWorkingSetItem = (setId: string, categoryId: string, itemId: string) => {
-  const store = loadStore();
-  const idx = store.sets.findIndex(set => set.id === setId);
-  if (idx === -1) return null;
-  const next = { ...store.sets[idx] };
-  const bucket = next.categoryBuckets[categoryId] ?? [];
-  next.categoryBuckets = {
-    ...next.categoryBuckets,
-    [categoryId]: bucket.filter(item => item.id !== itemId),
-  };
-  next.updatedAt = Date.now();
-  store.sets[idx] = next;
-  saveStore(store);
-  return next;
+export const removeWorkingSetItem = async (setId: string, categoryId: string, itemId: string) => {
+  const { error } = await supabase
+    .from('working_set_items')
+    .delete()
+    .eq('id', itemId)
+    .eq('working_set_id', setId)
+    .eq('category_id', categoryId);
+  if (error) throw error;
+  await supabase.from('working_sets').update({ updated_at: new Date().toISOString() }).eq('id', setId);
 };
 
-export const clearWorkingSetCategory = (setId: string, categoryId: string) => {
-  const store = loadStore();
-  const idx = store.sets.findIndex(set => set.id === setId);
-  if (idx === -1) return null;
-  const next = { ...store.sets[idx] };
-  next.categoryBuckets = { ...next.categoryBuckets, [categoryId]: [] };
-  next.updatedAt = Date.now();
-  store.sets[idx] = next;
-  saveStore(store);
-  return next;
+export const clearWorkingSetCategory = async (setId: string, categoryId: string) => {
+  const { error } = await supabase
+    .from('working_set_items')
+    .delete()
+    .eq('working_set_id', setId)
+    .eq('category_id', categoryId);
+  if (error) throw error;
+  await supabase.from('working_sets').update({ updated_at: new Date().toISOString() }).eq('id', setId);
+};
+
+export const exportWorkingSetStore = async (): Promise<WorkingSetStore> => {
+  const sets = await listWorkingSets();
+  return { version: 2, activeId: getActiveWorkingSetId(), sets };
 };

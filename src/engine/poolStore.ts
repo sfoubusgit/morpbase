@@ -1,466 +1,166 @@
 import type { Pool, PoolItem, PoolStore } from '../types';
-
-const STORAGE_KEY = 'promptgen:user_pools';
-
-const blankStore = (): PoolStore => ({ version: 1, pools: [] });
+import { supabase } from './supabaseClient';
+import { getProfile } from './authStore';
 
 const normalizeText = (value: string): string =>
   value.replace(/\s+/g, ' ').trim();
 
-const makeId = (prefix: string) =>
-  `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-
-const SEED_POOL_NAME = 'Nature elements and phrases';
-const CREATIVE_POOL_NAME = 'Surreal scenes and motifs';
-const FOGBOUND_POOL_NAME = 'Fogbound Forestcore';
-const APOTHECARY_POOL_NAME = 'Wildcrafted Apothecary';
-const DESERT_NOMAD_POOL_NAME = 'Desert Sun Nomad';
-const ARCTIC_SILENCE_POOL_NAME = 'Arctic Silencecore';
-const FAERGHUS_KNIGHT_POOL_NAME = 'Faerghus Frostbound Knight';
-const BASE_WOMEN_TYPES_POOL_NAME = 'Base Women Types';
-const NARUTO_SUBJECTS_POOL_NAME = 'Naruto Subjects Pool';
-const NARUTO_ENVIRONMENT_POOL_NAME = 'Naruto Environment Pool';
-
-const createSeedPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: SEED_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'misty pine forest', tags: ['nature', 'forest'] },
-      { id: makeId('item'), text: 'sunlit meadow', tags: ['nature', 'meadow'] },
-      { id: makeId('item'), text: 'ancient oak tree', tags: ['nature', 'tree'] },
-      { id: makeId('item'), text: 'rocky mountain ridge', tags: ['nature', 'mountain'] },
-      { id: makeId('item'), text: 'winding river', tags: ['nature', 'water'] },
-      { id: makeId('item'), text: 'waterfall spray', tags: ['nature', 'water'] },
-      { id: makeId('item'), text: 'fog rolling over hills', tags: ['nature', 'atmosphere'] },
-      { id: makeId('item'), text: 'wildflower field', tags: ['nature', 'flowers'] },
-      { id: makeId('item'), text: 'mossy stones', tags: ['nature', 'forest'] },
-      { id: makeId('item'), text: 'golden hour haze', tags: ['nature', 'light'] },
-      { id: makeId('item'), text: 'rain-soaked leaves', tags: ['nature', 'rain'] },
-      { id: makeId('item'), text: 'starry night sky', tags: ['nature', 'sky'] },
-      { id: makeId('item'), text: 'coastal cliffs', tags: ['nature', 'coast'] },
-      { id: makeId('item'), text: 'snow-dusted peaks', tags: ['nature', 'snow'] },
-      { id: makeId('item'), text: 'glowing bioluminescent fungi', tags: ['nature', 'forest'] },
-      { id: makeId('item'), text: 'desert dunes at dusk', tags: ['nature', 'desert'] },
-    ],
-  };
+const requireProfileId = async (): Promise<string> => {
+  const profile = await getProfile();
+  if (!profile) {
+    throw new Error('You must be logged in.');
+  }
+  return profile.id;
 };
 
-const createCreativePool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: CREATIVE_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'a city floating above a calm ocean', tags: ['surreal', 'city'] },
-      { id: makeId('item'), text: 'a mirror lake reflecting a second sky', tags: ['surreal', 'water'] },
-      { id: makeId('item'), text: 'endless stairways spiraling into clouds', tags: ['surreal', 'architecture'] },
-      { id: makeId('item'), text: 'a desert of glass with soft blue dunes', tags: ['surreal', 'desert'] },
-      { id: makeId('item'), text: 'a forest where trees glow like lanterns', tags: ['surreal', 'forest'] },
-      { id: makeId('item'), text: 'a train of light crossing the night sky', tags: ['surreal', 'sky'] },
-      { id: makeId('item'), text: 'a waterfall that flows upward', tags: ['surreal', 'water'] },
-      { id: makeId('item'), text: 'a mountain split open revealing starlight', tags: ['surreal', 'mountain'] },
-      { id: makeId('item'), text: 'a quiet library floating in space', tags: ['surreal', 'interior'] },
-      { id: makeId('item'), text: 'a giant moon resting on a meadow', tags: ['surreal', 'moon'] },
-      { id: makeId('item'), text: 'a river of clouds through a canyon', tags: ['surreal', 'atmosphere'] },
-      { id: makeId('item'), text: 'a lighthouse on an endless plain', tags: ['surreal', 'landscape'] },
-    ],
-  };
-};
-
-const createFogboundPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: FOGBOUND_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'fog-laced conifer grove', tags: ['fog', 'forest', 'atmosphere'] },
-      { id: makeId('item'), text: 'moss-draped roots', tags: ['forest', 'moss', 'texture'] },
-      { id: makeId('item'), text: 'silver mist threading through ferns', tags: ['fog', 'forest'] },
-      { id: makeId('item'), text: 'dew-heavy spiderwebs', tags: ['fog', 'detail'] },
-      { id: makeId('item'), text: 'weathered stone path', tags: ['forest', 'path'] },
-      { id: makeId('item'), text: 'ancient cedar silhouettes', tags: ['forest', 'trees'] },
-      { id: makeId('item'), text: 'lichen-speckled boulders', tags: ['forest', 'stone'] },
-      { id: makeId('item'), text: 'soft lantern glow in the mist', tags: ['fog', 'light'] },
-      { id: makeId('item'), text: 'dripping canopy hush', tags: ['forest', 'rain'] },
-      { id: makeId('item'), text: 'half-hidden shrine', tags: ['forest', 'mystic'] },
-      { id: makeId('item'), text: 'trail of scattered pinecones', tags: ['forest', 'detail'] },
-      { id: makeId('item'), text: 'old wooden footbridge', tags: ['forest', 'structure'] },
-      { id: makeId('item'), text: 'mist curling around trunks', tags: ['fog', 'forest'] },
-      { id: makeId('item'), text: 'quiet creek shimmer', tags: ['forest', 'water'] },
-      { id: makeId('item'), text: 'fern-shadowed ground cover', tags: ['forest', 'foliage'] },
-      { id: makeId('item'), text: 'soft footsteps on damp earth', tags: ['forest', 'mood'] },
-    ],
-  };
-};
-
-const createApothecaryPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: APOTHECARY_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'shelf of amber tincture bottles', tags: ['apothecary', 'glass'] },
-      { id: makeId('item'), text: 'bundles of dried herbs', tags: ['apothecary', 'herbs'] },
-      { id: makeId('item'), text: 'mortar and pestle stained green', tags: ['apothecary', 'tools'] },
-      { id: makeId('item'), text: 'handwritten remedy labels', tags: ['apothecary', 'detail'] },
-      { id: makeId('item'), text: 'brass scale with tiny weights', tags: ['apothecary', 'tools'] },
-      { id: makeId('item'), text: 'beeswax candles with soft glow', tags: ['apothecary', 'light'] },
-      { id: makeId('item'), text: 'stacks of aged recipe books', tags: ['apothecary', 'books'] },
-      { id: makeId('item'), text: 'linen sachets tied with twine', tags: ['apothecary', 'herbs'] },
-      { id: makeId('item'), text: 'copper distillation coil', tags: ['apothecary', 'tools'] },
-      { id: makeId('item'), text: 'jars of dried mushrooms', tags: ['apothecary', 'fungi'] },
-      { id: makeId('item'), text: 'pressed wildflower pages', tags: ['apothecary', 'botanical'] },
-      { id: makeId('item'), text: 'smoky resin incense', tags: ['apothecary', 'atmosphere'] },
-      { id: makeId('item'), text: 'crystal vials with shimmering oils', tags: ['apothecary', 'glass'] },
-      { id: makeId('item'), text: 'wooden counter worn smooth', tags: ['apothecary', 'interior'] },
-      { id: makeId('item'), text: 'woven baskets of roots and bark', tags: ['apothecary', 'herbs'] },
-      { id: makeId('item'), text: 'herbal steam curling in the air', tags: ['apothecary', 'atmosphere'] },
-    ],
-  };
-};
-
-const createDesertNomadPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: DESERT_NOMAD_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'sun-bleached sand dunes', tags: ['desert', 'landscape'] },
-      { id: makeId('item'), text: 'wind-carved canyon walls', tags: ['desert', 'terrain'] },
-      { id: makeId('item'), text: 'nomad cloak fluttering in the wind', tags: ['nomad', 'fabric'] },
-      { id: makeId('item'), text: 'brass compass with worn etching', tags: ['nomad', 'tool'] },
-      { id: makeId('item'), text: 'camel caravan on the horizon', tags: ['desert', 'travel'] },
-      { id: makeId('item'), text: 'sun-baked leather satchel', tags: ['nomad', 'gear'] },
-      { id: makeId('item'), text: 'oasis shimmer in the distance', tags: ['desert', 'water'] },
-      { id: makeId('item'), text: 'sandstorm haze', tags: ['desert', 'atmosphere'] },
-      { id: makeId('item'), text: 'woven tent with patterned rugs', tags: ['nomad', 'shelter'] },
-      { id: makeId('item'), text: 'carved wooden prayer beads', tags: ['nomad', 'ritual'] },
-      { id: makeId('item'), text: 'ceramic water flask', tags: ['nomad', 'gear'] },
-      { id: makeId('item'), text: 'dune grasses catching light', tags: ['desert', 'flora'] },
-      { id: makeId('item'), text: 'solar glare over the flats', tags: ['desert', 'light'] },
-      { id: makeId('item'), text: 'trail of footprints in sand', tags: ['desert', 'detail'] },
-      { id: makeId('item'), text: 'weathered map scroll', tags: ['nomad', 'map'] },
-      { id: makeId('item'), text: 'burning ember campfire', tags: ['nomad', 'light'] },
-    ],
-  };
-};
-
-const createArcticSilencePool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: ARCTIC_SILENCE_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'frozen fjord expanse', tags: ['arctic', 'landscape'] },
-      { id: makeId('item'), text: 'snow-dusted pine silhouettes', tags: ['arctic', 'forest'] },
-      { id: makeId('item'), text: 'ice-crusted shoreline', tags: ['arctic', 'ice'] },
-      { id: makeId('item'), text: 'soft aurora glow', tags: ['arctic', 'light'] },
-      { id: makeId('item'), text: 'frost-laced windowpane', tags: ['arctic', 'detail'] },
-      { id: makeId('item'), text: 'wind-carved snowdrifts', tags: ['arctic', 'snow'] },
-      { id: makeId('item'), text: 'silent white valley', tags: ['arctic', 'mood'] },
-      { id: makeId('item'), text: 'glacial ice cracks', tags: ['arctic', 'ice'] },
-      { id: makeId('item'), text: 'faint blue twilight', tags: ['arctic', 'light'] },
-      { id: makeId('item'), text: 'distant wolf tracks', tags: ['arctic', 'detail'] },
-      { id: makeId('item'), text: 'steam rising from breath', tags: ['arctic', 'atmosphere'] },
-      { id: makeId('item'), text: 'snow-laden spruce boughs', tags: ['arctic', 'forest'] },
-      { id: makeId('item'), text: 'frozen lake mirror', tags: ['arctic', 'ice'] },
-      { id: makeId('item'), text: 'ice lantern glimmer', tags: ['arctic', 'light'] },
-      { id: makeId('item'), text: 'distant mountain ridge', tags: ['arctic', 'mountain'] },
-      { id: makeId('item'), text: 'whispering snowfall', tags: ['arctic', 'snow'] },
-    ],
-  };
-};
-
-const createFaerghusKnightPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: FAERGHUS_KNIGHT_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'frost-rimed plate armor', tags: ['knight', 'armor'] },
-      { id: makeId('item'), text: 'ice-blue tabard', tags: ['knight', 'fabric'] },
-      { id: makeId('item'), text: 'silver crest on the breastplate', tags: ['knight', 'detail'] },
-      { id: makeId('item'), text: 'fur-lined mantle', tags: ['knight', 'winter'] },
-      { id: makeId('item'), text: 'snow-dusted warhorse', tags: ['knight', 'mount'] },
-      { id: makeId('item'), text: 'frozen breath in the air', tags: ['winter', 'atmosphere'] },
-      { id: makeId('item'), text: 'crystalline longsword', tags: ['knight', 'weapon'] },
-      { id: makeId('item'), text: 'frosted kite shield', tags: ['knight', 'shield'] },
-      { id: makeId('item'), text: 'snow-laden banners', tags: ['knight', 'standard'] },
-      { id: makeId('item'), text: 'glacial cathedral backdrop', tags: ['winter', 'architecture'] },
-      { id: makeId('item'), text: 'ice-bound battlefield', tags: ['winter', 'scene'] },
-      { id: makeId('item'), text: 'cold steel gauntlets', tags: ['knight', 'armor'] },
-      { id: makeId('item'), text: 'snowfall drifting past the visor', tags: ['winter', 'atmosphere'] },
-      { id: makeId('item'), text: 'frost-bright heraldry', tags: ['knight', 'detail'] },
-      { id: makeId('item'), text: 'blue-white glow along the blade', tags: ['knight', 'weapon'] },
-      { id: makeId('item'), text: 'winterlight glinting on armor', tags: ['winter', 'light'] },
-    ],
-  };
-};
-
-const createBaseWomenTypesPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: BASE_WOMEN_TYPES_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'young adult woman', tags: ['base', 'age'] },
-      { id: makeId('item'), text: 'adult woman', tags: ['base', 'age'] },
-      { id: makeId('item'), text: 'middle-aged woman', tags: ['base', 'age'] },
-      { id: makeId('item'), text: 'elderly woman', tags: ['base', 'age'] },
-      { id: makeId('item'), text: 'athletic woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'slim woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'curvy woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'plus-size woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'petite woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'tall woman', tags: ['base', 'body'] },
-      { id: makeId('item'), text: 'freckled woman', tags: ['base', 'feature'] },
-      { id: makeId('item'), text: 'scarred woman', tags: ['base', 'feature'] },
-      { id: makeId('item'), text: 'short-haired woman', tags: ['base', 'hair'] },
-      { id: makeId('item'), text: 'long-haired woman', tags: ['base', 'hair'] },
-      { id: makeId('item'), text: 'braided hair', tags: ['base', 'hair'] },
-      { id: makeId('item'), text: 'shaved head', tags: ['base', 'hair'] },
-    ],
-  };
-};
-
-const createNarutoSubjectsPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: NARUTO_SUBJECTS_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'Naruto Uzumaki', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Sasuke Uchiha', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Sakura Haruno', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Kakashi Hatake', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Hinata Hyuga', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Itachi Uchiha', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Gaara', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Jiraiya', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Tsunade', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Orochimaru', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Shikamaru Nara', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Rock Lee', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Neji Hyuga', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Madara Uchiha', tags: ['naruto', 'character', 'subject'] },
-      { id: makeId('item'), text: 'Obito Uchiha', tags: ['naruto', 'character', 'subject'] },
-    ],
-  };
-};
-
-const createNarutoEnvironmentPool = (): Pool => {
-  const now = Date.now();
-  return {
-    id: makeId('pool'),
-    name: NARUTO_ENVIRONMENT_POOL_NAME,
-    createdAt: now,
-    updatedAt: now,
-    items: [
-      { id: makeId('item'), text: 'Hidden Leaf Village streets', tags: ['naruto', 'environment', 'village'] },
-      { id: makeId('item'), text: 'Hokage Rock overlook', tags: ['naruto', 'environment', 'landmark'] },
-      { id: makeId('item'), text: 'Academy classroom', tags: ['naruto', 'environment', 'interior'] },
-      { id: makeId('item'), text: 'Training Ground 7', tags: ['naruto', 'environment', 'forest'] },
-      { id: makeId('item'), text: 'Ichiraku Ramen shop', tags: ['naruto', 'environment', 'interior'] },
-      { id: makeId('item'), text: 'Uchiha district at dusk', tags: ['naruto', 'environment', 'street'] },
-      { id: makeId('item'), text: 'Forest of Death', tags: ['naruto', 'environment', 'forest'] },
-      { id: makeId('item'), text: 'Chunin Exams arena', tags: ['naruto', 'environment', 'arena'] },
-      { id: makeId('item'), text: 'Kage Summit hall', tags: ['naruto', 'environment', 'interior'] },
-      { id: makeId('item'), text: 'Hidden Sand Village rooftops', tags: ['naruto', 'environment', 'village'] },
-      { id: makeId('item'), text: 'Valley of the End', tags: ['naruto', 'environment', 'landmark'] },
-      { id: makeId('item'), text: 'rain-soaked Hidden Rain streets', tags: ['naruto', 'environment', 'rain'] },
-      { id: makeId('item'), text: 'misty Hidden Mist harbor', tags: ['naruto', 'environment', 'water'] },
-      { id: makeId('item'), text: 'Snowy Hidden Snow village', tags: ['naruto', 'environment', 'snow'] },
-      { id: makeId('item'), text: 'Akatsuki hideout cavern', tags: ['naruto', 'environment', 'cave'] },
-    ],
-  };
-};
-
-const createSeedStore = (): PoolStore => ({
-  version: 1,
-  pools: [
-    createSeedPool(),
-    createFogboundPool(),
-    createApothecaryPool(),
-    createDesertNomadPool(),
-    createArcticSilencePool(),
-    createFaerghusKnightPool(),
-    createBaseWomenTypesPool(),
-    createNarutoSubjectsPool(),
-    createNarutoEnvironmentPool(),
-  ],
+const toPool = (poolRow: any, items: PoolItem[]): Pool => ({
+  id: poolRow.id,
+  name: poolRow.name,
+  createdAt: new Date(poolRow.created_at).getTime(),
+  updatedAt: new Date(poolRow.updated_at).getTime(),
+  items,
 });
 
-const loadStore = (): PoolStore => {
-  if (typeof window === 'undefined') return blankStore();
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const seeded = createSeedStore();
-      saveStore(seeded);
-      return seeded;
-    }
-    const parsed = JSON.parse(raw) as PoolStore;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.pools)) {
-      return blankStore();
-    }
-    const seededPools: Pool[] = [];
-    if (!parsed.pools.some(pool => pool.name === SEED_POOL_NAME)) {
-      seededPools.push(createSeedPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === CREATIVE_POOL_NAME)) {
-      seededPools.push(createCreativePool());
-    }
-    if (!parsed.pools.some(pool => pool.name === FOGBOUND_POOL_NAME)) {
-      seededPools.push(createFogboundPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === APOTHECARY_POOL_NAME)) {
-      seededPools.push(createApothecaryPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === DESERT_NOMAD_POOL_NAME)) {
-      seededPools.push(createDesertNomadPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === ARCTIC_SILENCE_POOL_NAME)) {
-      seededPools.push(createArcticSilencePool());
-    }
-    if (!parsed.pools.some(pool => pool.name === FAERGHUS_KNIGHT_POOL_NAME)) {
-      seededPools.push(createFaerghusKnightPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === BASE_WOMEN_TYPES_POOL_NAME)) {
-      seededPools.push(createBaseWomenTypesPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === NARUTO_SUBJECTS_POOL_NAME)) {
-      seededPools.push(createNarutoSubjectsPool());
-    }
-    if (!parsed.pools.some(pool => pool.name === NARUTO_ENVIRONMENT_POOL_NAME)) {
-      seededPools.push(createNarutoEnvironmentPool());
-    }
-    if (seededPools.length > 0) {
-      parsed.pools = [...seededPools, ...parsed.pools];
-      saveStore(parsed);
-    }
-    return parsed;
-  } catch {
-    return blankStore();
-  }
+const toPoolItem = (row: any): PoolItem => ({
+  id: row.id,
+  text: row.text,
+  tags: row.tags ?? undefined,
+  note: row.note ?? undefined,
+});
+
+export const listPools = async (): Promise<Pool[]> => {
+  const userId = await requireProfileId();
+  const { data: pools, error } = await supabase
+    .from('pools')
+    .select('*')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('updated_at', { ascending: false });
+  if (error) throw error;
+  if (!pools || pools.length === 0) return [];
+
+  const poolIds = pools.map(pool => pool.id);
+  const { data: items, error: itemsError } = await supabase
+    .from('pool_items')
+    .select('*')
+    .in('pool_id', poolIds)
+    .order('created_at', { ascending: false });
+  if (itemsError) throw itemsError;
+
+  const itemsByPool = new Map<string, PoolItem[]>();
+  (items ?? []).forEach(row => {
+    const poolId = row.pool_id as string;
+    const list = itemsByPool.get(poolId) ?? [];
+    list.push(toPoolItem(row));
+    itemsByPool.set(poolId, list);
+  });
+
+  return pools.map(pool => toPool(pool, itemsByPool.get(pool.id) ?? []));
 };
 
-const saveStore = (store: PoolStore) => {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+export const getPool = async (poolId: string): Promise<Pool | null> => {
+  const { data: pool, error } = await supabase
+    .from('pools')
+    .select('*')
+    .eq('id', poolId)
+    .single();
+  if (error) throw error;
+  if (!pool) return null;
+  const { data: items, error: itemsError } = await supabase
+    .from('pool_items')
+    .select('*')
+    .eq('pool_id', poolId)
+    .order('created_at', { ascending: false });
+  if (itemsError) throw itemsError;
+  return toPool(pool, (items ?? []).map(toPoolItem));
 };
 
-export const listPools = (): Pool[] => {
-  return loadStore().pools;
-};
-
-export const getPool = (poolId: string): Pool | null => {
-  return loadStore().pools.find(pool => pool.id === poolId) ?? null;
-};
-
-export const createPool = (name: string): Pool => {
+export const createPool = async (name: string): Promise<Pool> => {
   const trimmed = normalizeText(name);
   if (!trimmed) {
     throw new Error('Pool name cannot be empty.');
   }
-  const now = Date.now();
-  const pool: Pool = {
-    id: makeId('pool'),
-    name: trimmed,
-    createdAt: now,
-    updatedAt: now,
-    items: [],
-  };
-  const store = loadStore();
-  store.pools.unshift(pool);
-  saveStore(store);
-  return pool;
+  const userId = await requireProfileId();
+  const { data, error } = await supabase
+    .from('pools')
+    .insert({ user_id: userId, name: trimmed })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return toPool(data, []);
 };
 
-export const renamePool = (poolId: string, name: string): Pool | null => {
+export const renamePool = async (poolId: string, name: string): Promise<Pool | null> => {
   const trimmed = normalizeText(name);
   if (!trimmed) {
     throw new Error('Pool name cannot be empty.');
   }
-  const store = loadStore();
-  const next = store.pools.map(pool =>
-    pool.id === poolId ? { ...pool, name: trimmed, updatedAt: Date.now() } : pool
-  );
-  store.pools = next;
-  saveStore(store);
-  return next.find(pool => pool.id === poolId) ?? null;
+  const { data, error } = await supabase
+    .from('pools')
+    .update({ name: trimmed })
+    .eq('id', poolId)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data ? toPool(data, []) : null;
 };
 
-export const deletePool = (poolId: string): Pool[] => {
-  const store = loadStore();
-  store.pools = store.pools.filter(pool => pool.id !== poolId);
-  saveStore(store);
-  return store.pools;
+export const deletePool = async (poolId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('pools')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', poolId);
+  if (error) throw error;
 };
 
-export const addItemToPool = (poolId: string, text: string, tags?: string[], note?: string): PoolItem => {
+export const addItemToPool = async (poolId: string, text: string, tags?: string[], note?: string): Promise<PoolItem> => {
   const normalizedText = normalizeText(text);
   if (!normalizedText) {
     throw new Error('Item text cannot be empty.');
   }
-  const store = loadStore();
-  const pool = store.pools.find(item => item.id === poolId);
-  if (!pool) {
-    throw new Error('Pool not found.');
-  }
-  const item: PoolItem = {
-    id: makeId('item'),
+  const payload = {
+    pool_id: poolId,
     text: normalizedText,
-    tags: tags && tags.length > 0 ? tags.map(normalizeText).filter(Boolean) : undefined,
-    note: note ? normalizeText(note) : undefined,
+    tags: tags && tags.length > 0 ? tags.map(normalizeText).filter(Boolean) : null,
+    note: note ? normalizeText(note) : null,
   };
-  pool.items.unshift(item);
-  pool.updatedAt = Date.now();
-  saveStore(store);
-  return item;
+  const { data, error } = await supabase
+    .from('pool_items')
+    .insert(payload)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return toPoolItem(data);
 };
 
-export const updatePoolItem = (poolId: string, updated: PoolItem): PoolItem | null => {
-  const store = loadStore();
-  const pool = store.pools.find(item => item.id === poolId);
-  if (!pool) return null;
-  pool.items = pool.items.map(item => (item.id === updated.id ? updated : item));
-  pool.updatedAt = Date.now();
-  saveStore(store);
-  return updated;
+export const updatePoolItem = async (poolId: string, updated: PoolItem): Promise<PoolItem | null> => {
+  const payload = {
+    text: normalizeText(updated.text),
+    tags: updated.tags && updated.tags.length > 0 ? updated.tags.map(normalizeText).filter(Boolean) : null,
+    note: updated.note ? normalizeText(updated.note) : null,
+  };
+  const { data, error } = await supabase
+    .from('pool_items')
+    .update(payload)
+    .eq('id', updated.id)
+    .eq('pool_id', poolId)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data ? toPoolItem(data) : null;
 };
 
-export const deletePoolItem = (poolId: string, itemId: string): PoolItem[] => {
-  const store = loadStore();
-  const pool = store.pools.find(item => item.id === poolId);
-  if (!pool) return [];
-  pool.items = pool.items.filter(item => item.id !== itemId);
-  pool.updatedAt = Date.now();
-  saveStore(store);
-  return pool.items;
+export const deletePoolItem = async (poolId: string, itemId: string): Promise<void> => {
+  const { error } = await supabase
+    .from('pool_items')
+    .delete()
+    .eq('id', itemId)
+    .eq('pool_id', poolId);
+  if (error) throw error;
 };
 
-export const exportPoolPayload = (poolId: string): { version: 1; pool: Pool } => {
-  const pool = getPool(poolId);
+export const exportPoolPayload = async (poolId: string): Promise<{ version: 1; pool: Pool }> => {
+  const pool = await getPool(poolId);
   if (!pool) {
     throw new Error('Pool not found.');
   }
@@ -470,83 +170,82 @@ export const exportPoolPayload = (poolId: string): { version: 1; pool: Pool } =>
   };
 };
 
-export const importPoolPayload = (
+export const importPoolPayload = async (
   payload: { version: number; pool: Pool },
   mode: 'merge' | 'replace'
-): Pool => {
+): Promise<Pool> => {
   if (!payload || payload.version !== 1 || !payload.pool) {
     throw new Error('Invalid pool payload.');
   }
+  const userId = await requireProfileId();
   const incoming = payload.pool;
-  const store = loadStore();
-  const existingIndex = store.pools.findIndex(pool => pool.name === incoming.name);
+  const existing = await listPools();
+  const existingIndex = existing.findIndex(pool => pool.name === incoming.name);
 
   const sanitizeItems = (items: PoolItem[]) =>
     items.map(item => ({
-      ...item,
-      id: makeId('item'),
       text: normalizeText(item.text),
-      tags: item.tags?.map(normalizeText).filter(Boolean),
-      note: item.note ? normalizeText(item.note) : undefined,
+      tags: item.tags?.map(normalizeText).filter(Boolean) ?? null,
+      note: item.note ? normalizeText(item.note) : null,
     }));
 
-  const nextPool: Pool = {
-    ...incoming,
-    id: makeId('pool'),
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
-    items: sanitizeItems(incoming.items || []),
-  };
-
   if (existingIndex === -1) {
-    store.pools.unshift(nextPool);
-    saveStore(store);
-    return nextPool;
+    const { data: newPool, error } = await supabase
+      .from('pools')
+      .insert({ user_id: userId, name: normalizeText(incoming.name) })
+      .select('*')
+      .single();
+    if (error) throw error;
+    const items = sanitizeItems(incoming.items || []);
+    if (items.length > 0) {
+      const { error: itemsError } = await supabase
+        .from('pool_items')
+        .insert(items.map(item => ({ ...item, pool_id: newPool.id })));
+      if (itemsError) throw itemsError;
+    }
+    return getPool(newPool.id) as Promise<Pool>;
   }
 
+  const targetPool = existing[existingIndex];
   if (mode === 'replace') {
-    store.pools[existingIndex] = { ...nextPool, name: incoming.name };
-    saveStore(store);
-    return store.pools[existingIndex];
+    await supabase.from('pool_items').delete().eq('pool_id', targetPool.id);
   }
 
-  // merge
-  const existing = store.pools[existingIndex];
-  const mergedItems = [...existing.items, ...nextPool.items];
-  store.pools[existingIndex] = {
-    ...existing,
-    items: mergedItems,
-    updatedAt: Date.now(),
-  };
-  saveStore(store);
-  return store.pools[existingIndex];
+  const items = sanitizeItems(incoming.items || []);
+  if (items.length > 0) {
+    const { error: itemsError } = await supabase
+      .from('pool_items')
+      .insert(items.map(item => ({ ...item, pool_id: targetPool.id })));
+    if (itemsError) throw itemsError;
+  }
+  return getPool(targetPool.id) as Promise<Pool>;
 };
 
-export const exportAllPoolsPayload = (): PoolStore => {
-  return loadStore();
+export const exportAllPoolsPayload = async (): Promise<PoolStore> => {
+  const pools = await listPools();
+  return { version: 1, pools };
 };
 
-export const importAllPoolsPayload = (payload: PoolStore, mode: 'merge' | 'replace') => {
+export const importAllPoolsPayload = async (payload: PoolStore, mode: 'merge' | 'replace') => {
   if (!payload || payload.version !== 1 || !Array.isArray(payload.pools)) {
     throw new Error('Invalid pools payload.');
   }
-  const store = loadStore();
   if (mode === 'replace') {
-    saveStore({ version: 1, pools: payload.pools });
-    return;
-  }
-  const existingNames = new Set(store.pools.map(pool => pool.name));
-  const merged = [...store.pools];
-  payload.pools.forEach(pool => {
-    if (!existingNames.has(pool.name)) {
-      merged.push(pool);
+    const pools = await listPools();
+    const poolIds = pools.map(pool => pool.id);
+    if (poolIds.length > 0) {
+      await supabase.from('pool_items').delete().in('pool_id', poolIds);
+      await supabase.from('pools').delete().in('id', poolIds);
     }
-  });
-  saveStore({ version: 1, pools: merged });
+  }
+
+  for (const pool of payload.pools) {
+    await importPoolPayload({ version: 1, pool }, 'merge');
+  }
 };
 
-export const exportPoolCsv = (poolId: string): string => {
-  const pool = getPool(poolId);
+export const exportPoolCsv = async (poolId: string): Promise<string> => {
+  const pool = await getPool(poolId);
   if (!pool) {
     throw new Error('Pool not found.');
   }
@@ -559,8 +258,8 @@ export const exportPoolCsv = (poolId: string): string => {
   return ['text,tags,note', ...rows].join('\n');
 };
 
-export const importPoolCsv = (poolId: string, csv: string, mode: 'merge' | 'replace') => {
-  const pool = getPool(poolId);
+export const importPoolCsv = async (poolId: string, csv: string, mode: 'merge' | 'replace') => {
+  const pool = await getPool(poolId);
   if (!pool) {
     throw new Error('Pool not found.');
   }
@@ -569,37 +268,31 @@ export const importPoolCsv = (poolId: string, csv: string, mode: 'merge' | 'repl
     throw new Error('CSV is empty.');
   }
   const startIndex = lines[0].toLowerCase().startsWith('text') ? 1 : 0;
-  const items: PoolItem[] = [];
+  const items: Array<{ text: string; tags?: string[]; note?: string }> = [];
   for (let i = startIndex; i < lines.length; i += 1) {
     const line = lines[i];
     const parts = line.split(',').map(part => part.replace(/^"|"$/g, '').trim());
     if (!parts[0]) continue;
     items.push({
-      id: makeId('item'),
       text: normalizeText(parts[0]),
       tags: parts[1] ? parseTagsCsv(parts[1]) : undefined,
       note: parts[2] ? normalizeText(parts[2]) : undefined,
     });
   }
-  const store = loadStore();
-  const poolIndex = store.pools.findIndex(item => item.id === poolId);
-  if (poolIndex === -1) {
-    throw new Error('Pool not found.');
-  }
   if (mode === 'replace') {
-    store.pools[poolIndex] = {
-      ...store.pools[poolIndex],
-      items,
-      updatedAt: Date.now(),
-    };
-  } else {
-    store.pools[poolIndex] = {
-      ...store.pools[poolIndex],
-      items: [...store.pools[poolIndex].items, ...items],
-      updatedAt: Date.now(),
-    };
+    await supabase.from('pool_items').delete().eq('pool_id', poolId);
   }
-  saveStore(store);
+  if (items.length > 0) {
+    const { error } = await supabase
+      .from('pool_items')
+      .insert(items.map(item => ({
+        pool_id: poolId,
+        text: item.text,
+        tags: item.tags?.map(normalizeText).filter(Boolean) ?? null,
+        note: item.note ? normalizeText(item.note) : null,
+      })));
+    if (error) throw error;
+  }
 };
 
 const parseTagsCsv = (raw: string): string[] =>

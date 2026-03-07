@@ -212,6 +212,8 @@ type PoolHubPageProps = {
   onRequestLogin?: () => void;
   userName?: string | null;
   userId?: string | null;
+  isPro?: boolean;
+  manualUrl?: string;
 };
 
 export function PoolHubPage({
@@ -220,7 +222,10 @@ export function PoolHubPage({
   onRequestLogin,
   userName,
   userId,
+  isPro = false,
+  manualUrl,
 }: PoolHubPageProps) {
+  const canInteract = isLoggedIn && isPro;
   const [hubMode, setHubMode] = useState<HubMode>('pools');
   const [entries, setEntries] = useState<PoolHubEntry[]>(() => listHubEntries());
   const [workingSetEntries, setWorkingSetEntries] = useState<WorkingSetHubEntry[]>(() => listWorkingSetHubEntries());
@@ -246,14 +251,10 @@ export function PoolHubPage({
   const [adminJson, setAdminJson] = useState('');
   const [adminMessage, setAdminMessage] = useState<string | null>(null);
   const [adminError, setAdminError] = useState<string | null>(null);
-  const [userPools, setUserPools] = useState(() => listPools());
-  const [userWorkingSets, setUserWorkingSets] = useState(() => listWorkingSets());
-  const [selectedUserPoolId, setSelectedUserPoolId] = useState<string>(
-    () => listPools()[0]?.id ?? ''
-  );
-  const [selectedUserWorkingSetId, setSelectedUserWorkingSetId] = useState<string>(
-    () => listWorkingSets()[0]?.id ?? ''
-  );
+  const [userPools, setUserPools] = useState<Pool[]>([]);
+  const [userWorkingSets, setUserWorkingSets] = useState<WorkingSet[]>([]);
+  const [selectedUserPoolId, setSelectedUserPoolId] = useState<string>('');
+  const [selectedUserWorkingSetId, setSelectedUserWorkingSetId] = useState<string>('');
   const [userRating, setUserRatingState] = useState<number | null>(null);
   const [workingSetUserRating, setWorkingSetUserRatingState] = useState<number | null>(null);
   const [comments, setComments] = useState(() =>
@@ -272,13 +273,35 @@ export function PoolHubPage({
   const [reportReason, setReportReason] = useState('');
   const [authNotice, setAuthNotice] = useState<string | null>(null);
 
+  const refreshUserPools = async () => {
+    try {
+      const pools = await listPools();
+      setUserPools(pools);
+      setSelectedUserPoolId(pools[0]?.id ?? '');
+    } catch {
+      setUserPools([]);
+      setSelectedUserPoolId('');
+    }
+  };
+
+  const refreshUserWorkingSets = async () => {
+    try {
+      const sets = await listWorkingSets();
+      setUserWorkingSets(sets);
+      setSelectedUserWorkingSetId(sets[0]?.id ?? '');
+    } catch {
+      setUserWorkingSets([]);
+      setSelectedUserWorkingSetId('');
+    }
+  };
+
   useEffect(() => {
     if (hubMode === 'working-sets') {
       setSelectedWorkingSetId(workingSetEntries[0]?.id ?? '');
-      setUserWorkingSets(listWorkingSets());
+      refreshUserWorkingSets();
     } else {
       setSelectedId(entries[0]?.id ?? '');
-      setUserPools(listPools());
+      refreshUserPools();
     }
     setShowAllItems(false);
     setAddMessage(null);
@@ -409,32 +432,41 @@ export function PoolHubPage({
     setCommentBody('');
   }, [selectedEntry?.id, userId, entries, workingSetEntries, hubMode]);
 
-  const handleAddToActive = () => {
+  const handleAddToActive = async () => {
     if (!isLoggedIn) {
       setAuthNotice(hubMode === 'working-sets' ? 'Log in to add Working Sets.' : 'Log in to add pools to User Pools.');
       onRequestLogin?.();
+      return;
+    }
+    if (!isPro) {
+      setAuthNotice('Upgrade to Pro to add Hub content.');
       return;
     }
     if (!selectedEntry) return;
     if (hubMode === 'working-sets') {
       const confirmed = window.confirm('Add this Working Set to your Working Sets? Existing sets with the same name will merge.');
       if (!confirmed) return;
-      const imported = importWorkingSetPayload({ version: 2, workingSet: selectedEntry.payload as WorkingSet }, 'merge');
+      const imported = await importWorkingSetPayload({ version: 2, workingSet: selectedEntry.payload as WorkingSet }, 'merge');
       setActiveWorkingSetId(imported.id);
       setAddMessage('Added to Working Sets (merged).');
-      setUserWorkingSets(listWorkingSets());
+      refreshUserWorkingSets();
       return;
     }
     const confirmed = window.confirm('Add this pool to User Pools? Existing pools with the same name will merge.');
     if (!confirmed) return;
-    importPoolPayload({ version: 1, pool: selectedEntry.payload as Pool }, 'merge');
+    await importPoolPayload({ version: 1, pool: selectedEntry.payload as Pool }, 'merge');
     setAddMessage('Added to User Pools (merged).');
+    refreshUserPools();
   };
 
   const handleRate = (rating: number) => {
     if (!isLoggedIn) {
       setAuthNotice(hubMode === 'working-sets' ? 'Log in to rate Working Sets.' : 'Log in to rate pools.');
       onRequestLogin?.();
+      return;
+    }
+    if (!isPro) {
+      setAuthNotice('Upgrade to Pro to rate Hub content.');
       return;
     }
     if (!selectedEntry) return;
@@ -454,6 +486,10 @@ export function PoolHubPage({
     if (!isLoggedIn) {
       setAuthNotice('Log in to comment.');
       onRequestLogin?.();
+      return;
+    }
+    if (!isPro) {
+      setAuthNotice('Upgrade to Pro to comment.');
       return;
     }
     if (!selectedEntry) return;
@@ -715,7 +751,7 @@ export function PoolHubPage({
     reader.readAsText(file);
   };
 
-  const handleImportFromUserPools = () => {
+  const handleImportFromUserPools = async () => {
     setUploadError(null);
     if (hubMode === 'working-sets') {
       if (!selectedUserWorkingSetId) {
@@ -723,7 +759,7 @@ export function PoolHubPage({
         return;
       }
       try {
-        const payload = exportWorkingSetPayload(selectedUserWorkingSetId);
+        const payload = await exportWorkingSetPayload(selectedUserWorkingSetId);
         const setName = payload.workingSet.name;
         setWorkingSetUploadState(prev => ({
           ...prev,
@@ -742,7 +778,7 @@ export function PoolHubPage({
       return;
     }
     try {
-      const payload = exportPoolPayload(selectedUserPoolId);
+      const payload = await exportPoolPayload(selectedUserPoolId);
       const poolName = payload.pool.name;
       setUploadState(prev => ({
         ...prev,
@@ -773,6 +809,16 @@ export function PoolHubPage({
           <h2>Pool Hub</h2>
           <p>Discover, download, and activate pools and working sets from the community.</p>
         </div>
+        {manualUrl && (
+          <a
+            className="pool-hub-manual-link"
+            href={`${manualUrl}#pool-hub`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Community manual
+          </a>
+        )}
         <div className="pool-hub-header-actions">
           <div className="pool-hub-mode-toggle">
             <button
@@ -793,6 +839,13 @@ export function PoolHubPage({
           {isLoggedIn && userName && (
             <div className="pool-hub-user-badge">Logged in as {userName}</div>
           )}
+          {!isLoggedIn && (
+            <div className="pool-hub-user-badge">Browse mode (log in to participate)</div>
+          )}
+          <div className="pool-hub-user-badge pool-hub-preview-badge">Preview (local only)</div>
+          {isLoggedIn && !isPro && (
+            <div className="pool-hub-user-badge">Upgrade to Pro to upload, rate, or comment</div>
+          )}
           <button
             type="button"
             className="pool-hub-primary"
@@ -800,6 +853,10 @@ export function PoolHubPage({
               if (!isLoggedIn) {
                 setAuthNotice(hubMode === 'working-sets' ? 'Log in to upload Working Sets.' : 'Log in to upload pools.');
                 onRequestLogin?.();
+                return;
+              }
+              if (!isPro) {
+                setAuthNotice('Upgrade to Pro to upload Hub content.');
                 return;
               }
               setUploadError(null);
@@ -812,7 +869,7 @@ export function PoolHubPage({
                 setIsUploadOpen(true);
               }
             }}
-            disabled={!isLoggedIn}
+            disabled={!canInteract}
           >
             {hubMode === 'working-sets' ? 'Upload Working Set' : 'Upload Pool'}
           </button>
@@ -957,7 +1014,8 @@ export function PoolHubPage({
                     type="button"
                     className="pool-hub-primary"
                     onClick={handleAddToActive}
-                    disabled={!isLoggedIn}
+                    disabled={!canInteract}
+                    title={canInteract ? 'Add to your library' : 'Upgrade to Pro to add'}
                   >
                     Add to Active
                   </button>
@@ -1047,7 +1105,7 @@ export function PoolHubPage({
                           : ''
                       }`}
                       onClick={() => handleRate(star)}
-                      disabled={!isLoggedIn}
+                      disabled={!canInteract}
                     >
                       ★
                     </button>
@@ -1067,28 +1125,28 @@ export function PoolHubPage({
                     placeholder="Your name (optional)"
                     value={commentAuthor}
                     onChange={event => setCommentAuthor(event.target.value)}
-                    disabled={!isLoggedIn}
+                    disabled={!canInteract}
                   />
                   <textarea
                     rows={3}
                     placeholder="Write a comment"
                     value={commentBody}
                     onChange={event => setCommentBody(event.target.value)}
-                    disabled={!isLoggedIn}
+                    disabled={!canInteract}
                   />
                   {commentError && <div className="pool-hub-error">{commentError}</div>}
                   <div className="pool-hub-comments-actions">
                     <button type="button" className="pool-hub-secondary" onClick={() => {
                       setCommentBody('');
                       setCommentError(null);
-                    }} disabled={!isLoggedIn}>
+                    }} disabled={!canInteract}>
                       Clear
                     </button>
                     <button
                       type="button"
                       className="pool-hub-primary"
                       onClick={handleAddComment}
-                      disabled={!isLoggedIn}
+                      disabled={!canInteract}
                     >
                       Post Comment
                     </button>
@@ -1096,6 +1154,11 @@ export function PoolHubPage({
                   {!isLoggedIn && (
                     <div className="pool-hub-auth-hint">
                       Log in to post comments and ratings.
+                    </div>
+                  )}
+                  {isLoggedIn && !isPro && (
+                    <div className="pool-hub-auth-hint">
+                      Upgrade to Pro to post comments and ratings.
                     </div>
                   )}
                 </div>

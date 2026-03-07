@@ -5,8 +5,8 @@ import './AuthModal.css';
 type AuthModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: (email: string, password: string) => boolean;
-  onRegister: (name: string, email: string, password: string) => boolean;
+  onLogin: (email: string, password: string) => Promise<boolean>;
+  onRegister: (name: string, email: string, password: string) => Promise<boolean>;
   error?: string | null;
 };
 
@@ -29,10 +29,10 @@ export function AuthModal({ isOpen, onClose, onLogin, onRegister, error }: AuthM
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const ok = mode === 'login'
-      ? onLogin(email, password)
-      : onRegister(name, email, password);
+      ? await onLogin(email, password)
+      : await onRegister(name, email, password);
     if (ok) {
       resetForm();
     }

@@ -195,8 +195,7 @@ export function CategorySidebar({
           </svg>
         </div>
         <div className="logo-text">
-          <span className="logo-text-main">SD Prompt</span>
-          <span className="logo-text-sub">Builder</span>
+          <span className="logo-text-main">MORPBASE</span>
         </div>
       </div>
       <div className="category-sidebar-content">
