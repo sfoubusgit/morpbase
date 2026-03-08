@@ -142,7 +142,7 @@ export function App() {
   });
   const isDevMode = devModeOverride ?? envDevMode;
   const [isPro] = useState<boolean>(isDevMode);
-  const manualUrl = `${import.meta.env.BASE_URL}manual.md`;
+  const manualUrl = `${import.meta.env.BASE_URL}manual.html`;
   const manualLink = (anchor: string) => `${manualUrl}#${anchor}`;
   const feedbackSchema = `Feedback Schema (v1)
 
