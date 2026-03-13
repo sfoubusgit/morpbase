@@ -12,9 +12,13 @@ import './WorkingSetsPage.css';
 
 type WorkingSetsPageProps = {
   workingSets: WorkingSet[];
+  baseSetTemplate: WorkingSet;
   activeWorkingSetId: string | null;
   categoryOrder: string[];
-  onCreateWorkingSet: (name: string) => Promise<WorkingSet | null>;
+  onCreateWorkingSet: (
+    name: string,
+    payload?: Partial<Omit<WorkingSet, 'id' | 'name' | 'createdAt' | 'updatedAt'>>
+  ) => Promise<WorkingSet | null>;
   onRenameWorkingSet: (id: string, name: string) => Promise<void>;
   onDeleteWorkingSet: (id: string) => Promise<void>;
   onSetActiveWorkingSet: (id: string | null) => void;
@@ -36,6 +40,7 @@ const formatCategoryLabel = (categoryId: string) =>
 
 export function WorkingSetsPage({
   workingSets,
+  baseSetTemplate,
   activeWorkingSetId,
   categoryOrder,
   onCreateWorkingSet,
@@ -53,11 +58,11 @@ export function WorkingSetsPage({
 }: WorkingSetsPageProps) {
   const [pools, setPools] = useState<Pool[]>([]);
   const [poolsLoading, setPoolsLoading] = useState(false);
-  const [selectedSetId, setSelectedSetId] = useState<string | null>(workingSets[0]?.id ?? null);
+  const [selectedSetId, setSelectedSetId] = useState<string | null>(baseSetTemplate.id);
   const [newSetName, setNewSetName] = useState('');
   const [renameValue, setRenameValue] = useState('');
   const [poolId, setPoolId] = useState<string | null>(null);
-  const [categoryId, setCategoryId] = useState<string>(categoryOrder[0] ?? 'subject');
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [itemFilter, setItemFilter] = useState('');
   const [pageMessage, setPageMessage] = useState<string | null>(null);
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
@@ -85,9 +90,10 @@ export function WorkingSetsPage({
         : null;
 
   useEffect(() => {
+    if (selectedSetId === baseSetTemplate.id) return;
     if (selectedSetId && workingSets.some(set => set.id === selectedSetId)) return;
-    setSelectedSetId(workingSets[0]?.id ?? null);
-  }, [selectedSetId, workingSets]);
+    setSelectedSetId(baseSetTemplate.id);
+  }, [selectedSetId, workingSets, baseSetTemplate.id]);
 
   useEffect(() => {
     let isActive = true;
@@ -116,18 +122,31 @@ export function WorkingSetsPage({
   }, [authUser?.id]);
 
   useEffect(() => {
-    const target = workingSets.find(set => set.id === selectedSetId);
+    const target = selectedSetId === baseSetTemplate.id
+      ? baseSetTemplate
+      : workingSets.find(set => set.id === selectedSetId) ?? null;
     setRenameValue(target?.name ?? '');
-  }, [selectedSetId, workingSets]);
+  }, [selectedSetId, workingSets, baseSetTemplate]);
+
+  useEffect(() => {
+    setEditingCategoryId(null);
+    setItemFilter('');
+  }, [selectedSetId]);
 
   useEffect(() => {
     if (poolId && pools.some(pool => pool.id === poolId)) return;
     setPoolId(pools[0]?.id ?? null);
   }, [poolId, pools]);
 
-  const selectedSet = workingSets.find(set => set.id === selectedSetId) ?? null;
+  const availableSets = useMemo(() => [baseSetTemplate, ...workingSets], [baseSetTemplate, workingSets]);
+  const selectedSet = availableSets.find(set => set.id === selectedSetId) ?? null;
   const selectedPool = pools.find(pool => pool.id === poolId) ?? null;
-  const isActiveSet = selectedSet?.id === activeWorkingSetId;
+  const isBaseSetTemplate = selectedSet?.id === baseSetTemplate.id;
+  const isActiveSet = isBaseSetTemplate ? activeWorkingSetId === null : selectedSet?.id === activeWorkingSetId;
+  const selectedSetItemCount = selectedSet
+    ? Object.values(selectedSet.categoryBuckets).reduce((sum, items) => sum + items.length, 0)
+    : 0;
+  const editingCategoryLabel = editingCategoryId ? formatCategoryLabel(editingCategoryId) : '';
 
   const filteredItems = useMemo(() => {
     if (!selectedPool) return [];
@@ -151,6 +170,41 @@ export function WorkingSetsPage({
       setSelectedSetId(created.id);
       setNewSetName('');
       setPageMessage(`Created "${created.name}".`);
+    }
+  };
+
+  const handleDuplicateBaseSet = async () => {
+    const defaultName = `Base Set Copy ${workingSets.length + 1}`;
+    const name = window.prompt('Name your editable copy of Base Set.', defaultName)?.trim();
+    if (!name) {
+      return;
+    }
+
+    const created = await onCreateWorkingSet(name, {
+      categoryBuckets: baseSetTemplate.categoryBuckets,
+    });
+    if (created) {
+      setSelectedSetId(created.id);
+      setPageMessage(`Created editable copy "${created.name}" from Base Set.`);
+    }
+  };
+
+  const handleDuplicateSet = async () => {
+    if (!selectedSet || isBaseSetTemplate) return;
+
+    const defaultName = `${selectedSet.name} Copy`;
+    const name = window.prompt('Name your duplicated Working Set.', defaultName)?.trim();
+    if (!name) {
+      return;
+    }
+
+    const created = await onCreateWorkingSet(name, {
+      categoryBuckets: selectedSet.categoryBuckets,
+    });
+
+    if (created) {
+      setSelectedSetId(created.id);
+      setPageMessage(`Created duplicate "${created.name}".`);
     }
   };
 
@@ -270,12 +324,12 @@ export function WorkingSetsPage({
       setPageMessage('Upgrade to Pro to add items.');
       return;
     }
-    if (!selectedSet || !selectedPool) {
-      setPageMessage('Select a working set and pool first.');
+    if (!selectedSet || !selectedPool || !editingCategoryId) {
+      setPageMessage('Open a category editor and select a pool first.');
       return;
     }
-    await onAddWorkingSetItem(selectedSet.id, categoryId, selectedPool.id, item);
-    setPageMessage(`Added to ${formatCategoryLabel(categoryId)}.`);
+    await onAddWorkingSetItem(selectedSet.id, editingCategoryId, selectedPool.id, item);
+    setPageMessage(`Added to ${formatCategoryLabel(editingCategoryId)}.`);
   };
 
   const handleActivate = () => {
@@ -371,10 +425,8 @@ export function WorkingSetsPage({
           <div className="working-sets-list">
             {workingSetsLoading ? (
               <div className="working-sets-empty">Loading working sets...</div>
-            ) : workingSets.length === 0 ? (
-              <div className="working-sets-empty">No working sets yet.</div>
             ) : (
-              workingSets.map(set => (
+              availableSets.map(set => (
                 <button
                   key={set.id}
                   type="button"
@@ -385,7 +437,10 @@ export function WorkingSetsPage({
                   <div className="working-sets-list-meta">
                     {Object.values(set.categoryBuckets).reduce((sum, items) => sum + items.length, 0)} items
                   </div>
-                  {set.id === activeWorkingSetId && <span className="working-sets-active-pill">Active</span>}
+                  {set.id === baseSetTemplate.id && <span className="working-sets-template-pill">Template</span>}
+                  {((set.id === activeWorkingSetId) || (set.id === baseSetTemplate.id && activeWorkingSetId === null)) && (
+                    <span className="working-sets-active-pill">Active</span>
+                  )}
                 </button>
               ))
             )}
@@ -397,158 +452,234 @@ export function WorkingSetsPage({
             <>
               <div className="working-sets-detail-header">
                 <div className="working-sets-detail-title">
-                  <input
-                    type="text"
-                    value={renameValue}
-                    onChange={event => setRenameValue(event.target.value)}
-                  />
-                  <button type="button" onClick={handleRename}>
-                    Rename
-                  </button>
+                  {isBaseSetTemplate ? (
+                    <div className="working-sets-readonly-title">
+                      <strong>{selectedSet.name}</strong>
+                      <span>Read-only template available for everyone. Duplicate it to make an editable Working Set.</span>
+                    </div>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        value={renameValue}
+                        onChange={event => setRenameValue(event.target.value)}
+                      />
+                      <button type="button" onClick={handleRename}>
+                        Rename
+                      </button>
+                    </>
+                  )}
                 </div>
                 <div className="working-sets-detail-actions">
-                  <button type="button" onClick={handleActivate} disabled={isActiveSet}>
-                    {isActiveSet ? 'Active' : 'Activate'}
-                  </button>
-                  {isActiveSet && (
-                    <button type="button" onClick={() => onSetActiveWorkingSet(null)}>
-                      Deactivate (Base Set)
-                    </button>
+                  {isBaseSetTemplate ? (
+                    <>
+                      <button type="button" onClick={() => onSetActiveWorkingSet(null)} disabled={isActiveSet}>
+                        {isActiveSet ? 'Using Base Set' : 'Use Base Set'}
+                      </button>
+                      <button type="button" onClick={handleDuplicateBaseSet}>
+                        Duplicate to Edit
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button type="button" onClick={handleActivate} disabled={isActiveSet}>
+                        {isActiveSet ? 'Active' : 'Activate'}
+                      </button>
+                      <button type="button" onClick={handleDuplicateSet}>
+                        Duplicate
+                      </button>
+                      <button type="button" onClick={handlePublish}>
+                        Publish
+                      </button>
+                      {isActiveSet && (
+                        <button type="button" onClick={() => onSetActiveWorkingSet(null)}>
+                          Deactivate (Base Set)
+                        </button>
+                      )}
+                      <button type="button" className="working-sets-danger" onClick={handleDelete}>
+                        Delete
+                      </button>
+                    </>
                   )}
-                  <button type="button" className="working-sets-danger" onClick={handleDelete}>
-                    Delete
-                  </button>
                 </div>
               </div>
-              <div className="working-sets-publish-row">
-                <div className="working-sets-publish-info">
-                  Share this focused prompt kit with the community library.
+              {isBaseSetTemplate ? (
+                <div className="working-sets-base-template">
+                  <div className="working-sets-base-template-summary">
+                    Base Set mirrors the full Builder catalog. You cannot edit it directly, but you can duplicate it into a personal Working Set and then rename, trim, and reorganize that copy.
+                  </div>
+                  <div className="working-sets-base-template-grid">
+                    {categoryOrder.map(cat => {
+                      const bucket = selectedSet.categoryBuckets[cat] ?? [];
+                      return (
+                        <div key={cat} className="working-sets-base-template-card">
+                          <span>{formatCategoryLabel(cat)}</span>
+                          <strong>{bucket.length}</strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="working-sets-base-template-total">
+                    Total prompt elements in Base Set: {selectedSetItemCount}
+                  </div>
                 </div>
-                <button type="button" className="working-sets-publish" onClick={handlePublish}>
-                  Publish to Hub
-                </button>
-              </div>
-              {publishMessage && <div className="working-sets-message">{publishMessage}</div>}
-              {publishError && <div className="working-sets-error">{publishError}</div>}
+              ) : (
+                <>
+                  {publishMessage && <div className="working-sets-message">{publishMessage}</div>}
+                  {publishError && <div className="working-sets-error">{publishError}</div>}
 
-              <div className="working-sets-add">
-                {poolsLoading ? (
-                  <div className="working-sets-empty">Loading pools...</div>
-                ) : pools.length === 0 ? (
-                  <div className="working-sets-empty">No pools available. Create a pool in User Pools first.</div>
-                ) : (
-                  <>
-                    <div className="working-sets-add-row">
-                      <label>
-                        Pool
-                        <select
-                          value={poolId ?? ''}
-                          onChange={event => setPoolId(event.target.value || null)}
-                        >
-                          {pools.map(pool => (
-                            <option key={pool.id} value={pool.id}>
-                              {pool.name} ({pool.items.length})
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        Category
-                        <select
-                          value={categoryId}
-                          onChange={event => setCategoryId(event.target.value)}
-                        >
-                          {categoryOrder.map(cat => (
-                            <option key={cat} value={cat}>
-                              {formatCategoryLabel(cat)}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        Search items
-                        <input
-                          type="text"
-                          value={itemFilter}
-                          onChange={event => setItemFilter(event.target.value)}
-                          placeholder="Filter pool items"
-                        />
-                      </label>
-                    </div>
-                    <div className="working-sets-item-grid">
-                      {filteredItems.length === 0 ? (
-                        <div className="working-sets-empty">No items found.</div>
-                      ) : (
-                        filteredItems.map(item => (
-                          <div key={item.id} className="working-sets-item-row">
-                            <div>
-                              <div className="working-sets-item-text">{item.text}</div>
-                              {item.tags && item.tags.length > 0 && (
-                                <div className="working-sets-item-tags">{item.tags.join(', ')}</div>
+                  <div className="working-sets-overview-grid">
+                    {categoryOrder.map(cat => {
+                      const bucket = selectedSet.categoryBuckets[cat] ?? [];
+                      const previewItems = bucket.slice(0, 3);
+                      const remainingCount = Math.max(0, bucket.length - previewItems.length);
+                      return (
+                        <div key={cat} className="working-sets-overview-card">
+                          <div className="working-sets-category-header">
+                            <h3>{formatCategoryLabel(cat)}</h3>
+                            <div className="working-sets-category-actions">
+                              <span>{bucket.length} items</span>
+                              <button type="button" onClick={() => setEditingCategoryId(cat)}>
+                                Edit
+                              </button>
+                            </div>
+                          </div>
+                          {bucket.length === 0 ? (
+                            <div className="working-sets-overview-empty">
+                              <span>No elements yet</span>
+                              <span>Edit to add elements</span>
+                            </div>
+                          ) : (
+                            <div className="working-sets-overview-preview">
+                              {previewItems.map(item => (
+                                <span key={item.id} className="working-sets-overview-chip">
+                                  {item.text}
+                                </span>
+                              ))}
+                              {remainingCount > 0 && (
+                                <span className="working-sets-overview-more">+{remainingCount} more</span>
                               )}
                             </div>
-                            <button type="button" onClick={() => handleAddItem(item)}>
-                              Add
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
 
-              <div className="working-sets-categories">
-                {categoryOrder.map(cat => {
-                  const bucket = selectedSet.categoryBuckets[cat] ?? [];
-                  return (
-                    <div key={cat} className="working-sets-category">
-                      <div className="working-sets-category-header">
-                        <h3>{formatCategoryLabel(cat)}</h3>
-                        <div className="working-sets-category-actions">
-                          <span>{bucket.length} items</span>
-                          <button
-                            type="button"
-                            className="working-sets-clear"
+                  {editingCategoryId && (
+                    <div className="working-sets-category-editor">
+                      <div className="working-sets-category-editor-header">
+                        <div>
+                          <h3>Edit {editingCategoryLabel}</h3>
+                          <p>Manage prompt elements in this category only.</p>
+                        </div>
+                        <button type="button" className="working-sets-secondary" onClick={() => setEditingCategoryId(null)}>
+                          Close
+                        </button>
+                      </div>
+
+                      <div className="working-sets-add">
+                        {poolsLoading ? (
+                          <div className="working-sets-empty">Loading pools...</div>
+                        ) : pools.length === 0 ? (
+                          <div className="working-sets-empty">No pools available. Create a pool in User Pools first.</div>
+                        ) : (
+                          <>
+                            <div className="working-sets-add-row">
+                              <label>
+                                Pool
+                                <select
+                                  value={poolId ?? ''}
+                                  onChange={event => setPoolId(event.target.value || null)}
+                                >
+                                  {pools.map(pool => (
+                                    <option key={pool.id} value={pool.id}>
+                                      {pool.name} ({pool.items.length})
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label>
+                                Search items
+                                <input
+                                  type="text"
+                                  value={itemFilter}
+                                  onChange={event => setItemFilter(event.target.value)}
+                                  placeholder={`Filter ${editingCategoryLabel} items`}
+                                />
+                              </label>
+                            </div>
+                            <div className="working-sets-item-grid">
+                              {filteredItems.length === 0 ? (
+                                <div className="working-sets-empty">No items found.</div>
+                              ) : (
+                                filteredItems.map(item => (
+                                  <div key={item.id} className="working-sets-item-row">
+                                    <div>
+                                      <div className="working-sets-item-text">{item.text}</div>
+                                      {item.tags && item.tags.length > 0 && (
+                                        <div className="working-sets-item-tags">{item.tags.join(', ')}</div>
+                                      )}
+                                    </div>
+                                    <button type="button" onClick={() => handleAddItem(item)}>
+                                      Add
+                                    </button>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="working-sets-category-editor-list">
+                        <div className="working-sets-category-header">
+                          <h3>{editingCategoryLabel}</h3>
+                          <div className="working-sets-category-actions">
+                            <span>{selectedSet.categoryBuckets[editingCategoryId]?.length ?? 0} items</span>
+                            <button
+                              type="button"
+                              className="working-sets-clear"
                               onClick={async () => {
                                 if (!authUser || !isPro) {
                                   setPageMessage('Upgrade to Pro to manage Working Sets.');
                                   return;
                                 }
-                                await onClearWorkingSetCategory(selectedSet.id, cat);
+                                await onClearWorkingSetCategory(selectedSet.id, editingCategoryId);
                               }}
-                          >
-                            Clear
-                          </button>
+                            >
+                              Clear
+                            </button>
+                          </div>
                         </div>
+                        {(selectedSet.categoryBuckets[editingCategoryId] ?? []).length === 0 ? (
+                          <div className="working-sets-empty">No elements yet.</div>
+                        ) : (
+                          <div className="working-sets-category-list">
+                            {(selectedSet.categoryBuckets[editingCategoryId] ?? []).map(item => (
+                              <div key={item.id} className="working-sets-category-item">
+                                <span>{item.text}</span>
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    if (!authUser || !isPro) {
+                                      setPageMessage('Upgrade to Pro to manage Working Sets.');
+                                      return;
+                                    }
+                                    await onRemoveWorkingSetItem(selectedSet.id, editingCategoryId, item.id);
+                                  }}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {bucket.length === 0 ? (
-                        <div className="working-sets-empty">No elements yet.</div>
-                      ) : (
-                        <div className="working-sets-category-list">
-                          {bucket.map(item => (
-                            <div key={item.id} className="working-sets-category-item">
-                              <span>{item.text}</span>
-                              <button
-                                type="button"
-                                onClick={async () => {
-                                  if (!authUser || !isPro) {
-                                    setPageMessage('Upgrade to Pro to manage Working Sets.');
-                                    return;
-                                  }
-                                  await onRemoveWorkingSetItem(selectedSet.id, cat, item.id);
-                                }}
-                              >
-                                Remove
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </>
+              )}
             </>
           ) : (
             <div className="working-sets-empty">Select a working set to edit it.</div>

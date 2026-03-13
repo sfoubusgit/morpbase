@@ -7,6 +7,15 @@ const ACTIVE_KEY = 'promptgen:working_sets:active_id';
 const normalizeText = (value: string): string =>
   value.replace(/\s+/g, ' ').trim();
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const normalizeUuidRef = (value?: string | null): string | null => {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return UUID_PATTERN.test(trimmed) ? trimmed : null;
+};
+
 const requireProfileId = async (): Promise<string> => {
   const profile = await getProfile();
   if (!profile) {
@@ -128,8 +137,8 @@ export const createWorkingSet = async (
     items.forEach(item => {
       itemRows.push({
         working_set_id: data.id,
-        pool_id: item.poolId ?? null,
-        pool_item_id: item.poolItemId ?? null,
+        pool_id: normalizeUuidRef(item.poolId),
+        pool_item_id: normalizeUuidRef(item.poolItemId),
         category_id: categoryId,
         text: normalizeText(item.text),
       });
@@ -252,8 +261,8 @@ export const importWorkingSetPayload = async (
     items.forEach(item => {
       itemRows.push({
         working_set_id: target.id,
-        pool_id: item.poolId ?? null,
-        pool_item_id: item.poolItemId ?? null,
+        pool_id: normalizeUuidRef(item.poolId),
+        pool_item_id: normalizeUuidRef(item.poolItemId),
         category_id: categoryId,
         text: normalizeText(item.text),
       });

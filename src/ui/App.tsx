@@ -302,6 +302,30 @@ export function App() {
     return defs;
   }, [activeWorkingSet]);
 
+  const baseSetTemplate = useMemo<WorkingSet>(() => {
+    const categoryBuckets: WorkingSet['categoryBuckets'] = {};
+
+    attributeDefinitions.forEach(definition => {
+      const bucket = categoryBuckets[definition.category] ?? [];
+      bucket.push({
+        id: definition.id,
+        poolId: 'base-set',
+        poolItemId: definition.id,
+        text: definition.baseText,
+        addedAt: 0,
+      });
+      categoryBuckets[definition.category] = bucket;
+    });
+
+    return {
+      id: '__base_set_template__',
+      name: 'Base Set',
+      categoryBuckets,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+  }, [attributeDefinitions]);
+
   
   // Helper: Get first subcategory node ID for a category, or the category root if no subcategories
   const getFirstSubcategoryNodeId = (categoryId: string, nodes: QuestionNode[]): string | null => {
@@ -1065,9 +1089,12 @@ export function App() {
     persistActiveWorkingSetId(id);
   };
 
-  const handleCreateWorkingSet = async (name: string) => {
+  const handleCreateWorkingSet = async (
+    name: string,
+    payload?: Partial<Omit<WorkingSet, 'id' | 'name' | 'createdAt' | 'updatedAt'>>
+  ) => {
     try {
-      const created = await createWorkingSet(name);
+      const created = await createWorkingSet(name, payload);
       await refreshWorkingSets();
       setActiveWorkingSet(created.id);
       return created;
@@ -1664,6 +1691,7 @@ export function App() {
         <WorkingSetsPage
           manualUrl={manualUrl}
           workingSets={workingSets}
+          baseSetTemplate={baseSetTemplate}
           workingSetsLoading={workingSetsLoading}
           activeWorkingSetId={activeWorkingSetId}
           categoryOrder={CATEGORY_ORDER}

@@ -161,6 +161,17 @@
   font-size: 11px;
 }
 
+.working-sets-template-pill {
+  position: absolute;
+  top: 10px;
+  right: 72px;
+  background: rgba(59, 130, 246, 0.18);
+  color: #bfdbfe;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
 .working-sets-detail-header {
   display: flex;
   justify-content: space-between;
@@ -176,6 +187,22 @@
   flex: 1;
 }
 
+.working-sets-readonly-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.working-sets-readonly-title strong {
+  font-size: 18px;
+}
+
+.working-sets-readonly-title span {
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .working-sets-detail-title input {
   flex: 1;
   background: rgba(20, 20, 26, 0.95);
@@ -188,13 +215,25 @@
 .working-sets-detail-title button,
 .working-sets-detail-actions button,
 .working-sets-item-row button,
-.working-sets-category-item button {
+.working-sets-category-item button,
+.working-sets-category-actions button,
+.working-sets-category-editor-header button {
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(26, 26, 34, 0.95);
   color: #e5e7eb;
   padding: 6px 12px;
   cursor: pointer;
+}
+
+.working-sets-detail-title button:hover,
+.working-sets-detail-actions button:hover,
+.working-sets-item-row button:hover,
+.working-sets-category-item button:hover,
+.working-sets-category-actions button:hover,
+.working-sets-category-editor-header button:hover {
+  background: rgba(40, 40, 52, 0.95);
+  border-color: rgba(110, 86, 249, 0.35);
 }
 
 .working-sets-detail-actions {
@@ -222,6 +261,50 @@
   cursor: pointer;
 }
 
+.working-sets-base-template {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.working-sets-base-template-summary,
+.working-sets-base-template-total {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(110, 86, 249, 0.08);
+  border: 1px solid rgba(110, 86, 249, 0.18);
+  color: #d8d2ff;
+  line-height: 1.5;
+}
+
+.working-sets-base-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.working-sets-base-template-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(20, 20, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.working-sets-base-template-card span {
+  color: #9ca3af;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.working-sets-base-template-card strong {
+  font-size: 24px;
+  color: #ffffff;
+}
+
 .working-sets-error {
   margin-top: 10px;
   padding: 10px 12px;
@@ -241,6 +324,88 @@
   border-radius: 12px;
   background: rgba(110, 86, 249, 0.08);
   border: 1px solid rgba(110, 86, 249, 0.25);
+}
+
+.working-sets-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.working-sets-overview-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(20, 20, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.working-sets-overview-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.working-sets-overview-chip,
+.working-sets-overview-more {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.working-sets-overview-chip {
+  background: rgba(110, 86, 249, 0.12);
+  color: #e1dcff;
+  border: 1px solid rgba(110, 86, 249, 0.2);
+}
+
+.working-sets-overview-more {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5f5;
+}
+
+.working-sets-overview-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.working-sets-category-editor {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(12, 13, 20, 0.92);
+  border: 1px solid rgba(110, 86, 249, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.working-sets-category-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.working-sets-category-editor-header h3 {
+  margin: 0 0 6px 0;
+}
+
+.working-sets-category-editor-header p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.working-sets-category-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .working-sets-publish-info {
