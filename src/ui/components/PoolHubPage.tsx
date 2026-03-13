@@ -360,7 +360,7 @@ export function PoolHubPage({
     return () => {
       isActive = false;
     };
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     let isActive = true;
@@ -474,6 +474,21 @@ export function PoolHubPage({
       tags: Record<string, number>;
     }>();
 
+    publicProfiles.forEach(profile => {
+      const id = `id:${profile.userId}`;
+      profiles.set(id, {
+        id,
+        name: profile.displayName,
+        userId: profile.userId,
+        profile,
+        uploads: 0,
+        totalDownloads: 0,
+        avgRating: 0,
+        entries: [] as typeof source,
+        tags: {},
+      });
+    });
+
     source.forEach(entry => {
       const profile = resolveCreatorProfile(entry);
       const name = profile?.displayName ?? entry.creator;
@@ -503,8 +518,11 @@ export function PoolHubPage({
       profiles.set(id, next);
     });
 
-    return Array.from(profiles.values()).sort((a, b) => b.uploads - a.uploads);
-  }, [entries, workingSetEntries, hubMode, publicProfileByUserId, publicProfileByName]);
+    return Array.from(profiles.values()).sort((a, b) => {
+      if (b.uploads !== a.uploads) return b.uploads - a.uploads;
+      return a.name.localeCompare(b.name);
+    });
+  }, [entries, workingSetEntries, hubMode, publicProfiles, publicProfileByUserId, publicProfileByName]);
 
   const filteredCreators = useMemo(() => {
     const term = creatorSearchTerm.trim().toLowerCase();
@@ -1107,7 +1125,7 @@ export function PoolHubPage({
       <header className="pool-hub-header">
         <div>
           <h2>Pool Hub</h2>
-          <p>Discover, download, and activate pools and working sets from the community.</p>
+          <p>Community library for browsing, importing, and sharing reusable pools and working sets.</p>
         </div>
         {manualUrl && (
           <a
@@ -1252,7 +1270,7 @@ export function PoolHubPage({
         <div className="pool-hub-profile-info">
           <div className="pool-hub-profile-title">Public creator profile</div>
           <div className="pool-hub-profile-hint">
-            Your profile name appears on Hub uploads and creator search.
+            Your public profile appears in Hub user search, even before you publish anything.
           </div>
         </div>
         <div className="pool-hub-profile-actions">
@@ -1281,10 +1299,10 @@ export function PoolHubPage({
       </div>
       <div className="pool-hub-creator-search">
         <label>
-          Search creators
+          Search users
           <input
             type="text"
-            placeholder="Creator name"
+            placeholder="User or creator name"
             value={creatorSearchTerm}
             onChange={event => setCreatorSearchTerm(event.target.value)}
           />
@@ -1292,7 +1310,7 @@ export function PoolHubPage({
         {creatorSearchTerm.trim() && (
           <div className="pool-hub-creator-results">
             {filteredCreators.length === 0 ? (
-              <div className="pool-hub-empty">No creators match that search.</div>
+              <div className="pool-hub-empty">No users match that search.</div>
             ) : (
               filteredCreators.slice(0, 8).map(profile => (
                 <button
@@ -2228,27 +2246,31 @@ export function PoolHubPage({
               ))}
             </div>
             <div className="pool-hub-creator-uploads">
-              {selectedCreatorProfile.entries.map(entry => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className="pool-hub-creator-upload"
-                  onClick={() => {
-                    if (hubMode === 'working-sets') {
-                      setSelectedWorkingSetId(entry.id);
-                    } else {
-                      setSelectedId(entry.id);
-                    }
-                    setIsCreatorProfileOpen(false);
-                  }}
-                >
-                  <div>
-                    <div className="pool-hub-creator-upload-title">{entry.title}</div>
-                    <div className="pool-hub-creator-upload-summary">{entry.summary}</div>
-                  </div>
-                  <span>{entry.ratingAvg.toFixed(1)}</span>
-                </button>
-              ))}
+              {selectedCreatorProfile.entries.length === 0 ? (
+                <div className="pool-hub-empty">No Hub uploads yet.</div>
+              ) : (
+                selectedCreatorProfile.entries.map(entry => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="pool-hub-creator-upload"
+                    onClick={() => {
+                      if (hubMode === 'working-sets') {
+                        setSelectedWorkingSetId(entry.id);
+                      } else {
+                        setSelectedId(entry.id);
+                      }
+                      setIsCreatorProfileOpen(false);
+                    }}
+                  >
+                    <div>
+                      <div className="pool-hub-creator-upload-title">{entry.title}</div>
+                      <div className="pool-hub-creator-upload-summary">{entry.summary}</div>
+                    </div>
+                    <span>{entry.ratingAvg.toFixed(1)}</span>
+                  </button>
+                ))
+              )}
             </div>
             <div className="pool-hub-creator-prompts">
               <div className="pool-hub-section-title">Public prompts</div>

@@ -58,6 +58,8 @@ export function ErrorDisplay({
     return null;
   }
 
+  const showTechnicalDetails = error.type !== 'INVALID_ATTRIBUTE';
+
   return (
     <div className="error-display">
       {error.type && (
@@ -68,7 +70,7 @@ export function ErrorDisplay({
       <div className="error-message">
         {error.message || 'An error occurred'}
       </div>
-      {error.details && Object.keys(error.details).length > 0 && (
+      {showTechnicalDetails && error.details && Object.keys(error.details).length > 0 && (
         <div className="error-details">
           {error.details.conflictingAttributeIds && (
             <div>

@@ -55,6 +55,25 @@
   cursor: pointer;
 }
 
+.working-sets-guidance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(110, 86, 249, 0.08);
+  border: 1px solid rgba(110, 86, 249, 0.18);
+  color: #d8d2ff;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.working-sets-guidance-label {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .working-sets-message {
   margin-bottom: 16px;
   padding: 10px 12px;

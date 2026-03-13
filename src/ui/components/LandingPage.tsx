@@ -10,11 +10,11 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
     <div className="landing-page">
       <header className="landing-hero">
         <span className="landing-eyebrow">MorpBase</span>
-        <h1>Prompts are built, not typed.</h1>
+        <h1>Build prompts from reusable pieces.</h1>
         <p>
-          MorpBase is a pro prompt workspace for IMG/VIDEO creators who iterate fast. Structure
-          your elements, assemble repeatable prompts, and maintain a permanent cloud library that
-          scales with you.
+          MorpBase helps you build prompts from reusable pieces instead of rewriting them from
+          scratch. Choose prompt elements by category, see the final prompt update as you go, and
+          copy it into your workflow.
         </p>
         <div className="landing-cta">
           <button type="button" className="landing-primary" onClick={onEnter}>
@@ -32,7 +32,7 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
           )}
         </div>
         <div className="landing-subtext">
-          Built for heavy prompt workflows, teams, and creators who treat prompts as assets.
+          Built for creators who want faster prompt building, cleaner reuse, and less repetition.
         </div>
       </header>
 
@@ -41,19 +41,19 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
         <div className="landing-pipeline-track">
           <div className="landing-node">
             <div className="landing-node-label">User Pools</div>
-            <p>Collect raw prompt elements and reuse them across projects.</p>
+            <p>Save reusable prompt fragments you want to keep around.</p>
           </div>
           <div className="landing-node">
             <div className="landing-node-label">Working Sets</div>
-            <p>Curate focused sets for specific styles, clients, or models.</p>
+            <p>Curate focused prompt kits for a specific style or project.</p>
           </div>
           <div className="landing-node">
             <div className="landing-node-label">Builder</div>
-            <p>Assemble structured prompts with precision and consistency.</p>
+            <p>Choose prompt elements by category and build the final prompt step by step.</p>
           </div>
           <div className="landing-node">
             <div className="landing-node-label">Prompt Library</div>
-            <p>Archive every prompt with model, purpose, and usage metadata.</p>
+            <p>Save finished prompts and return to them later.</p>
           </div>
         </div>
       </section>
@@ -61,24 +61,24 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
       <section className="landing-benefits">
         <div className="landing-benefit">
           <h3>Structure beats chaos</h3>
-          <p>Design repeatable frameworks instead of rewriting prompts from scratch.</p>
+          <p>Build prompts from clear parts instead of rewriting everything each time.</p>
         </div>
         <div className="landing-benefit">
           <h3>Reuse without friction</h3>
-          <p>Save, remix, and scale the best prompt building blocks instantly.</p>
+          <p>Keep the prompt fragments that work and reuse them when you need them.</p>
         </div>
         <div className="landing-benefit">
-          <h3>Community-ready</h3>
-          <p>Share pools and working sets with verified creator profiles when you want.</p>
+          <h3>Grow into advanced tools</h3>
+          <p>Start with the Builder, then move into pools, working sets, and sharing when ready.</p>
         </div>
       </section>
 
       <section className="landing-community">
         <div>
-          <h2>Designed for serious prompt creators</h2>
+          <h2>Community tools when you want them</h2>
           <p>
-            The Pool Hub lets you discover curated pools and working sets, while auth-backed
-            profiles keep credits and ownership clear. You control if your prompts are public.
+            The Pool Hub is a community library for reusable pools and working sets. Import what
+            helps, publish what works, and keep your own workflow flexible.
           </p>
         </div>
         <div className="landing-community-card">
@@ -93,8 +93,8 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
 
       <footer className="landing-footer">
         <div>
-          <h2>Start building your library</h2>
-          <p>Enter MorpBase and shape your prompt workflow in minutes.</p>
+          <h2>Start with one prompt</h2>
+          <p>Enter MorpBase, build from categories, and copy the final prompt into your workflow.</p>
         </div>
         <button type="button" className="landing-primary" onClick={onEnter}>
           Enter MorpBase

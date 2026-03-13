@@ -210,6 +210,8 @@ export function App() {
   const [workingSets, setWorkingSets] = useState<WorkingSet[]>([]);
   const [workingSetsLoading, setWorkingSetsLoading] = useState(false);
   const [activeWorkingSetId, setActiveWorkingSet] = useState<string | null>(() => getActiveWorkingSetId());
+  const [builderNotice, setBuilderNotice] = useState<string | null>(null);
+  const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
 
   // UI State: Engine Result
   const [engineResult, setEngineResult] = useState<Prompt | ValidationError | null>(null);
@@ -444,6 +446,56 @@ export function App() {
 
   const activeCategoryId = activeWorkingSet ? getCategoryForNode(currentNodeId) : null;
   const effectiveAttributeDefinitions = activeWorkingSet ? workingSetAttributeDefinitions : attributeDefinitions;
+  const effectiveDefinitionIds = useMemo(() => new Set(effectiveAttributeDefinitions.map(def => def.id)), [effectiveAttributeDefinitions]);
+
+  const isNodeUsable = useCallback((nodeId: string | null, nodes: QuestionNode[], definitions: AttributeDefinition[]) => {
+    if (!nodeId) return false;
+    const node = nodes.find(item => item.id === nodeId);
+    if (!node) return false;
+
+    if (!activeWorkingSet) {
+      return node.attributeIds.some(attributeId => definitions.some(def => def.id === attributeId));
+    }
+
+    const categoryId = getCategoryForNode(nodeId);
+    if (!categoryId) return false;
+
+    return definitions.some(def => def.category === categoryId);
+  }, [activeWorkingSet, getCategoryForNode]);
+
+  const usableNodeIds = useMemo(() => {
+    if (questionNodes.length === 0) return [];
+    const orderedNodeIds = getAllSubcategoryNodeIds(questionNodes);
+    return orderedNodeIds.filter(nodeId => isNodeUsable(nodeId, questionNodes, effectiveAttributeDefinitions));
+  }, [questionNodes, getAllSubcategoryNodeIds, isNodeUsable, effectiveAttributeDefinitions]);
+
+  const getAdjacentUsableNodeId = useCallback((nodeId: string | null, direction: 'next' | 'previous') => {
+    if (usableNodeIds.length === 0) return null;
+    if (!nodeId) {
+      return direction === 'next' ? usableNodeIds[0] : usableNodeIds[usableNodeIds.length - 1];
+    }
+
+    const currentIndex = usableNodeIds.indexOf(nodeId);
+    if (currentIndex === -1) {
+      return direction === 'next' ? usableNodeIds[0] : usableNodeIds[usableNodeIds.length - 1];
+    }
+
+    if (direction === 'next') {
+      return usableNodeIds[currentIndex + 1] ?? null;
+    }
+
+    return usableNodeIds[currentIndex - 1] ?? null;
+  }, [usableNodeIds]);
+
+  const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
+  const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
+  const hasNextUsableNode = useMemo(() => {
+    if (!currentNodeId || !usableNodeIds.includes(currentNodeId)) {
+      return false;
+    }
+
+    return getAdjacentUsableNodeId(currentNodeId, 'next') !== null;
+  }, [currentNodeId, getAdjacentUsableNodeId, usableNodeIds]);
   
   // Track if user has explicitly clicked Next to reach the end
   // This ensures completion only happens after explicit Next click, not just from selections
@@ -495,13 +547,13 @@ export function App() {
       const invalidCount = validationResults.filter(r => !r.isValid).length;
       console.log(`[App] Category Integration Summary: ${validCount} valid, ${invalidCount} invalid out of ${validationResults.length} total`);
       
-      if (loaded.length > 0) {
-        setQuestionNodes(loaded);
-        // Always set initial node when question nodes first load
-        const initialId = getInitialNodeId(loaded);
-        console.log(`[App] Setting initial node ID: ${initialId}`);
-        if (initialId) {
-          setCurrentNodeId(initialId);
+        if (loaded.length > 0) {
+          setQuestionNodes(loaded);
+          // Always set initial node when question nodes first load
+          const initialId = getInitialNodeId(loaded);
+          console.log(`[App] Setting initial node ID: ${initialId}`);
+          if (initialId) {
+            setCurrentNodeId(initialId);
           setNavigationHistory([initialId]);
           setHasReachedEndViaNext(false); // Reset completion flag on initial load
         }
@@ -511,7 +563,7 @@ export function App() {
     } catch (err) {
       console.error('[App] Failed to load question nodes:', err);
     }
-  }, [attributeDefinitions]);
+  }, [attributeDefinitions, getInitialNodeId]);
 
   // Get current question node
   const currentNode: QuestionNode | undefined = questionNodes.find(n => n.id === currentNodeId);
@@ -539,7 +591,8 @@ export function App() {
   // - Completion ONLY happens after explicit Next button click
   // - Next button is ALWAYS required to proceed
   const isComplete = currentNode && 
-                     !currentNode.nextNodeId && 
+                     isCurrentNodeUsable &&
+                     !hasNextUsableNode &&
                      hasReachedEndViaNext &&
                      selections.size > 0;
   
@@ -595,7 +648,7 @@ export function App() {
    */
   const callEngine = useCallback(() => {
     // Convert Map state to arrays for engine
-    const selectionsArray: AttributeSelection[] = Array.from(selections.values());
+    const selectionsArray: AttributeSelection[] = Array.from(selections.values()).filter(selection => effectiveDefinitionIds.has(selection.attributeId));
     const outputDefinitions = selectionOutputOverrides.size === 0
       ? effectiveAttributeDefinitions
       : effectiveAttributeDefinitions.map(def => {
@@ -618,7 +671,7 @@ export function App() {
     // Call engine
     const result = generatePrompt(input);
     setEngineResult(result);
-  }, [selections, modifiers, weightsEnabledGlobal, modelProfile, effectiveAttributeDefinitions, selectionOutputOverrides]);
+  }, [selections, modifiers, weightsEnabledGlobal, modelProfile, effectiveAttributeDefinitions, selectionOutputOverrides, effectiveDefinitionIds]);
 
   // Call engine whenever selections, modifiers, or modelProfile changes
   useEffect(() => {
@@ -738,15 +791,22 @@ export function App() {
    */
   const handleNavigateBack = useCallback(() => {
     setHasReachedEndViaNext(false); // Reset completion flag when going back
+    setUnavailableJumpNodeId(null);
     setNavigationHistory(prev => {
       if (prev.length > 1) {
-        const newHistory = prev.slice(0, -1);
-        setCurrentNodeId(newHistory[newHistory.length - 1]);
+        let newHistory = prev.slice(0, -1);
+        while (newHistory.length > 0 && !usableNodeIds.includes(newHistory[newHistory.length - 1])) {
+          newHistory = newHistory.slice(0, -1);
+        }
+        const fallbackNodeId = newHistory[newHistory.length - 1] ?? getAdjacentUsableNodeId(currentNodeId, 'previous');
+        if (fallbackNodeId) {
+          setCurrentNodeId(fallbackNodeId);
+        }
         return newHistory;
       }
       return prev;
     });
-  }, []);
+  }, [currentNodeId, getAdjacentUsableNodeId, usableNodeIds]);
 
   /**
    * Event Handler: Navigate next
@@ -764,34 +824,45 @@ export function App() {
     console.log('[App] Navigate Next clicked');
     console.log('[App] Current node:', currentNode?.id);
     console.log('[App] Next node ID:', currentNode?.nextNodeId);
-    
-    // Always use sequential subcategory navigation
-    // This ensures we go through: Subject->People, Subject->Animals, ..., Anatomy Details->Breasts, etc.
-    const nextNodeId = getNextSubcategoryNodeId(currentNode?.id || null, questionNodes);
-    
+
+    setUnavailableJumpNodeId(null);
+    const nextNodeId = getAdjacentUsableNodeId(currentNode?.id || null, 'next');
+
     if (nextNodeId) {
-      // Navigate to next subcategory in sequence
-      console.log('[App] Navigating to next subcategory:', nextNodeId);
+      console.log('[App] Navigating to next usable subcategory:', nextNodeId);
       setCurrentNodeId(nextNodeId);
-      setNavigationHistory(prev => [...prev, nextNodeId]);
+      setNavigationHistory(prev => prev[prev.length - 1] === nextNodeId ? prev : [...prev, nextNodeId]);
       setHasReachedEndViaNext(false); // Reset completion flag when moving forward
     } else {
-      // No more subcategories - mark as complete (shouldn't happen with looping, but just in case)
-      console.log('[App] No more subcategories available - marking as complete via Next button');
+      console.log('[App] No more usable subcategories available - marking as complete via Next button');
       setHasReachedEndViaNext(true);
     }
-  }, [currentNode, questionNodes, getNextSubcategoryNodeId]);
+  }, [currentNode, getAdjacentUsableNodeId]);
 
   /**
    * Event Handler: Navigate skip
    * Skips current question and moves to next
    */
   const handleNavigateSkip = useCallback(() => {
-    if (currentNode?.nextNodeId) {
-      setCurrentNodeId(currentNode.nextNodeId);
-      setNavigationHistory(prev => [...prev, currentNode.nextNodeId!]);
+    setUnavailableJumpNodeId(null);
+    const nextNodeId = getAdjacentUsableNodeId(currentNode?.id || null, 'next');
+    if (nextNodeId) {
+      setCurrentNodeId(nextNodeId);
+      setNavigationHistory(prev => prev[prev.length - 1] === nextNodeId ? prev : [...prev, nextNodeId]);
     }
-  }, [currentNode]);
+  }, [currentNode, getAdjacentUsableNodeId]);
+
+  const handleGoToUsableNode = useCallback((nodeId: string | null) => {
+    if (!nodeId) return;
+
+    setUnavailableJumpNodeId(null);
+    setHasReachedEndViaNext(false);
+    setCurrentNodeId(nodeId);
+    setNavigationHistory(prev => {
+      const filtered = prev.filter(historyNodeId => usableNodeIds.includes(historyNodeId));
+      return filtered[filtered.length - 1] === nodeId ? filtered : [...filtered, nodeId];
+    });
+  }, [usableNodeIds]);
 
   /**
    * Event Handler: Start over
@@ -800,11 +871,14 @@ export function App() {
   const handleStartOver = useCallback(() => {
     setSelections(new Map());
     setModifiers(new Map());
+    setSelectionOutputOverrides(new Map());
+    setUnavailableJumpNodeId(null);
+    setBuilderNotice(null);
     setHasReachedEndViaNext(false); // Reset completion flag
-    const initialId = getInitialNodeId(questionNodes);
+    const initialId = getInitialUsableNodeId() || getInitialNodeId(questionNodes);
     setCurrentNodeId(initialId);
     setNavigationHistory([initialId]);
-  }, [questionNodes]);
+  }, [questionNodes, getInitialNodeId, getInitialUsableNodeId]);
 
   /**
    * Event Handler: Review selections
@@ -812,10 +886,11 @@ export function App() {
    */
   const handleReview = useCallback(() => {
     setHasReachedEndViaNext(false); // Reset completion flag when reviewing
-    const initialId = getInitialNodeId(questionNodes);
+    setUnavailableJumpNodeId(null);
+    const initialId = getInitialUsableNodeId() || getInitialNodeId(questionNodes);
     setCurrentNodeId(initialId);
     setNavigationHistory([initialId]);
-  }, [questionNodes]);
+  }, [questionNodes, getInitialNodeId, getInitialUsableNodeId]);
 
   /**
    * Event Handler: Jump to category
@@ -831,23 +906,29 @@ export function App() {
     const targetNode = questionNodes.find(n => n.id === nodeId);
     if (targetNode) {
       console.log('[App] Target node found, navigating to:', nodeId);
+      const targetUsable = isNodeUsable(nodeId, questionNodes, effectiveAttributeDefinitions);
       setCurrentNodeId(nodeId);
+      setUnavailableJumpNodeId(targetUsable ? null : nodeId);
       setHasReachedEndViaNext(false); // Reset completion flag when jumping
-      // Update history to include this jump
       setNavigationHistory(prev => {
-        // If node is already in history, truncate to that point
-        const nodeIndex = prev.indexOf(nodeId);
-        if (nodeIndex !== -1) {
-          return prev.slice(0, nodeIndex + 1);
+        const filtered = prev.filter(historyNodeId => usableNodeIds.includes(historyNodeId));
+        if (!targetUsable) {
+          return filtered;
         }
-        // Otherwise, add to history
-        return [...prev, nodeId];
+
+        const nodeIndex = filtered.indexOf(nodeId);
+        if (nodeIndex !== -1) {
+          return filtered.slice(0, nodeIndex + 1);
+        }
+
+        return [...filtered, nodeId];
       });
+      setBuilderNotice(null);
     } else {
       console.error('[App] Target node not found:', nodeId);
       console.error('[App] Available nodes:', questionNodes.map(n => n.id));
     }
-  }, [questionNodes]);
+  }, [questionNodes, isNodeUsable, effectiveAttributeDefinitions, usableNodeIds]);
 
   /**
    * Event Handler: Remove selection
@@ -974,11 +1055,8 @@ export function App() {
   }, []);
 
   const handleSetActiveWorkingSet = (id: string | null) => {
-    if (id !== activeWorkingSetId) {
-      setSelections(new Map());
-      setModifiers(new Map());
-      setSelectionOutputOverrides(new Map());
-    }
+    setUnavailableJumpNodeId(null);
+    setHasReachedEndViaNext(false);
     setActiveWorkingSet(id);
     persistActiveWorkingSetId(id);
   };
@@ -1026,13 +1104,93 @@ export function App() {
 
   useEffect(() => {
     if (questionNodes.length === 0) return;
-    const initialId = getInitialNodeId(questionNodes);
+    const initialId = getInitialUsableNodeId() || getInitialNodeId(questionNodes);
     if (initialId) {
-      setCurrentNodeId(initialId);
-      setNavigationHistory([initialId]);
+      setCurrentNodeId(prev => prev || initialId);
+      setNavigationHistory(prev => prev.length > 0 ? prev : [initialId]);
       setHasReachedEndViaNext(false);
     }
-  }, [questionNodes.length, getInitialNodeId]);
+  }, [questionNodes.length, getInitialNodeId, getInitialUsableNodeId]);
+
+  useEffect(() => {
+    setSelections(prev => {
+      const next = new Map<string, AttributeSelection>();
+      prev.forEach((selection, id) => {
+        if (effectiveDefinitionIds.has(id)) {
+          next.set(id, selection);
+        }
+      });
+      if (next.size !== prev.size) {
+        setBuilderNotice('Some selections were removed because they are not available in this set.');
+      }
+      return next.size === prev.size ? prev : next;
+    });
+
+    setModifiers(prev => {
+      const next = new Map<string, Modifier>();
+      prev.forEach((modifier, id) => {
+        if (effectiveDefinitionIds.has(id)) {
+          next.set(id, modifier);
+        }
+      });
+      return next.size === prev.size ? prev : next;
+    });
+
+    setSelectionOutputOverrides(prev => {
+      const next = new Map<string, string>();
+      prev.forEach((value, id) => {
+        if (effectiveDefinitionIds.has(id)) {
+          next.set(id, value);
+        }
+      });
+      return next.size === prev.size ? prev : next;
+    });
+  }, [effectiveDefinitionIds]);
+
+  useEffect(() => {
+    if (!builderNotice) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setBuilderNotice(null);
+    }, 4500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [builderNotice]);
+
+  useEffect(() => {
+    if (questionNodes.length === 0) return;
+    if (usableNodeIds.length === 0) {
+      setUnavailableJumpNodeId(activeWorkingSet ? '__builder_empty__' : null);
+      return;
+    }
+
+    if (unavailableJumpNodeId && unavailableJumpNodeId !== '__builder_empty__') {
+      return;
+    }
+
+    if (currentNodeId && usableNodeIds.includes(currentNodeId)) {
+      if (unavailableJumpNodeId === '__builder_empty__') {
+        setUnavailableJumpNodeId(null);
+      }
+      return;
+    }
+
+    const nextNodeId = getAdjacentUsableNodeId(currentNodeId, 'next')
+      ?? getAdjacentUsableNodeId(currentNodeId, 'previous')
+      ?? usableNodeIds[0];
+
+    if (nextNodeId) {
+      setCurrentNodeId(nextNodeId);
+      setNavigationHistory(prev => {
+        const filtered = prev.filter(nodeId => usableNodeIds.includes(nodeId));
+        if (filtered[filtered.length - 1] === nextNodeId) return filtered;
+        return [...filtered, nextNodeId];
+      });
+      if (unavailableJumpNodeId === '__builder_empty__') {
+        setUnavailableJumpNodeId(null);
+      }
+    }
+  }, [questionNodes.length, usableNodeIds, currentNodeId, getAdjacentUsableNodeId, unavailableJumpNodeId, activeWorkingSet]);
 
   /**
    * Event Handler: Randomize prompt
@@ -1190,6 +1348,18 @@ export function App() {
   // Extract prompt and error from engine result
   const prompt: Prompt | null = engineResult && 'positiveTokens' in engineResult ? engineResult : null;
   const error: ValidationError | null = engineResult && 'type' in engineResult ? engineResult : null;
+  const displayError: ValidationError | null = error?.type === 'INVALID_ATTRIBUTE'
+    ? {
+        type: 'INVALID_ATTRIBUTE',
+        message: activeWorkingSet
+          ? 'Some prompt elements are not available in the current Working Set.'
+          : 'Some prompt elements are no longer available in the Builder.',
+        details: {},
+      }
+    : error;
+  const unavailableJumpNode = unavailableJumpNodeId && unavailableJumpNodeId !== '__builder_empty__'
+    ? questionNodes.find(node => node.id === unavailableJumpNodeId)
+    : null;
   
 
   // Persist active page
@@ -1465,6 +1635,7 @@ export function App() {
                 onJumpToCategory={handleJumpToCategory}
                 onOpenRandom={() => setIsRandomPromptModalOpen(true)}
                 onOpenTutorial={() => setIsAppTutorialOpen(true)}
+                activeWorkingSetName={activeWorkingSet?.name ?? null}
               />
           <div className="interview-container">
             <div className="app-main">
@@ -1472,6 +1643,11 @@ export function App() {
                 <div>
                   <span className="working-set-banner-label">Working Set</span>
                   <strong>{activeWorkingSet ? activeWorkingSet.name : 'Base Set'}</strong>
+                  <div className="working-set-banner-description">
+                    {activeWorkingSet
+                      ? 'This Working Set is filtering the Builder by category with a smaller, focused set of prompt elements.'
+                      : 'Base Set gives you the full prompt builder by category.'}
+                  </div>
                 </div>
                 <div className="working-set-banner-actions">
                   <label className="working-set-banner-switch">
@@ -1498,12 +1674,66 @@ export function App() {
                   )}
                 </div>
               </div>
+              <div className="builder-guidance">
+                <p className="builder-guidance-intro">
+                  Select prompt elements by category and MorpBase assembles the final prompt for you.
+                </p>
+                <div className="builder-guidance-steps">
+                  <span className="builder-guidance-label">How it works:</span>
+                  <span>1. Choose from the left</span>
+                  <span>2. Build in the center</span>
+                  <span>3. Edit text or adjust weight on selected elements</span>
+                  <span>4. Copy on the right</span>
+                </div>
+              </div>
+              {builderNotice && (
+                <div className="builder-notice">
+                  <span>{builderNotice}</span>
+                  <button type="button" onClick={() => setBuilderNotice(null)}>
+                    Dismiss
+                  </button>
+                </div>
+              )}
               {isComplete ? (
                 <CompletionState
                   totalSteps={navigationHistory.length}
                   onStartOver={handleStartOver}
                   onReview={handleReview}
                 />
+              ) : unavailableJumpNodeId === '__builder_empty__' ? (
+                <div className="app-error-state">
+                  <p>This Working Set does not contain any prompt elements for the Builder.</p>
+                  <div className="builder-state-actions">
+                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
+                    <button onClick={() => setActivePage('working-sets')}>Manage Working Sets</button>
+                  </div>
+                </div>
+              ) : unavailableJumpNode ? (
+                <div className="app-error-state">
+                  <p>This section is not covered by the current Working Set category filter.</p>
+                  <div className="builder-state-subtitle">{unavailableJumpNode.question}</div>
+                  <div className="builder-state-actions">
+                    <button
+                      onClick={() => handleGoToUsableNode(getAdjacentUsableNodeId(unavailableJumpNode.id, 'next'))}
+                    >
+                      Go to Next Available Section
+                    </button>
+                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
+                    <button onClick={() => setActivePage('working-sets')}>Manage Working Sets</button>
+                  </div>
+                </div>
+              ) : currentNode && !isCurrentNodeUsable ? (
+                <div className="app-error-state">
+                  <p>This section is outside the current Working Set category filter.</p>
+                  <div className="builder-state-actions">
+                    <button
+                      onClick={() => handleGoToUsableNode(getAdjacentUsableNodeId(currentNode.id, 'next'))}
+                    >
+                      Go to Next Available Section
+                    </button>
+                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
+                  </div>
+                </div>
               ) : currentNode ? (
                 <QuestionCard
                   node={currentNode}
@@ -1532,26 +1762,29 @@ export function App() {
                   <button onClick={handleStartOver}>Start Over</button>
                 </div>
               )}
-              {error && (
+              {displayError && (
                 <ErrorDisplay
-                  error={error}
+                  error={displayError}
                   selections={selectionsMap}
                   onRemoveSelection={handleRemoveSelection}
                 />
               )}
             </div>
             <div className="app-sidebar">
-              <div className="freeform-prompt-panel">
-                <div className="freeform-prompt-header">
-                  <h3>Freeform Prompt</h3>
-                  <span>Type anything</span>
-                </div>
-                <textarea
-                  rows={4}
-                  placeholder="Write a full prompt here..."
-                  value={freeformPrompt}
-                  onChange={event => setFreeformPrompt(event.target.value)}
-                />
+                <div className="freeform-prompt-panel">
+                  <div className="freeform-prompt-header">
+                    <h3>Freeform Prompt</h3>
+                    <span>Optional custom text</span>
+                  </div>
+                  <p className="freeform-prompt-help">
+                    Optional custom text to add on top of your built prompt.
+                  </p>
+                  <textarea
+                    rows={4}
+                    placeholder="Add optional custom text..."
+                    value={freeformPrompt}
+                    onChange={event => setFreeformPrompt(event.target.value)}
+                  />
               </div>
               <PromptPreview 
                 prompt={prompt}

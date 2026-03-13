@@ -180,7 +180,10 @@ export function PromptPreview({
   return (
     <div className="prompt-preview">
       <div className="prompt-preview-header">
-        <h3 className="prompt-preview-title">Prompt Preview</h3>
+        <div className="prompt-preview-heading">
+          <h3 className="prompt-preview-title">Prompt Preview</h3>
+          <p className="prompt-preview-subtitle">Your final prompt, updated as you build.</p>
+        </div>
         <div className="prompt-preview-header-controls">
           {(onClear || onUndoClear) && (
             <div className="prompt-preview-action-buttons">
@@ -259,7 +262,7 @@ export function PromptPreview({
             <div className="prompt-preview-section">
               <label className="prompt-preview-label">Prompt</label>
             <div className="prompt-preview-text">
-              {mergedPositive || 'Start building your prompt...'}
+              {mergedPositive || 'Select prompt elements to start building your prompt.'}
             </div>
           </div>
         )}

@@ -21,6 +21,12 @@
   margin-bottom: var(--spacing-4);
 }
 
+.prompt-preview-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 .prompt-preview-header-controls {
   display: flex;
   align-items: center;
@@ -119,6 +125,13 @@
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   margin: 0;
+}
+
+.prompt-preview-subtitle {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #b0b0c3;
 }
 
 .prompt-preview-metadata {

@@ -145,6 +145,21 @@
   margin-bottom: 4px;
 }
 
+.category-sidebar-hint {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(110, 86, 249, 0.12);
+  border: 1px solid rgba(110, 86, 249, 0.22);
+  color: #d8d2ff;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.category-sidebar-hint strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
 .category-group {
   display: flex;
   flex-direction: column;

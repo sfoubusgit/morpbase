@@ -276,6 +276,13 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: #9ca3af;
 }
 
+.freeform-prompt-help {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b7bed2;
+  margin: 0;
+}
+
 .freeform-prompt-panel textarea {
   background: rgba(15, 15, 18, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -283,6 +290,73 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: #e5e7eb;
   font-size: 12px;
   min-height: 80px;
+}
+
+.builder-guidance {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(110, 86, 249, 0.08);
+  border: 1px solid rgba(110, 86, 249, 0.22);
+  color: #e5e7eb;
+}
+
+.builder-guidance-intro {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #f3f4f6;
+}
+
+.builder-guidance-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  font-size: 12px;
+  color: #cdd7ff;
+}
+
+.builder-guidance-label {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.builder-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  color: #dbeafe;
+  font-size: 13px;
+}
+
+.builder-notice button,
+.builder-state-actions button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(20, 20, 26, 0.95);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.builder-state-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.builder-state-subtitle {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #cbd5f5;
 }
 
 .app-sidebar-actions {
@@ -343,6 +417,14 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   letter-spacing: 0.08em;
   color: rgba(229, 231, 235, 0.75);
   margin-bottom: 4px;
+}
+
+.working-set-banner-description {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(229, 231, 235, 0.82);
+  max-width: 540px;
 }
 
 .working-set-banner button {

@@ -131,6 +131,9 @@ export function QuestionCard({
         {questionDescription && (
           <p className="question-card-description">{questionDescription}</p>
         )}
+        <div className="question-card-help">
+          Select an element to add it, then use the inline controls inside the selected card to edit the output text or adjust its weight.
+        </div>
         
         <div className="question-card-options">
           <AttributeSelector

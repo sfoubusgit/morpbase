@@ -320,7 +320,7 @@ export function WorkingSetsPage({
       <header className="working-sets-header">
         <div>
           <h1>Working Sets</h1>
-          <p>Create structured sets of prompt elements and activate them inside the Builder.</p>
+          <p>Working Sets let you build with a smaller, focused set of prompt elements by category for a specific style or project.</p>
         </div>
         {manualUrl && (
           <a
@@ -344,6 +344,14 @@ export function WorkingSetsPage({
           </button>
         </div>
       </header>
+
+      <div className="working-sets-guidance">
+        <span className="working-sets-guidance-label">How it works:</span>
+        <span>1. Create or open a Working Set</span>
+        <span>2. Add prompt elements from your User Pools into category buckets</span>
+        <span>3. Build a smaller, focused prompt kit for a style or project</span>
+        <span>4. Activate it in Builder or switch back to Base Set anytime</span>
+      </div>
 
       {pageMessage && <div className="working-sets-message">{pageMessage}</div>}
 
@@ -414,7 +422,7 @@ export function WorkingSetsPage({
               </div>
               <div className="working-sets-publish-row">
                 <div className="working-sets-publish-info">
-                  Share this working set with the community marketplace.
+                  Share this focused prompt kit with the community library.
                 </div>
                 <button type="button" className="working-sets-publish" onClick={handlePublish}>
                   Publish to Hub

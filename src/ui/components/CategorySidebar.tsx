@@ -53,6 +53,9 @@ interface CategorySidebarProps {
 
   /** Open Tutorial */
   onOpenTutorial?: () => void;
+
+  /** Active Working Set name when the Builder is filtered */
+  activeWorkingSetName?: string | null;
 }
 
 /**
@@ -106,6 +109,7 @@ export function CategorySidebar({
   onJumpToCategory,
   onOpenRandom,
   onOpenTutorial,
+  activeWorkingSetName,
 }: CategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
@@ -206,6 +210,11 @@ export function CategorySidebar({
           <div className="category-sidebar-title-wrapper">
             <h3 className="category-sidebar-title">Categories</h3>
           </div>
+          {activeWorkingSetName && (
+            <div className="category-sidebar-hint">
+              <strong>{activeWorkingSetName}</strong> is filtering the Builder by category.
+            </div>
+          )}
           {Object.entries(categoryMap).map(([categoryId, items]) => {
             const allNodeIds = collectNodeIds(items);
             const visited = hasCommitted(allNodeIds);

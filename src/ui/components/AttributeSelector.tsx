@@ -179,7 +179,7 @@ export function AttributeSelector({
                       setEditingValue(outputValue);
                     }}
                   >
-                    Add + Edit
+                    Edit Text
                   </button>
                   <button
                     type="button"
@@ -188,7 +188,7 @@ export function AttributeSelector({
                       toggleWeightEditor(attr.id);
                     }}
                   >
-                    Add Weight
+                    Adjust Weight
                   </button>
                 </div>
               </div>

@@ -34,7 +34,7 @@ export function PromptsPage({
       <header className="prompts-header">
         <div>
           <h2>Prompts</h2>
-          <p>Your permanent cloud library of saved prompts.</p>
+          <p>Save finished prompts and return to them later.</p>
         </div>
         {manualUrl && (
           <a
@@ -64,11 +64,11 @@ export function PromptsPage({
 
         <aside className="prompts-panel prompts-panel-sidebar">
           <div className="prompts-library-card">
-            <div className="prompts-library-intro">
-              <h3>Library Tips</h3>
-              <p>Use tags to group styles, export JSON for backups, and import to sync across devices.</p>
-            </div>
+          <div className="prompts-library-intro">
+            <h3>Library Tips</h3>
+            <p>Use tags to group prompt styles, then export or import your library when you want backups or reuse.</p>
           </div>
+        </div>
           <PromptPreview
             prompt={prompt ?? null}
             customAdditions={customAdditions}

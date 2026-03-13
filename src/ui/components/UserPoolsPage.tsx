@@ -514,7 +514,7 @@ export function UserPoolsPage({
       <header className="user-pools-header">
         <div>
           <h2>User Pools</h2>
-          <p>Create and manage your own prompt element pools.</p>
+          <p>Save prompt fragments you want to reuse later and add them to prompts when needed.</p>
         </div>
         {manualUrl && (
           <a
@@ -623,7 +623,7 @@ export function UserPoolsPage({
           ) : (
             <>
               <div className="user-pools-helper">
-                Add items as reusable prompt fragments. Use tags to organize.
+                Add reusable prompt fragments here, then organize them with tags and notes.
               </div>
               <div className="user-pools-filters">
                 <input
@@ -839,11 +839,14 @@ export function UserPoolsPage({
           <div className="freeform-prompt-panel">
             <div className="freeform-prompt-header">
               <h3>Freeform Prompt</h3>
-              <span>Type anything</span>
+              <span>Optional custom text</span>
             </div>
+            <p className="freeform-prompt-help">
+              Optional custom text to add on top of your built prompt.
+            </p>
             <textarea
               rows={4}
-              placeholder="Write a full prompt here..."
+              placeholder="Add optional custom text..."
               value={freeformPrompt}
               onChange={event => onFreeformPromptChange?.(event.target.value)}
             />

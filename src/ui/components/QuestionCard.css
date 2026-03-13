@@ -117,6 +117,16 @@
   margin: 0;
 }
 
+.question-card-help {
+  font-size: 13px;
+  color: #d4cff7;
+  background: rgba(110, 86, 249, 0.08);
+  border: 1px solid rgba(110, 86, 249, 0.18);
+  border-radius: 12px;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+
 .question-card-options {
   display: flex;
   flex-direction: column;
@@ -193,4 +203,3 @@
   bottom: 0;
   z-index: 10;
 }
-

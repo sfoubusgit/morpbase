@@ -19,6 +19,33 @@ const toAuthUser = (profile: ProfileRow): AuthUser => ({
   email: profile.email,
 });
 
+const ensurePublicProfile = async (profile: ProfileRow): Promise<void> => {
+  const { data, error } = await supabase
+    .from('public_profiles')
+    .select('id')
+    .eq('user_id', profile.id)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (data) {
+    return;
+  }
+
+  const { error: insertError } = await supabase
+    .from('public_profiles')
+    .insert({
+      user_id: profile.id,
+      display_name: profile.display_name,
+    });
+
+  if (insertError) {
+    throw insertError;
+  }
+};
+
 export type AuthProfile = ProfileRow;
 
 export const getProfile = async (): Promise<AuthProfile | null> => {
@@ -58,6 +85,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
   }
 
   if (existing) {
+    await ensurePublicProfile(existing as ProfileRow);
     return toAuthUser(existing as ProfileRow);
   }
 
@@ -77,6 +105,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
     .single();
 
   if (insertError) throw insertError;
+  await ensurePublicProfile(inserted as ProfileRow);
   return toAuthUser(inserted as ProfileRow);
 };
 

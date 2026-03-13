@@ -2,7 +2,7 @@
  * Completion State Component
  * 
  * Responsibilities:
- * - Display completion message when interview is finished
+ * - Display completion message when the Builder flow is finished
  * - Show summary of selections made
  * - Provide option to start over or review
  * 
@@ -28,7 +28,7 @@ interface CompletionStateProps {
 /**
  * Completion State Component
  * 
- * Displays when the interview flow is complete.
+ * Displays when the Builder flow is complete.
  */
 export function CompletionState({
   totalSteps,
@@ -37,10 +37,10 @@ export function CompletionState({
 }: CompletionStateProps) {
   return (
     <div className="completion-state">
-      <div className="completion-state-icon">✓</div>
-      <h2 className="completion-state-title">Interview Complete</h2>
+      <div className="completion-state-icon">{'\u2713'}</div>
+      <h2 className="completion-state-title">Prompt Complete</h2>
       <p className="completion-state-message">
-        You've completed all {totalSteps} questions. Your prompt is ready!
+        You've reached the end of this Builder flow after {totalSteps} steps. Your prompt is ready to review or copy.
       </p>
       <div className="completion-state-actions">
         {onReview && (
@@ -63,4 +63,3 @@ export function CompletionState({
     </div>
   );
 }
-
