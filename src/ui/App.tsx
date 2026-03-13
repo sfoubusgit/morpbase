@@ -36,6 +36,7 @@ import { AccountModal } from './components/AccountModal';
 import { WorkingSetsPage } from './components/WorkingSetsPage';
 import { PromptsPage } from './components/PromptsPage';
 import { LandingPage } from './components/LandingPage';
+import { AdminPage } from './components/AdminPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import {
   changeUserPassword,
@@ -58,6 +59,7 @@ import {
   setActiveWorkingSetId as persistActiveWorkingSetId,
   updateWorkingSet,
 } from '../engine/workingSetStore';
+import { isCurrentUserAdmin } from '../engine/adminStore';
 
 /**
  * Default model profile for Stable Diffusion
@@ -86,13 +88,14 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'working-sets'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'working-sets' | 'admin'>(() => {
     try {
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
       if (saved === 'pool-hub') return 'pool-hub';
       if (saved === 'working-sets') return 'working-sets';
+      if (saved === 'admin') return 'admin';
       return 'generator';
     } catch {
       return 'generator';
@@ -129,6 +132,7 @@ export function App() {
   const [modelProfile, setModelProfile] = useState<ModelProfile>(DEFAULT_MODEL_PROFILE);
   const [authUser, setAuthUser] = useState<Awaited<ReturnType<typeof getCurrentUser>>>(null);
   const [authReady, setAuthReady] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const envDevMode = import.meta.env.VITE_DEV_MODE === '1';
   const [devModeOverride, setDevModeOverride] = useState<boolean | null>(() => {
     try {
@@ -1394,6 +1398,41 @@ export function App() {
   }, [activePage, authUser]);
 
   useEffect(() => {
+    let isActive = true;
+
+    if (!authReady || !authUser) {
+      setIsAdmin(false);
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const loadAdminState = async () => {
+      try {
+        const next = await isCurrentUserAdmin();
+        if (isActive) {
+          setIsAdmin(next);
+        }
+      } catch {
+        if (isActive) {
+          setIsAdmin(false);
+        }
+      }
+    };
+
+    loadAdminState();
+    return () => {
+      isActive = false;
+    };
+  }, [authReady, authUser?.id]);
+
+  useEffect(() => {
+    if (activePage === 'admin' && !isAdmin) {
+      setActivePage('generator');
+    }
+  }, [activePage, isAdmin]);
+
+  useEffect(() => {
     if (authUser) {
       refreshWorkingSets();
     } else {
@@ -1564,9 +1603,22 @@ export function App() {
           >
             Pool Hub
           </button>
+          {isAdmin && (
+            <button
+              type="button"
+              className={`app-page-toggle-btn ${activePage === 'admin' ? 'active' : ''}`}
+              onClick={() => setActivePage('admin')}
+              role="tab"
+              aria-selected={activePage === 'admin'}
+            >
+              Admin
+            </button>
+          )}
         </div>
       </div>
-      {activePage === 'user-pools' ? (
+      {activePage === 'admin' ? (
+        <AdminPage userName={authUser?.name ?? null} />
+      ) : activePage === 'user-pools' ? (
         <UserPoolsPage
           manualUrl={manualUrl}
           onAddToPrompt={handleAddPoolItem}
