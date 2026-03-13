@@ -116,6 +116,7 @@ export function App() {
 
   // UI State: Freeform prompt text
   const [freeformPrompt, setFreeformPrompt] = useState<string>('');
+  const [exportMode, setExportMode] = useState<'structured' | 'clean' | 'structured_with_negative'>('clean');
   const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(new Map());
 
   // UI State: Clear prompt undo (single step)
@@ -1839,7 +1840,7 @@ export function App() {
               ) : (
                 <div className="app-error-state">
                   <p>Question not found. Please start over.</p>
-                  <button onClick={handleStartOver}>Start Over</button>
+                  <button onClick={handleStartOver}>Restart Builder</button>
                 </div>
               )}
               {displayError && (
@@ -1870,6 +1871,8 @@ export function App() {
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
                 freeformPrompt={freeformPrompt}
+                exportMode={exportMode}
+                onExportModeChange={setExportMode}
                 onClear={handleClearPrompt}
                 onUndoClear={handleUndoClearPrompt}
                 canUndoClear={Boolean(clearUndoState)}

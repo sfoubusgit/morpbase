@@ -132,6 +132,7 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  flex-wrap: wrap;
   padding: 18px 32px;
   position: sticky;
   top: 0;
@@ -145,6 +146,9 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  flex: 1 1 420px;
+  min-width: 0;
 }
 
 .app-page-toggle-auth-hint {
@@ -161,6 +165,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+  flex: 1 1 520px;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding: 4px;
   border-radius: 999px;
   background: rgba(22, 22, 28, 0.9);
@@ -191,6 +201,7 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   border: 1px solid transparent;
   color: rgba(229, 231, 235, 0.8);
   border-radius: 999px;
+  white-space: nowrap;
   padding: 8px 18px;
   font-size: 13px;
   font-weight: 600;
@@ -218,6 +229,16 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   .app-page-toggle {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .app-page-toggle-left,
+  .app-page-toggle-group {
+    width: 100%;
+    flex-basis: auto;
+  }
+
+  .app-page-toggle-group {
+    justify-content: flex-start;
   }
 }
 

@@ -56,7 +56,7 @@ export function CompletionState({
             className="completion-state-button completion-state-button-primary"
             onClick={onStartOver}
           >
-            Start Over
+            Restart Builder
           </button>
         )}
       </div>

@@ -5,9 +5,18 @@ export type PoolItem = {
   note?: string;
 };
 
+export type PoolFolder = {
+  id: string;
+  name: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
 export type Pool = {
   id: string;
   name: string;
+  folderId?: string;
+  folderName?: string;
   createdAt: number;
   updatedAt: number;
   items: PoolItem[];

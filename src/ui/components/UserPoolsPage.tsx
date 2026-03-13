@@ -1,16 +1,20 @@
-import { useMemo, useState, useEffect } from 'react';
-import type { Pool, PoolItem } from '../../types';
+﻿import { useMemo, useState, useEffect } from 'react';
+import type { Pool, PoolFolder, PoolItem } from '../../types';
 import {
   addItemToPool,
   createPool,
+  createPoolFolder,
   deletePool,
   deletePoolItem,
   exportPoolPayload,
   importPoolPayload,
+  listPoolFolders,
   listPools,
   renamePool,
   updatePoolItem,
 } from '../../engine/poolStore';
+import { createPoolFromTemplate } from '../../engine/poolTemplates';
+import { defaultUserPools } from '../../data/defaultUserPools';
 import { PromptPreview } from './PromptPreview';
 import { PromptLibrary } from './PromptLibrary';
 import { Modal } from './Modal';
@@ -51,10 +55,14 @@ export function UserPoolsPage({
   isPro = false,
   manualUrl,
 }: UserPoolsPageProps) {
+  const defaultFolderId = '__default_pools_folder__';
   const [pools, setPools] = useState<Pool[]>([]);
+  const [folders, setFolders] = useState<PoolFolder[]>([]);
   const [poolsLoading, setPoolsLoading] = useState(false);
   const [activePoolId, setActivePoolId] = useState<string | null>(null);
   const [newPoolName, setNewPoolName] = useState('');
+  const [newFolderName, setNewFolderName] = useState('');
+  const [selectedFolderId, setSelectedFolderId] = useState('');
   const [editingPoolId, setEditingPoolId] = useState<string | null>(null);
   const [editingPoolName, setEditingPoolName] = useState('');
   const [poolError, setPoolError] = useState<string | null>(null);
@@ -86,6 +94,7 @@ export function UserPoolsPage({
   const [randomizerTagInput, setRandomizerTagInput] = useState('');
   const [randomizerAppendMode, setRandomizerAppendMode] = useState<'replace' | 'append'>('replace');
   const [appendTargetId, setAppendTargetId] = useState<string>('last');
+  const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<string>>(new Set());
   const gateMessage = !authReady
     ? 'Loading your pools...'
     : !authUser
@@ -94,10 +103,28 @@ export function UserPoolsPage({
         ? 'Upgrade to Pro to use User Pools.'
         : null;
 
+  const defaultPools = useMemo(() => defaultUserPools, []);
+  const availablePools = useMemo(() => [...defaultPools, ...pools], [defaultPools, pools]);
   const activePool = useMemo(
-    () => pools.find(pool => pool.id === activePoolId) ?? null,
-    [pools, activePoolId]
+    () => availablePools.find(pool => pool.id === activePoolId) ?? null,
+    [availablePools, activePoolId]
   );
+  const isDefaultPoolSelected = useMemo(
+    () => Boolean(activePool && defaultPools.some(pool => pool.id === activePool.id)),
+    [activePool, defaultPools]
+  );
+  const groupedPools = useMemo(() => {
+    const groups = new Map<string, { id: string; name: string; pools: Pool[] }>();
+    groups.set(defaultFolderId, { id: defaultFolderId, name: 'Default Pools', pools: [] });
+    folders.forEach(folder => groups.set(folder.id, { id: folder.id, name: folder.name, pools: [] }));
+    groups.set('__ungrouped__', { id: '__ungrouped__', name: 'Ungrouped', pools: [] });
+    availablePools.forEach(pool => {
+      const key = pool.folderId ?? '__ungrouped__';
+      const group = groups.get(key);
+      if (group) group.pools.push(pool);
+    });
+    return Array.from(groups.values()).filter(group => group.pools.length > 0);
+  }, [availablePools, defaultFolderId, folders]);
 
   const filteredItems = useMemo(() => {
     if (!activePool) return [];
@@ -111,14 +138,29 @@ export function UserPoolsPage({
     });
   }, [activePool, searchTerm, tagFilter]);
 
+  const toggleFolderCollapsed = (folderId: string) => {
+    setCollapsedFolderIds(previous => {
+      const next = new Set(previous);
+      if (next.has(folderId)) {
+        next.delete(folderId);
+      } else {
+        next.add(folderId);
+      }
+      return next;
+    });
+  };
+
   const refreshPools = async () => {
     setPoolsLoading(true);
     try {
-      const next = await listPools();
+      const [nextFolders, next] = await Promise.all([listPoolFolders(), listPools()]);
+      setFolders(nextFolders);
       setPools(next);
       if (next.length === 0) {
-        setActivePoolId(null);
-      } else if (!next.find(pool => pool.id === activePoolId)) {
+        if (!defaultPools.find(pool => pool.id === activePoolId)) {
+          setActivePoolId(defaultPools[0]?.id ?? null);
+        }
+      } else if (!next.find(pool => pool.id === activePoolId) && !defaultPools.find(pool => pool.id === activePoolId)) {
         setActivePoolId(next[0].id);
       }
     } catch (err: any) {
@@ -145,10 +187,11 @@ export function UserPoolsPage({
       refreshPools();
     } else {
       setPools([]);
-      setActivePoolId(null);
+      setFolders([]);
+      setActivePoolId(defaultPools[0]?.id ?? null);
       setPoolsLoading(false);
     }
-  }, [authUser]);
+  }, [authUser, defaultPools]);
 
   const handleCreatePool = async () => {
     if (!authUser || !isPro) {
@@ -157,12 +200,53 @@ export function UserPoolsPage({
     }
     setPoolError(null);
     try {
-      const created = await createPool(newPoolName);
+      const created = await createPool(newPoolName, selectedFolderId || null);
       setNewPoolName('');
+      setSelectedFolderId('');
       await refreshPools();
       setActivePoolId(created.id);
     } catch (err: any) {
       setPoolError(err?.message ?? 'Failed to create pool.');
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    if (!authUser || !isPro) {
+      setPoolError('Upgrade to Pro to create folders.');
+      return;
+    }
+    setPoolError(null);
+    try {
+      const created = await createPoolFolder(newFolderName);
+      setNewFolderName('');
+      await refreshPools();
+      setSelectedFolderId(created.id);
+    } catch (err: any) {
+      setPoolError(err?.message ?? 'Failed to create folder.');
+    }
+  };
+
+  const handleDuplicateDefaultPool = async (template: Pool) => {
+    if (!authUser || !isPro) {
+      setPoolError('Log in with Pro access to copy default pools into your own library.');
+      return;
+    }
+    setPoolError(null);
+    try {
+      const existingNames = new Set(pools.map(pool => pool.name.toLowerCase()));
+      let nextName = template.name;
+      let copyIndex = 1;
+      while (existingNames.has(nextName.toLowerCase())) {
+        copyIndex += 1;
+        nextName = `${template.name} Copy ${copyIndex}`;
+      }
+      const created = await createPoolFromTemplate(template, nextName);
+      await refreshPools();
+      setActivePoolId(created.id);
+      setPoolJsonMessage(`Copied default pool "${created.name}" into your library.`);
+      setPoolJsonError(null);
+    } catch (err: any) {
+      setPoolError(err?.message ?? 'Failed to copy default pool.');
     }
   };
 
@@ -193,6 +277,20 @@ export function UserPoolsPage({
       await refreshPools();
     } catch (err: any) {
       setPoolError(err?.message ?? 'Failed to rename pool.');
+    }
+  };
+
+  const handleMovePool = async (poolId: string, folderId: string) => {
+    if (!authUser || !isPro) {
+      setPoolError('Upgrade to Pro to organize pools.');
+      return;
+    }
+    setPoolError(null);
+    try {
+      await movePoolToFolder(poolId, folderId || null);
+      await refreshPools();
+    } catch (err: any) {
+      setPoolError(err?.message ?? 'Failed to move pool.');
     }
   };
 
@@ -507,10 +605,6 @@ export function UserPoolsPage({
 
   return (
     <div className="user-pools-page">
-      {gateMessage ? (
-        <div className="user-pools-empty">{gateMessage}</div>
-      ) : (
-        <>
       <header className="user-pools-header">
         <div>
           <h2>User Pools</h2>
@@ -530,9 +624,12 @@ export function UserPoolsPage({
 
       <div className="user-pools-guide">
         <div>
-          <strong>Quick start:</strong> Create a pool → add items → click “Add to Prompt”.
+          <strong>Quick start:</strong> Create a folder, add a pool, then build it with reusable items.
         </div>
       </div>
+
+      {gateMessage && <div className="user-pools-empty">{gateMessage}</div>}
+      {!gateMessage && poolError && <div className="user-pools-error">{poolError}</div>}
 
       <div className="user-pools-layout">
         <section className="user-pools-panel user-pools-panel-main">
@@ -541,69 +638,121 @@ export function UserPoolsPage({
               Pools
               <span className="user-pools-title-icon" aria-hidden="true" />
             </h3>
-                <button type="button" onClick={() => setIsRandomizerOpen(true)} disabled={poolsLoading}>
-                  Randomize
-                </button>
-          </div>
-          <div className="user-pools-create">
-            <input
-              type="text"
-              placeholder="Pool name"
-              value={newPoolName}
-              onChange={event => setNewPoolName(event.target.value)}
-            />
-            <button type="button" onClick={handleCreatePool}>
-              Create
+            <button type="button" onClick={() => setIsRandomizerOpen(true)} disabled={poolsLoading || !!gateMessage}>
+              Randomize
             </button>
           </div>
-          {poolError && <div className="user-pools-error">{poolError}</div>}
+          {!gateMessage && (
+            <>
+              <div className="user-pools-folder-create">
+                <input
+                  type="text"
+                  placeholder="Folder name"
+                  value={newFolderName}
+                  onChange={event => setNewFolderName(event.target.value)}
+                />
+                <button type="button" onClick={handleCreateFolder}>
+                  Create Folder
+                </button>
+              </div>
+              <div className="user-pools-create">
+                <input
+                  type="text"
+                  placeholder="Pool name"
+                  value={newPoolName}
+                  onChange={event => setNewPoolName(event.target.value)}
+                />
+                <select value={selectedFolderId} onChange={event => setSelectedFolderId(event.target.value)}>
+                  <option value="">No folder</option>
+                  {folders.map(folder => (
+                    <option key={folder.id} value={folder.id}>
+                      {folder.name}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" onClick={handleCreatePool}>
+                  Create
+                </button>
+              </div>
+            </>
+          )}
           <div className="user-pools-list">
             {poolsLoading ? (
-            <div className="user-pools-empty">Loading pools...</div>
-          ) : pools.length === 0 ? (
-            <div className="user-pools-empty">No pools yet. Create one above.</div>
-          ) : (
-              pools.map(pool => (
-                <div
-                  key={pool.id}
-                  className={`user-pools-row ${pool.id === activePoolId ? 'active' : ''}`}
-                >
+              <div className="user-pools-empty">Loading pools...</div>
+            ) : groupedPools.length === 0 ? (
+              <div className="user-pools-empty">No pools yet. Create one above.</div>
+            ) : (
+              groupedPools.map(group => (
+                <div key={group.id} className="user-pools-folder-group">
                   <button
                     type="button"
-                    className="user-pools-row-main"
-                    onClick={() => setActivePoolId(pool.id)}
+                    className="user-pools-folder-heading user-pools-folder-toggle"
+                    onClick={() => toggleFolderCollapsed(group.id)}
+                    aria-expanded={!collapsedFolderIds.has(group.id)}
                   >
-                    <div className="user-pools-row-name">{pool.name}</div>
-                    <div className="user-pools-row-meta">
-                      {pool.items.length} items • {new Date(pool.updatedAt).toLocaleDateString()}
-                    </div>
+                    <span className="user-pools-folder-title">
+                      <span className="user-pools-folder-caret">
+                        {collapsedFolderIds.has(group.id) ? '+' : '-'}
+                      </span>
+                      <span>{group.name}</span>
+                    </span>
+                    <span className="user-pools-folder-count">{group.pools.length}</span>
                   </button>
-                  <div className="user-pools-row-actions">
-                    {editingPoolId === pool.id ? (
-                      <>
-                        <input
-                          type="text"
-                          value={editingPoolName}
-                          onChange={event => setEditingPoolName(event.target.value)}
-                        />
-                        <button type="button" onClick={() => handleRenamePool(pool.id)}>
-                          Save
-                        </button>
-                        <button type="button" onClick={() => setEditingPoolId(null)}>
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button type="button" onClick={() => handleStartRename(pool)}>
-                          Rename
-                        </button>
-                        <button type="button" onClick={() => handleDeletePool(pool.id)}>
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </div>
+                  {!collapsedFolderIds.has(group.id) && (
+                    <div className="user-pools-folder-items">
+                      {group.pools.map(pool => {
+                        const isDefaultPool = defaultPools.some(defaultPool => defaultPool.id === pool.id);
+                        return (
+                          <div
+                            key={pool.id}
+                            className={`user-pools-row ${pool.id === activePoolId ? 'active' : ''}`}
+                          >
+                            <button
+                              type="button"
+                              className="user-pools-row-main"
+                              onClick={() => setActivePoolId(pool.id)}
+                            >
+                              <div className="user-pools-row-name">{pool.name}</div>
+                              {isDefaultPool && <span className="user-pools-default-inline-pill">Default</span>}
+                              <div className="user-pools-row-meta">
+                                {pool.items.length} items • {new Date(pool.updatedAt).toLocaleDateString()}
+                              </div>
+                            </button>
+                            <div className="user-pools-row-actions">
+                              {isDefaultPool ? (
+                                <button type="button" onClick={() => handleDuplicateDefaultPool(pool)}>
+                                  Copy
+                                </button>
+                              ) : editingPoolId === pool.id ? (
+                                <>
+                                  <input
+                                    type="text"
+                                    value={editingPoolName}
+                                    onChange={event => setEditingPoolName(event.target.value)}
+                                  />
+                                  <button type="button" onClick={() => handleRenamePool(pool.id)}>
+                                    Save
+                                  </button>
+                                  <button type="button" onClick={() => setEditingPoolId(null)}>
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button type="button" onClick={() => handleStartRename(pool)}>
+                                    Rename
+                                  </button>
+                                  <button type="button" onClick={() => handleDeletePool(pool.id)}>
+                                    Delete
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -620,10 +769,84 @@ export function UserPoolsPage({
           </div>
           {!activePool ? (
             <div className="user-pools-empty">Select a pool to view and add items.</div>
+          ) : isDefaultPoolSelected ? (
+            <>
+              <div className="user-pools-helper">
+                This is a default read-only pool inside the Default Pools folder. Copy it into your own library to edit or reuse it freely.
+              </div>
+              <div className="user-pools-filters">
+                <input
+                  type="text"
+                  placeholder="Search items"
+                  value={searchTerm}
+                  onChange={event => setSearchTerm(event.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Filter by tag"
+                  value={tagFilter}
+                  onChange={event => setTagFilter(event.target.value)}
+                />
+              </div>
+              <div className="user-pools-default-detail-actions">
+                <button type="button" onClick={() => handleDuplicateDefaultPool(activePool)}>
+                  Copy To My Pools
+                </button>
+              </div>
+              <div className="user-pools-items">
+                {filteredItems.length === 0 ? (
+                  <div className="user-pools-empty">No items match your search or tag filter.</div>
+                ) : (
+                  filteredItems.map(item => (
+                    <div key={item.id} className="user-pools-item">
+                      <div className="user-pools-item-content">
+                        <div className="user-pools-item-text">{item.text}</div>
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="user-pools-item-tags">{item.tags.join(', ')}</div>
+                        )}
+                        {item.note && <div className="user-pools-item-note">{item.note}</div>}
+                      </div>
+                      <div className="user-pools-item-actions">
+                        <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+                          Add to Prompt
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
+                            onAppendToPrompt?.(item.text, targetId);
+                          }}
+                        >
+                          Append
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
           ) : (
             <>
               <div className="user-pools-helper">
                 Add reusable prompt fragments here, then organize them with tags and notes.
+              </div>
+              <div className="user-pools-folder-assignment">
+                <label>
+                  Folder
+                  <select
+                    value={activePool.folderId ?? ''}
+                    onChange={event => {
+                      void handleMovePool(activePool.id, event.target.value);
+                    }}
+                  >
+                    <option value="">No folder</option>
+                    {folders.map(folder => (
+                      <option key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
               <div className="user-pools-filters">
                 <input
@@ -996,11 +1219,10 @@ export function UserPoolsPage({
           </div>
         </div>
       </Modal>
-        </>
-      )}
     </div>
   );
 }
+
 
 
 
