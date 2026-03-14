@@ -108,15 +108,16 @@ export function App() {
   const [modifiers, setModifiers] = useState<Map<string, Modifier>>(new Map());
   
   // UI State: Global weight enabled/disabled
-  const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(true);
+  const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(false);
   
   // UI State: User pool prompt additions
   const [poolPromptItems, setPoolPromptItems] = useState<Array<{ id: string; text: string }>>([]);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(new Map());
 
   // UI State: Freeform prompt text
-  const [freeformPrompt, setFreeformPrompt] = useState<string>('');
   const [exportMode, setExportMode] = useState<'structured' | 'clean' | 'structured_with_negative'>('clean');
+  const [editedPositiveOutput, setEditedPositiveOutput] = useState<string | null>(null);
+  const [editedNegativeOutput, setEditedNegativeOutput] = useState<string | null>(null);
   const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(new Map());
 
   // UI State: Clear prompt undo (single step)
@@ -126,7 +127,6 @@ export function App() {
     poolPromptItems: Array<{ id: string; text: string }>;
     poolOutputOverrides: Map<string, string>;
     selectionOutputOverrides: Map<string, string>;
-    freeformPrompt: string;
   } | null>(null);
   
   // UI State: Model Profile
@@ -1232,8 +1232,8 @@ export function App() {
     // Clear existing selections
     setSelections(new Map());
     setModifiers(new Map());
-    // Ensure weights remain enabled after randomize
-    setWeightsEnabledGlobal(true);
+    // Keep weights off by default after randomize unless the user enables them
+    setWeightsEnabledGlobal(false);
     setSelectionOutputOverrides(new Map());
 
     // Apply random selections
@@ -1325,15 +1325,13 @@ export function App() {
       poolPromptItems: [...poolPromptItems],
       poolOutputOverrides: new Map(poolOutputOverrides),
       selectionOutputOverrides: new Map(selectionOutputOverrides),
-      freeformPrompt,
     });
     setSelections(new Map());
     setModifiers(new Map());
     setPoolPromptItems([]);
     setPoolOutputOverrides(new Map());
     setSelectionOutputOverrides(new Map());
-    setFreeformPrompt('');
-  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, freeformPrompt]);
+  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides]);
 
   const handleUndoClearPrompt = useCallback(() => {
     if (!clearUndoState) return;
@@ -1342,9 +1340,13 @@ export function App() {
     setPoolPromptItems([...clearUndoState.poolPromptItems]);
     setPoolOutputOverrides(new Map(clearUndoState.poolOutputOverrides));
     setSelectionOutputOverrides(new Map(clearUndoState.selectionOutputOverrides));
-    setFreeformPrompt(clearUndoState.freeformPrompt);
     setClearUndoState(null);
   }, [clearUndoState]);
+
+  const handleEditedOutputChange = useCallback((positive: string | null, negative: string | null) => {
+    setEditedPositiveOutput(positive);
+    setEditedNegativeOutput(negative);
+  }, []);
 
   // Convert Map state to props format for children
   const selectionsMap = new Map<string, { isEnabled: boolean; customExtension: string | null }>();
@@ -1654,12 +1656,13 @@ export function App() {
           onRandomizePoolItems={handleRandomizePoolItems}
           prompt={prompt}
           customAdditions={poolAdditionTexts}
+          editedPositive={editedPositiveOutput}
+          editedNegative={editedNegativeOutput}
+          onEditedOutputChange={handleEditedOutputChange}
           additionItems={poolAdditionItems}
           onClearPrompt={handleClearPrompt}
           onUndoClearPrompt={handleUndoClearPrompt}
           canUndoClearPrompt={Boolean(clearUndoState)}
-          freeformPrompt={freeformPrompt}
-          onFreeformPromptChange={setFreeformPrompt}
           authUser={authUser}
           authReady={authReady}
           isPro={isPro}
@@ -1679,8 +1682,9 @@ export function App() {
           manualUrl={manualUrl}
           prompt={prompt}
           customAdditions={poolAdditionTexts}
-          freeformPrompt={freeformPrompt}
-          onFreeformPromptChange={setFreeformPrompt}
+          editedPositive={editedPositiveOutput}
+          editedNegative={editedNegativeOutput}
+          onEditedOutputChange={handleEditedOutputChange}
           onClearPrompt={handleClearPrompt}
           onUndoClearPrompt={handleUndoClearPrompt}
           canUndoClearPrompt={Boolean(clearUndoState)}
@@ -1852,27 +1856,12 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
-                <div className="freeform-prompt-panel">
-                  <div className="freeform-prompt-header">
-                    <h3>Freeform Prompt</h3>
-                    <span>Optional custom text</span>
-                  </div>
-                  <p className="freeform-prompt-help">
-                    Optional custom text to add on top of your built prompt.
-                  </p>
-                  <textarea
-                    rows={4}
-                    placeholder="Add optional custom text..."
-                    value={freeformPrompt}
-                    onChange={event => setFreeformPrompt(event.target.value)}
-                  />
-              </div>
               <PromptPreview 
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
-                freeformPrompt={freeformPrompt}
                 exportMode={exportMode}
                 onExportModeChange={setExportMode}
+                onEditedOutputChange={handleEditedOutputChange}
                 onClear={handleClearPrompt}
                 onUndoClear={handleUndoClearPrompt}
                 canUndoClear={Boolean(clearUndoState)}
@@ -1880,6 +1869,8 @@ export function App() {
               <PromptLibrary
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
+                editedPositive={editedPositiveOutput}
+                editedNegative={editedNegativeOutput}
                 onAddToPrompt={handleAddPoolItem}
                 authUser={authUser}
                 isPro={isPro}

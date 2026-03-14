@@ -99,6 +99,17 @@
   cursor: not-allowed;
 }
 
+.prompt-preview-action-button-primary {
+  background: rgba(110, 86, 249, 0.18);
+  border-color: rgba(110, 86, 249, 0.45);
+  color: #f5f3ff;
+}
+
+.prompt-preview-action-button-primary:hover:not(:disabled) {
+  background: rgba(110, 86, 249, 0.28);
+  border-color: rgba(110, 86, 249, 0.7);
+}
+
 .prompt-preview-action-button-danger {
   border-color: rgba(248, 113, 113, 0.4);
   color: #fecaca;
@@ -192,6 +203,43 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+}
+
+.prompt-preview-edit-notice {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d7dbea;
+  font-size: 12px;
+}
+
+.prompt-preview-edited-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-bottom: 16px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #c7f9df;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.prompt-preview-edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.prompt-preview-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .prompt-preview-section {

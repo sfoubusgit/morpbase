@@ -5,8 +5,9 @@ import './PromptsPage.css';
 type PromptsPageProps = {
   prompt?: any | null;
   customAdditions?: string[];
-  freeformPrompt?: string;
-  onFreeformPromptChange?: (value: string) => void;
+  editedPositive?: string | null;
+  editedNegative?: string | null;
+  onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
   onClearPrompt?: () => void;
   onUndoClearPrompt?: () => void;
   canUndoClearPrompt?: boolean;
@@ -19,8 +20,9 @@ type PromptsPageProps = {
 export function PromptsPage({
   prompt,
   customAdditions = [],
-  freeformPrompt = '',
-  onFreeformPromptChange,
+  editedPositive,
+  editedNegative,
+  onEditedOutputChange,
   onClearPrompt,
   onUndoClearPrompt,
   canUndoClearPrompt = false,
@@ -53,6 +55,8 @@ export function PromptsPage({
           <PromptLibrary
             prompt={prompt ?? null}
             customAdditions={customAdditions}
+            editedPositive={editedPositive}
+            editedNegative={editedNegative}
             onAddToPrompt={onAddToPrompt}
             authUser={authUser}
             isPro={isPro}
@@ -72,7 +76,7 @@ export function PromptsPage({
           <PromptPreview
             prompt={prompt ?? null}
             customAdditions={customAdditions}
-            freeformPrompt={freeformPrompt}
+            onEditedOutputChange={onEditedOutputChange}
             onClear={onClearPrompt}
             onUndoClear={onUndoClearPrompt}
             canUndoClear={canUndoClearPrompt}

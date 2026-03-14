@@ -26,12 +26,13 @@ type UserPoolsPageProps = {
   onRandomizePoolItems?: (items: string[]) => void;
   prompt?: any | null;
   customAdditions?: string[];
+  editedPositive?: string | null;
+  editedNegative?: string | null;
+  onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
   additionItems?: Array<{ id: string; text: string }>;
   onClearPrompt?: () => void;
   onUndoClearPrompt?: () => void;
   canUndoClearPrompt?: boolean;
-  freeformPrompt?: string;
-  onFreeformPromptChange?: (value: string) => void;
   authUser?: { id: string } | null;
   authReady?: boolean;
   isPro?: boolean;
@@ -44,12 +45,13 @@ export function UserPoolsPage({
   onRandomizePoolItems,
   prompt,
   customAdditions = [],
+  editedPositive,
+  editedNegative,
+  onEditedOutputChange,
   additionItems = [],
   onClearPrompt,
   onUndoClearPrompt,
   canUndoClearPrompt = false,
-  freeformPrompt = '',
-  onFreeformPromptChange,
   authUser,
   authReady = false,
   isPro = false,
@@ -1059,25 +1061,10 @@ export function UserPoolsPage({
           <div className="user-pools-panel-header">
             <h3>Main Prompt</h3>
           </div>
-          <div className="freeform-prompt-panel">
-            <div className="freeform-prompt-header">
-              <h3>Freeform Prompt</h3>
-              <span>Optional custom text</span>
-            </div>
-            <p className="freeform-prompt-help">
-              Optional custom text to add on top of your built prompt.
-            </p>
-            <textarea
-              rows={4}
-              placeholder="Add optional custom text..."
-              value={freeformPrompt}
-              onChange={event => onFreeformPromptChange?.(event.target.value)}
-            />
-          </div>
           <PromptPreview
             prompt={prompt ?? null}
             customAdditions={customAdditions}
-            freeformPrompt={freeformPrompt}
+            onEditedOutputChange={onEditedOutputChange}
             onClear={onClearPrompt}
             onUndoClear={onUndoClearPrompt}
             canUndoClear={canUndoClearPrompt}
@@ -1085,6 +1072,8 @@ export function UserPoolsPage({
           <PromptLibrary
             prompt={prompt ?? null}
             customAdditions={customAdditions}
+            editedPositive={editedPositive}
+            editedNegative={editedNegative}
             onAddToPrompt={onAddToPrompt}
             authUser={authUser}
             manualUrl={manualUrl}

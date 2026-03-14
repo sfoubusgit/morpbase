@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './PromptPreview.css';
 
 const SECTION_HEADER_MAP: Record<string, string> = {
@@ -30,16 +31,15 @@ interface PromptPreviewProps {
   prompt: any | null;
   onCopy?: () => void;
   customAdditions?: string[];
-  freeformPrompt?: string;
   exportMode?: PromptExportMode;
   onExportModeChange?: (mode: PromptExportMode) => void;
+  onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
   onClear?: () => void;
   onUndoClear?: () => void;
   canUndoClear?: boolean;
 }
 
 interface ParsedFragment {
-  raw: string;
   normalized: string;
   text: string;
   weight: number | null;
@@ -80,7 +80,6 @@ function parseFragment(fragment: string): ParsedFragment {
     const text = attentionMatch[1].trim();
     const weight = Number.parseFloat(attentionMatch[2]);
     return {
-      raw: trimmed,
       normalized: text.toLowerCase().replace(/\s+/g, ' '),
       text,
       weight: Number.isFinite(weight) ? weight : null,
@@ -88,7 +87,6 @@ function parseFragment(fragment: string): ParsedFragment {
   }
 
   return {
-    raw: trimmed,
     normalized: trimmed.toLowerCase().replace(/\s+/g, ' '),
     text: trimmed,
     weight: null,
@@ -169,55 +167,143 @@ export function PromptPreview({
   prompt,
   onCopy,
   customAdditions = [],
-  freeformPrompt = '',
   exportMode = 'clean',
   onExportModeChange,
+  onEditedOutputChange,
   onClear,
   onUndoClear,
   canUndoClear = false,
 }: PromptPreviewProps) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedPositive, setEditedPositive] = useState<string | null>(null);
+  const [editedNegative, setEditedNegative] = useState<string | null>(null);
+  const [draftPositive, setDraftPositive] = useState('');
+  const [draftNegative, setDraftNegative] = useState('');
+  const [editNotice, setEditNotice] = useState<string | null>(null);
+  const [editSnapshot, setEditSnapshot] = useState<{ positive: string | null; negative: string | null }>({
+    positive: null,
+    negative: null,
+  });
+
   const displayPositive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
   const displayNegative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
   const additionsText = customAdditions.filter(Boolean).join(', ');
-  const freeformText = freeformPrompt.trim();
-
-  const combinedPositive = joinNonEmpty([displayPositive, additionsText], ', ');
-  const mergedPositive = joinNonEmpty([freeformText, combinedPositive], ', ');
-
-  const cleanedCombinedPositive = cleanPromptText(combinedPositive);
-  const cleanedPositive = joinNonEmpty([freeformText, cleanedCombinedPositive], ', ');
+  const mergedPositive = joinNonEmpty([displayPositive, additionsText], ', ');
+  const cleanedPositive = cleanPromptText(mergedPositive);
   const cleanedNegative = cleanPromptText(displayNegative);
-
   const structuredPositive = formatStructuredPrompt(prompt, additionsText) || mergedPositive;
-  const usesStructuredDisplay = exportMode === 'structured' || exportMode === 'structured_with_negative';
-  const currentPositive = exportMode === 'clean' ? cleanedPositive : mergedPositive;
-  const currentNegative = exportMode === 'clean' ? cleanedNegative : displayNegative;
+
+  const generatedPositiveForMode = exportMode === 'clean' ? cleanedPositive : structuredPositive;
+  const generatedNegativeForMode = exportMode === 'clean' ? cleanedNegative : displayNegative;
+  const hasEditedOutput = editedPositive !== null || editedNegative !== null;
+  const currentPositive = editedPositive ?? generatedPositiveForMode;
+  const currentNegative = editedNegative ?? generatedNegativeForMode;
   const shouldIncludeNegativeInCopy = exportMode === 'structured_with_negative';
+  const sourceSignature = useMemo(
+    () => JSON.stringify([displayPositive, displayNegative, additionsText, exportMode, structuredPositive, cleanedPositive, cleanedNegative]),
+    [displayPositive, displayNegative, additionsText, exportMode, structuredPositive, cleanedPositive, cleanedNegative]
+  );
+  const previousSourceSignature = useRef(sourceSignature);
+
+  useEffect(() => {
+    if (previousSourceSignature.current === sourceSignature) {
+      return;
+    }
+
+    const hadManualEdits = isEditMode || hasEditedOutput;
+    previousSourceSignature.current = sourceSignature;
+
+    if (hadManualEdits) {
+      setIsEditMode(false);
+      setEditedPositive(null);
+      setEditedNegative(null);
+      setDraftPositive('');
+      setDraftNegative('');
+      setEditNotice('Edited output was reset because the prompt changed.');
+      onEditedOutputChange?.(null, null);
+    }
+  }, [sourceSignature, isEditMode, hasEditedOutput, onEditedOutputChange]);
+
+  const handleEnterEditMode = () => {
+    setEditSnapshot({
+      positive: editedPositive,
+      negative: editedNegative,
+    });
+    setDraftPositive(currentPositive);
+    setDraftNegative(currentNegative);
+    setEditNotice(null);
+    setIsEditMode(true);
+  };
+
+  const handleApplyEdits = () => {
+    const nextPositive = draftPositive.trim();
+    const nextNegative = draftNegative.trim();
+    setEditedPositive(nextPositive);
+    setEditedNegative(nextNegative);
+    onEditedOutputChange?.(nextPositive, nextNegative);
+    setIsEditMode(false);
+  };
+
+  const handleCancelEdits = () => {
+    setEditedPositive(editSnapshot.positive);
+    setEditedNegative(editSnapshot.negative);
+    onEditedOutputChange?.(editSnapshot.positive, editSnapshot.negative);
+    setDraftPositive('');
+    setDraftNegative('');
+    setIsEditMode(false);
+  };
+
+  const handleResetEditedOutput = () => {
+    setEditedPositive(null);
+    setEditedNegative(null);
+    setDraftPositive('');
+    setDraftNegative('');
+    setIsEditMode(false);
+    setEditNotice(null);
+    onEditedOutputChange?.(null, null);
+  };
+
+  const handleDraftPositiveChange = (value: string) => {
+    setDraftPositive(value);
+    const nextPositive = value.trim();
+    const nextNegative = draftNegative.trim();
+    setEditedPositive(nextPositive);
+    setEditedNegative(nextNegative);
+    onEditedOutputChange?.(nextPositive, nextNegative);
+  };
+
+  const handleDraftNegativeChange = (value: string) => {
+    setDraftNegative(value);
+    const nextPositive = draftPositive.trim();
+    const nextNegative = value.trim();
+    setEditedPositive(nextPositive);
+    setEditedNegative(nextNegative);
+    onEditedOutputChange?.(nextPositive, nextNegative);
+  };
 
   const handleCopy = () => {
-    const positiveForCopy = exportMode === 'clean' ? cleanedPositive : structuredPositive;
-    const negativeForCopy = exportMode === 'clean' ? cleanedNegative : displayNegative;
-    const hasPositive = Boolean(positiveForCopy.trim());
-    const hasNegative = Boolean(negativeForCopy.trim());
-
+    const hasPositive = Boolean(currentPositive.trim());
+    const hasNegative = Boolean(currentNegative.trim());
     if (!hasPositive && !hasNegative) return;
 
     const exportText = shouldIncludeNegativeInCopy && hasNegative
-      ? `${positiveForCopy}\n\nNEGATIVE PROMPT:\n${negativeForCopy}`
-      : positiveForCopy;
+      ? `${currentPositive}\n\nNEGATIVE PROMPT:\n${currentNegative}`
+      : currentPositive;
 
     navigator.clipboard.writeText(exportText).catch(() => {
-      // Silent fail - copy functionality is optional
+      // Silent fail
     });
     onCopy?.();
   };
+
+  const showStructuredSections = !hasEditedOutput && !isEditMode && exportMode !== 'clean' && prompt && 'sections' in prompt && prompt.sections && Object.keys(prompt.sections).length > 0;
 
   return (
     <div className="prompt-preview">
       <div className="prompt-preview-header">
         <div className="prompt-preview-heading">
           <h3 className="prompt-preview-title">Prompt Preview</h3>
-          <p className="prompt-preview-subtitle">Your final prompt, updated as you build.</p>
+          <p className="prompt-preview-subtitle">Build first, then edit the final output if you want to refine it manually.</p>
         </div>
         <div className="prompt-preview-header-controls">
           <div className="prompt-preview-mode">
@@ -235,6 +321,16 @@ export function PromptPreview({
               <option value="structured_with_negative">Structured + Negative</option>
             </select>
           </div>
+          {!isEditMode && (
+            <button
+              type="button"
+              className="prompt-preview-action-button prompt-preview-action-button-primary"
+              onClick={handleEnterEditMode}
+              disabled={!currentPositive && !currentNegative}
+            >
+              Edit Output
+            </button>
+          )}
           {(onClear || onUndoClear) && (
             <div className="prompt-preview-action-buttons">
               {onUndoClear && (
@@ -277,19 +373,49 @@ export function PromptPreview({
             : 'Structured + Negative copies both the positive and negative prompt together.'}
       </div>
 
+      {editNotice && <div className="prompt-preview-edit-notice">{editNotice}</div>}
+      {hasEditedOutput && !isEditMode && (
+        <div className="prompt-preview-edited-badge">Edited Output</div>
+      )}
+
       <div className="prompt-preview-content">
-        {usesStructuredDisplay && prompt && 'sections' in prompt && prompt.sections && Object.keys(prompt.sections).length > 0 ? (
+        {isEditMode ? (
+          <div className="prompt-preview-edit-mode">
+            <div className="prompt-preview-section">
+              <label className="prompt-preview-label">Prompt</label>
+              <textarea
+                className="prompt-preview-textarea"
+                rows={7}
+                value={draftPositive}
+                onChange={event => handleDraftPositiveChange(event.target.value)}
+              />
+            </div>
+            <div className="prompt-preview-section prompt-preview-section-negative">
+              <label className="prompt-preview-label">Negative Prompt</label>
+              <textarea
+                className="prompt-preview-textarea prompt-preview-textarea-negative"
+                rows={5}
+                value={draftNegative}
+                onChange={event => handleDraftNegativeChange(event.target.value)}
+              />
+            </div>
+            <div className="prompt-preview-edit-actions">
+              <button type="button" className="prompt-preview-action-button prompt-preview-action-button-primary" onClick={handleApplyEdits}>
+                Apply Edits
+              </button>
+              <button type="button" className="prompt-preview-action-button" onClick={handleCancelEdits}>
+                Cancel
+              </button>
+              <button type="button" className="prompt-preview-action-button" onClick={handleResetEditedOutput}>
+                Reset to Generated
+              </button>
+            </div>
+          </div>
+        ) : showStructuredSections ? (
           <div className="prompt-preview-sections">
-            {freeformText && (
-              <div className="prompt-preview-section">
-                <label className="prompt-preview-section-label">Freeform</label>
-                <div className="prompt-preview-section-text">{freeformText}</div>
-              </div>
-            )}
             {SECTION_ORDER.map(sectionKey => {
               const sectionValue = prompt.sections?.[sectionKey as keyof typeof prompt.sections];
               if (!sectionValue) return null;
-
               return (
                 <div key={sectionKey} className="prompt-preview-section">
                   <label className="prompt-preview-section-label">{SECTION_HEADER_MAP[sectionKey]}:</label>
@@ -297,7 +423,7 @@ export function PromptPreview({
                 </div>
               );
             })}
-            {!freeformText && additionsText && (
+            {additionsText && (
               <div className="prompt-preview-section">
                 <label className="prompt-preview-section-label">Custom</label>
                 <div className="prompt-preview-section-text">{additionsText}</div>
@@ -324,7 +450,7 @@ export function PromptPreview({
         )}
       </div>
 
-      {(currentPositive || currentNegative) && (
+      {(currentPositive || currentNegative) && !isEditMode && (
         <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
           <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
             {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}

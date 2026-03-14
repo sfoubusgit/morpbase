@@ -12,6 +12,8 @@ import './PromptLibrary.css';
 type PromptLibraryProps = {
   prompt: any | null;
   customAdditions?: string[];
+  editedPositive?: string | null;
+  editedNegative?: string | null;
   onAddToPrompt?: (text: string) => void;
   authUser?: { id: string } | null;
   isPro?: boolean;
@@ -42,7 +44,12 @@ const saveLocalPrompts = (prompts: SavedPrompt[]) => {
   }
 };
 
-const buildPromptText = (prompt: any, customAdditions: string[]) => {
+const buildPromptText = (
+  prompt: any,
+  customAdditions: string[],
+  editedPositive?: string | null,
+  editedNegative?: string | null
+) => {
   const additionsText = customAdditions.filter(Boolean).join(', ');
   const positive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
   const combinedPositive = positive
@@ -51,16 +58,20 @@ const buildPromptText = (prompt: any, customAdditions: string[]) => {
       : positive
     : additionsText;
   const negative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
+  const effectivePositive = editedPositive ?? combinedPositive;
+  const effectiveNegative = editedNegative ?? negative;
   return {
-    positive: combinedPositive,
-    negative,
-    full: negative ? `${combinedPositive}\n\nNEGATIVE PROMPT:\n${negative}` : combinedPositive,
+    positive: effectivePositive,
+    negative: effectiveNegative,
+    full: effectiveNegative ? `${effectivePositive}\n\nNEGATIVE PROMPT:\n${effectiveNegative}` : effectivePositive,
   };
 };
 
 export function PromptLibrary({
   prompt,
   customAdditions = [],
+  editedPositive,
+  editedNegative,
   onAddToPrompt,
   authUser,
   isPro = false,
@@ -79,7 +90,10 @@ export function PromptLibrary({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const currentText = useMemo(() => buildPromptText(prompt, customAdditions), [prompt, customAdditions]);
+  const currentText = useMemo(
+    () => buildPromptText(prompt, customAdditions, editedPositive, editedNegative),
+    [prompt, customAdditions, editedPositive, editedNegative]
+  );
 
   const refresh = async () => {
     try {
