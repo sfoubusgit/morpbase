@@ -126,6 +126,10 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   margin-right: 4px;
   color: #ffffff;
   flex-shrink: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
 }
 
 .app-page-brand-icon {
@@ -140,6 +144,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.app-page-brand:hover .app-page-brand-text,
+.app-page-brand:hover .app-page-brand-icon {
+  color: #ffffff;
+  opacity: 0.9;
 }
 
 .app-page-toggle-auth-hint {
