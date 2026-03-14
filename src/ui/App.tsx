@@ -47,7 +47,6 @@ import {
   registerUser,
   updateUserName,
 } from '../engine/authStore';
-import { captureError } from '../engine/errorTracker';
 import {
   addWorkingSetItem,
   clearWorkingSetCategory,
@@ -134,19 +133,7 @@ export function App() {
   const [authUser, setAuthUser] = useState<Awaited<ReturnType<typeof getCurrentUser>>>(null);
   const [authReady, setAuthReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const envDevMode = import.meta.env.VITE_DEV_MODE === '1';
-  const [devModeOverride, setDevModeOverride] = useState<boolean | null>(() => {
-    try {
-      const raw = window.localStorage.getItem('morpbase:dev_mode');
-      if (raw === '1') return true;
-      if (raw === '0') return false;
-      return null;
-    } catch {
-      return null;
-    }
-  });
-  const isDevMode = devModeOverride ?? envDevMode;
-  const [isPro] = useState<boolean>(isDevMode);
+  const isPro = false;
   const manualUrl = `${import.meta.env.BASE_URL}manual.html`;
   const manualLink = (anchor: string) => `${manualUrl}#${anchor}`;
   const feedbackSchema = `Feedback Schema (v1)
@@ -1479,59 +1466,18 @@ export function App() {
         <LandingPage manualUrl={manualUrl} onEnter={handleEnterApp} />
       ) : (
       <>
-      {isDevMode && (
-        <div className="app-dev-banner">
-          <span>DEV MODE: All features unlocked</span>
-          <button
-            type="button"
-            className="app-dev-toggle"
-            onClick={() => {
-              captureError(new Error('Manual test error'), { source: 'DevTest' });
-            }}
-          >
-            Test Error
-          </button>
-          <button
-            type="button"
-            className="app-dev-toggle"
-            onClick={() => {
-              const next = false;
-              setDevModeOverride(next);
-              try {
-                window.localStorage.setItem('morpbase:dev_mode', next ? '1' : '0');
-              } catch {
-                // ignore
-              }
-              window.location.reload();
-            }}
-          >
-            Disable
-          </button>
-        </div>
-      )}
-      {!isDevMode && envDevMode && (
-        <div className="app-dev-banner">
-          <span>DEV MODE is OFF (override)</span>
-          <button
-            type="button"
-            className="app-dev-toggle"
-            onClick={() => {
-              const next = true;
-              setDevModeOverride(next);
-              try {
-                window.localStorage.setItem('morpbase:dev_mode', next ? '1' : '0');
-              } catch {
-                // ignore
-              }
-              window.location.reload();
-            }}
-          >
-            Enable
-          </button>
-        </div>
-      )}
       <div className="app-page-toggle">
         <div className="app-page-toggle-left">
+          <div className="app-page-brand" aria-label="MorpBase">
+            <span className="app-page-brand-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
+            <span className="app-page-brand-text">MORPBASE</span>
+          </div>
           {authReady && authUser ? (
             <>
               <button
@@ -1712,6 +1658,7 @@ export function App() {
           isPro={isPro}
         />
       ) : (
+        <>
         <div className="interview-layout">
               <CategorySidebar
                 categoryMap={CATEGORY_MAP}
@@ -1894,7 +1841,7 @@ export function App() {
                     <h3 className="random-prompt-description-title">What is this tool?</h3>
                     <p className="random-prompt-description-text">
                       The <strong>Random Prompt Generator</strong> helps you quickly create diverse, well-structured prompts without manually selecting every detail. 
-                      Simply choose which categories interest you (like "Style", "Lighting", or "Subject"), and the tool will randomly combine attributes from those categories 
+                      Simply choose which parts of the Builder interest you most, from defining the subject to refining lighting and finishing the look, and the tool will randomly combine attributes from those categories 
                       to generate a complete prompt ready to use in Stable Diffusion.
                     </p>
                     <p className="random-prompt-description-text">
@@ -1931,7 +1878,7 @@ export function App() {
                   <p>
                     This tool helps you build high-quality text prompts for image generation models such as Stable Diffusion.
                     Instead of writing a long, complex prompt from scratch, you answer a series of focused questions
-                    about your image (Subject, Style, Lighting, Camera, Environment, Quality, Effects, and more).
+                    about your image in three stages: define the main idea, refine the look, and finish the result only if needed.
                   </p>
                   <p>
                     Want the full guide? Open the manual section on the Builder.
@@ -1946,20 +1893,23 @@ export function App() {
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">How It Works</h3>
                   <p>
-                    Each answer you choose adds structured pieces to your final prompt—for example, who or what is in the scene,
-                    how it should look (art style or realism), how it should be lit, and how the camera should frame it.
-                    The prompt preview on the right updates as you go, so you can see exactly what will be sent to the model.
+                    Start by defining the image with the core pillars: who or what is in the scene, where it exists, and what visual language it should follow.
+                    Then refine the look with lighting, camera framing, and actions. Finish with extra polish only when you need it.
+                  </p>
+                  <p>
+                    Each answer you choose adds structured pieces to your final prompt, and the prompt preview on the right updates as you go,
+                    so you can see exactly what will be sent to the model.
                   </p>
                 </section>
 
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">Navigating the Interface</h3>
                   <p>
-                    <strong>Next Button:</strong> Move through questions sequentially, going through all categories and subcategories in order.
+                    <strong>Next Button:</strong> Move through the Builder in order, starting with the main image definition and then moving into refinement.
                   </p>
                   <p>
                     <strong>Category Sidebar:</strong> Jump directly to any category or subcategory by clicking on it in the left sidebar.
-                    The sidebar shows which categories you've visited and which have selections.
+                    The sidebar is grouped into Define, Refine, and Finish so it is easier to see what matters first.
                   </p>
                   <p>
                     <strong>Prompt Preview:</strong> Watch your prompt build in real-time on the right side as you make selections.
@@ -2011,6 +1961,7 @@ export function App() {
             </Modal>
           </div>
         </div>
+        </>
       )}
       </>
       )}

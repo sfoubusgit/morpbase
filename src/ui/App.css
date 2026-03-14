@@ -54,43 +54,6 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   overflow: hidden;
 }
 
-.app-dev-banner {
-  background: #1f1b2e;
-  color: #e9ddff;
-  border: 1px solid rgba(110, 86, 249, 0.35);
-  border-radius: 10px;
-  padding: 8px 12px;
-  margin: 12px 16px 0 16px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  text-align: center;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.app-dev-toggle {
-  background: rgba(110, 86, 249, 0.2);
-  border: 1px solid rgba(110, 86, 249, 0.5);
-  color: #e9ddff;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  cursor: pointer;
-}
-
-.app-dev-toggle:hover {
-  background: rgba(110, 86, 249, 0.35);
-}
-
 .app-root::before {
   content: '';
   position: fixed;
@@ -127,6 +90,11 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   z-index: 1;
 }
 
+.app-shell {
+  position: relative;
+  z-index: 1;
+}
+
 .app-page-toggle {
   display: flex;
   align-items: center;
@@ -151,6 +119,29 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   min-width: 0;
 }
 
+.app-page-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 4px;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.app-page-brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f82ff;
+}
+
+.app-page-brand-text {
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .app-page-toggle-auth-hint {
   display: inline-flex;
   align-items: center;
@@ -166,11 +157,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  flex: 1 1 520px;
+  flex: 0 1 auto;
   justify-content: flex-end;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  width: fit-content;
+  max-width: none;
+  min-width: auto;
+  margin-left: auto;
   padding: 4px;
   border-radius: 999px;
   background: rgba(22, 22, 28, 0.9);
@@ -244,7 +236,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 
 .interview-layout {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 72px);
+}
+
+.builder-shell {
+  position: relative;
+  z-index: 1;
 }
 
 .interview-container {

@@ -58,6 +58,36 @@ interface CategorySidebarProps {
   activeWorkingSetName?: string | null;
 }
 
+interface StageDefinition {
+  id: string;
+  label: string;
+  hint: string;
+  categories: string[];
+}
+
+const CATEGORY_STAGES: StageDefinition[] = [
+  {
+    id: 'define',
+    label: 'Define',
+    hint: 'Start with the main idea of the image.',
+    categories: ['subject', 'style', 'environment'],
+  },
+  {
+    id: 'refine',
+    label: 'Refine',
+    hint: 'Shape mood, framing, and subject behavior.',
+    categories: ['lighting', 'camera', 'actions'],
+  },
+  {
+    id: 'finish',
+    label: 'Finish',
+    hint: 'Add polish and advanced detail only if needed.',
+    categories: ['quality', 'effects', 'post-processing', 'anatomy-details'],
+  },
+];
+
+const ADVANCED_CATEGORY_IDS = new Set(['post-processing', 'anatomy-details']);
+
 /**
  * Helper to get display name for category
  */
@@ -113,6 +143,9 @@ export function CategorySidebar({
 }: CategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
+  const [expandedStages, setExpandedStages] = useState<Set<string>>(
+    new Set(['define', 'refine'])
+  );
 
   // Check if a category has selections
   const hasCommitted = (nodeIds: string[]): boolean => {
@@ -165,6 +198,19 @@ export function CategorySidebar({
     });
   };
 
+  const toggleStage = (stageId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedStages(prev => {
+      const next = new Set(prev);
+      if (next.has(stageId)) {
+        next.delete(stageId);
+      } else {
+        next.add(stageId);
+      }
+      return next;
+    });
+  };
+
   // Check if a category item has committed selections
   const itemHasCommitted = (item: CategoryItem): boolean => {
     const nodeIds: string[] = [];
@@ -190,156 +236,191 @@ export function CategorySidebar({
 
   return (
     <div className="category-sidebar">
-      <div className="category-sidebar-logo">
-        <div className="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <div className="logo-text">
-          <span className="logo-text-main">MORPBASE</span>
-        </div>
-      </div>
       <div className="category-sidebar-content">
-        <div className="category-sidebar-header">
-          <div className="category-sidebar-divider"></div>
-        </div>
         <div className="category-sidebar-list">
           <div className="category-sidebar-title-wrapper">
-            <h3 className="category-sidebar-title">Categories</h3>
+            <h3 className="category-sidebar-title">Builder Flow</h3>
           </div>
           {activeWorkingSetName && (
             <div className="category-sidebar-hint">
               <strong>{activeWorkingSetName}</strong> is filtering the Builder by category.
             </div>
           )}
-          {Object.entries(categoryMap).map(([categoryId, items]) => {
-            const allNodeIds = collectNodeIds(items);
-            const visited = hasCommitted(allNodeIds);
-            const active = isCategoryActive(items);
-            const firstNode = items[0]?.nodeId || items[0]?.subcategories?.[0]?.nodeId;
-            const isExpanded = expandedCategories.has(categoryId);
+          {CATEGORY_STAGES.map(stage => {
+            const stageEntries = stage.categories
+              .map(categoryId => [categoryId, categoryMap[categoryId]] as const)
+              .filter(([, items]) => Array.isArray(items) && items.length > 0);
+
+            if (stageEntries.length === 0) {
+              return null;
+            }
+
+            const isStageExpanded = expandedStages.has(stage.id);
 
             return (
-              <div key={categoryId} className="category-group">
-                <div
-                  className={`category-item ${visited ? "visited" : ""} ${active ? "active" : ""}`}
-                  onClick={() => firstNode && onJumpToCategory(firstNode)}
-                  title={`Jump to ${getCategoryDisplayName(categoryId)}`}
-                >
-                  <div className="category-item-main">
-                    <span className="category-item-label">
-                      {getCategoryDisplayName(categoryId)}
-                    </span>
-                    {visited && <span className="dot-indicator" title="Has committed selections" />}
+              <section key={stage.id} className="category-stage">
+                <div className="category-stage-header">
+                  <div className="category-stage-labels">
+                    <h4 className="category-stage-title">{stage.label}</h4>
+                    <p className="category-stage-hint">{stage.hint}</p>
                   </div>
                   <button
-                    className={`category-expand-button ${isExpanded ? "expanded" : ""}`}
-                    onClick={(e) => toggleCategory(categoryId, e)}
-                    title={isExpanded ? "Collapse" : "Expand"}
+                    className={`category-expand-button category-stage-toggle ${isStageExpanded ? "expanded" : ""}`}
+                    onClick={(e) => toggleStage(stage.id, e)}
+                    title={isStageExpanded ? "Collapse section" : "Expand section"}
                   >
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </button>
                 </div>
-                {isExpanded && (
-                  <div className="category-dropdown">
-                    {items.map((item, index) => {
-                      const itemKey = `${categoryId}-${index}`;
-                      const hasSubcategories = item.subcategories && item.subcategories.length > 0;
-                      const isSubcategoryExpanded = expandedSubcategories.has(itemKey);
-                      const itemNodeIds = item.nodeId ? [item.nodeId] : [];
-                      if (item.subcategories) {
-                        item.subcategories.forEach(sub => {
-                          if (sub.nodeId) itemNodeIds.push(sub.nodeId);
-                          if (sub.subcategories) {
-                            sub.subcategories.forEach(nested => {
-                              if (nested.nodeId) itemNodeIds.push(nested.nodeId);
-                            });
-                          }
-                        });
-                      }
-                      const itemVisited = itemNodeIds.length > 0 && hasCommitted(itemNodeIds);
-                      const itemActive = item.nodeId ? isNodeActive(item.nodeId) : false;
+                {isStageExpanded && (
+                  <div className="category-stage-list">
+                    {stageEntries.map(([categoryId, items]) => {
+                      const allNodeIds = collectNodeIds(items);
+                      const visited = hasCommitted(allNodeIds);
+                      const active = isCategoryActive(items);
+                      const firstNode = items[0]?.nodeId || items[0]?.subcategories?.[0]?.nodeId;
+                      const isExpanded = expandedCategories.has(categoryId);
+                      const isAdvancedCategory = ADVANCED_CATEGORY_IDS.has(categoryId);
 
                       return (
-                        <div key={itemKey} className="category-subcategory-group">
+                        <div key={categoryId} className="category-group">
                           <div
-                            className={`category-dropdown-item ${itemActive ? "active" : ""} ${itemVisited ? "visited" : ""} ${hasSubcategories ? "has-subcategories" : ""}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              console.log('[CategorySidebar] Item clicked:', item.label, 'nodeId:', item.nodeId, 'hasSubcategories:', hasSubcategories);
-                              // If item has a nodeId, navigate to it (this is a subcategory)
-                              if (item.nodeId) {
-                                console.log('[CategorySidebar] Navigating to:', item.nodeId);
-                                onJumpToCategory(item.nodeId);
-                              } else if (hasSubcategories) {
-                                // If item has subcategories but no nodeId, toggle expansion
-                                console.log('[CategorySidebar] Toggling subcategory expansion');
-                                toggleSubcategory(itemKey, e);
-                              } else {
-                                console.warn('[CategorySidebar] Item has no nodeId and no subcategories:', item);
-                              }
-                            }}
-                            title={item.label}
+                            className={`category-item ${visited ? "visited" : ""} ${active ? "active" : ""} ${isAdvancedCategory ? "advanced" : ""}`}
+                            onClick={() => firstNode && onJumpToCategory(firstNode)}
+                            title={`Jump to ${getCategoryDisplayName(categoryId)}`}
                           >
-                            <div className="category-dropdown-item-main">
-                              <span className="category-dropdown-label">
-                                {item.label}
+                            <div className="category-item-main">
+                              <span className="category-item-label">
+                                {getCategoryDisplayName(categoryId)}
                               </span>
-                              {itemVisited && <span className="dot-indicator" title="Has committed selections" />}
+                              {isAdvancedCategory && (
+                                <span className="category-item-badge">Advanced</span>
+                              )}
+                              {visited && <span className="dot-indicator" title="Has committed selections" />}
                             </div>
-                            {hasSubcategories && (
-                              <button
-                                className={`category-expand-button ${isSubcategoryExpanded ? "expanded" : ""}`}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleSubcategory(itemKey, e);
-                                }}
-                                title={isSubcategoryExpanded ? "Collapse" : "Expand"}
-                              >
-                                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                </svg>
-                              </button>
-                            )}
+                            <button
+                              className={`category-expand-button ${isExpanded ? "expanded" : ""}`}
+                              onClick={(e) => toggleCategory(categoryId, e)}
+                              title={isExpanded ? "Collapse" : "Expand"}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </button>
                           </div>
-                          {hasSubcategories && isSubcategoryExpanded && (
-                            <div className="category-subcategory-dropdown">
-                              {item.subcategories!.map((subItem, subIndex) => {
-                                const subItemKey = `${itemKey}-${subIndex}`;
-                                const subActive = subItem.nodeId ? isNodeActive(subItem.nodeId) : false;
-                                const subNodeIds: string[] = [];
-                                if (subItem.nodeId) subNodeIds.push(subItem.nodeId);
-                                if (subItem.subcategories) {
-                                  subItem.subcategories.forEach(nested => {
-                                    if (nested.nodeId) subNodeIds.push(nested.nodeId);
+                          {isExpanded && (
+                            <div className="category-dropdown">
+                              {items.map((item, index) => {
+                                const itemKey = `${categoryId}-${index}`;
+                                const hasSubcategories = item.subcategories && item.subcategories.length > 0;
+                                const isSubcategoryExpanded = expandedSubcategories.has(itemKey);
+                                const itemNodeIds = item.nodeId ? [item.nodeId] : [];
+                                if (item.subcategories) {
+                                  item.subcategories.forEach(sub => {
+                                    if (sub.nodeId) itemNodeIds.push(sub.nodeId);
+                                    if (sub.subcategories) {
+                                      sub.subcategories.forEach(nested => {
+                                        if (nested.nodeId) itemNodeIds.push(nested.nodeId);
+                                      });
+                                    }
                                   });
                                 }
-                                const subVisited = subNodeIds.length > 0 && hasCommitted(subNodeIds);
-                                
+                                const itemVisited = itemNodeIds.length > 0 && hasCommitted(itemNodeIds);
+                                const itemActive = item.nodeId ? isNodeActive(item.nodeId) : false;
+
                                 return (
-                                  <div
-                                    key={subItemKey}
-                                    className={`category-subcategory-item ${subActive ? "active" : ""} ${subVisited ? "visited" : ""}`}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (subItem.nodeId) {
-                                        onJumpToCategory(subItem.nodeId);
-                                      }
-                                    }}
-                                    title={subItem.label}
-                                  >
-                                    <span className="category-subcategory-label">
-                                      {subItem.label}
-                                    </span>
-                                    {subVisited && <span className="dot-indicator" title="Has committed selections" />}
+                                  <div key={itemKey} className="category-subcategory-group">
+                                    <div
+                                      className={`category-dropdown-item ${itemActive ? "active" : ""} ${itemVisited ? "visited" : ""} ${hasSubcategories ? "has-subcategories" : ""}`}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (item.nodeId) {
+                                          onJumpToCategory(item.nodeId);
+                                        } else if (hasSubcategories) {
+                                          toggleSubcategory(itemKey, e);
+                                        }
+                                      }}
+                                      title={item.label}
+                                    >
+                                      <div className="category-dropdown-item-main">
+                                        <span className="category-dropdown-label">
+                                          {item.label}
+                                        </span>
+                                        {itemVisited && <span className="dot-indicator" title="Has committed selections" />}
+                                      </div>
+                                      {hasSubcategories && (
+                                        <button
+                                          className={`category-expand-button ${isSubcategoryExpanded ? "expanded" : ""}`}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleSubcategory(itemKey, e);
+                                          }}
+                                          title={isSubcategoryExpanded ? "Collapse" : "Expand"}
+                                        >
+                                          <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                                            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                          </svg>
+                                        </button>
+                                      )}
+                                    </div>
+                                    {hasSubcategories && isSubcategoryExpanded && (
+                                      <div className="category-subcategory-dropdown">
+                                        {item.subcategories!.map((subItem, subIndex) => {
+                                          const subItemKey = `${itemKey}-${subIndex}`;
+                                          const subActive = subItem.nodeId ? isNodeActive(subItem.nodeId) : false;
+                                          const subNodeIds: string[] = [];
+                                          if (subItem.nodeId) subNodeIds.push(subItem.nodeId);
+                                          if (subItem.subcategories) {
+                                            subItem.subcategories.forEach(nested => {
+                                              if (nested.nodeId) subNodeIds.push(nested.nodeId);
+                                            });
+                                          }
+                                          const subVisited = subNodeIds.length > 0 && hasCommitted(subNodeIds);
+
+                                          return (
+                                            <div
+                                              key={subItemKey}
+                                              className={`category-subcategory-item ${subActive ? "active" : ""} ${subVisited ? "visited" : ""}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (subItem.nodeId) {
+                                                  onJumpToCategory(subItem.nodeId);
+                                                }
+                                              }}
+                                              title={subItem.label}
+                                            >
+                                              <span className="category-subcategory-label">
+                                                {subItem.label}
+                                              </span>
+                                              {subVisited && <span className="dot-indicator" title="Has committed selections" />}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}
+                            </div>
+                          )}
+                          {categoryId === 'anatomy-details' && (
+                            <div className="category-sidebar-actions">
+                              <button
+                                type="button"
+                                className="category-sidebar-action-btn"
+                                onClick={onOpenRandom}
+                              >
+                                Random
+                              </button>
+                              <button
+                                type="button"
+                                className="category-sidebar-action-btn"
+                                onClick={onOpenTutorial}
+                              >
+                                Tutorial
+                              </button>
                             </div>
                           )}
                         </div>
@@ -347,25 +428,7 @@ export function CategorySidebar({
                     })}
                   </div>
                 )}
-                {categoryId === 'anatomy-details' && (
-                  <div className="category-sidebar-actions">
-                    <button
-                      type="button"
-                      className="category-sidebar-action-btn"
-                      onClick={onOpenRandom}
-                    >
-                      Random
-                    </button>
-                    <button
-                      type="button"
-                      className="category-sidebar-action-btn"
-                      onClick={onOpenTutorial}
-                    >
-                      Tutorial
-                    </button>
-                  </div>
-                )}
-              </div>
+              </section>
             );
           })}
         </div>
