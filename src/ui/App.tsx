@@ -133,7 +133,7 @@ export function App() {
   const [authUser, setAuthUser] = useState<Awaited<ReturnType<typeof getCurrentUser>>>(null);
   const [authReady, setAuthReady] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const isPro = false;
+  const isPro = true;
   const manualUrl = `${import.meta.env.BASE_URL}manual.html`;
   const manualLink = (anchor: string) => `${manualUrl}#${anchor}`;
   const feedbackSchema = `Feedback Schema (v1)
