@@ -81,6 +81,13 @@ interface QuestionCardProps {
   
   /** Whether next button should be enabled */
   canGoNext: boolean;
+
+  /** Territory context for the current Builder step */
+  territoryContext?: {
+    territoryName: string;
+    isRelevant: boolean;
+    matchingSections: string[];
+  } | null;
 }
 
 /**
@@ -108,6 +115,7 @@ export function QuestionCard({
   onNavigateSkip,
   canGoBack,
   canGoNext,
+  territoryContext = null,
 }: QuestionCardProps) {
   const questionText = node?.question || 'Select attributes';
   const questionDescription = node?.description || null;
@@ -130,6 +138,22 @@ export function QuestionCard({
         <h2 className="question-card-title">{questionText}</h2>
         {questionDescription && (
           <p className="question-card-description">{questionDescription}</p>
+        )}
+        {territoryContext && (
+          <div className={`question-card-territory ${territoryContext.isRelevant ? 'relevant' : 'outside'}`}>
+            <div className="question-card-territory-title">
+              {territoryContext.isRelevant
+                ? `Inside ${territoryContext.territoryName}`
+                : `Outside ${territoryContext.territoryName}`}
+            </div>
+            <div className="question-card-territory-text">
+              {territoryContext.isRelevant
+                ? territoryContext.matchingSections.length > 0
+                  ? `This step aligns with the Territory focus through ${territoryContext.matchingSections.join(', ')}.`
+                  : 'This step aligns with the current Territory focus.'
+                : 'This step is still available, but it is outside the current Territory focus.'}
+            </div>
+          </div>
         )}
         <div className="question-card-help">
           Select an element to add it, then use the inline controls inside the selected card to edit the output text or adjust its weight.

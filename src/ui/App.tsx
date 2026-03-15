@@ -1553,6 +1553,32 @@ export function App() {
     ...attr,
     allowCustomExtension: currentNode?.allowCustomExtension?.includes(attr.id) ?? false,
   }));
+  const currentTerritoryContext = useMemo(() => {
+    if (!activeTerritory) return null;
+    const categoryId = getCategoryForNode(currentNode?.id ?? null);
+    if (!categoryId) {
+      return {
+        territoryName: activeTerritory.name,
+        isRelevant: false,
+        matchingSections: [],
+      };
+    }
+
+    const matchingSections = activeTerritory.sources
+      .map(source => source.section)
+      .filter((section, index, list) => {
+        const mappedCategories = TERRITORY_SECTION_CATEGORY_MAP[section] ?? [];
+        const matchesCategory = mappedCategories.includes(categoryId);
+        const isFirst = list.indexOf(section) === index;
+        return matchesCategory && isFirst;
+      });
+
+    return {
+      territoryName: activeTerritory.name,
+      isRelevant: matchingSections.length > 0,
+      matchingSections,
+    };
+  }, [activeTerritory, currentNode?.id, getCategoryForNode]);
 
   // Extract prompt and error from engine result
   const prompt: Prompt | null = engineResult && 'positiveTokens' in engineResult ? engineResult : null;
@@ -2067,6 +2093,7 @@ export function App() {
                   onNavigateSkip={handleNavigateSkip}
                   canGoBack={navigationHistory.length > 1}
                   canGoNext={true}
+                  territoryContext={currentTerritoryContext}
                 />
               ) : (
                 <div className="app-error-state">

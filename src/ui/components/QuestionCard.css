@@ -127,6 +127,38 @@
   line-height: 1.5;
 }
 
+.question-card-territory {
+  font-size: 13px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  line-height: 1.5;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.question-card-territory.relevant {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.24);
+  color: #d1fae5;
+}
+
+.question-card-territory.outside {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #d5d9ea;
+}
+
+.question-card-territory-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.question-card-territory-text {
+  font-size: 13px;
+}
+
 .question-card-options {
   display: flex;
   flex-direction: column;
