@@ -303,6 +303,27 @@ export function App() {
     });
     return [...categoryIds];
   }, [activeTerritory]);
+
+  const getPreferredTerritoryStartNodeId = useCallback(() => {
+    if (!activeTerritoryCategoryIds.length) return '';
+
+    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
+    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
+      const categoryId = getCategoryForNode(nodeId);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    if (preferredUsableNodeId) {
+      return preferredUsableNodeId;
+    }
+
+    const preferredQuestionNode = questionNodes.find(node => {
+      const categoryId = getCategoryForNode(node.id);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    return preferredQuestionNode?.id ?? '';
+  }, [activeTerritoryCategoryIds, getCategoryForNode, questionNodes, usableNodeIds]);
   
   const workingSetAttributeDefinitions = useMemo<AttributeDefinition[]>(() => {
     if (!activeWorkingSet) return [];
@@ -924,10 +945,10 @@ export function App() {
     setUnavailableJumpNodeId(null);
     setBuilderNotice(null);
     setHasReachedEndViaNext(false); // Reset completion flag
-    const initialId = getInitialUsableNodeId() || getInitialNodeId(questionNodes);
+    const initialId = getPreferredTerritoryStartNodeId() || getInitialUsableNodeId() || getInitialNodeId(questionNodes);
     setCurrentNodeId(initialId);
     setNavigationHistory([initialId]);
-  }, [questionNodes, getInitialNodeId, getInitialUsableNodeId]);
+  }, [questionNodes, getInitialNodeId, getInitialUsableNodeId, getPreferredTerritoryStartNodeId]);
 
   const handleGoToBuilderStart = useCallback(() => {
     setHasSeenLanding(true);
@@ -1138,9 +1159,16 @@ export function App() {
     handleSetActiveTerritory(id);
     setActivePage('generator');
     const territory = territories.find(entry => entry.id === id) ?? null;
+    const preferredStartNodeId = territory ? getPreferredTerritoryStartNodeId() : '';
+    if (preferredStartNodeId) {
+      setCurrentNodeId(preferredStartNodeId);
+      setNavigationHistory([preferredStartNodeId]);
+      setHasReachedEndViaNext(false);
+      setUnavailableJumpNodeId(null);
+    }
     setBuilderNotice(
       territory
-        ? `"${territory.name}" is now active as your current creative territory.`
+        ? `"${territory.name}" is now active and Builder is starting from a matching area first.`
         : 'Territory mode is off.'
     );
   };
@@ -1226,13 +1254,13 @@ export function App() {
 
   useEffect(() => {
     if (questionNodes.length === 0) return;
-    const initialId = getInitialUsableNodeId() || getInitialNodeId(questionNodes);
+    const initialId = getPreferredTerritoryStartNodeId() || getInitialUsableNodeId() || getInitialNodeId(questionNodes);
     if (initialId) {
       setCurrentNodeId(prev => prev || initialId);
       setNavigationHistory(prev => prev.length > 0 ? prev : [initialId]);
       setHasReachedEndViaNext(false);
     }
-  }, [questionNodes.length, getInitialNodeId, getInitialUsableNodeId]);
+  }, [questionNodes.length, getInitialNodeId, getInitialUsableNodeId, getPreferredTerritoryStartNodeId]);
 
   useEffect(() => {
     setSelections(prev => {
