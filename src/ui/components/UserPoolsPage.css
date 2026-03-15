@@ -212,11 +212,25 @@
 
 .user-pools-territories {
   display: grid;
+  gap: 12px;
+}
+
+.user-pools-territory-overview {
+  display: grid;
   gap: 10px;
   padding: 12px;
   border-radius: 14px;
   background: rgba(13, 14, 20, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-pools-territory-active-summary {
+  font-size: 12px;
+  color: #d8dffb;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(110, 86, 249, 0.12);
+  border: 1px solid rgba(110, 86, 249, 0.22);
 }
 
 .user-pools-subsection-header {
@@ -242,6 +256,38 @@
 .user-pools-territory-form {
   display: grid;
   gap: 12px;
+}
+
+.user-pools-territory-section {
+  background: rgba(13, 14, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.user-pools-territory-section summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d9ddf8;
+}
+
+.user-pools-territory-section summary::-webkit-details-marker {
+  display: none;
+}
+
+.user-pools-territory-section-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px 14px;
 }
 
 .user-pools-territory-editor-block {
@@ -271,6 +317,10 @@
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) minmax(0, 0.85fr) auto;
   gap: 8px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .user-pools-territory-source-order {
@@ -316,7 +366,7 @@
 .user-pools-territory-list {
   display: grid;
   gap: 8px;
-  max-height: 300px;
+  max-height: 360px;
   overflow-y: auto;
   padding-top: 2px;
 }
