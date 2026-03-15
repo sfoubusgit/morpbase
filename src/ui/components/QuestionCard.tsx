@@ -1,14 +1,14 @@
 /**
  * Question Card Component
- * 
+ *
  * Responsibilities:
- * - Display current question
- * - Show question description (if available)
- * - Render attribute selector
+ * - Display current Builder area
+ * - Show supporting context for the current step
+ * - Render attribute selector or Territory-focused options
  * - Render modifier controls
  * - Render navigation buttons
  * - Display custom extension inputs
- * 
+ *
  * Must NOT:
  * - Determine which question to show
  * - Compute available attributes
@@ -16,6 +16,7 @@
  * - Store question state internally
  */
 
+import { useEffect, useState } from 'react';
 import './QuestionCard.css';
 import { AttributeSelector } from './AttributeSelector';
 import { ModifierControls } from './ModifierControls';
@@ -89,6 +90,9 @@ interface QuestionCardProps {
     matchingSections: string[];
   } | null;
 
+  /** Visible Builder area label */
+  sectionTitle?: string;
+
   /** Territory source fragments relevant to the current Builder step */
   territoryItems?: Array<{
     id: string;
@@ -97,10 +101,19 @@ interface QuestionCardProps {
     section: string;
     note?: string;
     tags?: string[];
+    isSelected?: boolean;
+    weight?: number;
+    outputText?: string;
   }>;
 
-  /** Add a Territory item directly into the prompt */
-  onAddTerritoryItem?: (text: string) => void;
+  /** Toggle a Territory item in the prompt */
+  onToggleTerritoryItem?: (itemId: string) => void;
+
+  /** Edit a Territory item output */
+  onSetTerritoryItemOutputOverride?: (itemId: string, value: string | null) => void;
+
+  /** Change a Territory item weight */
+  onSetTerritoryItemWeight?: (itemId: string, value: number) => void;
 }
 
 /**
@@ -129,11 +142,35 @@ export function QuestionCard({
   canGoBack,
   canGoNext,
   territoryContext = null,
+  sectionTitle,
   territoryItems = [],
-  onAddTerritoryItem,
+  onToggleTerritoryItem,
+  onSetTerritoryItemOutputOverride,
+  onSetTerritoryItemWeight,
 }: QuestionCardProps) {
   const questionText = node?.question || 'Select attributes';
   const questionDescription = node?.description || null;
+  const titleText = sectionTitle || 'Builder';
+  const helperQuestion = questionDescription || questionText;
+  const territoryModeAvailable = Boolean(territoryContext?.isRelevant && territoryItems.length > 0);
+  const [optionsMode, setOptionsMode] = useState<'territory' | 'base'>(() =>
+    territoryModeAvailable ? 'territory' : 'base'
+  );
+  const [editingTerritoryItemId, setEditingTerritoryItemId] = useState<string | null>(null);
+  const [editingTerritoryValue, setEditingTerritoryValue] = useState('');
+
+  useEffect(() => {
+    setOptionsMode(territoryModeAvailable ? 'territory' : 'base');
+    setEditingTerritoryItemId(null);
+    setEditingTerritoryValue('');
+  }, [territoryModeAvailable, node?.id]);
+
+  const clampWeight = (value: number) => Math.max(0, Math.min(2, value));
+
+  const handleTerritoryWeightAdjust = (itemId: string, currentWeight: number | undefined, delta: number) => {
+    const next = clampWeight(parseFloat(((currentWeight ?? 1.0) + delta).toFixed(1)));
+    onSetTerritoryItemWeight?.(itemId, next);
+  };
 
   return (
     <div className="question-card">
@@ -150,9 +187,9 @@ export function QuestionCard({
       </div>
       
       <div className="question-card-content">
-        <h2 className="question-card-title">{questionText}</h2>
-        {questionDescription && (
-          <p className="question-card-description">{questionDescription}</p>
+        <h2 className="question-card-title">{titleText}</h2>
+        {helperQuestion && (
+          <p className="question-card-description">{helperQuestion}</p>
         )}
         {territoryContext && (
           <div className={`question-card-territory ${territoryContext.isRelevant ? 'relevant' : 'outside'}`}>
@@ -170,7 +207,25 @@ export function QuestionCard({
             </div>
           </div>
         )}
-        {territoryContext?.isRelevant && territoryItems.length > 0 && (
+        {territoryModeAvailable && (
+          <div className="question-card-mode-switch">
+            <button
+              type="button"
+              className={optionsMode === 'territory' ? 'active' : ''}
+              onClick={() => setOptionsMode('territory')}
+            >
+              Territory Options
+            </button>
+            <button
+              type="button"
+              className={optionsMode === 'base' ? 'active' : ''}
+              onClick={() => setOptionsMode('base')}
+            >
+              Base Builder Options
+            </button>
+          </div>
+        )}
+        {territoryModeAvailable && optionsMode === 'territory' && (
           <div className="question-card-territory-items">
             <div className="question-card-territory-items-header">
               <div className="question-card-territory-items-title">Territory Source Material</div>
@@ -188,10 +243,69 @@ export function QuestionCard({
                   </div>
                   {item.note && <div className="question-card-territory-item-note">{item.note}</div>}
                   <div className="question-card-territory-item-actions">
-                    <button type="button" onClick={() => onAddTerritoryItem?.(item.text)}>
-                      Add to Prompt
+                    <button type="button" onClick={() => onToggleTerritoryItem?.(item.id)}>
+                      {item.isSelected ? 'Remove' : 'Add to Prompt'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingTerritoryItemId(item.id);
+                        setEditingTerritoryValue(item.outputText ?? item.text);
+                      }}
+                    >
+                      Edit Text
                     </button>
                   </div>
+                  {item.isSelected && (
+                    <div className="question-card-territory-item-weight">
+                      <span className="question-card-territory-item-weight-label">Weight</span>
+                      <button
+                        type="button"
+                        onClick={() => handleTerritoryWeightAdjust(item.id, item.weight, -0.1)}
+                      >
+                        -
+                      </button>
+                      <span className="question-card-territory-item-weight-value">
+                        {(item.weight ?? 1).toFixed(1)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleTerritoryWeightAdjust(item.id, item.weight, 0.1)}
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+                  {editingTerritoryItemId === item.id && (
+                    <div className="question-card-territory-item-editor">
+                      <input
+                        type="text"
+                        value={editingTerritoryValue}
+                        onChange={event => setEditingTerritoryValue(event.target.value)}
+                      />
+                      <div className="question-card-territory-item-editor-actions">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onSetTerritoryItemOutputOverride?.(item.id, editingTerritoryValue.trim() || null);
+                            setEditingTerritoryItemId(null);
+                            setEditingTerritoryValue('');
+                          }}
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingTerritoryItemId(null);
+                            setEditingTerritoryValue('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -202,21 +316,23 @@ export function QuestionCard({
         </div>
         
         <div className="question-card-options">
-          <AttributeSelector
-            attributeDefinitions={attributeDefinitions}
-            selections={selections}
-            weightValues={modifierValues}
-            onSelect={onSelect}
-            onDeselect={onDeselect}
-            onCustomExtensionChange={onCustomExtensionChange}
-            onWeightChange={onWeightChange}
-            weightsEnabledGlobal={weightsEnabledGlobal}
-            selectionOutputOverrides={selectionOutputOverrides}
-            onSetSelectionOutputOverride={onSetSelectionOutputOverride}
-          />
+          {(!territoryModeAvailable || optionsMode === 'base') && (
+            <AttributeSelector
+              attributeDefinitions={attributeDefinitions}
+              selections={selections}
+              weightValues={modifierValues}
+              onSelect={onSelect}
+              onDeselect={onDeselect}
+              onCustomExtensionChange={onCustomExtensionChange}
+              onWeightChange={onWeightChange}
+              weightsEnabledGlobal={weightsEnabledGlobal}
+              selectionOutputOverrides={selectionOutputOverrides}
+              onSetSelectionOutputOverride={onSetSelectionOutputOverride}
+            />
+          )}
           
           {/* Custom extension inputs for selected options */}
-          {attributeDefinitions.map((attr: any) => {
+          {(!territoryModeAvailable || optionsMode === 'base') && attributeDefinitions.map((attr: any) => {
             const selection = selections.get(attr.id);
             const isSelected = selection?.isEnabled ?? false;
             const allowCustomExtension = attr.allowCustomExtension ?? false;

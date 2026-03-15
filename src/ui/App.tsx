@@ -114,6 +114,13 @@ const BUILDER_CATEGORY_LABELS: Record<string, string> = {
  */
 
 export function App() {
+  type PromptAdditionItem = {
+    id: string;
+    text: string;
+    weight?: number;
+    sourceType?: 'pool' | 'territory';
+  };
+
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
     try {
       return window.localStorage.getItem('morpbase:seen_landing') === '1';
@@ -144,7 +151,7 @@ export function App() {
   const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(false);
   
   // UI State: User pool prompt additions
-  const [poolPromptItems, setPoolPromptItems] = useState<Array<{ id: string; text: string }>>([]);
+  const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>([]);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(new Map());
 
   // UI State: Freeform prompt text
@@ -157,7 +164,7 @@ export function App() {
   const [clearUndoState, setClearUndoState] = useState<{
     selections: Map<string, AttributeSelection>;
     modifiers: Map<string, Modifier>;
-    poolPromptItems: Array<{ id: string; text: string }>;
+    poolPromptItems: PromptAdditionItem[];
     poolOutputOverrides: Map<string, string>;
     selectionOutputOverrides: Map<string, string>;
   } | null>(null);
@@ -242,6 +249,7 @@ export function App() {
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
   const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
+  const [builderTerritoryPickerId, setBuilderTerritoryPickerId] = useState<string>('');
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
 
@@ -330,6 +338,16 @@ export function App() {
       ),
     }));
   }, [activeTerritory]);
+
+  useEffect(() => {
+    if (activeTerritoryId) {
+      setBuilderTerritoryPickerId(activeTerritoryId);
+      return;
+    }
+    if (!builderTerritoryPickerId && territories.length > 0) {
+      setBuilderTerritoryPickerId(territories[0].id);
+    }
+  }, [activeTerritoryId, builderTerritoryPickerId, territories]);
 
   const baseSetTemplate = useMemo<WorkingSet>(() => {
     const categoryBuckets: WorkingSet['categoryBuckets'] = {};
@@ -1438,7 +1456,7 @@ export function App() {
   const handleAddPoolItem = useCallback((text: string) => {
     if (!text.trim()) return;
     const id = `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-    setPoolPromptItems(prev => [...prev, { id, text: text.trim() }]);
+    setPoolPromptItems(prev => [...prev, { id, text: text.trim(), weight: 1.0, sourceType: 'pool' }]);
   }, []);
 
   const handleAppendPoolItem = useCallback((text: string, targetId?: string) => {
@@ -1447,7 +1465,7 @@ export function App() {
     setPoolPromptItems(prev => {
       if (prev.length === 0) {
         const id = `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        return [...prev, { id, text: trimmed }];
+        return [...prev, { id, text: trimmed, weight: 1.0, sourceType: 'pool' }];
       }
       const next = [...prev];
       let targetIndex = targetId ? next.findIndex(item => item.id === targetId) : next.length - 1;
@@ -1473,6 +1491,8 @@ export function App() {
       .map(text => ({
         id: `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         text: text.trim(),
+        weight: 1.0,
+        sourceType: 'pool' as const,
       }))
       .filter(item => item.text);
     setPoolPromptItems(next);
@@ -1489,6 +1509,32 @@ export function App() {
       }
       return next;
     });
+  }, []);
+
+  const handleToggleTerritoryItem = useCallback((item: {
+    id: string;
+    text: string;
+  }) => {
+    setPoolPromptItems(prev => {
+      const exists = prev.some(entry => entry.id === item.id);
+      if (exists) {
+        return prev.filter(entry => entry.id !== item.id);
+      }
+      return [...prev, { id: item.id, text: item.text.trim(), weight: 1.0, sourceType: 'territory' }];
+    });
+    setPoolOutputOverrides(prev => {
+      const next = new Map(prev);
+      if (next.has(item.id)) {
+        next.delete(item.id);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSetPromptAdditionWeight = useCallback((itemId: string, value: number) => {
+    setPoolPromptItems(prev => prev.map(item => (
+      item.id === itemId ? { ...item, weight: Math.max(0, Math.min(2, value)) } : item
+    )));
   }, []);
 
   const handleSetSelectionOutputOverride = useCallback((attributeId: string, value: string | null) => {
@@ -1555,13 +1601,19 @@ export function App() {
 
   
 
-  const poolAdditionTexts = poolPromptItems.map(item => {
+  const formatPromptAdditionText = useCallback((item: PromptAdditionItem) => {
     const override = poolOutputOverrides.get(item.id);
-    return override ? override : item.text;
-  });
+    const baseText = override ? override : item.text;
+    const weight = item.weight ?? 1.0;
+    if (weightsEnabledGlobal && Math.abs(weight - 1.0) > 0.001) {
+      return `(${baseText}:${weight.toFixed(2)})`;
+    }
+    return baseText;
+  }, [poolOutputOverrides, weightsEnabledGlobal]);
+
+  const poolAdditionTexts = poolPromptItems.map(formatPromptAdditionText);
   const poolAdditionItems = poolPromptItems.map((item, index) => {
-    const override = poolOutputOverrides.get(item.id);
-    return { id: item.id, text: override ? override : item.text };
+    return { id: item.id, text: formatPromptAdditionText(item) };
   });
 
   // Add allowCustomExtension to attribute definitions for current question
@@ -1595,12 +1647,18 @@ export function App() {
       matchingSections,
     };
   }, [activeTerritory, currentNode?.id, getCategoryForNode]);
+  const currentBuilderAreaLabel = useMemo(() => {
+    const categoryId = getCategoryForNode(currentNode?.id ?? null);
+    if (!categoryId) return 'Builder';
+    return BUILDER_CATEGORY_LABELS[categoryId] ?? 'Builder';
+  }, [currentNode?.id, getCategoryForNode]);
 
   const currentTerritoryItems = useMemo(() => {
     if (!activeTerritory) return [];
     const categoryId = getCategoryForNode(currentNode?.id ?? null);
     if (!categoryId) return [];
 
+    const selectedItems = new Map(poolPromptItems.map(item => [item.id, item]));
     const seenTexts = new Set<string>();
     const items: Array<{
       id: string;
@@ -1609,6 +1667,9 @@ export function App() {
       section: string;
       note?: string;
       tags?: string[];
+      isSelected?: boolean;
+      weight?: number;
+      outputText?: string;
     }> = [];
 
     activeTerritory.sources.forEach(source => {
@@ -1624,19 +1685,24 @@ export function App() {
         const normalizedText = item.text.trim().toLowerCase();
         if (!normalizedText || seenTexts.has(normalizedText)) return;
         seenTexts.add(normalizedText);
+        const runtimeId = `territory:${source.poolId}:${source.section}:${item.id}`;
+        const selectedEntry = selectedItems.get(runtimeId);
         items.push({
-          id: item.id,
+          id: runtimeId,
           text: item.text,
           poolName: source.poolName,
           section: source.section,
           note: item.note,
           tags: item.tags,
+          isSelected: Boolean(selectedEntry),
+          weight: selectedEntry?.weight ?? 1.0,
+          outputText: poolOutputOverrides.get(runtimeId) ?? item.text,
         });
       });
     });
 
     return items.slice(0, 10);
-  }, [activeTerritory, currentNode?.id, getCategoryForNode, territoryPools]);
+  }, [activeTerritory, currentNode?.id, getCategoryForNode, poolOutputOverrides, poolPromptItems, territoryPools]);
 
   // Extract prompt and error from engine result
   const prompt: Prompt | null = engineResult && 'positiveTokens' in engineResult ? engineResult : null;
@@ -2011,13 +2077,14 @@ export function App() {
                             {activeTerritory.description}
                           </div>
                         )}
-                        <details className="territory-banner-mapping">
-                          <summary>
-                            Builder mapping
-                            <span className="territory-banner-mapping-summary">
-                              {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
-                            </span>
-                          </summary>
+                        {activeTerritoryMappings.length > 0 && (
+                          <div className="territory-banner-mapping">
+                            <div className="territory-banner-mapping-heading">
+                              <span>Builder mapping</span>
+                              <span className="territory-banner-mapping-summary">
+                                {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
+                              </span>
+                            </div>
                           <div className="territory-banner-mapping-list">
                             {activeTerritoryMappings.slice(0, 5).map(mapping => (
                               <div key={mapping.id} className="territory-banner-mapping-item">
@@ -2043,7 +2110,8 @@ export function App() {
                               </div>
                             )}
                           </div>
-                        </details>
+                          </div>
+                        )}
                       </details>
                     )}
                   </div>
@@ -2070,10 +2138,40 @@ export function App() {
                   </div>
                 </div>
               )}
+              {!activeTerritory && territories.length > 0 && (
+                <div className="territory-reactivate-bar">
+                  <div className="territory-reactivate-copy">
+                    <span className="territory-reactivate-label">Territories</span>
+                    <span className="territory-reactivate-text">Activate a saved Territory without leaving Builder.</span>
+                  </div>
+                  <div className="territory-reactivate-actions">
+                    <select
+                      value={builderTerritoryPickerId}
+                      onChange={event => setBuilderTerritoryPickerId(event.target.value)}
+                    >
+                      {territories.map(territory => (
+                        <option key={territory.id} value={territory.id}>
+                          {territory.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
+                      disabled={!builderTerritoryPickerId}
+                    >
+                      Activate Territory
+                    </button>
+                    <button type="button" onClick={() => setActivePage('user-pools')}>
+                      Manage
+                    </button>
+                  </div>
+                </div>
+              )}
               <details className="builder-guidance">
                 <summary>
                   <span className="builder-guidance-title">Builder guide</span>
-                  <span className="builder-guidance-summary">Choose left, build center, copy right</span>
+                  {!activeTerritory && <span className="builder-guidance-summary">Choose left, build center, copy right</span>}
                 </summary>
                 <div className="builder-guidance-body">
                   <p className="builder-guidance-intro">
@@ -2158,9 +2256,16 @@ export function App() {
                   onNavigateSkip={handleNavigateSkip}
                   canGoBack={navigationHistory.length > 1}
                   canGoNext={true}
+                  sectionTitle={currentBuilderAreaLabel}
                   territoryContext={currentTerritoryContext}
                   territoryItems={currentTerritoryItems}
-                  onAddTerritoryItem={handleAddPoolItem}
+                  onToggleTerritoryItem={itemId => {
+                    const territoryItem = currentTerritoryItems.find(item => item.id === itemId);
+                    if (!territoryItem) return;
+                    handleToggleTerritoryItem({ id: territoryItem.id, text: territoryItem.outputText ?? territoryItem.text });
+                  }}
+                  onSetTerritoryItemOutputOverride={handleSetPoolOutputOverride}
+                  onSetTerritoryItemWeight={handleSetPromptAdditionWeight}
                 />
               ) : (
                 <div className="app-error-state">
