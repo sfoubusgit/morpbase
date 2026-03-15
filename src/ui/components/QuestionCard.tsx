@@ -181,6 +181,25 @@ export function QuestionCard({
     onSetTerritoryItemWeight?.(itemId, next);
   };
 
+  const handleTerritoryItemClick = (itemId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement;
+    if (target.closest('.question-card-territory-item-editor')) {
+      return;
+    }
+    if (target.closest('.question-card-territory-item-weight')) {
+      return;
+    }
+
+    onToggleTerritoryItem?.(itemId);
+  };
+
+  const handleTerritoryControlClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+  };
+
   return (
     <div className="question-card">
       <div className="question-card-header">
@@ -251,7 +270,11 @@ export function QuestionCard({
             </div>
             <div className="question-card-territory-items-list">
               {territoryItems.map(item => (
-                <div key={item.id} className="question-card-territory-item">
+                <div
+                  key={item.id}
+                  className={`question-card-territory-item ${item.isSelected ? 'selected' : ''}`}
+                  onClick={event => handleTerritoryItemClick(item.id, event)}
+                >
                   <div className="question-card-territory-item-text">{item.text}</div>
                   {!territorySourceSummary?.isSingleSource && (
                     <div className="question-card-territory-item-meta">
@@ -260,10 +283,8 @@ export function QuestionCard({
                     </div>
                   )}
                   {item.note && <div className="question-card-territory-item-note">{item.note}</div>}
-                  <div className="question-card-territory-item-actions">
-                    <button type="button" onClick={() => onToggleTerritoryItem?.(item.id)}>
-                      {item.isSelected ? 'Remove' : 'Add to Prompt'}
-                    </button>
+                  {item.isSelected && (
+                  <div className="question-card-territory-item-actions" onClick={handleTerritoryControlClick}>
                     <button
                       type="button"
                       onClick={() => {
@@ -274,8 +295,9 @@ export function QuestionCard({
                       Edit Text
                     </button>
                   </div>
+                  )}
                   {item.isSelected && (
-                    <div className="question-card-territory-item-weight">
+                    <div className="question-card-territory-item-weight" onClick={handleTerritoryControlClick}>
                       <span className="question-card-territory-item-weight-label">Weight</span>
                       <button
                         type="button"
@@ -295,7 +317,7 @@ export function QuestionCard({
                     </div>
                   )}
                   {editingTerritoryItemId === item.id && (
-                    <div className="question-card-territory-item-editor">
+                    <div className="question-card-territory-item-editor" onClick={handleTerritoryControlClick}>
                       <input
                         type="text"
                         value={editingTerritoryValue}

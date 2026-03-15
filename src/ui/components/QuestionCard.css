@@ -238,6 +238,20 @@
   border-radius: 12px;
   background: rgba(10, 14, 16, 0.45);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.24s ease;
+}
+
+.question-card-territory-item:hover {
+  background: rgba(16, 22, 26, 0.6);
+  border-color: rgba(16, 185, 129, 0.18);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
+.question-card-territory-item.selected {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.28);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.12);
 }
 
 .question-card-territory-item-text {
@@ -273,6 +287,10 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+}
+
+.question-card-territory-item-actions button:hover {
+  background: rgba(16, 185, 129, 0.2);
 }
 
 .question-card-territory-item-weight {
