@@ -16,7 +16,7 @@
  * - Store question state internally
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import './QuestionCard.css';
 import { AttributeSelector } from './AttributeSelector';
 import { ModifierControls } from './ModifierControls';
@@ -158,6 +158,15 @@ export function QuestionCard({
   );
   const [editingTerritoryItemId, setEditingTerritoryItemId] = useState<string | null>(null);
   const [editingTerritoryValue, setEditingTerritoryValue] = useState('');
+  const territorySourceSummary = useMemo(() => {
+    if (territoryItems.length === 0) return null;
+    const sections = [...new Set(territoryItems.map(item => item.section))];
+    const pools = [...new Set(territoryItems.map(item => item.poolName))];
+    return {
+      isSingleSource: sections.length === 1 && pools.length === 1,
+      label: `${sections.join(', ')}${pools.length > 0 ? ` · ${pools.join(', ')}` : ''}`,
+    };
+  }, [territoryItems]);
 
   useEffect(() => {
     setOptionsMode(territoryModeAvailable ? 'territory' : 'base');
@@ -228,7 +237,14 @@ export function QuestionCard({
         {territoryModeAvailable && optionsMode === 'territory' && (
           <div className="question-card-territory-items">
             <div className="question-card-territory-items-header">
-              <div className="question-card-territory-items-title">Territory Source Material</div>
+              <div className="question-card-territory-items-header-main">
+                <div className="question-card-territory-items-title">Territory Source Material</div>
+                {territorySourceSummary && (
+                  <div className="question-card-territory-items-source">
+                    {territorySourceSummary.label}
+                  </div>
+                )}
+              </div>
               <div className="question-card-territory-items-meta">
                 {territoryItems.length} suggestion{territoryItems.length === 1 ? '' : 's'}
               </div>
@@ -237,10 +253,12 @@ export function QuestionCard({
               {territoryItems.map(item => (
                 <div key={item.id} className="question-card-territory-item">
                   <div className="question-card-territory-item-text">{item.text}</div>
-                  <div className="question-card-territory-item-meta">
-                    <span>{item.section}</span>
-                    <span>{item.poolName}</span>
-                  </div>
+                  {!territorySourceSummary?.isSingleSource && (
+                    <div className="question-card-territory-item-meta">
+                      <span>{item.section}</span>
+                      <span>{item.poolName}</span>
+                    </div>
+                  )}
                   {item.note && <div className="question-card-territory-item-note">{item.note}</div>}
                   <div className="question-card-territory-item-actions">
                     <button type="button" onClick={() => onToggleTerritoryItem?.(item.id)}>

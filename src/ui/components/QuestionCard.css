@@ -202,12 +202,23 @@
   gap: 12px;
 }
 
+.question-card-territory-items-header-main {
+  display: grid;
+  gap: 4px;
+}
+
 .question-card-territory-items-title {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #d1fae5;
+}
+
+.question-card-territory-items-source {
+  font-size: 11px;
+  color: rgba(209, 250, 229, 0.76);
+  line-height: 1.4;
 }
 
 .question-card-territory-items-meta {
