@@ -1544,6 +1544,13 @@ export function App() {
           >
             Feedback
           </button>
+          <button
+            type="button"
+            className={`app-page-toggle-action-button ${activePage === 'working-sets' ? 'active' : ''}`}
+            onClick={() => setActivePage('working-sets')}
+          >
+            Legacy Sets
+          </button>
         </div>
         <div className="app-page-toggle-group" role="tablist" aria-label="App mode">
           <button
@@ -1563,15 +1570,6 @@ export function App() {
             aria-selected={activePage === 'prompts'}
           >
             Prompts
-          </button>
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'working-sets' ? 'active' : ''}`}
-            onClick={() => setActivePage('working-sets')}
-            role="tab"
-            aria-selected={activePage === 'working-sets'}
-          >
-            Working Sets
           </button>
           <button
             type="button"
@@ -1709,7 +1707,7 @@ export function App() {
                     </select>
                   </label>
                   <button type="button" onClick={() => setActivePage('working-sets')}>
-                    Manage Working Sets
+                    Open Legacy Sets
                   </button>
                   {activeWorkingSet && (
                     <button type="button" onClick={() => handleSetActiveWorkingSet(null)}>
@@ -1749,7 +1747,7 @@ export function App() {
                   <p>This Working Set does not contain any prompt elements for the Builder.</p>
                   <div className="builder-state-actions">
                     <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
-                    <button onClick={() => setActivePage('working-sets')}>Manage Working Sets</button>
+                    <button onClick={() => setActivePage('working-sets')}>Open Legacy Sets</button>
                   </div>
                 </div>
               ) : unavailableJumpNode ? (
@@ -1763,7 +1761,7 @@ export function App() {
                       Go to Next Available Section
                     </button>
                     <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
-                    <button onClick={() => setActivePage('working-sets')}>Manage Working Sets</button>
+                    <button onClick={() => setActivePage('working-sets')}>Open Legacy Sets</button>
                   </div>
                 </div>
               ) : currentNode && !isCurrentNodeUsable ? (

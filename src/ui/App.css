@@ -198,6 +198,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: #fff;
 }
 
+.app-page-toggle-action-button.active {
+  border-color: rgba(110, 86, 249, 0.45);
+  color: #fff;
+  background: rgba(110, 86, 249, 0.18);
+}
+
 .app-page-toggle-btn {
   background: transparent;
   border: 1px solid transparent;
