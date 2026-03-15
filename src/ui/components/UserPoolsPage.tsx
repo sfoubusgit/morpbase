@@ -85,6 +85,7 @@ export function UserPoolsPage({
   const [editingAddItemText, setEditingAddItemText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [tagFilter, setTagFilter] = useState('');
+  const [bulkSection, setBulkSection] = useState('');
   const [bulkText, setBulkText] = useState('');
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [poolJson, setPoolJson] = useState('');
@@ -392,13 +393,16 @@ export function UserPoolsPage({
     }
   };
 
-  const parseBulkLine = (line: string): { text: string; tags?: string[]; section?: string } | null => {
+  const parseBulkLine = (
+    line: string,
+    defaultSection?: string
+  ): { text: string; tags?: string[]; section?: string } | null => {
     const trimmed = line.trim();
     if (!trimmed) return null;
     const [textPart, tagPart, sectionPart] = trimmed.split('|').map(part => part.trim());
     if (!textPart) return null;
     const tags = tagPart ? parseTags(tagPart) : undefined;
-    return { text: textPart, tags, section: sectionPart || undefined };
+    return { text: textPart, tags, section: sectionPart || defaultSection || undefined };
   };
 
   const handleBulkAdd = async () => {
@@ -418,11 +422,12 @@ export function UserPoolsPage({
     }
     try {
       for (const line of lines) {
-        const parsed = parseBulkLine(line);
+        const parsed = parseBulkLine(line, bulkSection || undefined);
         if (parsed) {
           await addItemToPool(activePool.id, parsed.text, parsed.tags, undefined, parsed.section);
         }
       }
+      setBulkSection('');
       setBulkText('');
       await refreshPools();
     } catch (err: any) {
@@ -1191,11 +1196,19 @@ export function UserPoolsPage({
               </div>
               <div className="user-pools-bulk">
                 <div className="user-pools-helper">
-                  Bulk add: one item per line. Optional tags after first “|”, optional section after second “|”.
+                  Bulk add one item per line. Choose one section once for the whole batch, or override it per line with a second “|”.
                 </div>
+                <select value={bulkSection} onChange={event => setBulkSection(event.target.value)}>
+                  <option value="">No section</option>
+                  {POOL_SECTION_OPTIONS.map(section => (
+                    <option key={section} value={section}>
+                      {section}
+                    </option>
+                  ))}
+                </select>
                 <textarea
                   rows={4}
-                  placeholder="Bulk add: one item per line. Optional tags after first | and section after second | (e.g., big tree | nature, forest | Environment)"
+                  placeholder="Bulk add: one item per line. Optional tags after first |. Optional per-line section after second | (e.g., big tree | nature, forest | Environment)"
                   value={bulkText}
                   onChange={event => setBulkText(event.target.value)}
                 />
