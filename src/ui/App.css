@@ -337,12 +337,19 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 
 .builder-guidance summary {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: 12px;
   cursor: pointer;
   list-style: none;
   padding: 12px 14px;
+}
+
+.builder-guidance summary::-webkit-details-marker {
+  display: none;
+}
+
+.builder-guidance-title {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
@@ -350,13 +357,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: #f3f4f6;
 }
 
-.builder-guidance summary::-webkit-details-marker {
-  display: none;
-}
-
 .builder-guidance-summary {
   font-size: 10px;
   color: #cdd7ff;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  text-align: right;
 }
 
 .builder-guidance-body {

@@ -2072,7 +2072,7 @@ export function App() {
               )}
               <details className="builder-guidance">
                 <summary>
-                  Builder guide
+                  <span className="builder-guidance-title">Builder guide</span>
                   <span className="builder-guidance-summary">Choose left, build center, copy right</span>
                 </summary>
                 <div className="builder-guidance-body">
