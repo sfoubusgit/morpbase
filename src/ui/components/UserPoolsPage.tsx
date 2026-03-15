@@ -567,6 +567,20 @@ export function UserPoolsPage({
     setTerritorySources(prev => prev.filter((_, sourceIndex) => sourceIndex !== index));
   };
 
+  const handleMoveTerritorySource = (index: number, direction: 'up' | 'down') => {
+    setTerritorySources(prev => {
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) {
+        return prev;
+      }
+
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+  };
+
   const handleEditTerritory = (territory: Territory) => {
     setTerritoryDraftId(territory.id);
     setTerritoryName(territory.name);
@@ -1177,6 +1191,26 @@ export function UserPoolsPage({
                     ) : (
                       territorySources.map((source, index) => (
                         <div key={`${source.poolId}_${index}`} className="user-pools-territory-source-row">
+                          <div className="user-pools-territory-source-order">
+                            <button
+                              type="button"
+                              className="user-pools-inline-secondary"
+                              onClick={() => handleMoveTerritorySource(index, 'up')}
+                              disabled={index === 0}
+                              title="Move source up"
+                            >
+                              Up
+                            </button>
+                            <button
+                              type="button"
+                              className="user-pools-inline-secondary"
+                              onClick={() => handleMoveTerritorySource(index, 'down')}
+                              disabled={index === territorySources.length - 1}
+                              title="Move source down"
+                            >
+                              Down
+                            </button>
+                          </div>
                           <select
                             value={source.poolId}
                             onChange={event => handleChangeTerritorySource(index, 'poolId', event.target.value)}

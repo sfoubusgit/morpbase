@@ -255,8 +255,14 @@
 
 .user-pools-territory-source-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 0.85fr) auto;
   gap: 8px;
+}
+
+.user-pools-territory-source-order {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .user-pools-territory-form-actions {
@@ -267,13 +273,19 @@
 
 .user-pools-territory-form-actions button,
 .user-pools-territory-deactivate,
-.user-pools-inline-danger {
+.user-pools-inline-danger,
+.user-pools-inline-secondary {
   background: rgba(110, 86, 249, 0.18);
   border: 1px solid rgba(110, 86, 249, 0.35);
   color: #e1dcff;
   border-radius: 10px;
   padding: 6px 10px;
   cursor: pointer;
+}
+
+.user-pools-inline-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .user-pools-inline-danger {
