@@ -63,6 +63,7 @@ interface StageDefinition {
   label: string;
   hint: string;
   categories: string[];
+  optional?: boolean;
 }
 
 const CATEGORY_STAGES: StageDefinition[] = [
@@ -81,8 +82,9 @@ const CATEGORY_STAGES: StageDefinition[] = [
   {
     id: 'finish',
     label: 'Finish',
-    hint: 'Add polish and advanced detail only if needed.',
+    hint: 'Optional polish, atmosphere, and final treatment.',
     categories: ['quality', 'effects', 'post-processing', 'anatomy-details'],
+    optional: true,
   },
 ];
 
@@ -258,10 +260,18 @@ export function CategorySidebar({
             const isStageExpanded = expandedStages.has(stage.id);
 
             return (
-              <section key={stage.id} className="category-stage">
+              <section
+                key={stage.id}
+                className={`category-stage ${stage.optional ? 'category-stage-optional' : ''}`}
+              >
                 <div className="category-stage-header">
                   <div className="category-stage-labels">
-                    <h4 className="category-stage-title">{stage.label}</h4>
+                    <div className="category-stage-title-row">
+                      <h4 className="category-stage-title">{stage.label}</h4>
+                      {stage.optional && (
+                        <span className="category-stage-badge">Optional</span>
+                      )}
+                    </div>
                     <p className="category-stage-hint">{stage.hint}</p>
                   </div>
                   <button

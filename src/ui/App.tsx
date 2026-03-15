@@ -1922,6 +1922,7 @@ export function App() {
                   <p>
                     <strong>Category Sidebar:</strong> Jump directly to any category or subcategory by clicking on it in the left sidebar.
                     The sidebar is grouped into Define, Refine, and Finish so it is easier to see what matters first.
+                    Finish is intentionally optional and is mainly for extra polish, atmosphere, and final treatment.
                   </p>
                   <p>
                     <strong>Prompt Preview:</strong> Watch your prompt build in real-time on the right side as you make selections.
