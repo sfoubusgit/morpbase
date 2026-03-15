@@ -1415,7 +1415,11 @@ export function UserPoolsPage({
                   onChange={event => setTagFilter(event.target.value)}
                 />
               </div>
-              <div className="user-pools-list-toolbar">
+              <div className="user-pools-browse-toolbar">
+                <div className="user-pools-browse-stat">
+                  <strong>{filteredItems.length}</strong>
+                  <span>{filteredItems.length === 1 ? 'visible item' : 'visible items'}</span>
+                </div>
                 <div className="user-pools-append-target">
                   <label>
                     Append target
@@ -1433,8 +1437,36 @@ export function UserPoolsPage({
                   </label>
                 </div>
               </div>
+              {itemError && <div className="user-pools-error">{itemError}</div>}
+              <div className="user-pools-items">
+                {activePool.items.length === 0 ? (
+                  <div className="user-pools-empty">No items yet.</div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="user-pools-empty">No items match your search or tag filter.</div>
+                ) : filteredItemGroups.length > 0 ? (
+                  filteredItemGroups.map(group => (
+                    <div key={group.name} className="user-pools-section-group">
+                      <div className="user-pools-section-heading-row">
+                        <div className="user-pools-section-heading">{group.name}</div>
+                        <button
+                          type="button"
+                          className="user-pools-section-action"
+                          onClick={() => activePool && handleQuickAddSectionToTerritory(activePool.id, group.name)}
+                        >
+                          Add Section To Territory
+                        </button>
+                      </div>
+                      <div className="user-pools-section-items">
+                        {group.items.map(renderPoolItem)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  filteredItems.map(renderPoolItem)
+                )}
+              </div>
 
-              <details className="user-pools-collapsible" open>
+              <details className="user-pools-collapsible">
                 <summary>Add Content</summary>
                 <div className="user-pools-collapsible-body">
                   <div className="user-pools-items-create">
@@ -1540,34 +1572,6 @@ export function UserPoolsPage({
                   </div>
                 </div>
               </details>
-              {itemError && <div className="user-pools-error">{itemError}</div>}
-              <div className="user-pools-items">
-                {activePool.items.length === 0 ? (
-                  <div className="user-pools-empty">No items yet.</div>
-                ) : filteredItems.length === 0 ? (
-                  <div className="user-pools-empty">No items match your search or tag filter.</div>
-                ) : filteredItemGroups.length > 0 ? (
-                  filteredItemGroups.map(group => (
-                    <div key={group.name} className="user-pools-section-group">
-                      <div className="user-pools-section-heading-row">
-                        <div className="user-pools-section-heading">{group.name}</div>
-                        <button
-                          type="button"
-                          className="user-pools-section-action"
-                          onClick={() => activePool && handleQuickAddSectionToTerritory(activePool.id, group.name)}
-                        >
-                          Add Section To Territory
-                        </button>
-                      </div>
-                      <div className="user-pools-section-items">
-                        {group.items.map(renderPoolItem)}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  filteredItems.map(renderPoolItem)
-                )}
-              </div>
             </>
           )}
         </section>
