@@ -82,6 +82,18 @@ const DEFAULT_MODEL_PROFILE: ModelProfile = {
   defaultNegativePrompt: 'deformed, distorted, extra limbs, low detail, low quality, bad anatomy', // From old generator
 };
 
+const TERRITORY_SECTION_CATEGORY_MAP: Record<string, string[]> = {
+  Subjects: ['subject'],
+  Environment: ['environment'],
+  Props: ['subject', 'environment'],
+  Lighting: ['lighting'],
+  Mood: ['lighting', 'style', 'actions'],
+  Materials: ['quality', 'style'],
+  Style: ['style'],
+  Composition: ['camera'],
+  Effects: ['effects', 'post-processing'],
+};
+
 /**
  * Attribute definitions will be loaded from external JSON files.
  * No data is loaded at this stage.
@@ -282,6 +294,15 @@ export function App() {
   
   const activeWorkingSet = workingSets.find(set => set.id === activeWorkingSetId) ?? null;
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
+  const activeTerritoryCategoryIds = useMemo(() => {
+    if (!activeTerritory) return [];
+    const categoryIds = new Set<string>();
+    activeTerritory.sources.forEach(source => {
+      const mappedCategories = TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? [];
+      mappedCategories.forEach(categoryId => categoryIds.add(categoryId));
+    });
+    return [...categoryIds];
+  }, [activeTerritory]);
   
   const workingSetAttributeDefinitions = useMemo<AttributeDefinition[]>(() => {
     if (!activeWorkingSet) return [];
@@ -1781,6 +1802,8 @@ export function App() {
                 onOpenRandom={() => setIsRandomPromptModalOpen(true)}
                 onOpenTutorial={() => setIsAppTutorialOpen(true)}
                 activeWorkingSetName={activeWorkingSet?.name ?? null}
+                activeTerritoryName={activeTerritory?.name ?? null}
+                highlightedCategoryIds={activeTerritoryCategoryIds}
               />
           <div className="interview-container">
             <div className="app-main">
@@ -1863,6 +1886,11 @@ export function App() {
                   <span>3. Edit text or adjust weight on selected elements</span>
                   <span>4. Copy on the right</span>
                 </div>
+                {activeTerritory && (
+                  <div className="builder-guidance-territory-note">
+                    Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest.
+                  </div>
+                )}
               </div>
               {builderNotice && (
                 <div className="builder-notice">

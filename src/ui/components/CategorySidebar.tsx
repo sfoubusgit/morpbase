@@ -56,6 +56,10 @@ interface CategorySidebarProps {
 
   /** Active Working Set name when the Builder is filtered */
   activeWorkingSetName?: string | null;
+
+  /** Territory-driven Builder relevance highlights */
+  activeTerritoryName?: string | null;
+  highlightedCategoryIds?: string[];
 }
 
 interface StageDefinition {
@@ -142,12 +146,15 @@ export function CategorySidebar({
   onOpenRandom,
   onOpenTutorial,
   activeWorkingSetName,
+  activeTerritoryName,
+  highlightedCategoryIds = [],
 }: CategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
   const [expandedStages, setExpandedStages] = useState<Set<string>>(
     new Set(['define', 'refine'])
   );
+  const highlightedCategorySet = new Set(highlightedCategoryIds);
 
   // Check if a category has selections
   const hasCommitted = (nodeIds: string[]): boolean => {
@@ -248,6 +255,11 @@ export function CategorySidebar({
               <strong>{activeWorkingSetName}</strong> is filtering the Builder by category.
             </div>
           )}
+          {activeTerritoryName && (
+            <div className="category-sidebar-hint category-sidebar-hint-territory">
+              <strong>{activeTerritoryName}</strong> is highlighting the Builder areas most relevant to this Territory.
+            </div>
+          )}
           {CATEGORY_STAGES.map(stage => {
             const stageEntries = stage.categories
               .map(categoryId => [categoryId, categoryMap[categoryId]] as const)
@@ -258,11 +270,12 @@ export function CategorySidebar({
             }
 
             const isStageExpanded = expandedStages.has(stage.id);
+            const stageHasTerritoryFocus = stage.categories.some(categoryId => highlightedCategorySet.has(categoryId));
 
             return (
               <section
                 key={stage.id}
-                className={`category-stage ${stage.optional ? 'category-stage-optional' : ''}`}
+                className={`category-stage ${stage.optional ? 'category-stage-optional' : ''} ${stageHasTerritoryFocus ? 'category-stage-territory' : ''}`}
               >
                 <div className="category-stage-header">
                   <div className="category-stage-labels">
@@ -293,11 +306,12 @@ export function CategorySidebar({
                       const firstNode = items[0]?.nodeId || items[0]?.subcategories?.[0]?.nodeId;
                       const isExpanded = expandedCategories.has(categoryId);
                       const isAdvancedCategory = ADVANCED_CATEGORY_IDS.has(categoryId);
+                      const isTerritoryRelevant = highlightedCategorySet.has(categoryId);
 
                       return (
                         <div key={categoryId} className="category-group">
                           <div
-                            className={`category-item ${visited ? "visited" : ""} ${active ? "active" : ""} ${isAdvancedCategory ? "advanced" : ""}`}
+                            className={`category-item ${visited ? "visited" : ""} ${active ? "active" : ""} ${isAdvancedCategory ? "advanced" : ""} ${isTerritoryRelevant ? "territory-relevant" : ""}`}
                             onClick={() => firstNode && onJumpToCategory(firstNode)}
                             title={`Jump to ${getCategoryDisplayName(categoryId)}`}
                           >
@@ -305,6 +319,9 @@ export function CategorySidebar({
                               <span className="category-item-label">
                                 {getCategoryDisplayName(categoryId)}
                               </span>
+                              {isTerritoryRelevant && (
+                                <span className="category-item-badge category-item-badge-territory">Territory</span>
+                              )}
                               {isAdvancedCategory && (
                                 <span className="category-item-badge">Advanced</span>
                               )}
