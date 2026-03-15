@@ -1,9 +1,24 @@
 export type PoolItem = {
   id: string;
   text: string;
+  section?: string;
   tags?: string[];
   note?: string;
 };
+
+export const POOL_SECTION_OPTIONS = [
+  'Subjects',
+  'Environment',
+  'Props',
+  'Lighting',
+  'Mood',
+  'Materials',
+  'Style',
+  'Composition',
+  'Effects',
+] as const;
+
+export type PoolSection = (typeof POOL_SECTION_OPTIONS)[number];
 
 export type PoolFolder = {
   id: string;

@@ -1,4 +1,5 @@
 ﻿import { useMemo, useState, useEffect } from 'react';
+import { POOL_SECTION_OPTIONS } from '../../types';
 import type { Pool, PoolFolder, PoolItem } from '../../types';
 import {
   addItemToPool,
@@ -71,11 +72,13 @@ export function UserPoolsPage({
   const [editingPoolName, setEditingPoolName] = useState('');
   const [poolError, setPoolError] = useState<string | null>(null);
   const [newItemText, setNewItemText] = useState('');
+  const [newItemSection, setNewItemSection] = useState('');
   const [newItemTags, setNewItemTags] = useState('');
   const [newItemNote, setNewItemNote] = useState('');
   const [itemError, setItemError] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingItemText, setEditingItemText] = useState('');
+  const [editingItemSection, setEditingItemSection] = useState('');
   const [editingItemTags, setEditingItemTags] = useState('');
   const [editingItemNote, setEditingItemNote] = useState('');
   const [editingAddItemId, setEditingAddItemId] = useState<string | null>(null);
@@ -153,6 +156,30 @@ export function UserPoolsPage({
       return textMatch && tagMatch;
     });
   }, [activePool, searchTerm, tagFilter]);
+
+  const filteredItemGroups = useMemo(() => {
+    const hasSectionedItems = filteredItems.some(item => item.section);
+    if (!hasSectionedItems) return [];
+
+    const grouped = new Map<string, PoolItem[]>();
+    filteredItems.forEach(item => {
+      const key = item.section?.trim() || 'General';
+      const list = grouped.get(key) ?? [];
+      list.push(item);
+      grouped.set(key, list);
+    });
+
+    const knownGroups = POOL_SECTION_OPTIONS
+      .filter(section => grouped.has(section))
+      .map(section => ({ name: section, items: grouped.get(section) ?? [] }));
+
+    const customGroups = [...grouped.entries()]
+      .filter(([name]) => !POOL_SECTION_OPTIONS.includes(name as (typeof POOL_SECTION_OPTIONS)[number]))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([name, items]) => ({ name, items }));
+
+    return [...knownGroups, ...customGroups];
+  }, [filteredItems]);
 
   const toggleFolderCollapsed = (folderId: string) => {
     setCollapsedFolderIds(previous => {
@@ -348,8 +375,15 @@ export function UserPoolsPage({
     }
     setItemError(null);
     try {
-      await addItemToPool(activePool.id, newItemText, parseTags(newItemTags), newItemNote);
+      await addItemToPool(
+        activePool.id,
+        newItemText,
+        parseTags(newItemTags),
+        newItemNote,
+        newItemSection || undefined
+      );
       setNewItemText('');
+      setNewItemSection('');
       setNewItemTags('');
       setNewItemNote('');
       await refreshPools();
@@ -358,13 +392,13 @@ export function UserPoolsPage({
     }
   };
 
-  const parseBulkLine = (line: string): { text: string; tags?: string[] } | null => {
+  const parseBulkLine = (line: string): { text: string; tags?: string[]; section?: string } | null => {
     const trimmed = line.trim();
     if (!trimmed) return null;
-    const [textPart, tagPart] = trimmed.split('|').map(part => part.trim());
+    const [textPart, tagPart, sectionPart] = trimmed.split('|').map(part => part.trim());
     if (!textPart) return null;
     const tags = tagPart ? parseTags(tagPart) : undefined;
-    return { text: textPart, tags };
+    return { text: textPart, tags, section: sectionPart || undefined };
   };
 
   const handleBulkAdd = async () => {
@@ -386,7 +420,7 @@ export function UserPoolsPage({
       for (const line of lines) {
         const parsed = parseBulkLine(line);
         if (parsed) {
-          await addItemToPool(activePool.id, parsed.text, parsed.tags);
+          await addItemToPool(activePool.id, parsed.text, parsed.tags, undefined, parsed.section);
         }
       }
       setBulkText('');
@@ -469,6 +503,7 @@ export function UserPoolsPage({
     setEditingAddItemText('');
     setEditingItemId(item.id);
     setEditingItemText(item.text);
+    setEditingItemSection(item.section ?? '');
     setEditingItemTags((item.tags || []).join(', '));
     setEditingItemNote(item.note ?? '');
   };
@@ -505,12 +540,14 @@ export function UserPoolsPage({
       const updated: PoolItem = {
         ...item,
         text: editingItemText.trim(),
+        section: editingItemSection.trim() || undefined,
         tags: parseTags(editingItemTags),
         note: editingItemNote.trim() || undefined,
       };
       await updatePoolItem(poolId, updated);
       setEditingItemId(null);
       setEditingItemText('');
+      setEditingItemSection('');
       setEditingItemTags('');
       setEditingItemNote('');
       await refreshPools();
@@ -639,6 +676,122 @@ export function UserPoolsPage({
     if (!onRandomizePoolItems) return;
     onRandomizePoolItems([]);
   };
+
+  const renderPoolItem = (item: PoolItem) => (
+    <div key={item.id} className="user-pools-item">
+      <div className="user-pools-item-content">
+        {editingItemId === item.id ? (
+          <>
+            <input
+              type="text"
+              value={editingItemText}
+              onChange={event => setEditingItemText(event.target.value)}
+            />
+            <select
+              value={editingItemSection}
+              onChange={event => setEditingItemSection(event.target.value)}
+            >
+              <option value="">No section</option>
+              {POOL_SECTION_OPTIONS.map(section => (
+                <option key={section} value={section}>
+                  {section}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={editingItemTags}
+              onChange={event => setEditingItemTags(event.target.value)}
+            />
+            <input
+              type="text"
+              value={editingItemNote}
+              onChange={event => setEditingItemNote(event.target.value)}
+            />
+          </>
+        ) : editingAddItemId === item.id ? (
+          <input
+            type="text"
+            value={editingAddItemText}
+            onChange={event => setEditingAddItemText(event.target.value)}
+          />
+        ) : (
+          <>
+            <div className="user-pools-item-text">{item.text}</div>
+            {item.section && <div className="user-pools-item-section">{item.section}</div>}
+            {item.tags && item.tags.length > 0 && (
+              <div className="user-pools-item-tags">{item.tags.join(', ')}</div>
+            )}
+            {item.note && <div className="user-pools-item-note">{item.note}</div>}
+          </>
+        )}
+      </div>
+      <div className="user-pools-item-actions">
+        {editingItemId === item.id ? (
+          <>
+            <button type="button" onClick={() => handleSaveItem(activePool!.id, item)}>
+              Save
+            </button>
+            <button type="button" onClick={() => setEditingItemId(null)}>
+              Cancel
+            </button>
+          </>
+        ) : editingAddItemId === item.id ? (
+          <>
+            <button type="button" onClick={handleSaveAddEditItem}>
+              Add
+            </button>
+            <button type="button" onClick={handleAppendAddEditItem}>
+              Append
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEditingAddItemId(null);
+                setEditingAddItemText('');
+              }}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <>
+            <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+              Add to Prompt
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
+                onAppendToPrompt?.(item.text, targetId);
+              }}
+            >
+              Append
+            </button>
+            <button type="button" onClick={() => handleStartAddEditItem(item)}>
+              Add + Edit
+            </button>
+            <button type="button" onClick={() => handleStartEditItem(item)}>
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!authUser || !isPro || !activePool) {
+                  setItemError('Upgrade to Pro to delete items.');
+                  return;
+                }
+                await deletePoolItem(activePool.id, item.id);
+                await refreshPools();
+              }}
+            >
+              Delete
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="user-pools-page">
@@ -888,11 +1041,46 @@ export function UserPoolsPage({
               <div className="user-pools-items">
                 {filteredItems.length === 0 ? (
                   <div className="user-pools-empty">No items match your search or tag filter.</div>
+                ) : filteredItemGroups.length > 0 ? (
+                  filteredItemGroups.map(group => (
+                    <div key={group.name} className="user-pools-section-group">
+                      <div className="user-pools-section-heading">{group.name}</div>
+                      <div className="user-pools-section-items">
+                        {group.items.map(item => (
+                          <div key={item.id} className="user-pools-item">
+                            <div className="user-pools-item-content">
+                              <div className="user-pools-item-text">{item.text}</div>
+                              {item.section && <div className="user-pools-item-section">{item.section}</div>}
+                              {item.tags && item.tags.length > 0 && (
+                                <div className="user-pools-item-tags">{item.tags.join(', ')}</div>
+                              )}
+                              {item.note && <div className="user-pools-item-note">{item.note}</div>}
+                            </div>
+                            <div className="user-pools-item-actions">
+                              <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+                                Add to Prompt
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
+                                  onAppendToPrompt?.(item.text, targetId);
+                                }}
+                              >
+                                Append
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
                 ) : (
                   filteredItems.map(item => (
                     <div key={item.id} className="user-pools-item">
                       <div className="user-pools-item-content">
                         <div className="user-pools-item-text">{item.text}</div>
+                        {item.section && <div className="user-pools-item-section">{item.section}</div>}
                         {item.tags && item.tags.length > 0 && (
                           <div className="user-pools-item-tags">{item.tags.join(', ')}</div>
                         )}
@@ -920,7 +1108,7 @@ export function UserPoolsPage({
           ) : (
             <>
               <div className="user-pools-helper">
-                Add reusable prompt fragments here, then organize them with tags and notes.
+                Add reusable prompt fragments here, then organize them with sections, tags, and notes.
               </div>
               <div className="user-pools-folder-assignment">
                 <label>
@@ -977,6 +1165,14 @@ export function UserPoolsPage({
                   value={newItemText}
                   onChange={event => setNewItemText(event.target.value)}
                 />
+                <select value={newItemSection} onChange={event => setNewItemSection(event.target.value)}>
+                  <option value="">No section</option>
+                  {POOL_SECTION_OPTIONS.map(section => (
+                    <option key={section} value={section}>
+                      {section}
+                    </option>
+                  ))}
+                </select>
                 <input
                   type="text"
                   placeholder="Tags (comma)"
@@ -995,11 +1191,11 @@ export function UserPoolsPage({
               </div>
               <div className="user-pools-bulk">
                 <div className="user-pools-helper">
-                  Bulk add: one item per line. Optional tags after “|”.
+                  Bulk add: one item per line. Optional tags after first “|”, optional section after second “|”.
                 </div>
                 <textarea
                   rows={4}
-                  placeholder="Bulk add: one item per line. Optional tags after | (e.g., big tree | nature, forest)"
+                  placeholder="Bulk add: one item per line. Optional tags after first | and section after second | (e.g., big tree | nature, forest | Environment)"
                   value={bulkText}
                   onChange={event => setBulkText(event.target.value)}
                 />
@@ -1038,110 +1234,17 @@ export function UserPoolsPage({
                   <div className="user-pools-empty">No items yet.</div>
                 ) : filteredItems.length === 0 ? (
                   <div className="user-pools-empty">No items match your search or tag filter.</div>
-                ) : (
-                  filteredItems.map(item => (
-                    <div key={item.id} className="user-pools-item">
-                      <div className="user-pools-item-content">
-                        {editingItemId === item.id ? (
-                          <>
-                            <input
-                              type="text"
-                              value={editingItemText}
-                              onChange={event => setEditingItemText(event.target.value)}
-                            />
-                            <input
-                              type="text"
-                              value={editingItemTags}
-                              onChange={event => setEditingItemTags(event.target.value)}
-                            />
-                            <input
-                              type="text"
-                              value={editingItemNote}
-                              onChange={event => setEditingItemNote(event.target.value)}
-                            />
-                          </>
-                        ) : editingAddItemId === item.id ? (
-                          <input
-                            type="text"
-                            value={editingAddItemText}
-                            onChange={event => setEditingAddItemText(event.target.value)}
-                          />
-                        ) : (
-                          <>
-                            <div className="user-pools-item-text">{item.text}</div>
-                            {item.tags && item.tags.length > 0 && (
-                              <div className="user-pools-item-tags">{item.tags.join(', ')}</div>
-                            )}
-                            {item.note && <div className="user-pools-item-note">{item.note}</div>}
-                          </>
-                        )}
-                      </div>
-                      <div className="user-pools-item-actions">
-                        {editingItemId === item.id ? (
-                          <>
-                            <button type="button" onClick={() => handleSaveItem(activePool.id, item)}>
-                              Save
-                            </button>
-                            <button type="button" onClick={() => setEditingItemId(null)}>
-                              Cancel
-                            </button>
-                          </>
-                        ) : editingAddItemId === item.id ? (
-                          <>
-                            <button type="button" onClick={handleSaveAddEditItem}>
-                              Add
-                            </button>
-                            <button type="button" onClick={handleAppendAddEditItem}>
-                              Append
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingAddItemId(null);
-                                setEditingAddItemText('');
-                              }}
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
-                              Add to Prompt
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
-                                onAppendToPrompt?.(item.text, targetId);
-                              }}
-                            >
-                              Append
-                            </button>
-                            <button type="button" onClick={() => handleStartAddEditItem(item)}>
-                              Add + Edit
-                            </button>
-                            <button type="button" onClick={() => handleStartEditItem(item)}>
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                if (!authUser || !isPro) {
-                                  setItemError('Upgrade to Pro to delete items.');
-                                  return;
-                                }
-                                await deletePoolItem(activePool.id, item.id);
-                                await refreshPools();
-                              }}
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
+                ) : filteredItemGroups.length > 0 ? (
+                  filteredItemGroups.map(group => (
+                    <div key={group.name} className="user-pools-section-group">
+                      <div className="user-pools-section-heading">{group.name}</div>
+                      <div className="user-pools-section-items">
+                        {group.items.map(renderPoolItem)}
                       </div>
                     </div>
                   ))
+                ) : (
+                  filteredItems.map(renderPoolItem)
                 )}
               </div>
             </>

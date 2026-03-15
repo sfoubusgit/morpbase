@@ -449,7 +449,8 @@
   padding: 8px 10px;
 }
 
-.user-pools-items-create input {
+.user-pools-items-create input,
+.user-pools-items-create select {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
@@ -471,6 +472,26 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.user-pools-section-group {
+  display: grid;
+  gap: 10px;
+}
+
+.user-pools-section-heading {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d9ddf8;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.user-pools-section-items {
+  display: grid;
+  gap: 10px;
 }
 
 .user-pools-bulk {
@@ -521,9 +542,31 @@
   padding: 6px 8px;
 }
 
+.user-pools-item-content select {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #fff;
+  padding: 6px 8px;
+}
+
 .user-pools-item-text {
   font-size: 14px;
   font-weight: 600;
+}
+
+.user-pools-item-section {
+  display: inline-flex;
+  align-self: flex-start;
+  background: rgba(110, 86, 249, 0.16);
+  border: 1px solid rgba(110, 86, 249, 0.28);
+  color: #d8d2ff;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .user-pools-item-tags,

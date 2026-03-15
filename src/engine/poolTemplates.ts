@@ -11,6 +11,7 @@ export const createPoolFromTemplate = async (template: Pool, name: string): Prom
     .map(item => ({
       pool_id: created.id,
       text: normalizeText(item.text),
+      section: item.section ? normalizeText(item.section) : null,
       tags: item.tags?.map(normalizeText).filter(Boolean) ?? null,
       note: item.note ? normalizeText(item.note) : null,
     }))
@@ -28,6 +29,7 @@ export const createPoolFromTemplate = async (template: Pool, name: string): Prom
     items: template.items.map(item => ({
       ...item,
       text: normalizeText(item.text),
+      section: item.section ? normalizeText(item.section) : undefined,
       tags: item.tags?.map(normalizeText).filter(Boolean) ?? undefined,
       note: item.note ? normalizeText(item.note) : undefined,
     })),

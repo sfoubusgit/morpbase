@@ -34,6 +34,7 @@ const toPool = (poolRow: any, items: PoolItem[]): Pool => ({
 const toPoolItem = (row: any): PoolItem => ({
   id: row.id,
   text: row.text,
+  section: row.section ?? undefined,
   tags: row.tags ?? undefined,
   note: row.note ?? undefined,
 });
@@ -204,7 +205,13 @@ export const deletePool = async (poolId: string): Promise<void> => {
   if (error) throw error;
 };
 
-export const addItemToPool = async (poolId: string, text: string, tags?: string[], note?: string): Promise<PoolItem> => {
+export const addItemToPool = async (
+  poolId: string,
+  text: string,
+  tags?: string[],
+  note?: string,
+  section?: string
+): Promise<PoolItem> => {
   const normalizedText = normalizeText(text);
   if (!normalizedText) {
     throw new Error('Item text cannot be empty.');
@@ -212,6 +219,7 @@ export const addItemToPool = async (poolId: string, text: string, tags?: string[
   const payload = {
     pool_id: poolId,
     text: normalizedText,
+    section: section ? normalizeText(section) : null,
     tags: tags && tags.length > 0 ? tags.map(normalizeText).filter(Boolean) : null,
     note: note ? normalizeText(note) : null,
   };
@@ -227,6 +235,7 @@ export const addItemToPool = async (poolId: string, text: string, tags?: string[
 export const updatePoolItem = async (poolId: string, updated: PoolItem): Promise<PoolItem | null> => {
   const payload = {
     text: normalizeText(updated.text),
+    section: updated.section ? normalizeText(updated.section) : null,
     tags: updated.tags && updated.tags.length > 0 ? updated.tags.map(normalizeText).filter(Boolean) : null,
     note: updated.note ? normalizeText(updated.note) : null,
   };
@@ -276,6 +285,7 @@ export const importPoolPayload = async (
   const sanitizeItems = (items: PoolItem[]) =>
     items.map(item => ({
       text: normalizeText(item.text),
+      section: item.section ? normalizeText(item.section) : null,
       tags: item.tags?.map(normalizeText).filter(Boolean) ?? null,
       note: item.note ? normalizeText(item.note) : null,
     }));
@@ -341,12 +351,13 @@ export const exportPoolCsv = async (poolId: string): Promise<string> => {
     throw new Error('Pool not found.');
   }
   const rows = pool.items.map(item => {
+    const section = item.section ?? '';
     const tags = item.tags ? item.tags.join(', ') : '';
     const note = item.note ?? '';
     const escape = (value: string) => `"${value.replace(/"/g, '""')}"`;
-    return [item.text, tags, note].map(escape).join(',');
+    return [item.text, section, tags, note].map(escape).join(',');
   });
-  return ['text,tags,note', ...rows].join('\n');
+  return ['text,section,tags,note', ...rows].join('\n');
 };
 
 export const importPoolCsv = async (poolId: string, csv: string, mode: 'merge' | 'replace') => {
@@ -358,16 +369,25 @@ export const importPoolCsv = async (poolId: string, csv: string, mode: 'merge' |
   if (lines.length === 0) {
     throw new Error('CSV is empty.');
   }
-  const startIndex = lines[0].toLowerCase().startsWith('text') ? 1 : 0;
-  const items: Array<{ text: string; tags?: string[]; note?: string }> = [];
+  const headerColumns = lines[0].toLowerCase().startsWith('text')
+    ? lines[0].split(',').map(part => part.replace(/^"|"$/g, '').trim().toLowerCase())
+    : null;
+  const hasSectionColumn = headerColumns?.includes('section') ?? false;
+  const startIndex = headerColumns ? 1 : 0;
+  const items: Array<{ text: string; section?: string; tags?: string[]; note?: string }> = [];
   for (let i = startIndex; i < lines.length; i += 1) {
     const line = lines[i];
     const parts = line.split(',').map(part => part.replace(/^"|"$/g, '').trim());
     if (!parts[0]) continue;
     items.push({
       text: normalizeText(parts[0]),
-      tags: parts[1] ? parseTagsCsv(parts[1]) : undefined,
-      note: parts[2] ? normalizeText(parts[2]) : undefined,
+      section: hasSectionColumn && parts[1] ? normalizeText(parts[1]) : undefined,
+      tags: hasSectionColumn
+        ? (parts[2] ? parseTagsCsv(parts[2]) : undefined)
+        : (parts[1] ? parseTagsCsv(parts[1]) : undefined),
+      note: hasSectionColumn
+        ? (parts[3] ? normalizeText(parts[3]) : undefined)
+        : (parts[2] ? normalizeText(parts[2]) : undefined),
     });
   }
   if (mode === 'replace') {
@@ -379,6 +399,7 @@ export const importPoolCsv = async (poolId: string, csv: string, mode: 'merge' |
       .insert(items.map(item => ({
         pool_id: poolId,
         text: item.text,
+        section: item.section ? normalizeText(item.section) : null,
         tags: item.tags?.map(normalizeText).filter(Boolean) ?? null,
         note: item.note ? normalizeText(item.note) : null,
       })));
