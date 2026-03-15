@@ -1311,6 +1311,34 @@ export function App() {
     await refreshWorkingSets();
   };
 
+  const handleRemoveActiveTerritorySource = async (sourceId: string) => {
+    if (!activeTerritory) return;
+    if (activeTerritory.sources.length <= 1) {
+      setBuilderNotice('A Territory needs at least one source. Remove the Territory instead if you want to clear it.');
+      return;
+    }
+
+    const nextSources = activeTerritory.sources
+      .filter(source => source.id !== sourceId)
+      .map(source => ({
+        poolId: source.poolId,
+        poolName: source.poolName,
+        section: source.section,
+      }));
+
+    const updated = await handleUpdateTerritory(activeTerritory.id, {
+      name: activeTerritory.name,
+      description: activeTerritory.description ?? '',
+      sources: nextSources,
+    });
+
+    if (updated) {
+      setBuilderNotice(`Removed one source from "${updated.name}".`);
+    } else {
+      setBuilderNotice('Failed to update the active Territory.');
+    }
+  };
+
   useEffect(() => {
     if (questionNodes.length === 0) return;
     const initialId = getPreferredTerritoryStartNodeId() || getInitialUsableNodeId() || getInitialNodeId(questionNodes);
@@ -1989,6 +2017,13 @@ export function App() {
                             <span className="territory-banner-mapping-target">
                               {mapping.categoryLabels.length > 0 ? mapping.categoryLabels.join(', ') : 'No Builder areas yet'}
                             </span>
+                            <button
+                              type="button"
+                              className="territory-banner-mapping-remove"
+                              onClick={() => void handleRemoveActiveTerritorySource(mapping.id)}
+                            >
+                              Remove
+                            </button>
                           </div>
                         ))}
                         {activeTerritoryMappings.length > 5 && (

@@ -587,6 +587,19 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: rgba(209, 250, 229, 0.72);
 }
 
+.territory-banner-mapping-remove {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(20, 20, 26, 0.9);
+  color: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 .territory-banner-chip,
 .territory-banner-more {
   display: inline-flex;
