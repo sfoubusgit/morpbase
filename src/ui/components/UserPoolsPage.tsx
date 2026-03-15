@@ -10,7 +10,9 @@ import {
   importPoolPayload,
   listPoolFolders,
   listPools,
+  movePoolToFolder,
   renamePool,
+  updatePoolFolderOrder,
   updatePoolItem,
 } from '../../engine/poolStore';
 import { createPoolFromTemplate } from '../../engine/poolTemplates';
@@ -97,6 +99,8 @@ export function UserPoolsPage({
   const [randomizerAppendMode, setRandomizerAppendMode] = useState<'replace' | 'append'>('replace');
   const [appendTargetId, setAppendTargetId] = useState<string>('last');
   const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<string>>(new Set());
+  const [draggedFolderId, setDraggedFolderId] = useState<string | null>(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const gateMessage = !authReady
     ? 'Loading your pools...'
     : !authUser
@@ -117,15 +121,25 @@ export function UserPoolsPage({
   );
   const groupedPools = useMemo(() => {
     const groups = new Map<string, { id: string; name: string; pools: Pool[] }>();
+    const orderedGroupIds: string[] = [defaultFolderId, '__ungrouped__'];
+
     groups.set(defaultFolderId, { id: defaultFolderId, name: 'Default Pools', pools: [] });
-    folders.forEach(folder => groups.set(folder.id, { id: folder.id, name: folder.name, pools: [] }));
     groups.set('__ungrouped__', { id: '__ungrouped__', name: 'Ungrouped', pools: [] });
+    folders.forEach(folder => {
+      groups.set(folder.id, { id: folder.id, name: folder.name, pools: [] });
+      orderedGroupIds.push(folder.id);
+    });
+
     availablePools.forEach(pool => {
       const key = pool.folderId ?? '__ungrouped__';
       const group = groups.get(key);
       if (group) group.pools.push(pool);
     });
-    return Array.from(groups.values()).filter(group => group.pools.length > 0);
+
+    return orderedGroupIds
+      .map(groupId => groups.get(groupId))
+      .filter((group): group is { id: string; name: string; pools: Pool[] } => Boolean(group))
+      .filter(group => group.pools.length > 0);
   }, [availablePools, defaultFolderId, folders]);
 
   const filteredItems = useMemo(() => {
@@ -293,6 +307,27 @@ export function UserPoolsPage({
       await refreshPools();
     } catch (err: any) {
       setPoolError(err?.message ?? 'Failed to move pool.');
+    }
+  };
+
+  const handleFolderReorder = async (sourceFolderId: string, targetFolderId: string) => {
+    if (sourceFolderId === targetFolderId) return;
+
+    const sourceIndex = folders.findIndex(folder => folder.id === sourceFolderId);
+    const targetIndex = folders.findIndex(folder => folder.id === targetFolderId);
+    if (sourceIndex === -1 || targetIndex === -1) return;
+
+    const nextFolders = [...folders];
+    const [movedFolder] = nextFolders.splice(sourceIndex, 1);
+    nextFolders.splice(targetIndex, 0, movedFolder);
+
+    setFolders(nextFolders.map((folder, index) => ({ ...folder, sortOrder: index })));
+
+    try {
+      await updatePoolFolderOrder(nextFolders.map(folder => folder.id));
+    } catch (err: any) {
+      setPoolError(err?.message ?? 'Failed to reorder folders.');
+      await refreshPools();
     }
   };
 
@@ -684,22 +719,77 @@ export function UserPoolsPage({
             ) : groupedPools.length === 0 ? (
               <div className="user-pools-empty">No pools yet. Create one above.</div>
             ) : (
-              groupedPools.map(group => (
-                <div key={group.id} className="user-pools-folder-group">
-                  <button
-                    type="button"
-                    className="user-pools-folder-heading user-pools-folder-toggle"
-                    onClick={() => toggleFolderCollapsed(group.id)}
-                    aria-expanded={!collapsedFolderIds.has(group.id)}
-                  >
-                    <span className="user-pools-folder-title">
+              groupedPools.map(group => {
+                const isCustomFolder = folders.some(folder => folder.id === group.id);
+
+                return (
+                <div
+                  key={group.id}
+                  className={`user-pools-folder-group ${isCustomFolder ? 'draggable' : ''} ${dragOverFolderId === group.id ? 'drag-over' : ''}`}
+                  onDragOver={event => {
+                    if (!isCustomFolder || !draggedFolderId || draggedFolderId === group.id) return;
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    setDragOverFolderId(group.id);
+                  }}
+                  onDragEnter={event => {
+                    if (!isCustomFolder || !draggedFolderId || draggedFolderId === group.id) return;
+                    event.preventDefault();
+                    setDragOverFolderId(group.id);
+                  }}
+                  onDragLeave={() => {
+                    if (dragOverFolderId === group.id) {
+                      setDragOverFolderId(null);
+                    }
+                  }}
+                  onDrop={async event => {
+                    if (!isCustomFolder) return;
+                    event.preventDefault();
+                    const sourceFolderId = draggedFolderId ?? event.dataTransfer.getData('text/plain');
+                    setDragOverFolderId(null);
+                    setDraggedFolderId(null);
+                    if (!sourceFolderId || sourceFolderId === group.id) return;
+                    await handleFolderReorder(sourceFolderId, group.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedFolderId(null);
+                    setDragOverFolderId(null);
+                  }}
+                >
+                  <div className="user-pools-folder-heading">
+                    {isCustomFolder && (
+                      <span
+                        className="user-pools-folder-drag-handle"
+                        draggable
+                        onDragStart={event => {
+                          event.dataTransfer.effectAllowed = 'move';
+                          event.dataTransfer.setData('text/plain', group.id);
+                          setDraggedFolderId(group.id);
+                        }}
+                        onDragEnd={() => {
+                          setDraggedFolderId(null);
+                          setDragOverFolderId(null);
+                        }}
+                        title="Drag to reorder folder"
+                      >
+                        ::
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      className="user-pools-folder-toggle"
+                      onClick={() => toggleFolderCollapsed(group.id)}
+                      aria-expanded={!collapsedFolderIds.has(group.id)}
+                    >
+                      <span className="user-pools-folder-title">
                       <span className="user-pools-folder-caret">
                         {collapsedFolderIds.has(group.id) ? '+' : '-'}
                       </span>
                       <span>{group.name}</span>
-                    </span>
-                    <span className="user-pools-folder-count">{group.pools.length}</span>
-                  </button>
+                      </span>
+                      <span className="user-pools-folder-count">{group.pools.length}</span>
+                    </button>
+                  </div>
                   {!collapsedFolderIds.has(group.id) && (
                     <div className="user-pools-folder-items">
                       {group.pools.map(pool => {
@@ -756,7 +846,7 @@ export function UserPoolsPage({
                     </div>
                   )}
                 </div>
-              ))
+              )})
             )}
           </div>
         </section>

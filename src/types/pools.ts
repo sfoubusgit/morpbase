@@ -8,6 +8,7 @@ export type PoolItem = {
 export type PoolFolder = {
   id: string;
   name: string;
+  sortOrder: number;
   createdAt: number;
   updatedAt: number;
 };

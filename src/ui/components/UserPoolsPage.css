@@ -235,21 +235,51 @@
   gap: 8px;
 }
 
+.user-pools-folder-group.draggable {
+  cursor: grab;
+}
+
+.user-pools-folder-group.draggable:active {
+  cursor: grabbing;
+}
+
+.user-pools-folder-group.drag-over {
+  position: relative;
+}
+
+.user-pools-folder-group.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(143, 117, 255, 0.95);
+  box-shadow: 0 0 0 1px rgba(143, 117, 255, 0.2);
+}
+
 .user-pools-folder-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   font-size: 12px;
   color: #cbd5f5;
   padding: 6px 2px;
 }
 
 .user-pools-folder-toggle {
-  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   background: transparent;
   border: 0;
   cursor: pointer;
   text-align: left;
+  padding: 0;
+  color: inherit;
+  font: inherit;
 }
 
 .user-pools-folder-toggle:hover {
@@ -260,6 +290,23 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.user-pools-folder-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 12px;
+  color: #8f75ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  cursor: grab;
+  user-select: none;
+}
+
+.user-pools-folder-drag-handle:active {
+  cursor: grabbing;
 }
 
 .user-pools-folder-caret {

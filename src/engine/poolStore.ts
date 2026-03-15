@@ -16,6 +16,7 @@ const requireProfileId = async (): Promise<string> => {
 const toPoolFolder = (row: any): PoolFolder => ({
   id: row.id,
   name: row.name,
+  sortOrder: row.sort_order ?? 0,
   createdAt: new Date(row.created_at).getTime(),
   updatedAt: new Date(row.updated_at).getTime(),
 });
@@ -43,7 +44,8 @@ export const listPools = async (): Promise<Pool[]> => {
     .from('pool_folders')
     .select('*')
     .eq('user_id', userId)
-    .order('name', { ascending: true });
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
   if (folderError) throw folderError;
   const folderNameById = new Map<string, string>();
   (folders ?? []).forEach(folder => {
@@ -92,7 +94,8 @@ export const listPoolFolders = async (): Promise<PoolFolder[]> => {
     .from('pool_folders')
     .select('*')
     .eq('user_id', userId)
-    .order('name', { ascending: true });
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true });
   if (error) throw error;
   return (data ?? []).map(toPoolFolder);
 };
@@ -135,13 +138,36 @@ export const createPoolFolder = async (name: string): Promise<PoolFolder> => {
     throw new Error('Folder name cannot be empty.');
   }
   const userId = await requireProfileId();
+  const { data: existingFolders, error: existingError } = await supabase
+    .from('pool_folders')
+    .select('sort_order')
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: false })
+    .limit(1);
+  if (existingError) throw existingError;
+  const nextSortOrder = (existingFolders?.[0]?.sort_order ?? -1) + 1;
   const { data, error } = await supabase
     .from('pool_folders')
-    .insert({ user_id: userId, name: trimmed })
+    .insert({ user_id: userId, name: trimmed, sort_order: nextSortOrder })
     .select('*')
     .single();
   if (error) throw error;
   return toPoolFolder(data);
+};
+
+export const updatePoolFolderOrder = async (folderIds: string[]): Promise<void> => {
+  const updates = folderIds.map((id, index) =>
+    supabase
+      .from('pool_folders')
+      .update({ sort_order: index })
+      .eq('id', id)
+  );
+
+  const results = await Promise.all(updates);
+  const failed = results.find(result => result.error);
+  if (failed?.error) {
+    throw failed.error;
+  }
 };
 
 export const renamePool = async (poolId: string, name: string): Promise<Pool | null> => {
