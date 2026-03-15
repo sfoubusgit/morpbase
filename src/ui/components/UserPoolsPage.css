@@ -1072,21 +1072,6 @@
   font-size: 12px;
 }
 
-.user-pools-advanced {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  display: grid;
-  gap: 12px;
-}
-
-.user-pools-advanced summary {
-  cursor: pointer;
-  font-size: 12px;
-  color: #cbd5f5;
-}
-
 @media (max-width: 960px) {
   .user-pools-layout {
     grid-template-columns: 1fr;
