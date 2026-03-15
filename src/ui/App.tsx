@@ -309,7 +309,6 @@ export function App() {
   }, []);
 
   
-  const activeWorkingSet = workingSets.find(set => set.id === activeWorkingSetId) ?? null;
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const activeTerritoryCategoryIds = useMemo(() => {
     if (!activeTerritory) return [];
@@ -331,25 +330,6 @@ export function App() {
       ),
     }));
   }, [activeTerritory]);
-
-  const workingSetAttributeDefinitions = useMemo<AttributeDefinition[]>(() => {
-    if (!activeWorkingSet) return [];
-    const defs: AttributeDefinition[] = [];
-    Object.entries(activeWorkingSet.categoryBuckets).forEach(([categoryId, items]) => {
-      const semanticPriority = CATEGORY_ORDER.indexOf(categoryId) + 1;
-      items.forEach(item => {
-        defs.push({
-          id: `ws_${activeWorkingSet.id}_${categoryId}_${item.id}`,
-          baseText: item.text,
-          category: categoryId as AttributeDefinition['category'],
-          semanticPriority: semanticPriority > 0 ? semanticPriority : 3,
-          isNegative: false,
-          conflictsWith: [],
-        });
-      });
-    });
-    return defs;
-  }, [activeWorkingSet]);
 
   const baseSetTemplate = useMemo<WorkingSet>(() => {
     const categoryBuckets: WorkingSet['categoryBuckets'] = {};
@@ -521,8 +501,7 @@ export function App() {
   const [currentNodeId, setCurrentNodeId] = useState<string>('');
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
 
-  const activeCategoryId = activeWorkingSet ? getCategoryForNode(currentNodeId) : null;
-  const effectiveAttributeDefinitions = activeWorkingSet ? workingSetAttributeDefinitions : attributeDefinitions;
+  const effectiveAttributeDefinitions = attributeDefinitions;
   const effectiveDefinitionIds = useMemo(() => new Set(effectiveAttributeDefinitions.map(def => def.id)), [effectiveAttributeDefinitions]);
 
   const isNodeUsable = useCallback((nodeId: string | null, nodes: QuestionNode[], definitions: AttributeDefinition[]) => {
@@ -530,15 +509,8 @@ export function App() {
     const node = nodes.find(item => item.id === nodeId);
     if (!node) return false;
 
-    if (!activeWorkingSet) {
-      return node.attributeIds.some(attributeId => definitions.some(def => def.id === attributeId));
-    }
-
-    const categoryId = getCategoryForNode(nodeId);
-    if (!categoryId) return false;
-
-    return definitions.some(def => def.category === categoryId);
-  }, [activeWorkingSet, getCategoryForNode]);
+    return node.attributeIds.some(attributeId => definitions.some(def => def.id === attributeId));
+  }, []);
 
   const usableNodeIds = useMemo(() => {
     if (questionNodes.length === 0) return [];
@@ -728,13 +700,10 @@ export function App() {
                      selections.size > 0;
   
   // Get attribute definitions for current question
-  const currentQuestionAttributes = activeWorkingSet
-    ? workingSetAttributeDefinitions.filter(def => def.category === activeCategoryId)
-    : attributeDefinitions.filter(attr => currentNode?.attributeIds.includes(attr.id));
+  const currentQuestionAttributes = attributeDefinitions.filter(attr => currentNode?.attributeIds.includes(attr.id));
   
   // CRITICAL VALIDATION: Detect missing attributes for current question
   useEffect(() => {
-    if (activeWorkingSet) return;
     if (currentNode && currentNode.attributeIds) {
       const missingAttributes = currentNode.attributeIds.filter(
         attrId => !attributeDefinitions.find(def => def.id === attrId)
@@ -759,7 +728,7 @@ export function App() {
         console.log(`[App] ✓ Question "${currentNode.id}" has ${currentQuestionAttributes.length}/${currentNode.attributeIds.length} attributes available`);
       }
     }
-  }, [activeWorkingSet, currentNode?.id, currentNode?.attributeIds, attributeDefinitions.length, currentQuestionAttributes.length]);
+  }, [currentNode?.id, currentNode?.attributeIds, attributeDefinitions.length, currentQuestionAttributes.length]);
   
   // Get modifiers for current question (empty for now, can be enhanced later)
   const currentQuestionModifiers: Modifier[] = [];
@@ -1414,7 +1383,7 @@ export function App() {
   useEffect(() => {
     if (questionNodes.length === 0) return;
     if (usableNodeIds.length === 0) {
-      setUnavailableJumpNodeId(activeWorkingSet ? '__builder_empty__' : null);
+      setUnavailableJumpNodeId('__builder_empty__');
       return;
     }
 
@@ -1444,7 +1413,7 @@ export function App() {
         setUnavailableJumpNodeId(null);
       }
     }
-  }, [questionNodes.length, usableNodeIds, currentNodeId, getAdjacentUsableNodeId, unavailableJumpNodeId, activeWorkingSet]);
+  }, [questionNodes.length, usableNodeIds, currentNodeId, getAdjacentUsableNodeId, unavailableJumpNodeId]);
 
   /**
    * Event Handler: Randomize prompt
@@ -1675,9 +1644,7 @@ export function App() {
   const displayError: ValidationError | null = error?.type === 'INVALID_ATTRIBUTE'
     ? {
         type: 'INVALID_ATTRIBUTE',
-        message: activeWorkingSet
-          ? 'Some prompt elements are not available in the current Working Set.'
-          : 'Some prompt elements are no longer available in the Builder.',
+        message: 'Some prompt elements are no longer available in the Builder.',
         details: {},
       }
     : error;
@@ -2007,47 +1974,11 @@ export function App() {
                 onJumpToCategory={handleJumpToCategory}
                 onOpenRandom={() => setIsRandomPromptModalOpen(true)}
                 onOpenTutorial={() => setIsAppTutorialOpen(true)}
-                activeWorkingSetName={activeWorkingSet?.name ?? null}
                 activeTerritoryName={activeTerritory?.name ?? null}
                 highlightedCategoryIds={activeTerritoryCategoryIds}
               />
           <div className="interview-container">
             <div className="app-main">
-              <div className="working-set-banner">
-                <div>
-                  <span className="working-set-banner-label">Working Set</span>
-                  <strong>{activeWorkingSet ? activeWorkingSet.name : 'Base Set'}</strong>
-                  <div className="working-set-banner-description">
-                    {activeWorkingSet
-                      ? 'This Working Set is filtering the Builder by category with a smaller, focused set of prompt elements.'
-                      : 'Base Set gives you the full prompt builder by category.'}
-                  </div>
-                </div>
-                <div className="working-set-banner-actions">
-                  <label className="working-set-banner-switch">
-                    <span>Switch</span>
-                    <select
-                      value={activeWorkingSetId ?? ''}
-                      onChange={event => handleSetActiveWorkingSet(event.target.value || null)}
-                    >
-                      <option value="">Base Set</option>
-                      {workingSets.map(set => (
-                        <option key={set.id} value={set.id}>
-                          {set.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <button type="button" onClick={() => setActivePage('working-sets')}>
-                    Open Legacy Sets
-                  </button>
-                  {activeWorkingSet && (
-                    <button type="button" onClick={() => handleSetActiveWorkingSet(null)}>
-                      Deactivate (Base Set)
-                    </button>
-                  )}
-                </div>
-              </div>
               {activeTerritory && (
                 <div className="territory-banner">
                   <div>
@@ -2160,15 +2091,14 @@ export function App() {
                 />
               ) : unavailableJumpNodeId === '__builder_empty__' ? (
                 <div className="app-error-state">
-                  <p>This Working Set does not contain any prompt elements for the Builder.</p>
+                  <p>No Builder elements are currently available.</p>
                   <div className="builder-state-actions">
-                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
-                    <button onClick={() => setActivePage('working-sets')}>Open Legacy Sets</button>
+                    <button onClick={handleStartOver}>Restart Builder</button>
                   </div>
                 </div>
               ) : unavailableJumpNode ? (
                 <div className="app-error-state">
-                  <p>This section is not covered by the current Working Set category filter.</p>
+                  <p>This section is not currently available.</p>
                   <div className="builder-state-subtitle">{unavailableJumpNode.question}</div>
                   <div className="builder-state-actions">
                     <button
@@ -2176,20 +2106,17 @@ export function App() {
                     >
                       Go to Next Available Section
                     </button>
-                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
-                    <button onClick={() => setActivePage('working-sets')}>Open Legacy Sets</button>
                   </div>
                 </div>
               ) : currentNode && !isCurrentNodeUsable ? (
                 <div className="app-error-state">
-                  <p>This section is outside the current Working Set category filter.</p>
+                  <p>This section is currently unavailable.</p>
                   <div className="builder-state-actions">
                     <button
                       onClick={() => handleGoToUsableNode(getAdjacentUsableNodeId(currentNode.id, 'next'))}
                     >
                       Go to Next Available Section
                     </button>
-                    <button onClick={() => handleSetActiveWorkingSet(null)}>Use Base Set</button>
                   </div>
                 </div>
               ) : currentNode ? (

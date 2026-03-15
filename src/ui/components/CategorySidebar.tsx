@@ -54,9 +54,6 @@ interface CategorySidebarProps {
   /** Open Tutorial */
   onOpenTutorial?: () => void;
 
-  /** Active Working Set name when the Builder is filtered */
-  activeWorkingSetName?: string | null;
-
   /** Territory-driven Builder relevance highlights */
   activeTerritoryName?: string | null;
   highlightedCategoryIds?: string[];
@@ -145,7 +142,6 @@ export function CategorySidebar({
   onJumpToCategory,
   onOpenRandom,
   onOpenTutorial,
-  activeWorkingSetName,
   activeTerritoryName,
   highlightedCategoryIds = [],
 }: CategorySidebarProps) {
@@ -250,11 +246,6 @@ export function CategorySidebar({
           <div className="category-sidebar-title-wrapper">
             <h3 className="category-sidebar-title">Builder Flow</h3>
           </div>
-          {activeWorkingSetName && (
-            <div className="category-sidebar-hint">
-              <strong>{activeWorkingSetName}</strong> is filtering the Builder by category.
-            </div>
-          )}
           {activeTerritoryName && (
             <div className="category-sidebar-hint category-sidebar-hint-territory">
               <strong>{activeTerritoryName}</strong> is highlighting the Builder areas most relevant to this Territory.
