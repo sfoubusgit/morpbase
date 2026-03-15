@@ -2013,8 +2013,13 @@ export function App() {
                         </span>
                       )}
                     </div>
-                    <div className="territory-banner-mapping">
-                      <div className="territory-banner-mapping-label">Builder mapping</div>
+                    <details className="territory-banner-mapping">
+                      <summary>
+                        Builder mapping
+                        <span className="territory-banner-mapping-summary">
+                          {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
+                        </span>
+                      </summary>
                       <div className="territory-banner-mapping-list">
                         {activeTerritoryMappings.slice(0, 5).map(mapping => (
                           <div key={mapping.id} className="territory-banner-mapping-item">
@@ -2040,7 +2045,7 @@ export function App() {
                           </div>
                         )}
                       </div>
-                    </div>
+                    </details>
                   </div>
                   <div className="territory-banner-actions">
                     <label className="territory-banner-switch">
