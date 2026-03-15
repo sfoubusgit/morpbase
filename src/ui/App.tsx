@@ -94,6 +94,19 @@ const TERRITORY_SECTION_CATEGORY_MAP: Record<string, string[]> = {
   Effects: ['effects', 'post-processing'],
 };
 
+const BUILDER_CATEGORY_LABELS: Record<string, string> = {
+  subject: 'Subject',
+  style: 'Style',
+  lighting: 'Lighting',
+  camera: 'Camera',
+  environment: 'Environment',
+  quality: 'Quality',
+  effects: 'Effects',
+  'post-processing': 'Post-Processing',
+  actions: 'Actions',
+  'anatomy-details': 'Anatomy Details',
+};
+
 /**
  * Attribute definitions will be loaded from external JSON files.
  * No data is loaded at this stage.
@@ -302,6 +315,17 @@ export function App() {
       mappedCategories.forEach(categoryId => categoryIds.add(categoryId));
     });
     return [...categoryIds];
+  }, [activeTerritory]);
+  const activeTerritoryMappings = useMemo(() => {
+    if (!activeTerritory) return [];
+    return activeTerritory.sources.map(source => ({
+      id: source.id,
+      section: source.section,
+      poolName: source.poolName,
+      categoryLabels: (TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? []).map(
+        categoryId => BUILDER_CATEGORY_LABELS[categoryId] ?? categoryId
+      ),
+    }));
   }, [activeTerritory]);
 
   const getPreferredTerritoryStartNodeId = useCallback(() => {
@@ -1892,6 +1916,27 @@ export function App() {
                         </span>
                       )}
                     </div>
+                    <div className="territory-banner-mapping">
+                      <div className="territory-banner-mapping-label">Builder mapping</div>
+                      <div className="territory-banner-mapping-list">
+                        {activeTerritoryMappings.slice(0, 5).map(mapping => (
+                          <div key={mapping.id} className="territory-banner-mapping-item">
+                            <span className="territory-banner-mapping-source">
+                              {mapping.section} from {mapping.poolName}
+                            </span>
+                            <span className="territory-banner-mapping-arrow">-&gt;</span>
+                            <span className="territory-banner-mapping-target">
+                              {mapping.categoryLabels.length > 0 ? mapping.categoryLabels.join(', ') : 'No Builder areas yet'}
+                            </span>
+                          </div>
+                        ))}
+                        {activeTerritoryMappings.length > 5 && (
+                          <div className="territory-banner-mapping-more">
+                            +{activeTerritoryMappings.length - 5} more mappings
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <div className="territory-banner-actions">
                     <button type="button" onClick={() => setActivePage('user-pools')}>
@@ -1916,7 +1961,7 @@ export function App() {
                 </div>
                 {activeTerritory && (
                   <div className="builder-guidance-territory-note">
-                    Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest.
+                    Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and the mapping above shows how each Territory section currently feeds Builder.
                   </div>
                 )}
               </div>
