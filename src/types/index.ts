@@ -13,3 +13,4 @@ export * from './poolHub';
 export * from './prompts';
 export * from './workingSets';
 export * from './workingSetHub';
+export * from './territories';

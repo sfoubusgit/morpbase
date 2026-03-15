@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, PoolItem, Prompt, ValidationError, WorkingSet } from '../types';
+import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, PoolItem, Prompt, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { loadQuestionNodes, QuestionNode } from '../data/loadQuestionNodes';
@@ -59,6 +59,14 @@ import {
   updateWorkingSet,
 } from '../engine/workingSetStore';
 import { isCurrentUserAdmin } from '../engine/adminStore';
+import {
+  createTerritory,
+  deleteTerritory,
+  getActiveTerritoryId,
+  listTerritories,
+  setActiveTerritoryId as persistActiveTerritoryId,
+  updateTerritory,
+} from '../engine/territoryStore';
 
 /**
  * Default model profile for Stable Diffusion
@@ -202,6 +210,9 @@ export function App() {
   const [workingSets, setWorkingSets] = useState<WorkingSet[]>([]);
   const [workingSetsLoading, setWorkingSetsLoading] = useState(false);
   const [activeWorkingSetId, setActiveWorkingSet] = useState<string | null>(() => getActiveWorkingSetId());
+  const [territories, setTerritories] = useState<Territory[]>([]);
+  const [territoriesLoading, setTerritoriesLoading] = useState(false);
+  const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
 
@@ -270,6 +281,7 @@ export function App() {
 
   
   const activeWorkingSet = workingSets.find(set => set.id === activeWorkingSetId) ?? null;
+  const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   
   const workingSetAttributeDefinitions = useMemo<AttributeDefinition[]>(() => {
     if (!activeWorkingSet) return [];
@@ -1077,11 +1089,74 @@ export function App() {
     }
   }, []);
 
+  const refreshTerritories = useCallback(async () => {
+    setTerritoriesLoading(true);
+    try {
+      const next = await listTerritories();
+      setTerritories(next);
+    } catch {
+      setTerritories([]);
+    } finally {
+      setTerritoriesLoading(false);
+    }
+  }, []);
+
   const handleSetActiveWorkingSet = (id: string | null) => {
     setUnavailableJumpNodeId(null);
     setHasReachedEndViaNext(false);
     setActiveWorkingSet(id);
     persistActiveWorkingSetId(id);
+  };
+
+  const handleSetActiveTerritory = (id: string | null) => {
+    setActiveTerritory(id);
+    persistActiveTerritoryId(id);
+  };
+
+  const handleUseTerritoryInBuilder = (id: string | null) => {
+    handleSetActiveTerritory(id);
+    setActivePage('generator');
+    const territory = territories.find(entry => entry.id === id) ?? null;
+    setBuilderNotice(
+      territory
+        ? `"${territory.name}" is now active as your current creative territory.`
+        : 'Territory mode is off.'
+    );
+  };
+
+  const handleCreateTerritory = async (
+    name: string,
+    description: string,
+    sources: TerritorySourceInput[]
+  ) => {
+    try {
+      const created = await createTerritory(name, description, sources);
+      await refreshTerritories();
+      return created;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleUpdateTerritory = async (
+    id: string,
+    patch: { name?: string; description?: string; sources?: TerritorySourceInput[] }
+  ) => {
+    try {
+      const updated = await updateTerritory(id, patch);
+      await refreshTerritories();
+      return updated;
+    } catch {
+      return null;
+    }
+  };
+
+  const handleDeleteTerritory = async (id: string) => {
+    await deleteTerritory(id);
+    await refreshTerritories();
+    if (activeTerritoryId === id) {
+      handleSetActiveTerritory(null);
+    }
   };
 
   const handleCreateWorkingSet = async (
@@ -1419,7 +1494,17 @@ export function App() {
         setWorkingSetsLoading(false);
       }
     }
-  }, [activePage, authUser]);
+    if (activePage === 'user-pools' || activePage === 'generator') {
+      if (authUser) {
+        refreshTerritories();
+        setActiveTerritory(getActiveTerritoryId());
+      } else {
+        setTerritories([]);
+        setActiveTerritory(null);
+        setTerritoriesLoading(false);
+      }
+    }
+  }, [activePage, authUser, refreshTerritories, refreshWorkingSets]);
 
   useEffect(() => {
     let isActive = true;
@@ -1464,7 +1549,17 @@ export function App() {
       setActiveWorkingSet(null);
       setWorkingSetsLoading(false);
     }
-  }, [authUser]);
+  }, [authUser, refreshWorkingSets]);
+
+  useEffect(() => {
+    if (authUser) {
+      refreshTerritories();
+    } else {
+      setTerritories([]);
+      setActiveTerritory(null);
+      setTerritoriesLoading(false);
+    }
+  }, [authUser, refreshTerritories]);
 
   return (
     <>
@@ -1622,6 +1717,14 @@ export function App() {
           authUser={authUser}
           authReady={authReady}
           isPro={isPro}
+          territories={territories}
+          territoriesLoading={territoriesLoading}
+          activeTerritoryId={activeTerritoryId}
+          onCreateTerritory={handleCreateTerritory}
+          onUpdateTerritory={handleUpdateTerritory}
+          onDeleteTerritory={handleDeleteTerritory}
+          onUseTerritoryInBuilder={handleUseTerritoryInBuilder}
+          onDeactivateTerritory={() => handleSetActiveTerritory(null)}
         />
       ) : activePage === 'pool-hub' ? (
         <PoolHubPage
@@ -1716,9 +1819,42 @@ export function App() {
                   )}
                 </div>
               </div>
+              {activeTerritory && (
+                <div className="territory-banner">
+                  <div>
+                    <span className="territory-banner-label">Active Territory</span>
+                    <strong>{activeTerritory.name}</strong>
+                    <div className="territory-banner-description">
+                      {activeTerritory.description?.trim()
+                        ? activeTerritory.description
+                        : 'This Territory is setting your current creative focus while Builder integration continues step by step.'}
+                    </div>
+                    <div className="territory-banner-sources">
+                      {activeTerritory.sources.slice(0, 4).map(source => (
+                        <span key={source.id} className="territory-banner-chip">
+                          {source.section} from {source.poolName}
+                        </span>
+                      ))}
+                      {activeTerritory.sources.length > 4 && (
+                        <span className="territory-banner-more">
+                          +{activeTerritory.sources.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="territory-banner-actions">
+                    <button type="button" onClick={() => setActivePage('user-pools')}>
+                      Manage Territories
+                    </button>
+                    <button type="button" onClick={() => handleSetActiveTerritory(null)}>
+                      Turn Off Territory
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="builder-guidance">
                 <p className="builder-guidance-intro">
-                  Select prompt elements by category and MorpBase assembles the final prompt for you.
+                  Select prompt elements by category and MorpBase assembles the final prompt for you. The product is gradually aligning around shared creative layers like subjects, environment, lighting, mood, style, and effects.
                 </p>
                 <div className="builder-guidance-steps">
                   <span className="builder-guidance-label">How it works:</span>

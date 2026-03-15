@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState, useEffect } from 'react';
 import { POOL_SECTION_OPTIONS } from '../../types';
-import type { Pool, PoolFolder, PoolItem } from '../../types';
+import type { Pool, PoolFolder, PoolItem, Territory, TerritorySourceInput } from '../../types';
 import {
   addItemToPool,
   createPool,
@@ -40,6 +40,21 @@ type UserPoolsPageProps = {
   authReady?: boolean;
   isPro?: boolean;
   manualUrl?: string;
+  territories?: Territory[];
+  territoriesLoading?: boolean;
+  activeTerritoryId?: string | null;
+  onCreateTerritory?: (
+    name: string,
+    description: string,
+    sources: TerritorySourceInput[]
+  ) => Promise<Territory | null>;
+  onUpdateTerritory?: (
+    id: string,
+    patch: { name?: string; description?: string; sources?: TerritorySourceInput[] }
+  ) => Promise<Territory | null>;
+  onDeleteTerritory?: (id: string) => Promise<void>;
+  onUseTerritoryInBuilder?: (id: string) => void;
+  onDeactivateTerritory?: () => void;
 };
 
 export function UserPoolsPage({
@@ -59,6 +74,14 @@ export function UserPoolsPage({
   authReady = false,
   isPro = false,
   manualUrl,
+  territories = [],
+  territoriesLoading = false,
+  activeTerritoryId = null,
+  onCreateTerritory,
+  onUpdateTerritory,
+  onDeleteTerritory,
+  onUseTerritoryInBuilder,
+  onDeactivateTerritory,
 }: UserPoolsPageProps) {
   const defaultFolderId = '__default_pools_folder__';
   const [pools, setPools] = useState<Pool[]>([]);
@@ -105,6 +128,12 @@ export function UserPoolsPage({
   const [collapsedFolderIds, setCollapsedFolderIds] = useState<Set<string>>(new Set());
   const [draggedFolderId, setDraggedFolderId] = useState<string | null>(null);
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
+  const [territoryDraftId, setTerritoryDraftId] = useState<string | null>(null);
+  const [territoryName, setTerritoryName] = useState('');
+  const [territoryDescription, setTerritoryDescription] = useState('');
+  const [territorySources, setTerritorySources] = useState<Array<{ poolId: string; section: string }>>([]);
+  const [territoryError, setTerritoryError] = useState<string | null>(null);
+  const [territoryMessage, setTerritoryMessage] = useState<string | null>(null);
   const gateMessage = !authReady
     ? 'Loading your pools...'
     : !authUser
@@ -158,6 +187,28 @@ export function UserPoolsPage({
     });
   }, [activePool, searchTerm, tagFilter]);
 
+  const sectionedPools = useMemo(() => {
+    return availablePools
+      .map(pool => {
+        const sections = Array.from(
+          new Set(
+            pool.items
+              .map(item => item.section?.trim())
+              .filter((section): section is string => Boolean(section))
+          )
+        );
+        const knownSections = POOL_SECTION_OPTIONS.filter(section => sections.includes(section));
+        const customSections = sections
+          .filter(section => !POOL_SECTION_OPTIONS.includes(section as (typeof POOL_SECTION_OPTIONS)[number]))
+          .sort((a, b) => a.localeCompare(b));
+        return {
+          ...pool,
+          availableSections: [...knownSections, ...customSections],
+        };
+      })
+      .filter(pool => pool.availableSections.length > 0);
+  }, [availablePools]);
+
   const filteredItemGroups = useMemo(() => {
     const hasSectionedItems = filteredItems.some(item => item.section);
     if (!hasSectionedItems) return [];
@@ -192,6 +243,23 @@ export function UserPoolsPage({
       }
       return next;
     });
+  };
+
+  const buildInitialTerritorySources = () => {
+    const fallbackPool = sectionedPools[0];
+    if (!fallbackPool) return [];
+    return [{ poolId: fallbackPool.id, section: fallbackPool.availableSections[0] ?? '' }];
+  };
+
+  const getPoolSections = (poolId: string) =>
+    sectionedPools.find(pool => pool.id === poolId)?.availableSections ?? [];
+
+  const resetTerritoryDraft = () => {
+    setTerritoryDraftId(null);
+    setTerritoryName('');
+    setTerritoryDescription('');
+    setTerritorySources(buildInitialTerritorySources());
+    setTerritoryError(null);
   };
 
   const refreshPools = async () => {
@@ -236,6 +304,12 @@ export function UserPoolsPage({
       setPoolsLoading(false);
     }
   }, [authUser, defaultPools]);
+
+  useEffect(() => {
+    if (territorySources.length > 0) return;
+    if (sectionedPools.length === 0) return;
+    setTerritorySources(buildInitialTerritorySources());
+  }, [sectionedPools, territorySources.length]);
 
   const handleCreatePool = async () => {
     if (!authUser || !isPro) {
@@ -364,6 +438,117 @@ export function UserPoolsPage({
       .split(',')
       .map(tag => tag.trim())
       .filter(Boolean);
+
+  const handleAddTerritorySource = () => {
+    const fallbackPool = sectionedPools[0];
+    if (!fallbackPool) return;
+    setTerritorySources(prev => [
+      ...prev,
+      {
+        poolId: fallbackPool.id,
+        section: fallbackPool.availableSections[0] ?? '',
+      },
+    ]);
+  };
+
+  const handleChangeTerritorySource = (
+    index: number,
+    field: 'poolId' | 'section',
+    value: string
+  ) => {
+    setTerritorySources(prev =>
+      prev.map((source, sourceIndex) => {
+        if (sourceIndex !== index) return source;
+        if (field === 'poolId') {
+          const nextSections = getPoolSections(value);
+          return {
+            poolId: value,
+            section: nextSections.includes(source.section) ? source.section : (nextSections[0] ?? ''),
+          };
+        }
+        return {
+          ...source,
+          section: value,
+        };
+      })
+    );
+  };
+
+  const handleRemoveTerritorySource = (index: number) => {
+    setTerritorySources(prev => prev.filter((_, sourceIndex) => sourceIndex !== index));
+  };
+
+  const handleEditTerritory = (territory: Territory) => {
+    setTerritoryDraftId(territory.id);
+    setTerritoryName(territory.name);
+    setTerritoryDescription(territory.description ?? '');
+    setTerritorySources(
+      territory.sources.map(source => ({
+        poolId: source.poolId,
+        section: source.section,
+      }))
+    );
+    setTerritoryError(null);
+    setTerritoryMessage(null);
+  };
+
+  const handleSaveTerritory = async () => {
+    if (!authUser || !isPro) {
+      setTerritoryError('Upgrade to Pro to create Territories.');
+      return;
+    }
+
+    const trimmedName = territoryName.trim();
+    if (!trimmedName) {
+      setTerritoryError('Territory name is required.');
+      return;
+    }
+
+    const normalizedSources = territorySources
+      .map(source => {
+        const pool = sectionedPools.find(entry => entry.id === source.poolId);
+        if (!pool) return null;
+        const section = source.section.trim();
+        if (!section) return null;
+        return {
+          poolId: pool.id,
+          poolName: pool.name,
+          section,
+        };
+      })
+      .filter((source): source is TerritorySourceInput => Boolean(source));
+
+    if (normalizedSources.length === 0) {
+      setTerritoryError('Add at least one pool section to the Territory.');
+      return;
+    }
+
+    const dedupedSources = normalizedSources.filter((source, index, list) => {
+      return list.findIndex(entry => entry.poolId === source.poolId && entry.section === source.section) === index;
+    });
+
+    setTerritoryError(null);
+
+    const result = territoryDraftId
+      ? await onUpdateTerritory?.(territoryDraftId, {
+        name: trimmedName,
+        description: territoryDescription,
+        sources: dedupedSources,
+      })
+      : await onCreateTerritory?.(trimmedName, territoryDescription, dedupedSources);
+
+    if (!result) {
+      setTerritoryError(territoryDraftId ? 'Failed to update Territory.' : 'Failed to create Territory.');
+      return;
+    }
+
+    setTerritoryMessage(
+      territoryDraftId
+        ? `Updated "${result.name}".`
+        : `Created "${result.name}".`
+    );
+    resetTerritoryDraft();
+  };
 
   const handleAddItem = async () => {
     if (!authUser || !isPro) {
@@ -819,7 +1004,14 @@ export function UserPoolsPage({
 
       <div className="user-pools-guide">
         <div>
-          <strong>Quick start:</strong> Create a folder, add a pool, then build it with reusable items.
+          <strong>Quick start:</strong> Create a folder, add a pool, then build it with reusable items grouped into shared sections.
+        </div>
+        <div className="user-pools-section-legend">
+          {POOL_SECTION_OPTIONS.map(section => (
+            <span key={section} className="user-pools-section-chip">
+              {section}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -868,6 +1060,133 @@ export function UserPoolsPage({
                 <button type="button" onClick={handleCreatePool}>
                   Create
                 </button>
+              </div>
+              <div className="user-pools-territories">
+                <div className="user-pools-subsection-header">
+                  <h4>Territories</h4>
+                  {territoriesLoading && <span className="user-pools-subsection-meta">Loading...</span>}
+                </div>
+                <div className="user-pools-helper">
+                  Compose a creative territory from selected pool sections, then open it in Builder.
+                </div>
+                <div className="user-pools-territory-form">
+                  <input
+                    type="text"
+                    placeholder="Territory name"
+                    value={territoryName}
+                    onChange={event => setTerritoryName(event.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Short description (optional)"
+                    value={territoryDescription}
+                    onChange={event => setTerritoryDescription(event.target.value)}
+                  />
+                  <div className="user-pools-territory-sources">
+                    {territorySources.length === 0 ? (
+                      <div className="user-pools-empty">Add a sectioned pool first to compose a Territory.</div>
+                    ) : (
+                      territorySources.map((source, index) => (
+                        <div key={`${source.poolId}_${index}`} className="user-pools-territory-source-row">
+                          <select
+                            value={source.poolId}
+                            onChange={event => handleChangeTerritorySource(index, 'poolId', event.target.value)}
+                          >
+                            {sectionedPools.map(pool => (
+                              <option key={pool.id} value={pool.id}>
+                                {pool.name}
+                              </option>
+                            ))}
+                          </select>
+                          <select
+                            value={source.section}
+                            onChange={event => handleChangeTerritorySource(index, 'section', event.target.value)}
+                          >
+                            {getPoolSections(source.poolId).map(section => (
+                              <option key={section} value={section}>
+                                {section}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            className="user-pools-inline-danger"
+                            onClick={() => handleRemoveTerritorySource(index)}
+                            disabled={territorySources.length === 1}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div className="user-pools-territory-form-actions">
+                    <button type="button" onClick={handleAddTerritorySource} disabled={sectionedPools.length === 0}>
+                      Add Source
+                    </button>
+                    <button type="button" onClick={handleSaveTerritory} disabled={sectionedPools.length === 0}>
+                      {territoryDraftId ? 'Save Territory' : 'Create Territory'}
+                    </button>
+                    {territoryDraftId && (
+                      <button type="button" onClick={resetTerritoryDraft}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                  {territoryError && <div className="user-pools-error">{territoryError}</div>}
+                  {territoryMessage && <div className="user-pools-message">{territoryMessage}</div>}
+                </div>
+                <div className="user-pools-territory-list">
+                  {territories.length === 0 ? (
+                    <div className="user-pools-empty">No Territories yet.</div>
+                  ) : (
+                    territories.map(territory => (
+                      <div
+                        key={territory.id}
+                        className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
+                      >
+                        <div className="user-pools-territory-card-header">
+                          <div>
+                            <div className="user-pools-territory-name">{territory.name}</div>
+                            {territory.description && (
+                              <div className="user-pools-territory-description">{territory.description}</div>
+                            )}
+                          </div>
+                          {territory.id === activeTerritoryId && (
+                            <span className="user-pools-territory-active-pill">Active</span>
+                          )}
+                        </div>
+                        <div className="user-pools-territory-chip-row">
+                          {territory.sources.map(source => (
+                            <span key={source.id} className="user-pools-territory-chip">
+                              {source.section} from {source.poolName}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="user-pools-row-actions">
+                          <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
+                            Use in Builder
+                          </button>
+                          <button type="button" onClick={() => handleEditTerritory(territory)}>
+                            Edit
+                          </button>
+                          <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+                {activeTerritoryId && (
+                  <button
+                    type="button"
+                    className="user-pools-territory-deactivate"
+                    onClick={onDeactivateTerritory}
+                  >
+                    Turn Off Active Territory
+                  </button>
+                )}
               </div>
             </>
           )}
@@ -1113,7 +1432,7 @@ export function UserPoolsPage({
           ) : (
             <>
               <div className="user-pools-helper">
-                Add reusable prompt fragments here, then organize them with sections, tags, and notes.
+                Add reusable prompt fragments here, then organize them into shared sections, tags, and notes.
               </div>
               <div className="user-pools-filters">
                 <input
