@@ -63,8 +63,9 @@
 
 .user-pools-layout {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.65fr) minmax(320px, 1.1fr);
   gap: 20px;
+  align-items: start;
 }
 
 .user-pools-panel {
@@ -78,12 +79,16 @@
   min-height: 360px;
 }
 
-.user-pools-panel-sidebar {
+.user-pools-panel-territories {
   position: sticky;
   top: 80px;
   align-self: start;
   max-height: calc(100vh - 140px);
   overflow-y: auto;
+}
+
+.user-pools-panel-pools {
+  min-width: 0;
 }
 
 .freeform-prompt-panel {
