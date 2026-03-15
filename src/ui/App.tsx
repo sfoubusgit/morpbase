@@ -2045,152 +2045,6 @@ export function App() {
               />
           <div className="interview-container">
             <div className="app-main">
-              {activeTerritory && (
-                <div className="territory-banner">
-                  <div className="territory-banner-main">
-                    <div className="territory-banner-title-row">
-                      <span className="territory-banner-label">Active Territory</span>
-                      <strong>{activeTerritory.name}</strong>
-                    </div>
-                    <div className="territory-banner-sources">
-                      {activeTerritory.sources.slice(0, 4).map(source => (
-                        <span key={source.id} className="territory-banner-chip">
-                          {source.section} from {source.poolName}
-                        </span>
-                      ))}
-                      {activeTerritory.sources.length > 4 && (
-                        <span className="territory-banner-more">
-                          +{activeTerritory.sources.length - 4} more
-                        </span>
-                      )}
-                    </div>
-                    {(activeTerritory.description?.trim() || activeTerritoryMappings.length > 0) && (
-                      <details className="territory-banner-details">
-                        <summary>
-                          Territory details
-                          <span className="territory-banner-details-meta">
-                            {activeTerritoryMappings.length} mapping{activeTerritoryMappings.length === 1 ? '' : 's'}
-                          </span>
-                        </summary>
-                        {activeTerritory.description?.trim() && (
-                          <div className="territory-banner-description">
-                            {activeTerritory.description}
-                          </div>
-                        )}
-                        {activeTerritoryMappings.length > 0 && (
-                          <div className="territory-banner-mapping">
-                            <div className="territory-banner-mapping-heading">
-                              <span>Builder mapping</span>
-                              <span className="territory-banner-mapping-summary">
-                                {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
-                              </span>
-                            </div>
-                          <div className="territory-banner-mapping-list">
-                            {activeTerritoryMappings.slice(0, 5).map(mapping => (
-                              <div key={mapping.id} className="territory-banner-mapping-item">
-                                <span className="territory-banner-mapping-source">
-                                  {mapping.section} from {mapping.poolName}
-                                </span>
-                                <span className="territory-banner-mapping-arrow">-&gt;</span>
-                                <span className="territory-banner-mapping-target">
-                                  {mapping.categoryLabels.length > 0 ? mapping.categoryLabels.join(', ') : 'No Builder areas yet'}
-                                </span>
-                                <button
-                                  type="button"
-                                  className="territory-banner-mapping-remove"
-                                  onClick={() => void handleRemoveActiveTerritorySource(mapping.id)}
-                                >
-                                  Remove
-                                </button>
-                              </div>
-                            ))}
-                            {activeTerritoryMappings.length > 5 && (
-                              <div className="territory-banner-mapping-more">
-                                +{activeTerritoryMappings.length - 5} more mappings
-                              </div>
-                            )}
-                          </div>
-                          </div>
-                        )}
-                      </details>
-                    )}
-                  </div>
-                  <div className="territory-banner-actions">
-                    <label className="territory-banner-switch">
-                      <span>Navigation</span>
-                      <select
-                        value={territoryNavigationMode}
-                        onChange={event => setTerritoryNavigationMode(event.target.value as 'biased' | 'full')}
-                      >
-                        <option value="biased">Territory-biased</option>
-                        <option value="full">Full Builder</option>
-                      </select>
-                    </label>
-                    <button type="button" onClick={() => activeTerritory && handleOpenTerritoryEditor(activeTerritory.id)}>
-                      Edit Territory
-                    </button>
-                    <button type="button" onClick={() => setActivePage('user-pools')}>
-                      Manage Territories
-                    </button>
-                    <button type="button" onClick={() => handleSetActiveTerritory(null)}>
-                      Turn Off Territory
-                    </button>
-                  </div>
-                </div>
-              )}
-              {!activeTerritory && territories.length > 0 && (
-                <div className="territory-reactivate-bar">
-                  <div className="territory-reactivate-copy">
-                    <span className="territory-reactivate-label">Territories</span>
-                    <span className="territory-reactivate-text">Activate a saved Territory without leaving Builder.</span>
-                  </div>
-                  <div className="territory-reactivate-actions">
-                    <select
-                      value={builderTerritoryPickerId}
-                      onChange={event => setBuilderTerritoryPickerId(event.target.value)}
-                    >
-                      {territories.map(territory => (
-                        <option key={territory.id} value={territory.id}>
-                          {territory.name}
-                        </option>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
-                      disabled={!builderTerritoryPickerId}
-                    >
-                      Activate Territory
-                    </button>
-                    <button type="button" onClick={() => setActivePage('user-pools')}>
-                      Manage
-                    </button>
-                  </div>
-                </div>
-              )}
-              <details className="builder-guidance">
-                <summary>
-                  <span className="builder-guidance-title">Builder guide</span>
-                  {!activeTerritory && <span className="builder-guidance-summary">Choose left, build center, copy right</span>}
-                </summary>
-                <div className="builder-guidance-body">
-                  <p className="builder-guidance-intro">
-                    Select prompt elements by category and MorpBase assembles the final prompt for you. The product is gradually aligning around shared creative layers like subjects, environment, lighting, mood, style, and effects.
-                  </p>
-                  <div className="builder-guidance-steps">
-                    <span className="builder-guidance-label">How it works:</span>
-                    <span>1. Choose from the left</span>
-                    <span>2. Build in the center</span>
-                    <span>3. Edit text or adjust weight on selected elements</span>
-                    <span>4. Copy on the right</span>
-                  </div>
-                  {activeTerritory && (
-                    <div className="builder-guidance-territory-note">
-                      Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and navigation mode is currently set to {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'}.
-                    </div>
-                  )}
-                </div>
-              </details>
               {builderNotice && (
                 <div className="builder-notice">
                   <span>{builderNotice}</span>
@@ -2282,6 +2136,153 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
+              <div className="builder-sidebar-panel territory-sidebar-panel">
+                <div className="builder-sidebar-panel-header">
+                  <div>
+                    <div className="builder-sidebar-panel-label">Territory</div>
+                    <div className="builder-sidebar-panel-title">
+                      {activeTerritory ? activeTerritory.name : 'No active Territory'}
+                    </div>
+                  </div>
+                </div>
+                {activeTerritory ? (
+                  <>
+                    <div className="territory-sidebar-sources">
+                      {activeTerritory.sources.slice(0, 4).map(source => (
+                        <span key={source.id} className="territory-banner-chip">
+                          {source.section} from {source.poolName}
+                        </span>
+                      ))}
+                      {activeTerritory.sources.length > 4 && (
+                        <span className="territory-banner-more">
+                          +{activeTerritory.sources.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                    <label className="territory-banner-switch territory-sidebar-switch">
+                      <span>Navigation</span>
+                      <select
+                        value={territoryNavigationMode}
+                        onChange={event => setTerritoryNavigationMode(event.target.value as 'biased' | 'full')}
+                      >
+                        <option value="biased">Territory-biased</option>
+                        <option value="full">Full Builder</option>
+                      </select>
+                    </label>
+                    {(activeTerritory.description?.trim() || activeTerritoryMappings.length > 0) && (
+                      <details className="territory-banner-details">
+                        <summary>
+                          Territory details
+                          <span className="territory-banner-details-meta">
+                            {activeTerritoryMappings.length} mapping{activeTerritoryMappings.length === 1 ? '' : 's'}
+                          </span>
+                        </summary>
+                        {activeTerritory.description?.trim() && (
+                          <div className="territory-banner-description">
+                            {activeTerritory.description}
+                          </div>
+                        )}
+                        {activeTerritoryMappings.length > 0 && (
+                          <div className="territory-banner-mapping">
+                            <div className="territory-banner-mapping-heading">
+                              <span>Builder mapping</span>
+                              <span className="territory-banner-mapping-summary">
+                                {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
+                              </span>
+                            </div>
+                            <div className="territory-banner-mapping-list">
+                              {activeTerritoryMappings.slice(0, 5).map(mapping => (
+                                <div key={mapping.id} className="territory-banner-mapping-item">
+                                  <span className="territory-banner-mapping-source">
+                                    {mapping.section} from {mapping.poolName}
+                                  </span>
+                                  <span className="territory-banner-mapping-arrow">-&gt;</span>
+                                  <span className="territory-banner-mapping-target">
+                                    {mapping.categoryLabels.length > 0 ? mapping.categoryLabels.join(', ') : 'No Builder areas yet'}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="territory-banner-mapping-remove"
+                                    onClick={() => void handleRemoveActiveTerritorySource(mapping.id)}
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ))}
+                              {activeTerritoryMappings.length > 5 && (
+                                <div className="territory-banner-mapping-more">
+                                  +{activeTerritoryMappings.length - 5} more mappings
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </details>
+                    )}
+                    <div className="territory-sidebar-actions">
+                      <button type="button" onClick={() => activeTerritory && handleOpenTerritoryEditor(activeTerritory.id)}>
+                        Edit Territory
+                      </button>
+                      <button type="button" onClick={() => setActivePage('user-pools')}>
+                        Manage Territories
+                      </button>
+                      <button type="button" onClick={() => handleSetActiveTerritory(null)}>
+                        Turn Off Territory
+                      </button>
+                    </div>
+                  </>
+                ) : territories.length > 0 ? (
+                  <div className="territory-reactivate-bar territory-reactivate-bar-sidebar">
+                    <div className="territory-reactivate-copy">
+                      <span className="territory-reactivate-text">Activate a saved Territory without leaving Builder.</span>
+                    </div>
+                    <div className="territory-reactivate-actions">
+                      <select
+                        value={builderTerritoryPickerId}
+                        onChange={event => setBuilderTerritoryPickerId(event.target.value)}
+                      >
+                        {territories.map(territory => (
+                          <option key={territory.id} value={territory.id}>
+                            {territory.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
+                        disabled={!builderTerritoryPickerId}
+                      >
+                        Activate Territory
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="territory-reactivate-text">Create a Territory in User Pools to use Builder focus mode.</div>
+                )}
+              </div>
+              <details className="builder-sidebar-panel builder-guidance-sidebar">
+                <summary>
+                  <span className="builder-sidebar-panel-label">Builder Guide</span>
+                  <span className="builder-guidance-summary">Choose left, build center, copy right</span>
+                </summary>
+                <div className="builder-guidance-body">
+                  <p className="builder-guidance-intro">
+                    Select prompt elements by category and MorpBase assembles the final prompt for you. The product is gradually aligning around shared creative layers like subjects, environment, lighting, mood, style, and effects.
+                  </p>
+                  <div className="builder-guidance-steps">
+                    <span className="builder-guidance-label">How it works:</span>
+                    <span>1. Choose from the left</span>
+                    <span>2. Build in the center</span>
+                    <span>3. Edit text or adjust weight on selected elements</span>
+                    <span>4. Copy on the right</span>
+                  </div>
+                  {activeTerritory && (
+                    <div className="builder-guidance-territory-note">
+                      Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and navigation mode is currently set to {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'}.
+                    </div>
+                  )}
+                </div>
+              </details>
               <PromptPreview 
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}

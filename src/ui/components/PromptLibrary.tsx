@@ -7,6 +7,7 @@ import {
   importPromptsPayload,
   listPrompts,
 } from '../../engine/promptStore';
+import { Modal } from './Modal';
 import './PromptLibrary.css';
 
 type PromptLibraryProps = {
@@ -89,6 +90,7 @@ export function PromptLibrary({
   const [libraryJson, setLibraryJson] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, editedPositive, editedNegative),
@@ -141,6 +143,7 @@ export function PromptLibrary({
       setModel('');
       setPurpose('');
       setNote('');
+      setIsSaveModalOpen(false);
       await refresh();
       setMessage('Saved to cloud.');
     } catch (err: any) {
@@ -183,6 +186,7 @@ export function PromptLibrary({
     setModel('');
     setPurpose('');
     setNote('');
+    setIsSaveModalOpen(false);
     setMessage('Saved locally.');
   };
 
@@ -296,45 +300,13 @@ export function PromptLibrary({
         )}
         <span className="prompt-library-count">{prompts.length}</span>
       </div>
-      <div className="prompt-library-save">
-        <input
-          type="text"
-          placeholder="Prompt name"
-          value={name}
-          onChange={event => setName(event.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Tags (comma)"
-          value={tags}
-          onChange={event => setTags(event.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Model (free text)"
-          value={model}
-          onChange={event => setModel(event.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Purpose (free text)"
-          value={purpose}
-          onChange={event => setPurpose(event.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Note (optional)"
-          value={note}
-          onChange={event => setNote(event.target.value)}
-        />
-        <div className="prompt-library-save-actions">
-          <button type="button" onClick={handleSaveLocal}>
-            Save Locally
-          </button>
-          <button type="button" onClick={handleSave}>
-            Save to Cloud
-          </button>
+      <div className="prompt-library-save-bar">
+        <div className="prompt-library-save-copy">
+          Save the current prompt with a name, tags, and optional metadata.
         </div>
+        <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
+          Save Prompt
+        </button>
       </div>
       <details className="prompt-library-io">
         <summary>Import / Export</summary>
@@ -446,6 +418,53 @@ export function PromptLibrary({
           </div>
         )}
       </div>
+      <Modal
+        isOpen={isSaveModalOpen}
+        onClose={() => setIsSaveModalOpen(false)}
+        title="Save Prompt"
+        className="prompt-library-save-modal"
+      >
+        <div className="prompt-library-save">
+          <input
+            type="text"
+            placeholder="Prompt name"
+            value={name}
+            onChange={event => setName(event.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Tags (comma)"
+            value={tags}
+            onChange={event => setTags(event.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Model (free text)"
+            value={model}
+            onChange={event => setModel(event.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Purpose (free text)"
+            value={purpose}
+            onChange={event => setPurpose(event.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Note (optional)"
+            value={note}
+            onChange={event => setNote(event.target.value)}
+          />
+          <div className="prompt-library-save-actions">
+            <button type="button" onClick={handleSaveLocal}>
+              Save Locally
+            </button>
+            <button type="button" onClick={handleSave}>
+              Save to Cloud
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -40,6 +40,34 @@
   gap: 8px;
 }
 
+.prompt-library-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.prompt-library-save-copy {
+  font-size: 12px;
+  color: #cbd5f5;
+  line-height: 1.5;
+}
+
+.prompt-library-save-open {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #6e56f9;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .prompt-library-save input {
   background: rgba(15, 15, 18, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -69,6 +97,10 @@
   background: rgba(110, 86, 249, 0.2);
   border: 1px solid rgba(110, 86, 249, 0.5);
   color: #e9ddff;
+}
+
+.prompt-library-save-modal {
+  max-width: 560px;
 }
 
 .prompt-library-save button:hover {
