@@ -581,6 +581,39 @@ export function App() {
     return usableNodeIds[currentIndex - 1] ?? null;
   }, [usableNodeIds]);
 
+  const getTerritoryBiasedAdjacentNodeId = useCallback((nodeId: string | null, direction: 'next' | 'previous') => {
+    const fallbackNodeId = getAdjacentUsableNodeId(nodeId, direction);
+    if (!activeTerritoryCategoryIds.length || usableNodeIds.length === 0) {
+      return fallbackNodeId;
+    }
+
+    if (!nodeId) {
+      return fallbackNodeId;
+    }
+
+    const currentIndex = usableNodeIds.indexOf(nodeId);
+    if (currentIndex === -1) {
+      return fallbackNodeId;
+    }
+
+    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
+    const step = direction === 'next' ? 1 : -1;
+
+    for (
+      let index = currentIndex + step;
+      index >= 0 && index < usableNodeIds.length;
+      index += step
+    ) {
+      const candidateNodeId = usableNodeIds[index];
+      const categoryId = getCategoryForNode(candidateNodeId);
+      if (categoryId && preferredCategorySet.has(categoryId)) {
+        return candidateNodeId;
+      }
+    }
+
+    return fallbackNodeId;
+  }, [activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, usableNodeIds]);
+
   const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
   const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
   const hasNextUsableNode = useMemo(() => {
@@ -588,8 +621,8 @@ export function App() {
       return false;
     }
 
-    return getAdjacentUsableNodeId(currentNodeId, 'next') !== null;
-  }, [currentNodeId, getAdjacentUsableNodeId, usableNodeIds]);
+    return getTerritoryBiasedAdjacentNodeId(currentNodeId, 'next') !== null;
+  }, [currentNodeId, getTerritoryBiasedAdjacentNodeId, usableNodeIds]);
   
   // Track if user has explicitly clicked Next to reach the end
   // This ensures completion only happens after explicit Next click, not just from selections
@@ -920,7 +953,7 @@ export function App() {
     console.log('[App] Next node ID:', currentNode?.nextNodeId);
 
     setUnavailableJumpNodeId(null);
-    const nextNodeId = getAdjacentUsableNodeId(currentNode?.id || null, 'next');
+    const nextNodeId = getTerritoryBiasedAdjacentNodeId(currentNode?.id || null, 'next');
 
     if (nextNodeId) {
       console.log('[App] Navigating to next usable subcategory:', nextNodeId);
@@ -931,7 +964,7 @@ export function App() {
       console.log('[App] No more usable subcategories available - marking as complete via Next button');
       setHasReachedEndViaNext(true);
     }
-  }, [currentNode, getAdjacentUsableNodeId]);
+  }, [currentNode, getTerritoryBiasedAdjacentNodeId]);
 
   /**
    * Event Handler: Navigate skip
@@ -939,12 +972,12 @@ export function App() {
    */
   const handleNavigateSkip = useCallback(() => {
     setUnavailableJumpNodeId(null);
-    const nextNodeId = getAdjacentUsableNodeId(currentNode?.id || null, 'next');
+    const nextNodeId = getTerritoryBiasedAdjacentNodeId(currentNode?.id || null, 'next');
     if (nextNodeId) {
       setCurrentNodeId(nextNodeId);
       setNavigationHistory(prev => prev[prev.length - 1] === nextNodeId ? prev : [...prev, nextNodeId]);
     }
-  }, [currentNode, getAdjacentUsableNodeId]);
+  }, [currentNode, getTerritoryBiasedAdjacentNodeId]);
 
   const handleGoToUsableNode = useCallback((nodeId: string | null) => {
     if (!nodeId) return;
