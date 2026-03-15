@@ -43,6 +43,7 @@ type UserPoolsPageProps = {
   territories?: Territory[];
   territoriesLoading?: boolean;
   activeTerritoryId?: string | null;
+  territoryEditTargetId?: string | null;
   onCreateTerritory?: (
     name: string,
     description: string,
@@ -55,6 +56,7 @@ type UserPoolsPageProps = {
   onDeleteTerritory?: (id: string) => Promise<void>;
   onUseTerritoryInBuilder?: (id: string) => void;
   onDeactivateTerritory?: () => void;
+  onTerritoryEditTargetHandled?: () => void;
 };
 
 export function UserPoolsPage({
@@ -77,11 +79,13 @@ export function UserPoolsPage({
   territories = [],
   territoriesLoading = false,
   activeTerritoryId = null,
+  territoryEditTargetId = null,
   onCreateTerritory,
   onUpdateTerritory,
   onDeleteTerritory,
   onUseTerritoryInBuilder,
   onDeactivateTerritory,
+  onTerritoryEditTargetHandled,
 }: UserPoolsPageProps) {
   const defaultFolderId = '__default_pools_folder__';
   const [pools, setPools] = useState<Pool[]>([]);
@@ -350,6 +354,15 @@ export function UserPoolsPage({
     if (sectionedPools.length === 0) return;
     setTerritorySources(buildInitialTerritorySources());
   }, [sectionedPools, territorySources.length]);
+
+  useEffect(() => {
+    if (!territoryEditTargetId) return;
+    const target = territories.find(territory => territory.id === territoryEditTargetId);
+    if (!target) return;
+    handleEditTerritory(target);
+    setTerritoryMessage(`Editing "${target.name}".`);
+    onTerritoryEditTargetHandled?.();
+  }, [territories, territoryEditTargetId, onTerritoryEditTargetHandled]);
 
   const handleCreatePool = async () => {
     if (!authUser || !isPro) {

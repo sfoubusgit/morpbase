@@ -238,6 +238,7 @@ export function App() {
   const [territories, setTerritories] = useState<Territory[]>([]);
   const [territoriesLoading, setTerritoriesLoading] = useState(false);
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
+  const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
@@ -1232,6 +1233,11 @@ export function App() {
     );
   };
 
+  const handleOpenTerritoryEditor = (territoryId: string) => {
+    setTerritoryEditTargetId(territoryId);
+    setActivePage('user-pools');
+  };
+
   const handleCreateTerritory = async (
     name: string,
     description: string,
@@ -1882,11 +1888,13 @@ export function App() {
           territories={territories}
           territoriesLoading={territoriesLoading}
           activeTerritoryId={activeTerritoryId}
+          territoryEditTargetId={territoryEditTargetId}
           onCreateTerritory={handleCreateTerritory}
           onUpdateTerritory={handleUpdateTerritory}
           onDeleteTerritory={handleDeleteTerritory}
           onUseTerritoryInBuilder={handleUseTerritoryInBuilder}
           onDeactivateTerritory={() => handleSetActiveTerritory(null)}
+          onTerritoryEditTargetHandled={() => setTerritoryEditTargetId(null)}
         />
       ) : activePage === 'pool-hub' ? (
         <PoolHubPage
@@ -2045,6 +2053,9 @@ export function App() {
                         <option value="full">Full Builder</option>
                       </select>
                     </label>
+                    <button type="button" onClick={() => activeTerritory && handleOpenTerritoryEditor(activeTerritory.id)}>
+                      Edit Territory
+                    </button>
                     <button type="button" onClick={() => setActivePage('user-pools')}>
                       Manage Territories
                     </button>
