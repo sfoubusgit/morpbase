@@ -188,7 +188,7 @@ export function UserPoolsPage({
   }, [activePool, searchTerm, tagFilter]);
 
   const sectionedPools = useMemo(() => {
-    return availablePools
+    return pools
       .map(pool => {
         const sections = Array.from(
           new Set(
@@ -207,7 +207,7 @@ export function UserPoolsPage({
         };
       })
       .filter(pool => pool.availableSections.length > 0);
-  }, [availablePools]);
+  }, [pools]);
 
   const territoryDraftSummary = useMemo(() => {
     const normalizedSources = territorySources
@@ -489,6 +489,24 @@ export function UserPoolsPage({
         section: fallbackPool.availableSections[0] ?? '',
       },
     ]);
+  };
+
+  const handleQuickAddSectionToTerritory = (poolId: string, section: string) => {
+    const pool = sectionedPools.find(entry => entry.id === poolId);
+    if (!pool || !section.trim()) return;
+
+    setTerritorySources(prev => {
+      const alreadyIncluded = prev.some(source => source.poolId === poolId && source.section === section);
+      if (alreadyIncluded) return prev;
+      return [...prev, { poolId, section }];
+    });
+
+    if (!territoryName.trim()) {
+      setTerritoryName(`${pool.name} Territory`);
+    }
+
+    setTerritoryError(null);
+    setTerritoryMessage(`Added ${section} from ${pool.name} to the Territory draft.`);
   };
 
   const handleChangeTerritorySource = (
@@ -1667,7 +1685,16 @@ export function UserPoolsPage({
                 ) : filteredItemGroups.length > 0 ? (
                   filteredItemGroups.map(group => (
                     <div key={group.name} className="user-pools-section-group">
-                      <div className="user-pools-section-heading">{group.name}</div>
+                      <div className="user-pools-section-heading-row">
+                        <div className="user-pools-section-heading">{group.name}</div>
+                        <button
+                          type="button"
+                          className="user-pools-section-action"
+                          onClick={() => activePool && handleQuickAddSectionToTerritory(activePool.id, group.name)}
+                        >
+                          Add Section To Territory
+                        </button>
+                      </div>
                       <div className="user-pools-section-items">
                         {group.items.map(renderPoolItem)}
                       </div>

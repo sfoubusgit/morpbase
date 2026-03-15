@@ -744,6 +744,13 @@
   gap: 10px;
 }
 
+.user-pools-section-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .user-pools-section-heading {
   font-size: 12px;
   font-weight: 700;
@@ -752,6 +759,19 @@
   color: #d9ddf8;
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.user-pools-section-action {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 999px;
+  color: #d1fae5;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
 }
 
 .user-pools-section-items {
