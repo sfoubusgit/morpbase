@@ -189,7 +189,7 @@ export function QuestionCard({
     if (target.closest('.question-card-territory-item-editor')) {
       return;
     }
-    if (target.closest('.question-card-territory-item-weight')) {
+    if (target.closest('.question-card-territory-item-actions')) {
       return;
     }
 
@@ -294,10 +294,7 @@ export function QuestionCard({
                     >
                       Edit Text
                     </button>
-                  </div>
-                  )}
-                  {item.isSelected && (
-                    <div className="question-card-territory-item-weight" onClick={handleTerritoryControlClick}>
+                    <div className="question-card-territory-item-weight">
                       <span className="question-card-territory-item-weight-label">Weight</span>
                       <button
                         type="button"
@@ -315,6 +312,7 @@ export function QuestionCard({
                         +
                       </button>
                     </div>
+                  </div>
                   )}
                   {editingTerritoryItemId === item.id && (
                     <div className="question-card-territory-item-editor" onClick={handleTerritoryControlClick}>

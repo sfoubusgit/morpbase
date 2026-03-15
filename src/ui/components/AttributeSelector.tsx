@@ -83,16 +83,15 @@ export function AttributeSelector({
 }: AttributeSelectorProps) {
   const [editingAttributeId, setEditingAttributeId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState('');
-  const [weightEditingIds, setWeightEditingIds] = useState<Set<string>>(() => new Set());
 
   const handleItemClick = (attributeId: string, e: React.MouseEvent) => {
     // Prevent any form submission or navigation
     e.preventDefault();
     e.stopPropagation();
     
-    // Don't toggle if clicking on the slider or its container
+    // Don't toggle if clicking on inline controls
     const target = e.target as HTMLElement;
-    if (target.closest('.attribute-weight-slider-container')) {
+    if (target.closest('.attribute-inline-controls')) {
       return;
     }
     if (target.closest('.attribute-output-editor')) {
@@ -107,10 +106,6 @@ export function AttributeSelector({
     }
   };
   
-  const handleSliderClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const handleEditorClick = (e: React.MouseEvent) => {
     e.stopPropagation();
   };
@@ -121,18 +116,6 @@ export function AttributeSelector({
     const current = weightValues.get(attributeId) ?? 1.0;
     const next = clampWeight(parseFloat((current + delta).toFixed(1)));
     onWeightChange(attributeId, next);
-  };
-
-  const toggleWeightEditor = (attributeId: string) => {
-    setWeightEditingIds(prev => {
-      const next = new Set(prev);
-      if (next.has(attributeId)) {
-        next.delete(attributeId);
-      } else {
-        next.add(attributeId);
-      }
-      return next;
-    });
   };
 
   return (
@@ -148,7 +131,6 @@ export function AttributeSelector({
         const outputOverride = selectionOutputOverrides?.get(attr.id);
         const outputValue = outputOverride || baseText;
         const isEditing = editingAttributeId === attr.id;
-        const isWeightEditing = weightEditingIds.has(attr.id);
         return (
           <div
             key={attr.id}
@@ -181,15 +163,30 @@ export function AttributeSelector({
                   >
                     Edit Text
                   </button>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      toggleWeightEditor(attr.id);
-                    }}
-                  >
-                    Adjust Weight
-                  </button>
+                  <div className="attribute-inline-weight">
+                    <span className="attribute-inline-weight-label">Weight</span>
+                    <button
+                      type="button"
+                      className="attribute-weight-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWeightAdjust(attr.id, -0.1);
+                      }}
+                    >
+                      -
+                    </button>
+                    <span className="attribute-weight-value">{currentWeight.toFixed(1)}</span>
+                    <button
+                      type="button"
+                      className="attribute-weight-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleWeightAdjust(attr.id, 0.1);
+                      }}
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -263,44 +260,6 @@ export function AttributeSelector({
               The only condition is: isSelected === true
               There are NO other conditions, NO special cases, NO exclusions.
             */}
-            {isSelected && isWeightEditing && (
-              <div 
-                className="attribute-weight-slider-container"
-                onClick={handleSliderClick}
-              >
-                <div className="attribute-weight-header">
-                  <label className="attribute-weight-label">Weight</label>
-                </div>
-                {weightsEnabledGlobal && (
-                  <div className="attribute-weight-control">
-                    <button
-                      type="button"
-                      className="attribute-weight-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleWeightAdjust(attr.id, -0.1);
-                      }}
-                    >
-                      -
-                    </button>
-                    <span className="attribute-weight-value">{currentWeight.toFixed(1)}</span>
-                    <button
-                      type="button"
-                      className="attribute-weight-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleWeightAdjust(attr.id, 0.1);
-                      }}
-                    >
-                      +
-                    </button>
-                  </div>
-                )}
-                {!weightsEnabledGlobal && (
-                  <div className="attribute-weight-disabled">Weights are off</div>
-                )}
-              </div>
-            )}
           </div>
         );
       })}

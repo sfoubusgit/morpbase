@@ -289,6 +289,13 @@
   cursor: pointer;
 }
 
+.question-card-territory-item-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .question-card-territory-item-actions button:hover {
   background: rgba(16, 185, 129, 0.2);
 }
@@ -298,6 +305,7 @@
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  padding-left: 4px;
 }
 
 .question-card-territory-item-weight-label {
