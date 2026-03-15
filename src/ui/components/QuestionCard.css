@@ -159,6 +159,84 @@
   font-size: 13px;
 }
 
+.question-card-territory-items {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+.question-card-territory-items-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.question-card-territory-items-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d1fae5;
+}
+
+.question-card-territory-items-meta {
+  font-size: 11px;
+  color: rgba(209, 250, 229, 0.72);
+}
+
+.question-card-territory-items-list {
+  display: grid;
+  gap: 10px;
+}
+
+.question-card-territory-item {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(10, 14, 16, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.question-card-territory-item-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.question-card-territory-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11px;
+  color: #a7f3d0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.question-card-territory-item-note {
+  font-size: 12px;
+  color: #d5d9ea;
+}
+
+.question-card-territory-item-actions button {
+  justify-self: start;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  background: rgba(16, 185, 129, 0.12);
+  color: #d1fae5;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
 .question-card-options {
   display: flex;
   flex-direction: column;

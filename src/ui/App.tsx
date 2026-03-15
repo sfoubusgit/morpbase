@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, PoolItem, Prompt, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
+import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, Pool, PoolItem, Prompt, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { loadQuestionNodes, QuestionNode } from '../data/loadQuestionNodes';
@@ -67,6 +67,7 @@ import {
   setActiveTerritoryId as persistActiveTerritoryId,
   updateTerritory,
 } from '../engine/territoryStore';
+import { listPools } from '../engine/poolStore';
 
 /**
  * Default model profile for Stable Diffusion
@@ -237,6 +238,7 @@ export function App() {
   const [activeWorkingSetId, setActiveWorkingSet] = useState<string | null>(() => getActiveWorkingSetId());
   const [territories, setTerritories] = useState<Territory[]>([]);
   const [territoriesLoading, setTerritoriesLoading] = useState(false);
+  const [territoryPools, setTerritoryPools] = useState<Pool[]>([]);
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
   const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
@@ -1202,6 +1204,15 @@ export function App() {
     }
   }, []);
 
+  const refreshTerritoryPools = useCallback(async () => {
+    try {
+      const next = await listPools();
+      setTerritoryPools(next);
+    } catch {
+      setTerritoryPools([]);
+    }
+  }, []);
+
   const handleSetActiveWorkingSet = (id: string | null) => {
     setUnavailableJumpNodeId(null);
     setHasReachedEndViaNext(false);
@@ -1616,6 +1627,48 @@ export function App() {
     };
   }, [activeTerritory, currentNode?.id, getCategoryForNode]);
 
+  const currentTerritoryItems = useMemo(() => {
+    if (!activeTerritory) return [];
+    const categoryId = getCategoryForNode(currentNode?.id ?? null);
+    if (!categoryId) return [];
+
+    const seenTexts = new Set<string>();
+    const items: Array<{
+      id: string;
+      text: string;
+      poolName: string;
+      section: string;
+      note?: string;
+      tags?: string[];
+    }> = [];
+
+    activeTerritory.sources.forEach(source => {
+      const mappedCategories = TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? [];
+      if (!mappedCategories.includes(categoryId)) return;
+
+      const pool = territoryPools.find(entry => entry.id === source.poolId);
+      const sectionItems = (pool?.items ?? [])
+        .filter(item => item.section?.trim() === source.section)
+        .slice(0, 6);
+
+      sectionItems.forEach(item => {
+        const normalizedText = item.text.trim().toLowerCase();
+        if (!normalizedText || seenTexts.has(normalizedText)) return;
+        seenTexts.add(normalizedText);
+        items.push({
+          id: item.id,
+          text: item.text,
+          poolName: source.poolName,
+          section: source.section,
+          note: item.note,
+          tags: item.tags,
+        });
+      });
+    });
+
+    return items.slice(0, 10);
+  }, [activeTerritory, currentNode?.id, getCategoryForNode, territoryPools]);
+
   // Extract prompt and error from engine result
   const prompt: Prompt | null = engineResult && 'positiveTokens' in engineResult ? engineResult : null;
   const error: ValidationError | null = engineResult && 'type' in engineResult ? engineResult : null;
@@ -1665,14 +1718,16 @@ export function App() {
     if (activePage === 'user-pools' || activePage === 'generator') {
       if (authUser) {
         refreshTerritories();
+        refreshTerritoryPools();
         setActiveTerritory(getActiveTerritoryId());
       } else {
         setTerritories([]);
+        setTerritoryPools([]);
         setActiveTerritory(null);
         setTerritoriesLoading(false);
       }
     }
-  }, [activePage, authUser, refreshTerritories, refreshWorkingSets]);
+  }, [activePage, authUser, refreshTerritories, refreshTerritoryPools, refreshWorkingSets]);
 
   useEffect(() => {
     let isActive = true;
@@ -1722,12 +1777,14 @@ export function App() {
   useEffect(() => {
     if (authUser) {
       refreshTerritories();
+      refreshTerritoryPools();
     } else {
       setTerritories([]);
+      setTerritoryPools([]);
       setActiveTerritory(null);
       setTerritoriesLoading(false);
     }
-  }, [authUser, refreshTerritories]);
+  }, [authUser, refreshTerritories, refreshTerritoryPools]);
 
   return (
     <>
@@ -2157,6 +2214,8 @@ export function App() {
                   canGoBack={navigationHistory.length > 1}
                   canGoNext={true}
                   territoryContext={currentTerritoryContext}
+                  territoryItems={currentTerritoryItems}
+                  onAddTerritoryItem={handleAddPoolItem}
                 />
               ) : (
                 <div className="app-error-state">

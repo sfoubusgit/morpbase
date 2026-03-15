@@ -88,6 +88,19 @@ interface QuestionCardProps {
     isRelevant: boolean;
     matchingSections: string[];
   } | null;
+
+  /** Territory source fragments relevant to the current Builder step */
+  territoryItems?: Array<{
+    id: string;
+    text: string;
+    poolName: string;
+    section: string;
+    note?: string;
+    tags?: string[];
+  }>;
+
+  /** Add a Territory item directly into the prompt */
+  onAddTerritoryItem?: (text: string) => void;
 }
 
 /**
@@ -116,6 +129,8 @@ export function QuestionCard({
   canGoBack,
   canGoNext,
   territoryContext = null,
+  territoryItems = [],
+  onAddTerritoryItem,
 }: QuestionCardProps) {
   const questionText = node?.question || 'Select attributes';
   const questionDescription = node?.description || null;
@@ -152,6 +167,33 @@ export function QuestionCard({
                   ? `This step aligns with the Territory focus through ${territoryContext.matchingSections.join(', ')}.`
                   : 'This step aligns with the current Territory focus.'
                 : 'This step is still available, but it is outside the current Territory focus.'}
+            </div>
+          </div>
+        )}
+        {territoryContext?.isRelevant && territoryItems.length > 0 && (
+          <div className="question-card-territory-items">
+            <div className="question-card-territory-items-header">
+              <div className="question-card-territory-items-title">Territory Source Material</div>
+              <div className="question-card-territory-items-meta">
+                {territoryItems.length} suggestion{territoryItems.length === 1 ? '' : 's'}
+              </div>
+            </div>
+            <div className="question-card-territory-items-list">
+              {territoryItems.map(item => (
+                <div key={item.id} className="question-card-territory-item">
+                  <div className="question-card-territory-item-text">{item.text}</div>
+                  <div className="question-card-territory-item-meta">
+                    <span>{item.section}</span>
+                    <span>{item.poolName}</span>
+                  </div>
+                  {item.note && <div className="question-card-territory-item-note">{item.note}</div>}
+                  <div className="question-card-territory-item-actions">
+                    <button type="button" onClick={() => onAddTerritoryItem?.(item.text)}>
+                      Add to Prompt
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
