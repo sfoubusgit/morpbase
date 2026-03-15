@@ -294,6 +294,68 @@
   overflow-y: auto;
 }
 
+.user-pools-territory-summary {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-pools-territory-stat-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-pools-territory-stat {
+  min-width: 110px;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(13, 14, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-pools-territory-stat strong {
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.user-pools-territory-stat span {
+  font-size: 11px;
+  color: #aeb3d2;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.user-pools-territory-review-list {
+  display: grid;
+  gap: 8px;
+}
+
+.user-pools-territory-review-item {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(13, 14, 20, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-pools-territory-review-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.user-pools-territory-review-meta {
+  font-size: 11px;
+  color: #9fa0b8;
+}
+
 .user-pools-territory-card {
   display: grid;
   gap: 8px;

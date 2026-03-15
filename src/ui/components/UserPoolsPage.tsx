@@ -209,6 +209,46 @@ export function UserPoolsPage({
       .filter(pool => pool.availableSections.length > 0);
   }, [availablePools]);
 
+  const territoryDraftSummary = useMemo(() => {
+    const normalizedSources = territorySources
+      .map(source => {
+        const pool = sectionedPools.find(entry => entry.id === source.poolId);
+        if (!pool) return null;
+        const section = source.section.trim();
+        if (!section) return null;
+        const itemCount = pool.items.filter(item => item.section?.trim() === section).length;
+        return {
+          poolId: pool.id,
+          poolName: pool.name,
+          section,
+          itemCount,
+        };
+      })
+      .filter((source): source is { poolId: string; poolName: string; section: string; itemCount: number } => Boolean(source));
+
+    const uniqueSourceCount = normalizedSources.filter((source, index, list) => {
+      return list.findIndex(entry => entry.poolId === source.poolId && entry.section === source.section) === index;
+    }).length;
+
+    const sectionCounts = new Map<string, number>();
+    normalizedSources.forEach(source => {
+      sectionCounts.set(source.section, (sectionCounts.get(source.section) ?? 0) + 1);
+    });
+
+    const sections = [...sectionCounts.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([section, count]) => ({ section, count }));
+
+    const estimatedItems = normalizedSources.reduce((sum, source) => sum + source.itemCount, 0);
+
+    return {
+      sources: normalizedSources,
+      uniqueSourceCount,
+      sections,
+      estimatedItems,
+    };
+  }, [sectionedPools, territorySources]);
+
   const filteredItemGroups = useMemo(() => {
     const hasSectionedItems = filteredItems.some(item => item.section);
     if (!hasSectionedItems) return [];
@@ -1131,6 +1171,51 @@ export function UserPoolsPage({
                       <button type="button" onClick={resetTerritoryDraft}>
                         Cancel
                       </button>
+                    )}
+                  </div>
+                  <div className="user-pools-territory-summary">
+                    <div className="user-pools-subsection-header">
+                      <h4>Territory Summary</h4>
+                      <span className="user-pools-subsection-meta">
+                        {territoryDraftSummary.uniqueSourceCount} sources
+                      </span>
+                    </div>
+                    {territoryDraftSummary.sources.length === 0 ? (
+                      <div className="user-pools-empty">Choose at least one pool section to define the Territory.</div>
+                    ) : (
+                      <>
+                        <div className="user-pools-territory-stat-row">
+                          <div className="user-pools-territory-stat">
+                            <strong>{territoryDraftSummary.sections.length}</strong>
+                            <span>shared sections</span>
+                          </div>
+                          <div className="user-pools-territory-stat">
+                            <strong>{territoryDraftSummary.estimatedItems}</strong>
+                            <span>source items</span>
+                          </div>
+                        </div>
+                        <div className="user-pools-territory-chip-row">
+                          {territoryDraftSummary.sections.map(entry => (
+                            <span key={entry.section} className="user-pools-territory-chip">
+                              {entry.section} x{entry.count}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="user-pools-territory-review-list">
+                          {territoryDraftSummary.sources.map((source, index) => (
+                            <div key={`${source.poolId}_${source.section}_${index}`} className="user-pools-territory-review-item">
+                              <div>
+                                <div className="user-pools-territory-review-title">
+                                  {source.section} from {source.poolName}
+                                </div>
+                                <div className="user-pools-territory-review-meta">
+                                  {source.itemCount} pool items available in this section
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
                     )}
                   </div>
                   {territoryError && <div className="user-pools-error">{territoryError}</div>}
