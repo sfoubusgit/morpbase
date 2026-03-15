@@ -1438,33 +1438,6 @@ export function UserPoolsPage({
                 </div>
               </div>
               {itemError && <div className="user-pools-error">{itemError}</div>}
-              <div className="user-pools-items">
-                {activePool.items.length === 0 ? (
-                  <div className="user-pools-empty">No items yet.</div>
-                ) : filteredItems.length === 0 ? (
-                  <div className="user-pools-empty">No items match your search or tag filter.</div>
-                ) : filteredItemGroups.length > 0 ? (
-                  filteredItemGroups.map(group => (
-                    <div key={group.name} className="user-pools-section-group">
-                      <div className="user-pools-section-heading-row">
-                        <div className="user-pools-section-heading">{group.name}</div>
-                        <button
-                          type="button"
-                          className="user-pools-section-action"
-                          onClick={() => activePool && handleQuickAddSectionToTerritory(activePool.id, group.name)}
-                        >
-                          Add Section To Territory
-                        </button>
-                      </div>
-                      <div className="user-pools-section-items">
-                        {group.items.map(renderPoolItem)}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  filteredItems.map(renderPoolItem)
-                )}
-              </div>
 
               <details className="user-pools-collapsible">
                 <summary>Add Content</summary>
@@ -1526,6 +1499,34 @@ export function UserPoolsPage({
                   </div>
                 </div>
               </details>
+
+              <div className="user-pools-items">
+                {activePool.items.length === 0 ? (
+                  <div className="user-pools-empty">No items yet.</div>
+                ) : filteredItems.length === 0 ? (
+                  <div className="user-pools-empty">No items match your search or tag filter.</div>
+                ) : filteredItemGroups.length > 0 ? (
+                  filteredItemGroups.map(group => (
+                    <div key={group.name} className="user-pools-section-group">
+                      <div className="user-pools-section-heading-row">
+                        <div className="user-pools-section-heading">{group.name}</div>
+                        <button
+                          type="button"
+                          className="user-pools-section-action"
+                          onClick={() => activePool && handleQuickAddSectionToTerritory(activePool.id, group.name)}
+                        >
+                          Add Section To Territory
+                        </button>
+                      </div>
+                      <div className="user-pools-section-items">
+                        {group.items.map(renderPoolItem)}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  filteredItems.map(renderPoolItem)
+                )}
+              </div>
 
               <details className="user-pools-collapsible user-pools-advanced">
                 <summary>Advanced</summary>
