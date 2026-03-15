@@ -226,13 +226,17 @@ export function UserPoolsPage({
           poolName: pool.name,
           section,
           itemCount,
+          duplicateKey: `${pool.id}::${section}`,
         };
       })
-      .filter((source): source is { poolId: string; poolName: string; section: string; itemCount: number } => Boolean(source));
+      .filter((source): source is { poolId: string; poolName: string; section: string; itemCount: number; duplicateKey: string } => Boolean(source));
 
-    const uniqueSourceCount = normalizedSources.filter((source, index, list) => {
-      return list.findIndex(entry => entry.poolId === source.poolId && entry.section === source.section) === index;
-    }).length;
+    const duplicateCounts = new Map<string, number>();
+    normalizedSources.forEach(source => {
+      duplicateCounts.set(source.duplicateKey, (duplicateCounts.get(source.duplicateKey) ?? 0) + 1);
+    });
+
+    const uniqueSourceCount = new Set(normalizedSources.map(source => source.duplicateKey)).size;
 
     const sectionCounts = new Map<string, number>();
     normalizedSources.forEach(source => {
@@ -244,12 +248,26 @@ export function UserPoolsPage({
       .map(([section, count]) => ({ section, count }));
 
     const estimatedItems = normalizedSources.reduce((sum, source) => sum + source.itemCount, 0);
+    const duplicateSourceCount = [...duplicateCounts.values()].filter(count => count > 1).length;
+    const emptySourceCount = normalizedSources.filter(source => source.itemCount === 0).length;
+
+    const warnings: string[] = [];
+    if (duplicateSourceCount > 0) {
+      warnings.push(`${duplicateSourceCount} duplicate source ${duplicateSourceCount === 1 ? 'pair is' : 'pairs are'} selected.`);
+    }
+    if (emptySourceCount > 0) {
+      warnings.push(`${emptySourceCount} selected source ${emptySourceCount === 1 ? 'has' : 'have'} no items in that section.`);
+    }
 
     return {
       sources: normalizedSources,
       uniqueSourceCount,
       sections,
       estimatedItems,
+      duplicateSourceCount,
+      emptySourceCount,
+      warnings,
+      duplicateCounts,
     };
   }, [sectionedPools, territorySources]);
 
@@ -1215,6 +1233,15 @@ export function UserPoolsPage({
                       <div className="user-pools-empty">Choose at least one pool section to define the Territory.</div>
                     ) : (
                       <>
+                        {territoryDraftSummary.warnings.length > 0 && (
+                          <div className="user-pools-territory-warning-list">
+                            {territoryDraftSummary.warnings.map(warning => (
+                              <div key={warning} className="user-pools-territory-warning">
+                                {warning}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         <div className="user-pools-territory-stat-row">
                           <div className="user-pools-territory-stat">
                             <strong>{territoryDraftSummary.sections.length}</strong>
@@ -1234,7 +1261,10 @@ export function UserPoolsPage({
                         </div>
                         <div className="user-pools-territory-review-list">
                           {territoryDraftSummary.sources.map((source, index) => (
-                            <div key={`${source.poolId}_${source.section}_${index}`} className="user-pools-territory-review-item">
+                            <div
+                              key={`${source.poolId}_${source.section}_${index}`}
+                              className={`user-pools-territory-review-item ${territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 ? 'warning' : ''} ${source.itemCount === 0 ? 'empty' : ''}`}
+                            >
                               <div>
                                 <div className="user-pools-territory-review-title">
                                   {source.section} from {source.poolName}
@@ -1242,6 +1272,16 @@ export function UserPoolsPage({
                                 <div className="user-pools-territory-review-meta">
                                   {source.itemCount} pool items available in this section
                                 </div>
+                                {territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 && (
+                                  <div className="user-pools-territory-review-note">
+                                    Duplicate source selection
+                                  </div>
+                                )}
+                                {source.itemCount === 0 && (
+                                  <div className="user-pools-territory-review-note">
+                                    Empty section source
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}
