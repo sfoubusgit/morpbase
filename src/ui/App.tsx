@@ -238,6 +238,7 @@ export function App() {
   const [territories, setTerritories] = useState<Territory[]>([]);
   const [territoriesLoading, setTerritoriesLoading] = useState(false);
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
+  const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
 
@@ -583,7 +584,7 @@ export function App() {
 
   const getTerritoryBiasedAdjacentNodeId = useCallback((nodeId: string | null, direction: 'next' | 'previous') => {
     const fallbackNodeId = getAdjacentUsableNodeId(nodeId, direction);
-    if (!activeTerritoryCategoryIds.length || usableNodeIds.length === 0) {
+    if (territoryNavigationMode !== 'biased' || !activeTerritoryCategoryIds.length || usableNodeIds.length === 0) {
       return fallbackNodeId;
     }
 
@@ -612,7 +613,7 @@ export function App() {
     }
 
     return fallbackNodeId;
-  }, [activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, usableNodeIds]);
+  }, [activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, territoryNavigationMode, usableNodeIds]);
 
   const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
   const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
@@ -1214,6 +1215,7 @@ export function App() {
 
   const handleUseTerritoryInBuilder = (id: string | null) => {
     handleSetActiveTerritory(id);
+    setTerritoryNavigationMode('biased');
     setActivePage('generator');
     const territory = territories.find(entry => entry.id === id) ?? null;
     const preferredStartNodeId = territory ? getPreferredTerritoryStartNodeId() : '';
@@ -1998,6 +2000,16 @@ export function App() {
                     </div>
                   </div>
                   <div className="territory-banner-actions">
+                    <label className="territory-banner-switch">
+                      <span>Navigation</span>
+                      <select
+                        value={territoryNavigationMode}
+                        onChange={event => setTerritoryNavigationMode(event.target.value as 'biased' | 'full')}
+                      >
+                        <option value="biased">Territory-biased</option>
+                        <option value="full">Full Builder</option>
+                      </select>
+                    </label>
                     <button type="button" onClick={() => setActivePage('user-pools')}>
                       Manage Territories
                     </button>
@@ -2020,7 +2032,7 @@ export function App() {
                 </div>
                 {activeTerritory && (
                   <div className="builder-guidance-territory-note">
-                    Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and the mapping above shows how each Territory section currently feeds Builder.
+                    Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and the mapping above shows how each Territory section currently feeds Builder. Navigation mode is currently set to {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'}.
                   </div>
                 )}
               </div>

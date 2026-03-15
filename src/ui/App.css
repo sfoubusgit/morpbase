@@ -603,6 +603,7 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .territory-banner-actions button {
@@ -612,6 +613,23 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   padding: 8px 14px;
   border-radius: 10px;
   cursor: pointer;
+}
+
+.territory-banner-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.86);
+}
+
+.territory-banner-switch select {
+  background: rgba(20, 20, 26, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
 }
 
 .app-error-state {
