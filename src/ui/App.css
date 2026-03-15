@@ -284,6 +284,29 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   overflow-y: auto;
 }
 
+.builder-sidebar-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.builder-sidebar-primary-action {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(110, 86, 249, 0.45);
+  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(123, 101, 255, 0.9));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(110, 86, 249, 0.22);
+}
+
+.builder-sidebar-primary-action:hover {
+  background: linear-gradient(135deg, rgba(123, 101, 255, 1), rgba(139, 117, 255, 1));
+}
+
 .freeform-prompt-panel {
   background: #14141a;
   border: 1px solid rgba(255, 255, 255, 0.06);

@@ -250,6 +250,7 @@ export function App() {
   const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderTerritoryPickerId, setBuilderTerritoryPickerId] = useState<string>('');
+  const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
 
@@ -2136,6 +2137,15 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
+              <div className="builder-sidebar-quick-actions">
+                <button
+                  type="button"
+                  className="builder-sidebar-primary-action"
+                  onClick={() => setSavePromptOpenSignal(prev => prev + 1)}
+                >
+                  Save Prompt
+                </button>
+              </div>
               <div className="builder-sidebar-panel territory-sidebar-panel">
                 <div className="builder-sidebar-panel-header">
                   <div>
@@ -2304,6 +2314,8 @@ export function App() {
                 manualUrl={manualUrl}
                 showCloudPrompts={false}
                 showLocalPrompts={true}
+                hideSaveBar={true}
+                externalOpenSaveSignal={savePromptOpenSignal}
               />
             </div>
             

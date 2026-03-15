@@ -21,6 +21,8 @@ type PromptLibraryProps = {
   manualUrl?: string;
   showCloudPrompts?: boolean;
   showLocalPrompts?: boolean;
+  hideSaveBar?: boolean;
+  externalOpenSaveSignal?: number;
 };
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
@@ -79,6 +81,8 @@ export function PromptLibrary({
   manualUrl,
   showCloudPrompts = false,
   showLocalPrompts = true,
+  hideSaveBar = false,
+  externalOpenSaveSignal = 0,
 }: PromptLibraryProps) {
   const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
   const [localPrompts, setLocalPrompts] = useState<SavedPrompt[]>([]);
@@ -114,6 +118,12 @@ export function PromptLibrary({
       setPrompts([]);
     }
   }, [authUser]);
+
+  useEffect(() => {
+    if (externalOpenSaveSignal > 0) {
+      setIsSaveModalOpen(true);
+    }
+  }, [externalOpenSaveSignal]);
 
   const parseTags = (raw: string) =>
     raw
@@ -300,14 +310,16 @@ export function PromptLibrary({
         )}
         <span className="prompt-library-count">{prompts.length}</span>
       </div>
-      <div className="prompt-library-save-bar">
-        <div className="prompt-library-save-copy">
-          Save the current prompt with a name, tags, and optional metadata.
+      {!hideSaveBar && (
+        <div className="prompt-library-save-bar">
+          <div className="prompt-library-save-copy">
+            Save the current prompt with a name, tags, and optional metadata.
+          </div>
+          <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
+            Save Prompt
+          </button>
         </div>
-        <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
-          Save Prompt
-        </button>
-      </div>
+      )}
       <details className="prompt-library-io">
         <summary>Import / Export</summary>
         <textarea
