@@ -1115,24 +1115,6 @@ export function UserPoolsPage({
               <div className="user-pools-helper">
                 Add reusable prompt fragments here, then organize them with sections, tags, and notes.
               </div>
-              <div className="user-pools-folder-assignment">
-                <label>
-                  Folder
-                  <select
-                    value={activePool.folderId ?? ''}
-                    onChange={event => {
-                      void handleMovePool(activePool.id, event.target.value);
-                    }}
-                  >
-                    <option value="">No folder</option>
-                    {folders.map(folder => (
-                      <option key={folder.id} value={folder.id}>
-                        {folder.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
               <div className="user-pools-filters">
                 <input
                   type="text"
@@ -1147,98 +1129,129 @@ export function UserPoolsPage({
                   onChange={event => setTagFilter(event.target.value)}
                 />
               </div>
-              <div className="user-pools-append-target">
-                <label>
-                  Append target
-                  <select
-                    value={appendTargetId}
-                    onChange={event => setAppendTargetId(event.target.value)}
-                  >
-                    <option value="last">Last addition</option>
-                    {additionItems.map(item => (
-                      <option key={item.id} value={item.id}>
-                        {item.text.length > 48 ? `${item.text.slice(0, 48)}...` : item.text}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <div className="user-pools-items-create">
-                <input
-                  type="text"
-                  placeholder="Item text"
-                  value={newItemText}
-                  onChange={event => setNewItemText(event.target.value)}
-                />
-                <select value={newItemSection} onChange={event => setNewItemSection(event.target.value)}>
-                  <option value="">No section</option>
-                  {POOL_SECTION_OPTIONS.map(section => (
-                    <option key={section} value={section}>
-                      {section}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="text"
-                  placeholder="Tags (comma)"
-                  value={newItemTags}
-                  onChange={event => setNewItemTags(event.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Note (optional)"
-                  value={newItemNote}
-                  onChange={event => setNewItemNote(event.target.value)}
-                />
-                <button type="button" onClick={handleAddItem}>
-                  Add Item
-                </button>
-              </div>
-              <div className="user-pools-bulk">
-                <div className="user-pools-helper">
-                  Bulk add one item per line. Choose one section once for the whole batch, or override it per line with a second “|”.
+              <div className="user-pools-list-toolbar">
+                <div className="user-pools-append-target">
+                  <label>
+                    Append target
+                    <select
+                      value={appendTargetId}
+                      onChange={event => setAppendTargetId(event.target.value)}
+                    >
+                      <option value="last">Last addition</option>
+                      {additionItems.map(item => (
+                        <option key={item.id} value={item.id}>
+                          {item.text.length > 48 ? `${item.text.slice(0, 48)}...` : item.text}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                 </div>
-                <select value={bulkSection} onChange={event => setBulkSection(event.target.value)}>
-                  <option value="">No section</option>
-                  {POOL_SECTION_OPTIONS.map(section => (
-                    <option key={section} value={section}>
-                      {section}
-                    </option>
-                  ))}
-                </select>
-                <textarea
-                  rows={4}
-                  placeholder="Bulk add: one item per line. Optional tags after first |. Optional per-line section after second | (e.g., big tree | nature, forest | Environment)"
-                  value={bulkText}
-                  onChange={event => setBulkText(event.target.value)}
-                />
-                <button type="button" onClick={handleBulkAdd}>
-                  Bulk Add
-                </button>
-                {bulkError && <div className="user-pools-error">{bulkError}</div>}
               </div>
-              <details className="user-pools-advanced">
-                <summary>Import / Export</summary>
-                <div className="user-pools-json">
-                  <textarea
-                    rows={5}
-                    placeholder="Pool JSON import/export"
-                    value={poolJson}
-                    onChange={event => setPoolJson(event.target.value)}
-                  />
-                  <div className="user-pools-json-actions">
-                    <button type="button" onClick={handleExportPoolJson}>
-                      Export Pool
-                    </button>
-                    <button type="button" onClick={handleImportPoolJson}>
-                      Import Pool
-                    </button>
-                    <button type="button" onClick={handleDownloadPoolJson}>
-                      Download Pool
+
+              <details className="user-pools-collapsible" open>
+                <summary>Add Content</summary>
+                <div className="user-pools-collapsible-body">
+                  <div className="user-pools-items-create">
+                    <input
+                      type="text"
+                      placeholder="Item text"
+                      value={newItemText}
+                      onChange={event => setNewItemText(event.target.value)}
+                    />
+                    <select value={newItemSection} onChange={event => setNewItemSection(event.target.value)}>
+                      <option value="">No section</option>
+                      {POOL_SECTION_OPTIONS.map(section => (
+                        <option key={section} value={section}>
+                          {section}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder="Tags (comma)"
+                      value={newItemTags}
+                      onChange={event => setNewItemTags(event.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Note (optional)"
+                      value={newItemNote}
+                      onChange={event => setNewItemNote(event.target.value)}
+                    />
+                    <button type="button" onClick={handleAddItem}>
+                      Add Item
                     </button>
                   </div>
-                  {poolJsonError && <div className="user-pools-error">{poolJsonError}</div>}
-                  {poolJsonMessage && <div className="user-pools-message">{poolJsonMessage}</div>}
+
+                  <div className="user-pools-bulk">
+                    <div className="user-pools-helper">
+                      Bulk add one item per line. Choose one section once for the whole batch, or override it per line with a second “|”.
+                    </div>
+                    <select value={bulkSection} onChange={event => setBulkSection(event.target.value)}>
+                      <option value="">No section</option>
+                      {POOL_SECTION_OPTIONS.map(section => (
+                        <option key={section} value={section}>
+                          {section}
+                        </option>
+                      ))}
+                    </select>
+                    <textarea
+                      rows={4}
+                      placeholder="Bulk add: one item per line. Optional tags after first |. Optional per-line section after second | (e.g., big tree | nature, forest | Environment)"
+                      value={bulkText}
+                      onChange={event => setBulkText(event.target.value)}
+                    />
+                    <button type="button" onClick={handleBulkAdd}>
+                      Bulk Add
+                    </button>
+                    {bulkError && <div className="user-pools-error">{bulkError}</div>}
+                  </div>
+                </div>
+              </details>
+
+              <details className="user-pools-collapsible user-pools-advanced">
+                <summary>Advanced</summary>
+                <div className="user-pools-collapsible-body">
+                  <div className="user-pools-folder-assignment">
+                    <label>
+                      Folder
+                      <select
+                        value={activePool.folderId ?? ''}
+                        onChange={event => {
+                          void handleMovePool(activePool.id, event.target.value);
+                        }}
+                      >
+                        <option value="">No folder</option>
+                        {folders.map(folder => (
+                          <option key={folder.id} value={folder.id}>
+                            {folder.name}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="user-pools-json">
+                    <textarea
+                      rows={5}
+                      placeholder="Pool JSON import/export"
+                      value={poolJson}
+                      onChange={event => setPoolJson(event.target.value)}
+                    />
+                    <div className="user-pools-json-actions">
+                      <button type="button" onClick={handleExportPoolJson}>
+                        Export Pool
+                      </button>
+                      <button type="button" onClick={handleImportPoolJson}>
+                        Import Pool
+                      </button>
+                      <button type="button" onClick={handleDownloadPoolJson}>
+                        Download Pool
+                      </button>
+                    </div>
+                    {poolJsonError && <div className="user-pools-error">{poolJsonError}</div>}
+                    {poolJsonMessage && <div className="user-pools-message">{poolJsonMessage}</div>}
+                  </div>
                 </div>
               </details>
               {itemError && <div className="user-pools-error">{itemError}</div>}

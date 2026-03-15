@@ -418,12 +418,45 @@
   color: #9fa0b8;
 }
 
+.user-pools-list-toolbar {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .user-pools-folder-assignment label {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 12px;
   color: #9fa0b8;
+}
+
+.user-pools-collapsible {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.user-pools-collapsible summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d9ddf8;
+}
+
+.user-pools-collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.user-pools-collapsible-body {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px 14px;
 }
 
 .user-pools-append-target label {
