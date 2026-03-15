@@ -329,27 +329,6 @@ export function App() {
     }));
   }, [activeTerritory]);
 
-  const getPreferredTerritoryStartNodeId = useCallback(() => {
-    if (!activeTerritoryCategoryIds.length) return '';
-
-    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
-    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
-      const categoryId = getCategoryForNode(nodeId);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    if (preferredUsableNodeId) {
-      return preferredUsableNodeId;
-    }
-
-    const preferredQuestionNode = questionNodes.find(node => {
-      const categoryId = getCategoryForNode(node.id);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    return preferredQuestionNode?.id ?? '';
-  }, [activeTerritoryCategoryIds, getCategoryForNode, questionNodes, usableNodeIds]);
-  
   const workingSetAttributeDefinitions = useMemo<AttributeDefinition[]>(() => {
     if (!activeWorkingSet) return [];
     const defs: AttributeDefinition[] = [];
@@ -614,6 +593,27 @@ export function App() {
 
     return fallbackNodeId;
   }, [activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, territoryNavigationMode, usableNodeIds]);
+
+  const getPreferredTerritoryStartNodeId = useCallback(() => {
+    if (!activeTerritoryCategoryIds.length) return '';
+
+    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
+    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
+      const categoryId = getCategoryForNode(nodeId);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    if (preferredUsableNodeId) {
+      return preferredUsableNodeId;
+    }
+
+    const preferredQuestionNode = questionNodes.find(node => {
+      const categoryId = getCategoryForNode(node.id);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    return preferredQuestionNode?.id ?? '';
+  }, [activeTerritoryCategoryIds, getCategoryForNode, questionNodes, usableNodeIds]);
 
   const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
   const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
