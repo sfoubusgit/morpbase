@@ -146,4 +146,65 @@ export const poolHubMock: PoolHubEntry[] = [
       ]
     ),
   },
+  {
+    id: 'hub_cathedral_starship_monks',
+    creator: 'MorpBase',
+    title: 'Cathedral Starship Monks',
+    summary: 'Monastic sci-fi processions, sacred engines, and gothic star-vessel ritual atmosphere.',
+    description:
+      'An official MorpBase pool for solemn space-monastery worlds: hooded cosmic monks, cathedral-like starships, incense-filled reactor halls, sacred machinery, and austere ceremonial grandeur.',
+    tags: ['sci-fi', 'gothic', 'monk', 'starship', 'cathedral', 'ritual'],
+    category: 'Illustration',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'cathedral_starship_monks_pool',
+      'Cathedral Starship Monks',
+      now - day,
+      now,
+      [
+        { text: 'hooded starship monk with an illuminated reliquary staff', section: 'Subjects', tags: ['subject', 'monk', 'staff'] },
+        { text: 'cyber-monastic elder with ritual implants and solemn gaze', section: 'Subjects', tags: ['subject', 'elder', 'cybernetic'] },
+        { text: 'processional order of silent space acolytes', section: 'Subjects', tags: ['subject', 'acolytes', 'procession'] },
+
+        { text: 'cathedral-like starship nave with vaulted steel arches', section: 'Environment', tags: ['environment', 'starship', 'nave'] },
+        { text: 'sacred reactor chamber glowing beneath gothic buttresses', section: 'Environment', tags: ['environment', 'reactor', 'gothic'] },
+        { text: 'orbital monastery cloister open to the starfield', section: 'Environment', tags: ['environment', 'monastery', 'orbital'] },
+
+        { text: 'floating censor emitting silver incense vapor', section: 'Props', tags: ['props', 'incense', 'censor'] },
+        { text: 'relic engine core housed in a ceremonial shrine frame', section: 'Props', tags: ['props', 'relic', 'engine'] },
+        { text: 'holographic scripture panels and machine-lit prayer seals', section: 'Props', tags: ['props', 'scripture', 'holographic'] },
+
+        { text: 'cold stained-glass light mixed with reactor glow', section: 'Lighting', tags: ['lighting', 'stained-glass', 'reactor'] },
+        { text: 'soft shafts of sacred white light through drifting vapor', section: 'Lighting', tags: ['lighting', 'shafts', 'vapor'] },
+        { text: 'deep shadowed aisles broken by gold ritual highlights', section: 'Lighting', tags: ['lighting', 'shadow', 'gold'] },
+
+        { text: 'solemn cosmic devotion', section: 'Mood', tags: ['mood', 'solemn', 'devotion'] },
+        { text: 'austere sacred technology reverence', section: 'Mood', tags: ['mood', 'technology', 'reverence'] },
+        { text: 'quiet interstellar ritual gravity', section: 'Mood', tags: ['mood', 'ritual', 'gravity'] },
+
+        { text: 'brushed metal robes with ceremonial gold thread', section: 'Materials', tags: ['materials', 'metal', 'fabric'] },
+        { text: 'aged steel, oxidized brass, and polished relic glass', section: 'Materials', tags: ['materials', 'steel', 'brass'] },
+        { text: 'stone-like ship surfaces with sacred engraved filigree', section: 'Materials', tags: ['materials', 'engraving', 'stone-like'] },
+
+        { text: 'gothic sci-fi religious concept art', section: 'Style', tags: ['style', 'gothic', 'concept-art'] },
+        { text: 'monastic space opera illustration', section: 'Style', tags: ['style', 'space-opera', 'illustration'] },
+        { text: 'sacred machinery visual language', section: 'Style', tags: ['style', 'sacred', 'machinery'] },
+
+        { text: 'symmetrical aisle composition leading to the reactor altar', section: 'Composition', tags: ['composition', 'symmetry', 'altar'] },
+        { text: 'low-angle reverent framing beneath massive arches', section: 'Composition', tags: ['composition', 'low-angle', 'arches'] },
+        { text: 'processional depth with layered figures and luminous vanishing point', section: 'Composition', tags: ['composition', 'depth', 'procession'] },
+
+        { text: 'incense vapor drifting through the ship sanctuary', section: 'Effects', tags: ['effects', 'vapor', 'incense'] },
+        { text: 'subtle dust motes and star-glitter in cathedral light', section: 'Effects', tags: ['effects', 'dust', 'glitter'] },
+        { text: 'faint holographic glyphs orbiting sacred machinery', section: 'Effects', tags: ['effects', 'glyphs', 'holographic'] },
+      ]
+    ),
+  },
 ];
