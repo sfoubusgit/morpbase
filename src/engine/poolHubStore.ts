@@ -1,7 +1,9 @@
 import type { PoolHubEntry } from '../types';
 import { poolHubMock } from '../data/poolHubMock';
 
-const STORAGE_KEY = 'promptgen:pool_hub_store:v5';
+const STORAGE_KEY = 'promptgen:pool_hub_store:v6';
+const CURRENT_STORE_VERSION = 6;
+const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
 
 type PoolHubComment = {
   id: string;
@@ -15,15 +17,20 @@ type PoolHubComment = {
 };
 
 type PoolHubStore = {
-  version: 5;
+  version: 6;
   entries: PoolHubEntry[];
   userRatings: Record<string, Record<string, number>>;
   comments: PoolHubComment[];
   flaggedEntries: Record<string, string[]>; // entryId -> reasons
 };
 
+const isOfficialEntry = (entry: PoolHubEntry) =>
+  OFFICIAL_CREATOR_NAMES.has(entry.creator?.trim().toLowerCase() ?? '');
+
+const sanitizeEntries = (entries: PoolHubEntry[]) => entries.filter(isOfficialEntry);
+
 const buildInitialStore = (): PoolHubStore => ({
-  version: 5,
+  version: CURRENT_STORE_VERSION,
   entries: poolHubMock,
   userRatings: {},
   comments: [],
@@ -40,8 +47,8 @@ const migrateV4 = (raw: string): PoolHubStore => {
     };
     if (parsed && parsed.version === 4 && Array.isArray(parsed.entries)) {
       return {
-        version: 5,
-        entries: parsed.entries,
+        version: CURRENT_STORE_VERSION,
+        entries: sanitizeEntries(parsed.entries),
         userRatings: parsed.userRatings ?? {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -63,8 +70,8 @@ const migrateV3 = (raw: string): PoolHubStore => {
     };
     if (parsed && parsed.version === 3 && Array.isArray(parsed.entries)) {
       return {
-        version: 5,
-        entries: parsed.entries,
+        version: CURRENT_STORE_VERSION,
+        entries: sanitizeEntries(parsed.entries),
         userRatings: parsed.userRatings ?? {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -86,8 +93,8 @@ const migrateV2 = (raw: string): PoolHubStore => {
     };
     if (parsed && parsed.version === 2 && Array.isArray(parsed.entries)) {
       return {
-        version: 5,
-        entries: parsed.entries,
+        version: CURRENT_STORE_VERSION,
+        entries: sanitizeEntries(parsed.entries),
         userRatings: parsed.userRatings ? { legacy: parsed.userRatings } : {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -104,8 +111,8 @@ const migrateV1 = (raw: string): PoolHubStore => {
     const parsed = JSON.parse(raw) as { version?: number; entries?: PoolHubEntry[] };
     if (parsed && parsed.version === 1 && Array.isArray(parsed.entries)) {
       return {
-        version: 5,
-        entries: parsed.entries,
+        version: CURRENT_STORE_VERSION,
+        entries: sanitizeEntries(parsed.entries),
         userRatings: {},
         comments: [],
         flaggedEntries: {},
@@ -121,6 +128,12 @@ const loadStore = (): PoolHubStore => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      const v5 = window.localStorage.getItem('promptgen:pool_hub_store:v5');
+      if (v5) {
+        const migrated = migrateV4(v5);
+        saveStore(migrated);
+        return migrated;
+      }
       const v4 = window.localStorage.getItem('promptgen:pool_hub_store:v4');
       if (v4) {
         const migrated = migrateV4(v4);
@@ -148,7 +161,7 @@ const loadStore = (): PoolHubStore => {
       return buildInitialStore();
     }
     const parsed = JSON.parse(raw) as PoolHubStore;
-    if (!parsed || parsed.version !== 5 || !Array.isArray(parsed.entries)) {
+    if (!parsed || parsed.version !== CURRENT_STORE_VERSION || !Array.isArray(parsed.entries)) {
       return buildInitialStore();
     }
     return parsed;
@@ -213,10 +226,20 @@ export const resetHubStore = () => {
 export const exportHubStore = (): PoolHubStore => loadStore();
 
 export const importHubStore = (payload: PoolHubStore) => {
-  if (!payload || payload.version !== 5 || !Array.isArray(payload.entries)) {
+  if (
+    !payload
+    || ![5, CURRENT_STORE_VERSION].includes(payload.version as number)
+    || !Array.isArray(payload.entries)
+  ) {
     throw new Error('Invalid Hub store payload.');
   }
-  saveStore(payload);
+  saveStore({
+    version: CURRENT_STORE_VERSION,
+    entries: sanitizeEntries(payload.entries),
+    userRatings: payload.userRatings ?? {},
+    comments: payload.comments ?? [],
+    flaggedEntries: payload.flaggedEntries ?? {},
+  });
 };
 
 export const getUserRating = (entryId: string, userId: string): number | null => {
