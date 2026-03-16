@@ -329,4 +329,65 @@ export const poolHubMock: PoolHubEntry[] = [
       ]
     ),
   },
+  {
+    id: 'hub_adventure_time_paintball_mania',
+    creator: 'MorpBase',
+    title: 'Adventure Time: Paintball Mania',
+    summary: 'Playful cartoon battle chaos, paint-splattered action, and bright improvised arena energy.',
+    description:
+      'An official MorpBase pool for colorful cartoon paintball scenes: playful warriors, improvised cover, splattered gear, campy outdoor arenas, exaggerated action poses, and joyful competitive chaos.',
+    tags: ['cartoon', 'paintball', 'action', 'chaos', 'playful', 'colorful'],
+    category: 'Illustration',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'adventure_time_paintball_mania_pool',
+      'Adventure Time: Paintball Mania',
+      now - day,
+      now,
+      [
+        { text: 'cartoon adventurer in a paint-splattered battle hoodie', section: 'Subjects', tags: ['subject', 'cartoon', 'adventurer'] },
+        { text: 'wild-eyed paintball champion mid-dodge with exaggerated pose', section: 'Subjects', tags: ['subject', 'pose', 'action'] },
+        { text: 'chaotic team captain with patched gear and goofy bravado', section: 'Subjects', tags: ['subject', 'team', 'character'] },
+
+        { text: 'makeshift outdoor paintball arena built from colorful obstacles', section: 'Environment', tags: ['environment', 'arena', 'obstacles'] },
+        { text: 'summer-camp battlefield with inflatable bunkers and tree cover', section: 'Environment', tags: ['environment', 'camp', 'bunkers'] },
+        { text: 'bright cartoon wilderness field streaked with paint splashes', section: 'Environment', tags: ['environment', 'wilderness', 'paint'] },
+
+        { text: 'chunky cartoon paintball blaster with sticker-covered body', section: 'Props', tags: ['props', 'blaster', 'stickers'] },
+        { text: 'paint grenades, splatter canisters, and colorful ammo pods', section: 'Props', tags: ['props', 'paint', 'ammo'] },
+        { text: 'patched masks and protective vests soaked in dried paint', section: 'Props', tags: ['props', 'masks', 'gear'] },
+
+        { text: 'bright afternoon sunlight with playful saturated contrast', section: 'Lighting', tags: ['lighting', 'sunlight', 'saturated'] },
+        { text: 'soft open-sky lighting with vivid paint highlights', section: 'Lighting', tags: ['lighting', 'open-sky', 'highlights'] },
+        { text: 'colorful reflected splashes bouncing across faces and gear', section: 'Lighting', tags: ['lighting', 'color', 'reflections'] },
+
+        { text: 'joyful competitive chaos', section: 'Mood', tags: ['mood', 'joyful', 'chaos'] },
+        { text: 'goofy high-energy battle excitement', section: 'Mood', tags: ['mood', 'goofy', 'energy'] },
+        { text: 'friendly but intense cartoon rivalry', section: 'Mood', tags: ['mood', 'rivalry', 'playful'] },
+
+        { text: 'rubbery cartoon materials with glossy paint splatter', section: 'Materials', tags: ['materials', 'cartoon', 'glossy'] },
+        { text: 'fabric gear stained with thick neon paint streaks', section: 'Materials', tags: ['materials', 'fabric', 'paint'] },
+        { text: 'inflatable bunker surfaces with wet reflective color marks', section: 'Materials', tags: ['materials', 'inflatable', 'reflective'] },
+
+        { text: 'playful action-cartoon illustration', section: 'Style', tags: ['style', 'cartoon', 'action'] },
+        { text: 'saturated adventure-comedy visual language', section: 'Style', tags: ['style', 'comedy', 'saturated'] },
+        { text: 'energetic splatter-battle concept art', section: 'Style', tags: ['style', 'splatter', 'concept-art'] },
+
+        { text: 'dynamic freeze-frame action composition with flying paint', section: 'Composition', tags: ['composition', 'freeze-frame', 'dynamic'] },
+        { text: 'wide team-battle view with layered obstacle chaos', section: 'Composition', tags: ['composition', 'wide', 'team'] },
+        { text: 'low-angle cartoon hero shot during a paintball charge', section: 'Composition', tags: ['composition', 'hero', 'charge'] },
+
+        { text: 'thick paint splashes exploding through the air', section: 'Effects', tags: ['effects', 'paint', 'splashes'] },
+        { text: 'motion streaks and impact bursts around near misses', section: 'Effects', tags: ['effects', 'motion', 'impact'] },
+        { text: 'dripping color blobs across cover, masks, and grass', section: 'Effects', tags: ['effects', 'drips', 'color'] },
+      ]
+    ),
+  },
 ];
