@@ -1064,6 +1064,10 @@
   font-size: 12px;
 }
 
+.pool-hub-report-panel .pool-hub-detail-panel-body {
+  gap: 10px;
+}
+
 .pool-hub-section-title {
   font-size: 12px;
   color: #cbd5f5;
@@ -1076,6 +1080,10 @@
 }
 
 @media (max-width: 960px) {
+  .pool-hub-comments-layout {
+    grid-template-columns: 1fr;
+  }
+
   .pool-hub-grid {
     grid-template-columns: 1fr;
   }
@@ -1139,8 +1147,40 @@
 }
 
 .pool-hub-comments-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pool-hub-comments-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #eef2ff;
+}
+
+.pool-hub-comments-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.15fr);
+  gap: 16px;
+}
+
+.pool-hub-comments-composer,
+.pool-hub-comments-thread {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pool-hub-comments-composer-title {
   font-size: 12px;
-  color: #cbd5f5;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #dfe4ff;
 }
 
 .pool-hub-comments-form {
@@ -1172,10 +1212,10 @@
 .pool-hub-comment {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 12px;
+  padding: 10px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pool-hub-comment-head {

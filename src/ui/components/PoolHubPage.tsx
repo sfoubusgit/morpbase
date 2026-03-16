@@ -1973,123 +1973,147 @@ export function PoolHubPage({
                   </div>
                 </details>
 
-                <div className="pool-hub-detail-rail-card pool-hub-report-card">
-                  <div className="pool-hub-section-title">Report</div>
-                  <div className="pool-hub-muted">See something off? Flag this pool.</div>
-                  <input
-                    type="text"
-                    value={reportReason}
-                    onChange={event => setReportReason(event.target.value)}
-                    placeholder="Reason (optional)"
-                  />
-                  <button type="button" className="pool-hub-secondary" onClick={handleReport}>
-                    Report pool
-                  </button>
-                </div>
+                <details className="pool-hub-detail-rail-card pool-hub-detail-panel pool-hub-report-panel">
+                  <summary className="pool-hub-detail-panel-summary">Report</summary>
+                  <div className="pool-hub-detail-panel-body">
+                    <div className="pool-hub-muted">Flag this pool if something looks off.</div>
+                    <input
+                      type="text"
+                      value={reportReason}
+                      onChange={event => setReportReason(event.target.value)}
+                      placeholder="Reason (optional)"
+                    />
+                    <button type="button" className="pool-hub-secondary" onClick={handleReport}>
+                      Report pool
+                    </button>
+                  </div>
+                </details>
               </aside>
             </div>
             <div className="pool-hub-comments">
-              <div className="pool-hub-comments-header">Comments ({detailComments.length})</div>
-              <div className="pool-hub-comments-form">
-                <input
-                  type="text"
-                  placeholder="Your name (optional)"
-                  value={commentAuthor}
-                  onChange={event => setCommentAuthor(event.target.value)}
-                  disabled={!canInteract}
-                />
-                <textarea
-                  rows={3}
-                  placeholder="Write a comment"
-                  value={commentBody}
-                  onChange={event => setCommentBody(event.target.value)}
-                  disabled={!canInteract}
-                />
-                {commentError && <div className="pool-hub-error">{commentError}</div>}
-                <div className="pool-hub-comments-actions">
-                  <button
-                    type="button"
-                    className="pool-hub-secondary"
-                    onClick={() => {
-                      setCommentBody('');
-                      setCommentError(null);
-                    }}
-                    disabled={!canInteract}
-                  >
-                    Clear
-                  </button>
-                  <button type="button" className="pool-hub-primary" onClick={handleAddComment} disabled={!canInteract}>
-                    Post Comment
-                  </button>
+              <div className="pool-hub-comments-header">
+                <div>
+                  <div className="pool-hub-comments-title">Comments</div>
+                  <div className="pool-hub-muted">
+                    {detailComments.length === 0
+                      ? 'No discussion yet.'
+                      : `${detailComments.length} comment${detailComments.length === 1 ? '' : 's'} on this pool.`}
+                  </div>
                 </div>
-                <div className="pool-hub-comments-list">
-                  {detailComments.length === 0 ? (
-                    <div className="pool-hub-empty">No comments yet.</div>
-                  ) : (
-                    detailComments.map(comment => (
-                      <div key={comment.id} className="pool-hub-comment">
-                        <div className="pool-hub-comment-head">
-                          <span className="pool-hub-comment-author">
-                            {comment.authorId && comment.authorId === userId ? 'You' : comment.author}
-                          </span>
-                          <span className="pool-hub-comment-date">
-                            {new Date(comment.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {editingCommentId === comment.id ? (
-                          <>
-                            <textarea
-                              rows={3}
-                              value={editingCommentBody}
-                              onChange={event => setEditingCommentBody(event.target.value)}
-                            />
+                {!isLoggedIn && (
+                  <div className="pool-hub-auth-hint">Log in to join the discussion.</div>
+                )}
+                {isLoggedIn && !isPro && (
+                  <div className="pool-hub-auth-hint">Upgrade to Pro to comment and rate.</div>
+                )}
+              </div>
+              <div className="pool-hub-comments-layout">
+                <div className="pool-hub-comments-composer">
+                  <div className="pool-hub-comments-composer-title">Add a comment</div>
+                  <div className="pool-hub-comments-form">
+                    <input
+                      type="text"
+                      placeholder="Your name (optional)"
+                      value={commentAuthor}
+                      onChange={event => setCommentAuthor(event.target.value)}
+                      disabled={!canInteract}
+                    />
+                    <textarea
+                      rows={4}
+                      placeholder="Write a comment"
+                      value={commentBody}
+                      onChange={event => setCommentBody(event.target.value)}
+                      disabled={!canInteract}
+                    />
+                    {commentError && <div className="pool-hub-error">{commentError}</div>}
+                    <div className="pool-hub-comments-actions">
+                      <button
+                        type="button"
+                        className="pool-hub-secondary"
+                        onClick={() => {
+                          setCommentBody('');
+                          setCommentError(null);
+                        }}
+                        disabled={!canInteract}
+                      >
+                        Clear
+                      </button>
+                      <button type="button" className="pool-hub-primary" onClick={handleAddComment} disabled={!canInteract}>
+                        Post Comment
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="pool-hub-comments-thread">
+                  <div className="pool-hub-comments-list">
+                    {detailComments.length === 0 ? (
+                      <div className="pool-hub-empty">No comments yet.</div>
+                    ) : (
+                      detailComments.map(comment => (
+                        <div key={comment.id} className="pool-hub-comment">
+                          <div className="pool-hub-comment-head">
+                            <span className="pool-hub-comment-author">
+                              {comment.authorId && comment.authorId === userId ? 'You' : comment.author}
+                            </span>
+                            <span className="pool-hub-comment-date">
+                              {new Date(comment.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          {editingCommentId === comment.id ? (
+                            <>
+                              <textarea
+                                rows={3}
+                                value={editingCommentBody}
+                                onChange={event => setEditingCommentBody(event.target.value)}
+                              />
+                              <div className="pool-hub-comments-actions">
+                                <button
+                                  type="button"
+                                  className="pool-hub-secondary"
+                                  onClick={() => {
+                                    setEditingCommentId(null);
+                                    setEditingCommentBody('');
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  className="pool-hub-primary"
+                                  onClick={() => handleEditComment(comment.id, editingCommentBody)}
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="pool-hub-comment-body">{comment.body}</div>
+                          )}
+                          {comment.authorId && comment.authorId === userId && editingCommentId !== comment.id && (
                             <div className="pool-hub-comments-actions">
                               <button
                                 type="button"
                                 className="pool-hub-secondary"
                                 onClick={() => {
-                                  setEditingCommentId(null);
-                                  setEditingCommentBody('');
+                                  setEditingCommentId(comment.id);
+                                  setEditingCommentBody(comment.body);
                                 }}
                               >
-                                Cancel
+                                Edit
                               </button>
                               <button
                                 type="button"
-                                className="pool-hub-primary"
-                                onClick={() => handleEditComment(comment.id, editingCommentBody)}
+                                className="pool-hub-secondary"
+                                onClick={() => handleDeleteComment(comment.id)}
                               >
-                                Save
+                                Delete
                               </button>
                             </div>
-                          </>
-                        ) : (
-                          <div className="pool-hub-comment-body">{comment.body}</div>
-                        )}
-                        {comment.authorId && comment.authorId === userId && editingCommentId !== comment.id && (
-                          <div className="pool-hub-comments-actions">
-                            <button
-                              type="button"
-                              className="pool-hub-secondary"
-                              onClick={() => {
-                                setEditingCommentId(comment.id);
-                                setEditingCommentBody(comment.body);
-                              }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="pool-hub-secondary"
-                              onClick={() => handleDeleteComment(comment.id)}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  )}
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
