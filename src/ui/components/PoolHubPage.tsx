@@ -1195,223 +1195,241 @@ export function PoolHubPage({
 
   return (
     <div className="pool-hub-page">
-      <header className="pool-hub-header">
-        <div>
-          <h2>Pool Hub</h2>
-          <p>Community library for browsing, importing, and sharing reusable pools and working sets.</p>
-        </div>
-        {manualUrl && (
-          <a
-            className="pool-hub-manual-link"
-            href={`${manualUrl}#pool-hub`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Community manual
-          </a>
-        )}
-        <div className="pool-hub-header-actions">
-          <div className="pool-hub-mode-toggle">
-            <button
-              type="button"
-              className={hubMode === 'pools' ? 'active' : ''}
-              onClick={() => setHubMode('pools')}
-            >
-              Pools
-            </button>
-            <button
-              type="button"
-              className={hubMode === 'working-sets' ? 'active' : ''}
-              onClick={() => setHubMode('working-sets')}
-            >
-              Working Sets
-            </button>
-          </div>
-          {isLoggedIn && userName && (
-            <div className="pool-hub-user-badge">Logged in as {userName}</div>
-          )}
-          {!isLoggedIn && (
-            <div className="pool-hub-user-badge">Browse mode (log in to participate)</div>
-          )}
-          <div className="pool-hub-user-badge pool-hub-preview-badge">Preview (local only)</div>
-          {isLoggedIn && !isPro && (
-            <div className="pool-hub-user-badge">Upgrade to Pro to upload, rate, or comment</div>
-          )}
-          <button
-            type="button"
-            className="pool-hub-primary"
-            onClick={() => {
-              if (!isLoggedIn) {
-                setAuthNotice(hubMode === 'working-sets' ? 'Log in to upload Working Sets.' : 'Log in to upload pools.');
-                onRequestLogin?.();
-                return;
-              }
-              if (!isPro) {
-                setAuthNotice('Upgrade to Pro to upload Hub content.');
-                return;
-              }
-              setUploadError(null);
-              setUploadSuccess(null);
-              if (hubMode === 'working-sets') {
-                setWorkingSetUploadState({
-                  ...DEFAULT_WS_UPLOAD_STATE,
-                  creator: creatorDisplayName,
-                });
-                setIsWorkingSetUploadOpen(true);
-              } else {
-                setUploadState({
-                  ...DEFAULT_UPLOAD_STATE,
-                  creator: creatorDisplayName,
-                });
-                setIsUploadOpen(true);
-              }
-            }}
-            disabled={!canInteract}
-          >
-            {hubMode === 'working-sets' ? 'Upload Working Set' : 'Upload Pool'}
-          </button>
-        </div>
-      </header>
-
-      {authNotice && <div className="pool-hub-auth-notice">{authNotice}</div>}
-      {uploadSuccess && <div className="pool-hub-message">{uploadSuccess}</div>}
-
-      <div className="pool-hub-toolbar">
-        <input
-          type="text"
-          placeholder={hubMode === 'working-sets' ? 'Search working sets' : 'Search pools'}
-          value={searchTerm}
-          onChange={event => setSearchTerm(event.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Filter by tag"
-          value={tagFilter}
-          onChange={event => setTagFilter(event.target.value)}
-        />
-        <select
-          value={categoryFilter}
-          onChange={event => setCategoryFilter(event.target.value)}
-        >
-          <option value="all">All categories</option>
-          {categories.map(category => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-        <select
-          value={languageFilter}
-          onChange={event => setLanguageFilter(event.target.value)}
-        >
-          <option value="all">All languages</option>
-          {languages.map(language => (
-            <option key={language} value={language}>
-              {language.toUpperCase()}
-            </option>
-          ))}
-        </select>
-        <select value={sortMode} onChange={event => setSortMode(event.target.value as SortMode)}>
-          <option value="trending">Trending</option>
-          <option value="newest">Newest</option>
-          <option value="top">Top Rated</option>
-          <option value="downloads">Most Downloads</option>
-        </select>
-        <label className="pool-hub-range">
-          <span>Min rating</span>
-          <input
-            type="range"
-            min={0}
-            max={5}
-            step={0.5}
-            value={minRating}
-            onChange={event => setMinRating(parseFloat(event.target.value))}
-          />
-          <span>{minRating.toFixed(1)}</span>
-        </label>
-        <label className="pool-hub-toggle">
-          <input
-            type="checkbox"
-            checked={showMyUploads}
-            onChange={event => setShowMyUploads(event.target.checked)}
-            disabled={!userName}
-          />
-          My uploads
-        </label>
-      </div>
-      <div className="pool-hub-profile-panel">
-        <div className="pool-hub-profile-info">
-          <div className="pool-hub-profile-title">Public creator profile</div>
-          <div className="pool-hub-profile-hint">
-            Your public profile appears in Hub user search, even before you publish anything.
-          </div>
-        </div>
-        <div className="pool-hub-profile-actions">
-          {isLoggedIn ? (
-            <>
-              <div className="pool-hub-profile-name">
-                {myProfile?.displayName ?? userName ?? 'Unnamed'}
+      <div className="pool-hub-top">
+        <header className="pool-hub-header">
+          <div className="pool-hub-hero">
+            <div className="pool-hub-hero-main">
+              <div className="pool-hub-mode-toggle">
+                <button
+                  type="button"
+                  className={hubMode === 'pools' ? 'active' : ''}
+                  onClick={() => setHubMode('pools')}
+                >
+                  Pools
+                </button>
+                <button
+                  type="button"
+                  className={hubMode === 'working-sets' ? 'active' : ''}
+                  onClick={() => setHubMode('working-sets')}
+                >
+                  Working Sets
+                </button>
               </div>
+              <div>
+                <h2>Pool Hub</h2>
+                <p>Discover curated MorpBase libraries and community-made downloads in one place.</p>
+              </div>
+              <div className="pool-hub-hero-badges">
+                {isLoggedIn && userName ? (
+                  <div className="pool-hub-user-badge">Logged in as {userName}</div>
+                ) : (
+                  <div className="pool-hub-user-badge">Browse mode</div>
+                )}
+                <div className="pool-hub-user-badge pool-hub-preview-badge">Preview</div>
+                {isLoggedIn && !isPro && (
+                  <div className="pool-hub-user-badge">Upgrade to Pro to upload, rate, or comment</div>
+                )}
+              </div>
+            </div>
+            <div className="pool-hub-hero-side">
+              {manualUrl && (
+                <a
+                  className="pool-hub-manual-link"
+                  href={`${manualUrl}#pool-hub`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Community manual
+                </a>
+              )}
               <button
                 type="button"
-                className="pool-hub-secondary"
-                onClick={handleOpenProfileEditor}
+                className="pool-hub-primary"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    setAuthNotice(hubMode === 'working-sets' ? 'Log in to upload Working Sets.' : 'Log in to upload pools.');
+                    onRequestLogin?.();
+                    return;
+                  }
+                  if (!isPro) {
+                    setAuthNotice('Upgrade to Pro to upload Hub content.');
+                    return;
+                  }
+                  setUploadError(null);
+                  setUploadSuccess(null);
+                  if (hubMode === 'working-sets') {
+                    setWorkingSetUploadState({
+                      ...DEFAULT_WS_UPLOAD_STATE,
+                      creator: creatorDisplayName,
+                    });
+                    setIsWorkingSetUploadOpen(true);
+                  } else {
+                    setUploadState({
+                      ...DEFAULT_UPLOAD_STATE,
+                      creator: creatorDisplayName,
+                    });
+                    setIsUploadOpen(true);
+                  }
+                }}
+                disabled={!canInteract}
               >
-                Edit profile
+                {hubMode === 'working-sets' ? 'Upload Working Set' : 'Upload Pool'}
               </button>
-            </>
-          ) : (
-            <>
-              <div className="pool-hub-profile-name">Log in to create a profile</div>
-              <button type="button" className="pool-hub-secondary" onClick={onRequestLogin}>
-                Log in
-              </button>
-            </>
-          )}
+            </div>
+          </div>
+        </header>
+
+        {authNotice && <div className="pool-hub-auth-notice">{authNotice}</div>}
+        {uploadSuccess && <div className="pool-hub-message">{uploadSuccess}</div>}
+
+        <div className="pool-hub-toolbar-card">
+          <div className="pool-hub-toolbar-header">
+            <div>
+              <div className="pool-hub-section-title">Browse and filter</div>
+              <div className="pool-hub-muted">Search by theme, creator language, rating, and category.</div>
+            </div>
+          </div>
+          <div className="pool-hub-toolbar">
+            <input
+              type="text"
+              placeholder={hubMode === 'working-sets' ? 'Search working sets' : 'Search pools'}
+              value={searchTerm}
+              onChange={event => setSearchTerm(event.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Filter by tag"
+              value={tagFilter}
+              onChange={event => setTagFilter(event.target.value)}
+            />
+            <select
+              value={categoryFilter}
+              onChange={event => setCategoryFilter(event.target.value)}
+            >
+              <option value="all">All categories</option>
+              {categories.map(category => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            <select
+              value={languageFilter}
+              onChange={event => setLanguageFilter(event.target.value)}
+            >
+              <option value="all">All languages</option>
+              {languages.map(language => (
+                <option key={language} value={language}>
+                  {language.toUpperCase()}
+                </option>
+              ))}
+            </select>
+            <select value={sortMode} onChange={event => setSortMode(event.target.value as SortMode)}>
+              <option value="trending">Trending</option>
+              <option value="newest">Newest</option>
+              <option value="top">Top Rated</option>
+              <option value="downloads">Most Downloads</option>
+            </select>
+            <label className="pool-hub-range">
+              <span>Min rating</span>
+              <input
+                type="range"
+                min={0}
+                max={5}
+                step={0.5}
+                value={minRating}
+                onChange={event => setMinRating(parseFloat(event.target.value))}
+              />
+              <span>{minRating.toFixed(1)}</span>
+            </label>
+            <label className="pool-hub-toggle">
+              <input
+                type="checkbox"
+                checked={showMyUploads}
+                onChange={event => setShowMyUploads(event.target.checked)}
+                disabled={!userName}
+              />
+              My uploads
+            </label>
+          </div>
         </div>
-      </div>
-      <div className="pool-hub-creator-search">
-        <label>
-          Search users
-          <input
-            type="text"
-            placeholder="User or creator name"
-            value={creatorSearchTerm}
-            onChange={event => setCreatorSearchTerm(event.target.value)}
-          />
-        </label>
-        {creatorSearchTerm.trim() && (
-          <div className="pool-hub-creator-results">
-            {filteredCreators.length === 0 ? (
-              <div className="pool-hub-empty">No users match that search.</div>
-            ) : (
-              filteredCreators.slice(0, 8).map(profile => (
-                <button
-                  key={profile.id}
-                  type="button"
-                  className="pool-hub-creator-result"
-                  onClick={() => openCreatorProfile(profile.id)}
-                >
-                  <span className="pool-hub-creator-result-name">
-                    {profile.profile?.avatarUrl ? (
-                      <img
-                        src={profile.profile.avatarUrl}
-                        alt={profile.name}
-                        className="pool-hub-creator-avatar"
-                      />
-                    ) : (
-                      <span className="pool-hub-creator-avatar-fallback">
-                        {profile.name.charAt(0).toUpperCase()}
+
+        <div className="pool-hub-support-grid">
+          <div className="pool-hub-profile-panel">
+            <div className="pool-hub-profile-info">
+              <div className="pool-hub-profile-title">Public creator profile</div>
+              <div className="pool-hub-profile-hint">
+                Your public profile appears in Hub user search, even before you publish anything.
+              </div>
+            </div>
+            <div className="pool-hub-profile-actions">
+              {isLoggedIn ? (
+                <>
+                  <div className="pool-hub-profile-name">
+                    {myProfile?.displayName ?? userName ?? 'Unnamed'}
+                  </div>
+                  <button
+                    type="button"
+                    className="pool-hub-secondary"
+                    onClick={handleOpenProfileEditor}
+                  >
+                    Edit profile
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="pool-hub-profile-name">Log in to create a profile</div>
+                  <button type="button" className="pool-hub-secondary" onClick={onRequestLogin}>
+                    Log in
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          <div className="pool-hub-creator-search">
+            <label>
+              Search users
+              <input
+                type="text"
+                placeholder="User or creator name"
+                value={creatorSearchTerm}
+                onChange={event => setCreatorSearchTerm(event.target.value)}
+              />
+            </label>
+            {creatorSearchTerm.trim() && (
+              <div className="pool-hub-creator-results">
+                {filteredCreators.length === 0 ? (
+                  <div className="pool-hub-empty">No users match that search.</div>
+                ) : (
+                  filteredCreators.slice(0, 8).map(profile => (
+                    <button
+                      key={profile.id}
+                      type="button"
+                      className="pool-hub-creator-result"
+                      onClick={() => openCreatorProfile(profile.id)}
+                    >
+                      <span className="pool-hub-creator-result-name">
+                        {profile.profile?.avatarUrl ? (
+                          <img
+                            src={profile.profile.avatarUrl}
+                            alt={profile.name}
+                            className="pool-hub-creator-avatar"
+                          />
+                        ) : (
+                          <span className="pool-hub-creator-avatar-fallback">
+                            {profile.name.charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                        {profile.name}
                       </span>
-                    )}
-                    {profile.name}
-                  </span>
-                  <span>{profile.uploads} uploads</span>
-                </button>
-              ))
+                      <span>{profile.uploads} uploads</span>
+                    </button>
+                  ))
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
 
       <div className="pool-hub-layout">
