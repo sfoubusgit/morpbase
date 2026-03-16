@@ -38,6 +38,7 @@ import { PromptsPage } from './components/PromptsPage';
 import { LandingPage } from './components/LandingPage';
 import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
+import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import {
   changeUserPassword,
@@ -129,13 +130,14 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'working-sets' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'working-sets' | 'admin'>(() => {
     try {
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
       if (saved === 'pool-hub') return 'pool-hub';
       if (saved === 'my-profile') return 'my-profile';
+      if (saved === 'creator-profile') return 'creator-profile';
       if (saved === 'working-sets') return 'working-sets';
       if (saved === 'admin') return 'admin';
       return 'generator';
@@ -255,6 +257,20 @@ export function App() {
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
+  const [selectedCreatorProfileTarget, setSelectedCreatorProfileTarget] = useState<{
+    creatorId?: string | null;
+    creatorName?: string | null;
+  } | null>(null);
+  const handleOpenCreatorProfilePage = useCallback((input: {
+    creatorId?: string | null;
+    creatorName?: string | null;
+  }) => {
+    setSelectedCreatorProfileTarget({
+      creatorId: input.creatorId ?? null,
+      creatorName: input.creatorName ?? null,
+    });
+    setActivePage('creator-profile');
+  }, []);
 
   // UI State: Engine Result
   const [engineResult, setEngineResult] = useState<Prompt | ValidationError | null>(null);
@@ -2004,11 +2020,24 @@ export function App() {
           userName={authUser?.name ?? null}
           onRequestLogin={handleOpenAuth}
         />
+      ) : activePage === 'creator-profile' ? (
+        <PublicCreatorPage
+          creatorId={selectedCreatorProfileTarget?.creatorId ?? null}
+          creatorName={selectedCreatorProfileTarget?.creatorName ?? null}
+          onBack={() => setActivePage('pool-hub')}
+          onOpenPool={(entryId) => {
+            setActivePage('pool-hub');
+            window.setTimeout(() => {
+              window.dispatchEvent(new CustomEvent('morpbase:open-hub-entry', { detail: { entryId } }));
+            }, 0);
+          }}
+        />
       ) : activePage === 'pool-hub' ? (
         <PoolHubPage
           manualUrl={manualUrl}
           onGoToUserPools={() => setActivePage('user-pools')}
           onGoToProfile={() => setActivePage('my-profile')}
+          onOpenCreatorProfile={handleOpenCreatorProfilePage}
           isLoggedIn={authReady && Boolean(authUser)}
           onRequestLogin={handleOpenAuth}
           userName={authUser?.name ?? null}
@@ -2546,4 +2575,3 @@ export function App() {
     </>
   );
 }
-

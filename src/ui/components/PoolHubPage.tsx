@@ -221,6 +221,7 @@ const isOfficialPoolEntry = (entry: { creator?: string; creatorId?: string }) =>
 type PoolHubPageProps = {
   onGoToUserPools?: () => void;
   onGoToProfile?: () => void;
+  onOpenCreatorProfile?: (input: { creatorId?: string | null; creatorName?: string | null }) => void;
   isLoggedIn?: boolean;
   onRequestLogin?: () => void;
   userName?: string | null;
@@ -232,6 +233,7 @@ type PoolHubPageProps = {
 export function PoolHubPage({
   onGoToUserPools,
   onGoToProfile,
+  onOpenCreatorProfile,
   isLoggedIn = false,
   onRequestLogin,
   userName,
@@ -396,6 +398,23 @@ export function PoolHubPage({
     setAddMessage(null);
   }, [entries]);
 
+  useEffect(() => {
+    const handleOpenHubEntry = (event: Event) => {
+      const customEvent = event as CustomEvent<{ entryId?: string }>;
+      const entryId = customEvent.detail?.entryId;
+      if (!entryId) return;
+      const match = entries.find(entry => entry.id === entryId);
+      if (!match) return;
+      setSelectedId(entryId);
+      setIsDetailOpen(true);
+    };
+
+    window.addEventListener('morpbase:open-hub-entry', handleOpenHubEntry as EventListener);
+    return () => {
+      window.removeEventListener('morpbase:open-hub-entry', handleOpenHubEntry as EventListener);
+    };
+  }, [entries]);
+
   const categories = useMemo(() => {
     const source = entries;
     return Array.from(new Set(source.map(entry => entry.category))).sort();
@@ -488,6 +507,15 @@ export function PoolHubPage({
   }, [creatorProfiles, selectedCreatorId]);
 
   const openCreatorProfile = (creatorId: string) => {
+    const target = creatorProfiles.find(profile => profile.id === creatorId) ?? null;
+    if (!target) return;
+    if (onOpenCreatorProfile) {
+      onOpenCreatorProfile({
+        creatorId: target.userId ?? null,
+        creatorName: target.name,
+      });
+      return;
+    }
     setSelectedCreatorId(creatorId);
     setIsCreatorProfileOpen(true);
   };

@@ -167,6 +167,22 @@ const saveStore = (store: PoolHubStore) => {
 
 export const listHubEntries = (): PoolHubEntry[] => loadStore().entries;
 
+export const listHubEntriesByCreator = (input: {
+  creatorId?: string | null;
+  creatorName?: string | null;
+}): PoolHubEntry[] => {
+  const creatorId = input.creatorId?.trim();
+  const creatorName = input.creatorName?.trim().toLowerCase();
+  return loadStore()
+    .entries
+    .filter(entry => {
+      if (creatorId && entry.creatorId === creatorId) return true;
+      if (creatorName && entry.creator?.trim().toLowerCase() === creatorName) return true;
+      return false;
+    })
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+};
+
 export const addHubEntry = (entry: PoolHubEntry) => {
   const store = loadStore();
   store.entries = [entry, ...store.entries];
