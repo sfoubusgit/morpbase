@@ -43,15 +43,10 @@ export function PromptsPage({
 
       <div className="prompts-layout">
         <section className="prompts-panel prompts-panel-main">
-          <div className="prompts-library-card">
-            <div className="prompts-library-intro">
-              <div>
-                <h3>Saved Prompt Library</h3>
-                <p>Keep finished prompts organized, searchable, and easy to reuse without leaving MorpBase.</p>
-              </div>
-              <div className="prompts-library-note">
-                Use tags to group prompt styles, then export or import your library when you want backups or reuse.
-              </div>
+          <div className="prompts-library-card prompts-library-card-simple">
+            <div className="prompts-library-intro prompts-library-intro-simple">
+              <h3>Saved Prompt Library</h3>
+              <p>Keep finished prompts organized, searchable, and easy to reuse without leaving MorpBase.</p>
             </div>
           </div>
           <PromptLibrary
