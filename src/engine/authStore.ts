@@ -39,6 +39,10 @@ const ensurePublicProfile = async (profile: ProfileRow): Promise<void> => {
     .insert({
       user_id: profile.id,
       display_name: profile.display_name,
+      show_public_prompts: false,
+      show_public_pools: false,
+      discoverable_in_search: true,
+      show_links_publicly: true,
     });
 
   if (insertError) {

@@ -8,9 +8,13 @@ const toPublicProfile = (row: any): PublicProfile => ({
   displayName: row.display_name,
   bio: row.bio ?? null,
   avatarUrl: row.avatar_url ?? null,
+  avatarStoragePath: row.avatar_storage_path ?? null,
   links: row.links ?? null,
   tags: row.tags ?? null,
   showPublicPrompts: row.show_public_prompts ?? null,
+  showPublicPools: row.show_public_pools ?? null,
+  discoverableInSearch: row.discoverable_in_search ?? null,
+  showLinksPublicly: row.show_links_publicly ?? null,
   createdAt: new Date(row.created_at).getTime(),
   updatedAt: new Date(row.updated_at).getTime(),
 });
@@ -36,13 +40,56 @@ export const getMyPublicProfile = async (): Promise<PublicProfile | null> => {
   return data ? toPublicProfile(data) : null;
 };
 
+export const getPublicProfileByUserId = async (userId: string): Promise<PublicProfile | null> => {
+  const { data, error } = await supabase
+    .from('public_profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? toPublicProfile(data) : null;
+};
+
+export const searchPublicProfiles = async (input: {
+  query?: string;
+  tags?: string[];
+  discoverableOnly?: boolean;
+} = {}): Promise<PublicProfile[]> => {
+  let query = supabase
+    .from('public_profiles')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (input.discoverableOnly !== false) {
+    query = query.eq('discoverable_in_search', true);
+  }
+
+  const normalizedQuery = input.query?.trim();
+  if (normalizedQuery) {
+    query = query.or(`display_name.ilike.%${normalizedQuery}%,bio.ilike.%${normalizedQuery}%`);
+  }
+
+  const normalizedTags = input.tags?.map(tag => tag.trim()).filter(Boolean) ?? [];
+  if (normalizedTags.length > 0) {
+    query = query.overlaps('tags', normalizedTags);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []).map(toPublicProfile);
+};
+
 export const upsertMyPublicProfile = async (input: {
   displayName: string;
   bio?: string | null;
   avatarUrl?: string | null;
+  avatarStoragePath?: string | null;
   links?: Record<string, string> | null;
   tags?: string[] | null;
   showPublicPrompts?: boolean | null;
+  showPublicPools?: boolean | null;
+  discoverableInSearch?: boolean | null;
+  showLinksPublicly?: boolean | null;
 }): Promise<PublicProfile> => {
   const profile = await getProfile();
   if (!profile) throw new Error('You must be logged in.');
@@ -51,9 +98,13 @@ export const upsertMyPublicProfile = async (input: {
     display_name: input.displayName.trim(),
     bio: input.bio?.trim() || null,
     avatar_url: input.avatarUrl?.trim() || null,
+    avatar_storage_path: input.avatarStoragePath?.trim() || null,
     links: input.links ?? null,
     tags: input.tags ?? null,
     show_public_prompts: input.showPublicPrompts ?? null,
+    show_public_pools: input.showPublicPools ?? null,
+    discoverable_in_search: input.discoverableInSearch ?? null,
+    show_links_publicly: input.showLinksPublicly ?? null,
   };
   const { data, error } = await supabase
     .from('public_profiles')
