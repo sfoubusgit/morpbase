@@ -9,6 +9,9 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+  max-width: 1180px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .prompts-header h2 {
