@@ -40,7 +40,6 @@ import {
 import {
   getMyPublicProfile,
   listPublicProfiles,
-  upsertMyPublicProfile,
 } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { Modal } from './Modal';
@@ -214,28 +213,6 @@ const parseWorkingSetPayload = (raw: string, fallbackName: string): WorkingSet =
   };
 };
 
-const profileLinksToText = (links?: Record<string, string> | null) => {
-  if (!links) return '';
-  return Object.entries(links)
-    .map(([label, url]) => `${label}: ${url}`)
-    .join('\n');
-};
-
-const parseProfileLinks = (raw: string) => {
-  const lines = raw.split('\n').map(line => line.trim()).filter(Boolean);
-  if (lines.length === 0) return null;
-  const links: Record<string, string> = {};
-  lines.forEach((line, index) => {
-    const parts = line.split(':');
-    if (parts.length < 2) return;
-    const label = parts.shift()?.trim();
-    const url = parts.join(':').trim();
-    if (!label || !url) return;
-    links[label || `Link ${index + 1}`] = url;
-  });
-  return Object.keys(links).length > 0 ? links : null;
-};
-
 const isOfficialPoolEntry = (entry: { creator?: string; creatorId?: string }) => {
   const creatorName = entry.creator?.trim().toLowerCase() ?? '';
   return entry.creatorId === 'morpbase-official' || OFFICIAL_CREATOR_NAMES.has(creatorName);
@@ -243,6 +220,7 @@ const isOfficialPoolEntry = (entry: { creator?: string; creatorId?: string }) =>
 
 type PoolHubPageProps = {
   onGoToUserPools?: () => void;
+  onGoToProfile?: () => void;
   isLoggedIn?: boolean;
   onRequestLogin?: () => void;
   userName?: string | null;
@@ -253,6 +231,7 @@ type PoolHubPageProps = {
 
 export function PoolHubPage({
   onGoToUserPools,
+  onGoToProfile,
   isLoggedIn = false,
   onRequestLogin,
   userName,
@@ -313,17 +292,6 @@ export function PoolHubPage({
   const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const [publicProfiles, setPublicProfiles] = useState<PublicProfile[]>([]);
   const [myProfile, setMyProfile] = useState<PublicProfile | null>(null);
-  const [isProfileEditorOpen, setIsProfileEditorOpen] = useState(false);
-  const [profileForm, setProfileForm] = useState({
-    displayName: '',
-    bio: '',
-    avatarUrl: '',
-    tags: '',
-    links: '',
-    showPublicPrompts: false,
-  });
-  const [profileMessage, setProfileMessage] = useState<string | null>(null);
-  const [profileError, setProfileError] = useState<string | null>(null);
   const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
   const [publicPromptsLoading, setPublicPromptsLoading] = useState(false);
   const [publicPromptsError, setPublicPromptsError] = useState<string | null>(null);
@@ -348,9 +316,7 @@ export function PoolHubPage({
           setPublicProfiles(profiles);
         }
       } catch {
-        if (isActive) {
-          setProfileError('Failed to load public profiles.');
-        }
+        // keep creator browse usable even if profiles fail
       }
     };
     loadProfiles();
@@ -374,9 +340,7 @@ export function PoolHubPage({
           setMyProfile(profile);
         }
       } catch {
-        if (isActive) {
-          setProfileError('Failed to load your public profile.');
-        }
+        // keep hub usable even if own public profile fails
       }
     };
     loadMyProfile();
@@ -422,17 +386,7 @@ export function PoolHubPage({
       onRequestLogin?.();
       return;
     }
-    setProfileError(null);
-    setProfileMessage(null);
-    setProfileForm({
-      displayName: myProfile?.displayName ?? userName ?? '',
-      bio: myProfile?.bio ?? '',
-      avatarUrl: myProfile?.avatarUrl ?? '',
-      tags: myProfile?.tags?.join(', ') ?? '',
-      links: profileLinksToText(myProfile?.links),
-      showPublicPrompts: Boolean(myProfile?.showPublicPrompts),
-    });
-    setIsProfileEditorOpen(true);
+    onGoToProfile?.();
   };
 
   useEffect(() => {
@@ -666,43 +620,6 @@ export function PoolHubPage({
     setCommentError(null);
     setCommentBody('');
   }, [selectedEntry?.id, userId, entries]);
-
-  const handleSaveProfile = async () => {
-    if (!isLoggedIn) {
-      setProfileError('Log in to save your profile.');
-      return;
-    }
-    const displayName = profileForm.displayName.trim();
-    if (!displayName) {
-      setProfileError('Display name is required.');
-      return;
-    }
-    try {
-      const tags = profileForm.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(Boolean);
-      const links = parseProfileLinks(profileForm.links);
-      const saved = await upsertMyPublicProfile({
-        displayName,
-        bio: profileForm.bio.trim() || null,
-        avatarUrl: profileForm.avatarUrl.trim() || null,
-        tags: tags.length > 0 ? tags : null,
-        links,
-        showPublicPrompts: profileForm.showPublicPrompts,
-      });
-      setMyProfile(saved);
-      setPublicProfiles(prev => {
-        const next = prev.filter(profile => profile.userId !== saved.userId);
-        return [saved, ...next];
-      });
-      setProfileMessage('Profile updated.');
-      setProfileError(null);
-      setIsProfileEditorOpen(false);
-    } catch (err: any) {
-      setProfileError(err?.message ?? 'Failed to save profile.');
-    }
-  };
 
   const handleAddToActive = async () => {
     if (!isLoggedIn) {
@@ -2227,78 +2144,6 @@ export function PoolHubPage({
           {adminError && <div className="pool-hub-error">{adminError}</div>}
         </div>
       </details>
-      <Modal
-        isOpen={isProfileEditorOpen}
-        onClose={() => setIsProfileEditorOpen(false)}
-        title="Public Creator Profile"
-        className="pool-hub-profile-modal"
-      >
-        <div className="pool-hub-profile-form">
-          <label>
-            Display name
-            <input
-              type="text"
-              value={profileForm.displayName}
-              onChange={event => setProfileForm(prev => ({ ...prev, displayName: event.target.value }))}
-              placeholder="Studio or creator name"
-            />
-          </label>
-          <label>
-            Bio
-            <textarea
-              rows={3}
-              value={profileForm.bio}
-              onChange={event => setProfileForm(prev => ({ ...prev, bio: event.target.value }))}
-              placeholder="What do you create?"
-            />
-          </label>
-          <label>
-            Avatar URL
-            <input
-              type="text"
-              value={profileForm.avatarUrl}
-              onChange={event => setProfileForm(prev => ({ ...prev, avatarUrl: event.target.value }))}
-              placeholder="https://..."
-            />
-          </label>
-          <label>
-            Tags (comma)
-            <input
-              type="text"
-              value={profileForm.tags}
-              onChange={event => setProfileForm(prev => ({ ...prev, tags: event.target.value }))}
-              placeholder="cinematic, portrait, VFX"
-            />
-          </label>
-          <label>
-            Links (one per line)
-            <textarea
-              rows={3}
-              value={profileForm.links}
-              onChange={event => setProfileForm(prev => ({ ...prev, links: event.target.value }))}
-              placeholder="Portfolio: https://...&#10;Twitter: https://..."
-            />
-          </label>
-          <label className="pool-hub-toggle">
-            <input
-              type="checkbox"
-              checked={profileForm.showPublicPrompts}
-              onChange={event => setProfileForm(prev => ({ ...prev, showPublicPrompts: event.target.checked }))}
-            />
-            Show my cloud prompts publicly
-          </label>
-          {profileError && <div className="pool-hub-error">{profileError}</div>}
-          {profileMessage && <div className="pool-hub-message">{profileMessage}</div>}
-          <div className="pool-hub-upload-actions">
-            <button type="button" className="pool-hub-secondary" onClick={() => setIsProfileEditorOpen(false)}>
-              Cancel
-            </button>
-            <button type="button" className="pool-hub-primary" onClick={handleSaveProfile}>
-              Save profile
-            </button>
-          </div>
-        </div>
-      </Modal>
       <Modal
         isOpen={isCreatorProfileOpen}
         onClose={() => setIsCreatorProfileOpen(false)}

@@ -37,6 +37,7 @@ import { WorkingSetsPage } from './components/WorkingSetsPage';
 import { PromptsPage } from './components/PromptsPage';
 import { LandingPage } from './components/LandingPage';
 import { AdminPage } from './components/AdminPage';
+import { MyProfilePage } from './components/MyProfilePage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import {
   changeUserPassword,
@@ -128,12 +129,13 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'working-sets' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'working-sets' | 'admin'>(() => {
     try {
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
       if (saved === 'pool-hub') return 'pool-hub';
+      if (saved === 'my-profile') return 'my-profile';
       if (saved === 'working-sets') return 'working-sets';
       if (saved === 'admin') return 'admin';
       return 'generator';
@@ -1936,6 +1938,15 @@ export function App() {
           </button>
           <button
             type="button"
+            className={`app-page-toggle-btn ${activePage === 'my-profile' ? 'active' : ''}`}
+            onClick={() => setActivePage('my-profile')}
+            role="tab"
+            aria-selected={activePage === 'my-profile'}
+          >
+            My Profile
+          </button>
+          <button
+            type="button"
             className={`app-page-toggle-btn ${activePage === 'pool-hub' ? 'active' : ''}`}
             onClick={() => setActivePage('pool-hub')}
             role="tab"
@@ -1987,10 +1998,17 @@ export function App() {
           onDeactivateTerritory={() => handleSetActiveTerritory(null)}
           onTerritoryEditTargetHandled={() => setTerritoryEditTargetId(null)}
         />
+      ) : activePage === 'my-profile' ? (
+        <MyProfilePage
+          isLoggedIn={authReady && Boolean(authUser)}
+          userName={authUser?.name ?? null}
+          onRequestLogin={handleOpenAuth}
+        />
       ) : activePage === 'pool-hub' ? (
         <PoolHubPage
           manualUrl={manualUrl}
           onGoToUserPools={() => setActivePage('user-pools')}
+          onGoToProfile={() => setActivePage('my-profile')}
           isLoggedIn={authReady && Boolean(authUser)}
           onRequestLogin={handleOpenAuth}
           userName={authUser?.name ?? null}
