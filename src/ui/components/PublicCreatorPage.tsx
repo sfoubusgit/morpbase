@@ -111,6 +111,52 @@ export function PublicCreatorPage({
     () => getCreatorSummaryFromPoolEntries(visiblePools, publicPrompts.length),
     [visiblePools, publicPrompts.length]
   );
+  const profileStateItems = useMemo(() => {
+    return [
+      {
+        label: 'Bio',
+        state: profile?.bio?.trim() ? 'complete' : 'missing',
+        detail: profile?.bio?.trim()
+          ? 'Creator added a public bio.'
+          : 'No public bio yet.',
+      },
+      {
+        label: 'Links',
+        state: profile?.showLinksPublicly && profile?.links && Object.keys(profile.links).length > 0 ? 'complete' : 'hidden',
+        detail: profile?.showLinksPublicly
+          ? (profile?.links && Object.keys(profile.links).length > 0 ? 'Public links are visible.' : 'No public links yet.')
+          : 'Links are hidden on this page.',
+      },
+      {
+        label: 'Pools',
+        state: profile?.showPublicPools ? (creatorSummary.uploads > 0 ? 'complete' : 'empty') : 'hidden',
+        detail: profile?.showPublicPools
+          ? (creatorSummary.uploads > 0 ? 'Public pools are visible.' : 'No public pools published yet.')
+          : 'Pools are hidden on this page.',
+      },
+      {
+        label: 'Prompts',
+        state: profile?.showPublicPrompts ? (creatorSummary.promptCount > 0 ? 'complete' : 'empty') : 'hidden',
+        detail: profile?.showPublicPrompts
+          ? (creatorSummary.promptCount > 0 ? 'Public prompts are visible.' : 'No public prompts published yet.')
+          : 'Prompts are hidden on this page.',
+      },
+    ];
+  }, [profile, creatorSummary]);
+  const profileStateSummary = useMemo(() => {
+    const visibleCount = profileStateItems.filter(item => item.state === 'complete').length;
+    const hiddenCount = profileStateItems.filter(item => item.state === 'hidden').length;
+    if (visibleCount === 0 && hiddenCount >= 2) {
+      return 'This creator is keeping most public profile sections private right now.';
+    }
+    if (visibleCount === 0) {
+      return 'This creator has only partially set up their public profile so far.';
+    }
+    if (visibleCount >= 3) {
+      return 'This creator has a strong public profile presence on MorpBase.';
+    }
+    return 'This public creator page is partially filled out and still growing.';
+  }, [profileStateItems]);
   const shareUrl = useMemo(() => {
     const params = new URLSearchParams();
     if (creatorId) params.set('user', creatorId);
@@ -198,6 +244,26 @@ export function PublicCreatorPage({
       {profileError && <div className="public-creator-callout public-creator-error">{profileError}</div>}
 
       <div className="public-creator-layout">
+        <section className="public-creator-section public-creator-section-overview">
+          <div className="public-creator-section-head">
+            <h2>Profile State</h2>
+            <p>{profileStateSummary}</p>
+          </div>
+          <div className="public-creator-state-grid">
+            {profileStateItems.map(item => (
+              <div key={item.label} className={`public-creator-state-card state-${item.state}`}>
+                <div className="public-creator-state-top">
+                  <span className="public-creator-state-label">{item.label}</span>
+                  <span className="public-creator-state-badge">
+                    {item.state === 'complete' ? 'Visible' : item.state === 'hidden' ? 'Hidden' : 'Empty'}
+                  </span>
+                </div>
+                <div className="public-creator-state-detail">{item.detail}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         <section className="public-creator-section">
           <div className="public-creator-section-head">
             <h2>Public Pools</h2>

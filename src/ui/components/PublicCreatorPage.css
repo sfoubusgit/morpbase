@@ -163,6 +163,12 @@
   padding: 1.2rem;
 }
 
+.public-creator-section-overview {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.02)),
+    rgba(18, 18, 29, 0.92);
+}
+
 .public-creator-section-head h2 {
   margin: 0;
   font-size: 1.05rem;
@@ -171,6 +177,57 @@
 .public-creator-section-head p {
   margin: 0.35rem 0 1rem;
   color: rgba(227, 224, 255, 0.66);
+}
+
+.public-creator-state-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.8rem;
+}
+
+.public-creator-state-card {
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.public-creator-state-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.55rem;
+}
+
+.public-creator-state-label {
+  font-weight: 700;
+}
+
+.public-creator-state-badge {
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 0.75rem;
+  color: rgba(237, 235, 255, 0.82);
+}
+
+.public-creator-state-detail {
+  color: rgba(227, 224, 255, 0.66);
+  font-size: 0.83rem;
+  line-height: 1.4;
+}
+
+.public-creator-state-card.state-complete {
+  border-color: rgba(118, 255, 201, 0.18);
+}
+
+.public-creator-state-card.state-hidden {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.public-creator-state-card.state-empty {
+  border-color: rgba(143, 130, 255, 0.16);
 }
 
 .public-creator-empty {
