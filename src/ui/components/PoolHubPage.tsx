@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile } from '../../types';
+import type { CreatorStats, Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile } from '../../types';
 import {
   addHubEntry,
   addHubComment,
@@ -41,7 +41,8 @@ import {
   getMyPublicProfile,
   listPublicProfiles,
 } from '../../engine/profileStore';
-import { getCreatorSummaryFromPoolEntries } from '../../engine/creatorSummary';
+import { listCreatorStatsByUserIds } from '../../engine/creatorStatsStore';
+import { getCreatorSummaryFromPoolEntries, mergeCreatorSummaryWithStats } from '../../engine/creatorSummary';
 import { Modal } from './Modal';
 import './PoolHubPage.css';
 
@@ -292,6 +293,7 @@ export function PoolHubPage({
   const [creatorSearchTerm, setCreatorSearchTerm] = useState('');
   const [publicProfiles, setPublicProfiles] = useState<PublicProfile[]>([]);
   const [myProfile, setMyProfile] = useState<PublicProfile | null>(null);
+  const [creatorStatsByUserId, setCreatorStatsByUserId] = useState<Record<string, CreatorStats>>({});
 
   const refreshUserPools = async () => {
     try {
@@ -321,6 +323,39 @@ export function PoolHubPage({
       isActive = false;
     };
   }, [isLoggedIn]);
+
+  useEffect(() => {
+    let isActive = true;
+    const creatorUserIds = [...new Set(publicProfiles.map(profile => profile.userId).filter(Boolean))];
+    if (creatorUserIds.length === 0) {
+      setCreatorStatsByUserId({});
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const loadCreatorStats = async () => {
+      try {
+        const stats = await listCreatorStatsByUserIds(creatorUserIds);
+        if (!isActive) return;
+        setCreatorStatsByUserId(
+          stats.reduce<Record<string, CreatorStats>>((acc, item) => {
+            acc[item.userId] = item;
+            return acc;
+          }, {})
+        );
+      } catch {
+        if (isActive) {
+          setCreatorStatsByUserId({});
+        }
+      }
+    };
+
+    void loadCreatorStats();
+    return () => {
+      isActive = false;
+    };
+  }, [publicProfiles]);
 
   useEffect(() => {
     let isActive = true;
@@ -482,10 +517,14 @@ export function PoolHubPage({
       entry.tags.forEach(tag => {
         next.tags[tag] = (next.tags[tag] ?? 0) + 1;
       });
-      const summary = getCreatorSummaryFromPoolEntries(next.entries, next.promptCount);
+      const summary = mergeCreatorSummaryWithStats(
+        getCreatorSummaryFromPoolEntries(next.entries, next.promptCount),
+        next.userId ? creatorStatsByUserId[next.userId] : null
+      );
       next.uploads = summary.uploads;
       next.totalDownloads = summary.totalDownloads;
       next.avgRating = summary.avgRating;
+      next.promptCount = summary.promptCount;
       next.topTags = summary.topTags;
       profiles.set(id, next);
     });
@@ -494,7 +533,7 @@ export function PoolHubPage({
       if (b.uploads !== a.uploads) return b.uploads - a.uploads;
       return a.name.localeCompare(b.name);
     });
-  }, [entries, publicProfiles, publicProfileByUserId, publicProfileByName]);
+  }, [entries, publicProfiles, publicProfileByUserId, publicProfileByName, creatorStatsByUserId]);
 
   const filteredCreators = useMemo(() => {
     const term = creatorSearchTerm.trim().toLowerCase();

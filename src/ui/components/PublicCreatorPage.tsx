@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { PoolHubEntry, PublicProfile, SavedPrompt } from '../../types';
+import type { CreatorStats, PoolHubEntry, PublicProfile, SavedPrompt } from '../../types';
 import { getPublicProfileByUserId } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { listHubEntriesByCreator } from '../../engine/poolHubStore';
-import { getCreatorSummaryFromPoolEntries } from '../../engine/creatorSummary';
+import { getCreatorStatsByUserId } from '../../engine/creatorStatsStore';
+import { getCreatorSummaryFromPoolEntries, mergeCreatorSummaryWithStats } from '../../engine/creatorSummary';
 import './PublicCreatorPage.css';
 
 type PublicCreatorPageProps = {
@@ -25,6 +26,7 @@ export function PublicCreatorPage({
   const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
   const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [promptsError, setPromptsError] = useState<string | null>(null);
+  const [creatorStats, setCreatorStats] = useState<CreatorStats | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const publicPools = useMemo(
@@ -62,6 +64,34 @@ export function PublicCreatorPage({
     };
 
     void loadProfile();
+    return () => {
+      isActive = false;
+    };
+  }, [creatorId]);
+
+  useEffect(() => {
+    let isActive = true;
+    if (!creatorId) {
+      setCreatorStats(null);
+      return () => {
+        isActive = false;
+      };
+    }
+
+    const loadStats = async () => {
+      try {
+        const stats = await getCreatorStatsByUserId(creatorId);
+        if (isActive) {
+          setCreatorStats(stats);
+        }
+      } catch {
+        if (isActive) {
+          setCreatorStats(null);
+        }
+      }
+    };
+
+    void loadStats();
     return () => {
       isActive = false;
     };
@@ -108,8 +138,11 @@ export function PublicCreatorPage({
       ? (profile.showPublicPools ? publicPools : [])
       : publicPools;
   const creatorSummary = useMemo(
-    () => getCreatorSummaryFromPoolEntries(visiblePools, publicPrompts.length),
-    [visiblePools, publicPrompts.length]
+    () => mergeCreatorSummaryWithStats(
+      getCreatorSummaryFromPoolEntries(visiblePools, publicPrompts.length),
+      creatorStats
+    ),
+    [visiblePools, publicPrompts.length, creatorStats]
   );
   const profileStateItems = useMemo(() => {
     return [

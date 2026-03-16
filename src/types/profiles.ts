@@ -22,3 +22,13 @@ export type CreatorSummary = {
   promptCount: number;
   topTags: string[];
 };
+
+export type CreatorStats = {
+  userId: string;
+  publicPoolCount: number;
+  publicPromptCount: number;
+  totalDownloads: number;
+  avgRating: number;
+  ratingCount: number;
+  updatedAt: number;
+};

@@ -1,4 +1,4 @@
-import type { CreatorSummary, PoolHubEntry } from '../types';
+import type { CreatorStats, CreatorSummary, PoolHubEntry } from '../types';
 
 const EMPTY_SUMMARY: CreatorSummary = {
   uploads: 0,
@@ -42,5 +42,20 @@ export const getCreatorSummaryFromPoolEntries = (
     avgRating: totalRating / entries.length,
     promptCount,
     topTags,
+  };
+};
+
+export const mergeCreatorSummaryWithStats = (
+  summary: CreatorSummary,
+  stats?: CreatorStats | null
+): CreatorSummary => {
+  if (!stats) return summary;
+
+  return {
+    uploads: stats.publicPoolCount,
+    totalDownloads: stats.totalDownloads,
+    avgRating: stats.avgRating,
+    promptCount: stats.publicPromptCount,
+    topTags: summary.topTags,
   };
 };
