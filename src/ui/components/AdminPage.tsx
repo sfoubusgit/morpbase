@@ -5,6 +5,16 @@ import {
   createMissingPublicProfile,
   listAdminUsers,
 } from '../../engine/adminStore';
+import {
+  getAdminAnalyticsSummary,
+  listAdminAnalyticsPageBreakdown,
+  listAdminRecentAnalyticsEvents,
+} from '../../engine/adminAnalyticsStore';
+import type {
+  AdminAnalyticsPageStat,
+  AdminAnalyticsRecentEvent,
+  AdminAnalyticsSummary,
+} from '../../types';
 import './AdminPage.css';
 
 type AdminPageProps = {
@@ -14,11 +24,18 @@ type AdminPageProps = {
 const formatDate = (timestamp: number) =>
   new Date(timestamp).toLocaleDateString();
 
+const formatDateTime = (timestamp: number) =>
+  new Date(timestamp).toLocaleString();
+
 export function AdminPage({ userName }: AdminPageProps) {
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
+  const [analyticsSummary, setAnalyticsSummary] = useState<AdminAnalyticsSummary | null>(null);
+  const [analyticsPageBreakdown, setAnalyticsPageBreakdown] = useState<AdminAnalyticsPageStat[]>([]);
+  const [recentEvents, setRecentEvents] = useState<AdminAnalyticsRecentEvent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -39,6 +56,29 @@ export function AdminPage({ userName }: AdminPageProps) {
 
   useEffect(() => {
     refreshUsers();
+  }, []);
+
+  const refreshAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const [summary, pageBreakdown, events] = await Promise.all([
+        getAdminAnalyticsSummary(),
+        listAdminAnalyticsPageBreakdown(),
+        listAdminRecentAnalyticsEvents(),
+      ]);
+      setAnalyticsSummary(summary);
+      setAnalyticsPageBreakdown(pageBreakdown);
+      setRecentEvents(events);
+      setError(null);
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to load analytics.');
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshAnalytics();
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -135,6 +175,9 @@ export function AdminPage({ userName }: AdminPageProps) {
         <button type="button" className="admin-secondary" onClick={refreshUsers} disabled={loading}>
           {loading ? 'Refreshing...' : 'Refresh Users'}
         </button>
+        <button type="button" className="admin-secondary" onClick={refreshAnalytics} disabled={analyticsLoading}>
+          {analyticsLoading ? 'Refreshing analytics...' : 'Refresh Analytics'}
+        </button>
       </div>
 
       {message && <div className="admin-message">{message}</div>}
@@ -230,6 +273,117 @@ export function AdminPage({ userName }: AdminPageProps) {
           )}
         </section>
       </div>
+
+      <section className="admin-analytics">
+        <div className="admin-panel-header">
+          <h2>Analytics</h2>
+          <span className="admin-analytics-meta">Internal, Google-free event tracking</span>
+        </div>
+        <div className="admin-analytics-grid">
+          <div className="admin-panel admin-analytics-summary-panel">
+            <div className="admin-panel-header">
+              <h3>Usage Summary</h3>
+            </div>
+            {analyticsLoading || !analyticsSummary ? (
+              <div className="admin-empty">Loading analytics...</div>
+            ) : (
+              <div className="admin-summary-grid admin-summary-grid-analytics">
+                <div className="admin-summary-card">
+                  <span>Total events</span>
+                  <strong>{analyticsSummary.totalEvents}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Unique sessions</span>
+                  <strong>{analyticsSummary.uniqueSessions}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Identified users</span>
+                  <strong>{analyticsSummary.identifiedUsers}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Last 24h</span>
+                  <strong>{analyticsSummary.last24hEvents}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Page views</span>
+                  <strong>{analyticsSummary.pageViews}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Prompt saves</span>
+                  <strong>{analyticsSummary.promptSaves}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Territory activations</span>
+                  <strong>{analyticsSummary.territoryActivations}</strong>
+                </div>
+                <div className="admin-summary-card">
+                  <span>Pool opens</span>
+                  <strong>{analyticsSummary.poolOpens}</strong>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="admin-panel admin-analytics-breakdown-panel">
+            <div className="admin-panel-header">
+              <h3>Top Pages</h3>
+            </div>
+            {analyticsLoading ? (
+              <div className="admin-empty">Loading page breakdown...</div>
+            ) : analyticsPageBreakdown.length === 0 ? (
+              <div className="admin-empty">No analytics page data yet.</div>
+            ) : (
+              <div className="admin-analytics-page-list">
+                {analyticsPageBreakdown.map(entry => (
+                  <div key={entry.pageKey} className="admin-analytics-page-row">
+                    <span>{entry.pageKey}</span>
+                    <strong>{entry.eventCount}</strong>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="admin-panel admin-analytics-events-panel">
+          <div className="admin-panel-header">
+            <h3>Recent Events</h3>
+          </div>
+          {analyticsLoading ? (
+            <div className="admin-empty">Loading recent events...</div>
+          ) : recentEvents.length === 0 ? (
+            <div className="admin-empty">No analytics events yet.</div>
+          ) : (
+            <div className="admin-analytics-event-list">
+              {recentEvents.map(event => (
+                <div key={event.id} className="admin-analytics-event-card">
+                  <div className="admin-analytics-event-top">
+                    <div>
+                      <div className="admin-analytics-event-type">{event.eventType}</div>
+                      <div className="admin-analytics-event-meta">
+                        {event.pageKey ?? 'unknown'} {event.path ? `• ${event.path}` : ''}
+                      </div>
+                    </div>
+                    <div className="admin-analytics-event-time">
+                      {formatDateTime(event.createdAt)}
+                    </div>
+                  </div>
+                  <div className="admin-analytics-event-details">
+                    <span>User: {event.userId ?? 'anonymous'}</span>
+                    <span>Session: {event.sessionId.slice(0, 12)}...</span>
+                    <span>Referrer: {event.referrerHost ?? 'direct'}</span>
+                  </div>
+                  {event.metadata && Object.keys(event.metadata).length > 0 && (
+                    <pre className="admin-analytics-event-payload">
+                      {JSON.stringify(event.metadata, null, 2)}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }
