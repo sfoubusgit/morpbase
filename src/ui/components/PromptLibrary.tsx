@@ -7,6 +7,7 @@ import {
   importPromptsPayload,
   listPrompts,
 } from '../../engine/promptStore';
+import { trackAnalyticsEvent } from '../../engine/analyticsStore';
 import { Modal } from './Modal';
 import './PromptLibrary.css';
 
@@ -155,6 +156,18 @@ export function PromptLibrary({
       setNote('');
       setIsSaveModalOpen(false);
       await refresh();
+      void trackAnalyticsEvent({
+        eventType: 'prompt_save',
+        pageKey: 'generator',
+        userId: authUser.id,
+        metadata: {
+          storage: 'cloud',
+          tagCount: parseTags(tags).length,
+          hasNegative: Boolean(currentText.negative?.trim()),
+          hasModel: Boolean(model.trim()),
+          hasPurpose: Boolean(purpose.trim()),
+        },
+      });
       setMessage('Saved to cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
@@ -197,6 +210,18 @@ export function PromptLibrary({
     setPurpose('');
     setNote('');
     setIsSaveModalOpen(false);
+    void trackAnalyticsEvent({
+      eventType: 'prompt_save',
+      pageKey: 'generator',
+      userId: authUser?.id ?? null,
+      metadata: {
+        storage: 'local',
+        tagCount: parseTags(tags).length,
+        hasNegative: Boolean(currentText.negative?.trim()),
+        hasModel: Boolean(model.trim()),
+        hasPurpose: Boolean(purpose.trim()),
+      },
+    });
     setMessage('Saved locally.');
   };
 
@@ -224,6 +249,19 @@ export function PromptLibrary({
         note: prompt.note,
       });
       await refresh();
+      void trackAnalyticsEvent({
+        eventType: 'prompt_save',
+        pageKey: 'generator',
+        userId: authUser.id,
+        metadata: {
+          storage: 'cloud_from_local',
+          sourcePromptId: prompt.id,
+          tagCount: prompt.tags?.length ?? 0,
+          hasNegative: Boolean(prompt.negative?.trim()),
+          hasModel: Boolean(prompt.model?.trim()),
+          hasPurpose: Boolean(prompt.purpose?.trim()),
+        },
+      });
       setMessage('Saved to cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');

@@ -43,6 +43,7 @@ import {
 } from '../../engine/profileStore';
 import { listCreatorStatsByUserIds } from '../../engine/creatorStatsStore';
 import { getCreatorSummaryFromPoolEntries, mergeCreatorSummaryWithStats } from '../../engine/creatorSummary';
+import { trackAnalyticsEvent } from '../../engine/analyticsStore';
 import { Modal } from './Modal';
 import './PoolHubPage.css';
 
@@ -1018,6 +1019,21 @@ export function PoolHubPage({
             setIsDetailOpen(true);
             setAddMessage(null);
             setShowAllItems(false);
+            void trackAnalyticsEvent({
+              eventType: 'pool_open',
+              pageKey: 'pool-hub',
+              userId: userId ?? null,
+              metadata: {
+                entryId: entry.id,
+                title: entry.title,
+                creatorId: entry.creatorId ?? null,
+                creatorName: resolveCreatorName(entry),
+                official: isOfficialPoolEntry(entry),
+                category: entry.category,
+                itemCount: entryItems.length,
+                sectionCount: sectionNames.length,
+              },
+            });
           }}
         >
           <div className="pool-hub-card-hero" style={heroStyle}>

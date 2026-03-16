@@ -62,6 +62,7 @@ import {
 } from '../engine/workingSetStore';
 import { isCurrentUserAdmin } from '../engine/adminStore';
 import {
+  trackAnalyticsEvent,
   trackAnalyticsPageView,
   trackAnalyticsSessionStart,
 } from '../engine/analyticsStore';
@@ -1269,6 +1270,18 @@ export function App() {
     setTerritoryNavigationMode('biased');
     setActivePage('generator');
     const territory = territories.find(entry => entry.id === id) ?? null;
+    void trackAnalyticsEvent({
+      eventType: territory ? 'territory_activate' : 'territory_deactivate',
+      pageKey: 'generator',
+      userId: authUser?.id ?? null,
+      metadata: territory
+        ? {
+            territoryId: territory.id,
+            territoryName: territory.name,
+            sourceCount: territory.sources.length,
+          }
+        : null,
+    });
     const preferredStartNodeId = territory ? getPreferredTerritoryStartNodeId() : '';
     if (preferredStartNodeId) {
       setCurrentNodeId(preferredStartNodeId);
