@@ -3,6 +3,7 @@ import type { PoolHubEntry, PublicProfile, SavedPrompt } from '../../types';
 import { getPublicProfileByUserId } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { listHubEntriesByCreator } from '../../engine/poolHubStore';
+import { getCreatorSummaryFromPoolEntries } from '../../engine/creatorSummary';
 import './PublicCreatorPage.css';
 
 type PublicCreatorPageProps = {
@@ -105,10 +106,10 @@ export function PublicCreatorPage({
     creatorId && profile
       ? (profile.showPublicPools ? publicPools : [])
       : publicPools;
-  const totalDownloads = visiblePools.reduce((sum, entry) => sum + entry.downloads, 0);
-  const averageRating = visiblePools.length === 0
-    ? 0
-    : visiblePools.reduce((sum, entry) => sum + entry.ratingAvg, 0) / visiblePools.length;
+  const creatorSummary = useMemo(
+    () => getCreatorSummaryFromPoolEntries(visiblePools, publicPrompts.length),
+    [visiblePools, publicPrompts.length]
+  );
 
   return (
     <div className="public-creator-page">
@@ -152,19 +153,19 @@ export function PublicCreatorPage({
         </div>
         <div className="public-creator-stats">
           <div>
-            <strong>{visiblePools.length}</strong>
+            <strong>{creatorSummary.uploads}</strong>
             <span>Public pools</span>
           </div>
           <div>
-            <strong>{publicPrompts.length}</strong>
+            <strong>{creatorSummary.promptCount}</strong>
             <span>Public prompts</span>
           </div>
           <div>
-            <strong>{totalDownloads}</strong>
+            <strong>{creatorSummary.totalDownloads}</strong>
             <span>Downloads</span>
           </div>
           <div>
-            <strong>{averageRating.toFixed(1)}</strong>
+            <strong>{creatorSummary.avgRating.toFixed(1)}</strong>
             <span>Avg rating</span>
           </div>
         </div>

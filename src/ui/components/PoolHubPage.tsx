@@ -42,6 +42,7 @@ import {
   listPublicProfiles,
 } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
+import { getCreatorSummaryFromPoolEntries } from '../../engine/creatorSummary';
 import { Modal } from './Modal';
 import './PoolHubPage.css';
 
@@ -280,7 +281,7 @@ export function PoolHubPage({
   const [workingSetComments, setWorkingSetComments] = useState(() =>
     workingSetEntries[0]?.id ? listWorkingSetHubComments(workingSetEntries[0].id) : []
   );
-  const [creatorStats, setCreatorStats] = useState({ uploads: 0, totalDownloads: 0, avgRating: 0 });
+  const [creatorStats, setCreatorStats] = useState({ uploads: 0, totalDownloads: 0, avgRating: 0, promptCount: 0, topTags: [] as string[] });
   const [workingSetCreatorStats, setWorkingSetCreatorStats] = useState({ uploads: 0, totalDownloads: 0, avgRating: 0 });
   const [commentAuthor, setCommentAuthor] = useState('');
   const [commentBody, setCommentBody] = useState('');
@@ -435,8 +436,10 @@ export function PoolHubPage({
       uploads: number;
       totalDownloads: number;
       avgRating: number;
+      promptCount: number;
       entries: typeof source;
       tags: Record<string, number>;
+      topTags: string[];
     }>();
 
     publicProfiles.forEach(profile => {
@@ -452,8 +455,10 @@ export function PoolHubPage({
         uploads: 0,
         totalDownloads: 0,
         avgRating: 0,
+        promptCount: 0,
         entries: [] as typeof source,
         tags: {},
+        topTags: [],
       });
     });
 
@@ -474,18 +479,20 @@ export function PoolHubPage({
         uploads: 0,
         totalDownloads: 0,
         avgRating: 0,
+        promptCount: 0,
         entries: [] as typeof source,
         tags: {},
+        topTags: [],
       };
-      next.uploads += 1;
-      next.totalDownloads += entry.downloads;
-      next.avgRating = next.avgRating === 0
-        ? entry.ratingAvg
-        : (next.avgRating * (next.uploads - 1) + entry.ratingAvg) / next.uploads;
       next.entries.push(entry);
       entry.tags.forEach(tag => {
         next.tags[tag] = (next.tags[tag] ?? 0) + 1;
       });
+      const summary = getCreatorSummaryFromPoolEntries(next.entries, next.promptCount);
+      next.uploads = summary.uploads;
+      next.totalDownloads = summary.totalDownloads;
+      next.avgRating = summary.avgRating;
+      next.topTags = summary.topTags;
       profiles.set(id, next);
     });
 
@@ -653,7 +660,7 @@ export function PoolHubPage({
     if (!selectedEntry) {
       setUserRatingState(null);
       setComments([]);
-      setCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
+      setCreatorStats(getCreatorSummaryFromPoolEntries([]));
       return;
     }
     if (userId) {
@@ -666,14 +673,9 @@ export function PoolHubPage({
       const creatorEntries = entries.filter(entry =>
         entry.creatorId ? entry.creatorId === selectedEntry.creatorId : entry.creator === selectedEntry.creator
       );
-      const uploads = creatorEntries.length;
-      const totalDownloads = creatorEntries.reduce((sum, entry) => sum + entry.downloads, 0);
-      const avgRating = uploads === 0
-        ? 0
-        : creatorEntries.reduce((sum, entry) => sum + entry.ratingAvg, 0) / uploads;
-      setCreatorStats({ uploads, totalDownloads, avgRating });
+      setCreatorStats(getCreatorSummaryFromPoolEntries(creatorEntries));
     } else {
-      setCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
+      setCreatorStats(getCreatorSummaryFromPoolEntries([]));
     }
     setCommentError(null);
     setCommentBody('');

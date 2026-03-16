@@ -14,3 +14,11 @@ export type PublicProfile = {
   createdAt: number;
   updatedAt: number;
 };
+
+export type CreatorSummary = {
+  uploads: number;
+  totalDownloads: number;
+  avgRating: number;
+  promptCount: number;
+  topTags: string[];
+};
