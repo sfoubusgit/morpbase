@@ -35,7 +35,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/cyber_creatine_gym.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
