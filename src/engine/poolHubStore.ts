@@ -1,8 +1,8 @@
 import type { PoolHubEntry } from '../types';
 import { poolHubMock } from '../data/poolHubMock';
 
-const STORAGE_KEY = 'promptgen:pool_hub_store:v7';
-const CURRENT_STORE_VERSION = 7;
+const STORAGE_KEY = 'promptgen:pool_hub_store:v8';
+const CURRENT_STORE_VERSION = 8;
 const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
 
 type PoolHubComment = {
@@ -17,7 +17,7 @@ type PoolHubComment = {
 };
 
 type PoolHubStore = {
-  version: 7;
+  version: 8;
   entries: PoolHubEntry[];
   userRatings: Record<string, Record<string, number>>;
   comments: PoolHubComment[];
@@ -142,6 +142,12 @@ const loadStore = (): PoolHubStore => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      const v7 = window.localStorage.getItem('promptgen:pool_hub_store:v7');
+      if (v7) {
+        const migrated = migrateV4(v7);
+        saveStore(migrated);
+        return migrated;
+      }
       const v6 = window.localStorage.getItem('promptgen:pool_hub_store:v6');
       if (v6) {
         const migrated = migrateV4(v6);
