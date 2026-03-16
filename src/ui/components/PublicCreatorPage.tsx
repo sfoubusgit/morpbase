@@ -25,6 +25,7 @@ export function PublicCreatorPage({
   const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
   const [loadingPrompts, setLoadingPrompts] = useState(false);
   const [promptsError, setPromptsError] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
 
   const publicPools = useMemo(
     () => listHubEntriesByCreator({ creatorId, creatorName }),
@@ -110,13 +111,34 @@ export function PublicCreatorPage({
     () => getCreatorSummaryFromPoolEntries(visiblePools, publicPrompts.length),
     [visiblePools, publicPrompts.length]
   );
+  const shareUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (creatorId) params.set('user', creatorId);
+    if (creatorName) params.set('name', creatorName);
+    const query = params.toString();
+    const hash = query ? `#creator?${query}` : '';
+    return `${window.location.origin}${window.location.pathname}${window.location.search}${hash}`;
+  }, [creatorId, creatorName]);
 
   return (
     <div className="public-creator-page">
       <div className="public-creator-hero">
-        <button type="button" className="public-creator-back" onClick={onBack}>
-          Back
-        </button>
+        <div className="public-creator-hero-actions">
+          <button type="button" className="public-creator-back" onClick={onBack}>
+            Back
+          </button>
+          <button
+            type="button"
+            className="public-creator-share"
+            onClick={() => {
+              navigator.clipboard.writeText(shareUrl)
+                .then(() => setShareMessage('Creator link copied.'))
+                .catch(() => setShareMessage('Could not copy creator link.'));
+            }}
+          >
+            Copy Link
+          </button>
+        </div>
         <div className="public-creator-hero-main">
           {profile?.avatarUrl ? (
             <img src={profile.avatarUrl} alt={displayName} className="public-creator-avatar" />
@@ -169,6 +191,7 @@ export function PublicCreatorPage({
             <span>Avg rating</span>
           </div>
         </div>
+        {shareMessage && <div className="public-creator-share-message">{shareMessage}</div>}
       </div>
 
       {loadingProfile && <div className="public-creator-callout">Loading creator profile...</div>}

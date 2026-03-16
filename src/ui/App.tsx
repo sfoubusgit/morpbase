@@ -110,6 +110,31 @@ const BUILDER_CATEGORY_LABELS: Record<string, string> = {
   'anatomy-details': 'Anatomy Details',
 };
 
+const parseCreatorHash = (): { creatorId?: string | null; creatorName?: string | null } | null => {
+  try {
+    if (!window.location.hash.startsWith('#creator')) return null;
+    const raw = window.location.hash.slice('#creator'.length);
+    const params = new URLSearchParams(raw.startsWith('?') ? raw.slice(1) : raw);
+    const creatorId = params.get('user');
+    const creatorName = params.get('name');
+    if (!creatorId && !creatorName) return null;
+    return {
+      creatorId: creatorId || null,
+      creatorName: creatorName || null,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const buildCreatorHash = (input: { creatorId?: string | null; creatorName?: string | null }): string => {
+  const params = new URLSearchParams();
+  if (input.creatorId) params.set('user', input.creatorId);
+  if (input.creatorName) params.set('name', input.creatorName);
+  const query = params.toString();
+  return query ? `#creator?${query}` : '';
+};
+
 /**
  * Attribute definitions will be loaded from external JSON files.
  * No data is loaded at this stage.
@@ -125,6 +150,9 @@ export function App() {
 
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
     try {
+      if (parseCreatorHash()) {
+        return true;
+      }
       return window.localStorage.getItem('morpbase:seen_landing') === '1';
     } catch {
       return false;
@@ -132,6 +160,7 @@ export function App() {
   });
   const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'working-sets' | 'admin'>(() => {
     try {
+      if (parseCreatorHash()) return 'creator-profile';
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
@@ -260,7 +289,7 @@ export function App() {
   const [selectedCreatorProfileTarget, setSelectedCreatorProfileTarget] = useState<{
     creatorId?: string | null;
     creatorName?: string | null;
-  } | null>(null);
+  } | null>(() => parseCreatorHash());
   const handleOpenCreatorProfilePage = useCallback((input: {
     creatorId?: string | null;
     creatorName?: string | null;
@@ -1746,6 +1775,39 @@ export function App() {
       // ignore
     }
   }, [activePage]);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const target = parseCreatorHash();
+      if (!target) return;
+      setSelectedCreatorProfileTarget(target);
+      setActivePage('creator-profile');
+      setHasSeenLanding(true);
+      try {
+        window.localStorage.setItem('morpbase:seen_landing', '1');
+      } catch {
+        // ignore
+      }
+    };
+
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => {
+      window.removeEventListener('hashchange', syncFromHash);
+    };
+  }, []);
+
+  useEffect(() => {
+    const currentHash = window.location.hash;
+    const nextHash = activePage === 'creator-profile' && selectedCreatorProfileTarget
+      ? buildCreatorHash(selectedCreatorProfileTarget)
+      : '';
+
+    if (currentHash === nextHash) return;
+
+    const nextUrl = `${window.location.pathname}${window.location.search}${nextHash}`;
+    window.history.replaceState(null, '', nextUrl);
+  }, [activePage, selectedCreatorProfileTarget]);
 
   const handleEnterApp = () => {
     setHasSeenLanding(true);
