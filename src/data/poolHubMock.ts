@@ -207,4 +207,65 @@ export const poolHubMock: PoolHubEntry[] = [
       ]
     ),
   },
+  {
+    id: 'hub_bioluminescent_coral_queens',
+    creator: 'MorpBase',
+    title: 'Bioluminescent Coral Queens',
+    summary: 'Radiant reef royalty, glowing ocean temples, and regal underwater dreamworld energy.',
+    description:
+      'An official MorpBase pool for luminous underwater fantasy scenes: coral-crowned queens, bioluminescent reefs, drifting silk currents, pearl-lit palaces, and ceremonial marine elegance.',
+    tags: ['underwater', 'bioluminescent', 'coral', 'queen', 'fantasy', 'ocean'],
+    category: 'Illustration',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'bioluminescent_coral_queens_pool',
+      'Bioluminescent Coral Queens',
+      now - day,
+      now,
+      [
+        { text: 'coral-crowned ocean queen with luminous skin patterns', section: 'Subjects', tags: ['subject', 'queen', 'coral'] },
+        { text: 'regal undersea sorceress draped in pearl-threaded silks', section: 'Subjects', tags: ['subject', 'sorceress', 'pearls'] },
+        { text: 'reef monarch attended by translucent aquatic handmaidens', section: 'Subjects', tags: ['subject', 'monarch', 'attendants'] },
+
+        { text: 'bioluminescent reef palace beneath a glowing midnight sea', section: 'Environment', tags: ['environment', 'reef', 'palace'] },
+        { text: 'cathedral coral grove filled with drifting lantern fish', section: 'Environment', tags: ['environment', 'coral', 'fish'] },
+        { text: 'pearl-lit underwater throne chamber with swaying kelp curtains', section: 'Environment', tags: ['environment', 'throne-room', 'kelp'] },
+
+        { text: 'branching coral scepter threaded with tiny glowing shells', section: 'Props', tags: ['props', 'scepter', 'shells'] },
+        { text: 'floating pearl orbs and ceremonial sea-glass relics', section: 'Props', tags: ['props', 'pearls', 'relics'] },
+        { text: 'ornamental tide mirrors framed in living anemones', section: 'Props', tags: ['props', 'mirrors', 'anemones'] },
+
+        { text: 'soft turquoise and violet underwater glow', section: 'Lighting', tags: ['lighting', 'turquoise', 'violet'] },
+        { text: 'shafts of filtered moonlight through rippling water', section: 'Lighting', tags: ['lighting', 'moonlight', 'shafts'] },
+        { text: 'radiant coral bloom casting pearlescent edge light', section: 'Lighting', tags: ['lighting', 'pearlescent', 'edge-light'] },
+
+        { text: 'serene aquatic majesty', section: 'Mood', tags: ['mood', 'serene', 'majestic'] },
+        { text: 'dreamlike oceanic nobility', section: 'Mood', tags: ['mood', 'dreamlike', 'nobility'] },
+        { text: 'mystical deep-sea ceremony calm', section: 'Mood', tags: ['mood', 'mystical', 'ceremony'] },
+
+        { text: 'translucent coral textures with wet iridescent sheen', section: 'Materials', tags: ['materials', 'coral', 'iridescent'] },
+        { text: 'silk fabrics drifting weightlessly in the current', section: 'Materials', tags: ['materials', 'silk', 'current'] },
+        { text: 'polished pearls, sea glass, and nacre surfaces', section: 'Materials', tags: ['materials', 'pearls', 'nacre'] },
+
+        { text: 'luxurious underwater fantasy illustration', section: 'Style', tags: ['style', 'underwater', 'fantasy'] },
+        { text: 'ornate marine royal concept art', section: 'Style', tags: ['style', 'marine', 'concept-art'] },
+        { text: 'bioluminescent dream-reef visual language', section: 'Style', tags: ['style', 'bioluminescent', 'dreamlike'] },
+
+        { text: 'centered throne composition framed by coral arches', section: 'Composition', tags: ['composition', 'throne', 'arches'] },
+        { text: 'floating three-quarter portrait with layered reef depth', section: 'Composition', tags: ['composition', 'portrait', 'depth'] },
+        { text: 'wide ceremonial tableau with drifting attendants and luminous symmetry', section: 'Composition', tags: ['composition', 'tableau', 'symmetry'] },
+
+        { text: 'glittering plankton drifting through the water', section: 'Effects', tags: ['effects', 'plankton', 'particles'] },
+        { text: 'soft caustic light ripples across coral and skin', section: 'Effects', tags: ['effects', 'caustics', 'ripples'] },
+        { text: 'tiny schools of glowing fish tracing arcs through the scene', section: 'Effects', tags: ['effects', 'fish', 'motion'] },
+      ]
+    ),
+  },
 ];
