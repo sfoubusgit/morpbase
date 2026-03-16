@@ -1174,21 +1174,54 @@ export function PoolHubPage({
                       className="pool-hub-creator-result"
                       onClick={() => openCreatorProfile(profile.id)}
                     >
-                      <span className="pool-hub-creator-result-name">
-                        {profile.profile?.avatarUrl ? (
-                          <img
-                            src={profile.profile.avatarUrl}
-                            alt={profile.name}
-                            className="pool-hub-creator-avatar"
-                          />
-                        ) : (
-                          <span className="pool-hub-creator-avatar-fallback">
-                            {profile.name.charAt(0).toUpperCase()}
+                      <div className="pool-hub-creator-result-top">
+                        <span className="pool-hub-creator-result-name">
+                          {profile.profile?.avatarUrl ? (
+                            <img
+                              src={profile.profile.avatarUrl}
+                              alt={profile.name}
+                              className="pool-hub-creator-avatar"
+                            />
+                          ) : (
+                            <span className="pool-hub-creator-avatar-fallback">
+                              {profile.name.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                          <span className="pool-hub-creator-result-identity">
+                            <span className="pool-hub-creator-result-title">{profile.name}</span>
+                            <span className="pool-hub-creator-result-subtitle">Public creator</span>
                           </span>
-                        )}
-                        {profile.name}
-                      </span>
-                      <span>{profile.uploads} uploads</span>
+                        </span>
+                        <span className="pool-hub-creator-result-count">{profile.uploads} uploads</span>
+                      </div>
+                      {profile.profile?.bio && (
+                        <div className="pool-hub-creator-result-bio">
+                          {profile.profile.bio}
+                        </div>
+                      )}
+                      <div className="pool-hub-creator-result-meta">
+                        <span>{profile.totalDownloads} downloads</span>
+                        <span>{profile.avgRating.toFixed(1)} avg rating</span>
+                      </div>
+                      {((profile.profile?.tags && profile.profile.tags.length > 0
+                        ? profile.profile.tags
+                        : Object.entries(profile.tags)
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 3)
+                          .map(([tag]) => tag)
+                      ).length > 0) && (
+                        <div className="pool-hub-creator-result-tags">
+                          {(profile.profile?.tags && profile.profile.tags.length > 0
+                            ? profile.profile.tags
+                            : Object.entries(profile.tags)
+                              .sort((a, b) => b[1] - a[1])
+                              .slice(0, 3)
+                              .map(([tag]) => tag)
+                          ).slice(0, 3).map(tag => (
+                            <span key={tag}>{tag}</span>
+                          ))}
+                        </div>
+                      )}
                     </button>
                   ))
                 )}
