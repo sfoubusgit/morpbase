@@ -279,7 +279,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/Desert_Oracle_Trains.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
