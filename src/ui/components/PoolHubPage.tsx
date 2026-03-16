@@ -1120,6 +1120,13 @@ export function PoolHubPage({
               <div className="pool-hub-profile-hint">
                 Your public profile can appear in creator search even before you publish anything, unless you disable discovery in My Profile.
               </div>
+              {isLoggedIn && myProfile && (
+                <div className="pool-hub-profile-hint">
+                  {myProfile.showPublicPools
+                    ? 'Pool uploads are currently visible on your public creator page.'
+                    : 'Pool uploads are currently hidden from your public creator page until you enable Show public pools in My Profile.'}
+                </div>
+              )}
             </div>
             <div className="pool-hub-profile-actions">
               {isLoggedIn ? (
@@ -1875,6 +1882,13 @@ export function PoolHubPage({
               placeholder="Describe the pool and best use cases"
             />
           </label>
+          {isLoggedIn && (
+            <div className="pool-hub-upload-visibility-note">
+              {myProfile?.showPublicPools
+                ? 'This upload can appear on your public creator page because Show public pools is enabled in My Profile.'
+                : 'This upload will still appear in Pool Hub, but it will stay hidden from your public creator page until you enable Show public pools in My Profile.'}
+            </div>
+          )}
           <label>
             Hero Image URL (optional)
             <input

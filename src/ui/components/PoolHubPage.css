@@ -953,6 +953,16 @@
   font-size: 12px;
 }
 
+.pool-hub-upload-visibility-note {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(118, 255, 201, 0.08);
+  border: 1px solid rgba(118, 255, 201, 0.14);
+  color: #cfeee3;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .pool-hub-upload-actions {
   display: flex;
   justify-content: flex-end;

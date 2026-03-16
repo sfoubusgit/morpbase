@@ -339,7 +339,7 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
               />
               <span>
                 <strong>Show public pools</strong>
-                <small>Display your shared pool uploads on your creator page.</small>
+                <small>Display your Pool Hub uploads on your public creator page. Turning this off keeps uploads in Pool Hub, but hides them from your profile page.</small>
               </span>
             </label>
             <label className="my-profile-toggle">
@@ -420,6 +420,11 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
             <div className="my-profile-preview-visibility">
               <span>{form.showPublicPrompts ? 'Public prompts on' : 'Prompts private'}</span>
               <span>{form.showPublicPools ? 'Public pools on' : 'Pools private'}</span>
+            </div>
+            <div className="my-profile-preview-note">
+              {form.showPublicPools
+                ? 'Your Pool Hub uploads can appear on your public creator page.'
+                : 'Your Pool Hub uploads stay available in the hub, but your public creator page will hide them.'}
             </div>
           </div>
 

@@ -272,6 +272,13 @@
   font-size: 0.82rem;
 }
 
+.my-profile-preview-note {
+  margin-top: 0.85rem;
+  color: rgba(227, 224, 255, 0.62);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .my-profile-checklist {
   gap: 0.65rem;
 }
