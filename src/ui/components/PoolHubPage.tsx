@@ -1274,6 +1274,7 @@ export function PoolHubPage({
           )}
         </section>
 
+        {false && (
         <aside className="pool-hub-panel pool-hub-panel-detail">
           {!selectedEntry ? (
             <div className="pool-hub-empty">
@@ -1581,6 +1582,7 @@ export function PoolHubPage({
             </>
           )}
         </aside>
+        )}
 
       </div>
 
