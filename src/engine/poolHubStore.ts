@@ -1,8 +1,8 @@
 import type { PoolHubEntry } from '../types';
 import { poolHubMock } from '../data/poolHubMock';
 
-const STORAGE_KEY = 'promptgen:pool_hub_store:v6';
-const CURRENT_STORE_VERSION = 6;
+const STORAGE_KEY = 'promptgen:pool_hub_store:v7';
+const CURRENT_STORE_VERSION = 7;
 const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
 
 type PoolHubComment = {
@@ -17,7 +17,7 @@ type PoolHubComment = {
 };
 
 type PoolHubStore = {
-  version: 6;
+  version: 7;
   entries: PoolHubEntry[];
   userRatings: Record<string, Record<string, number>>;
   comments: PoolHubComment[];
@@ -28,6 +28,20 @@ const isOfficialEntry = (entry: PoolHubEntry) =>
   OFFICIAL_CREATOR_NAMES.has(entry.creator?.trim().toLowerCase() ?? '');
 
 const sanitizeEntries = (entries: PoolHubEntry[]) => entries.filter(isOfficialEntry);
+
+const mergeWithSeedEntries = (entries: PoolHubEntry[]) => {
+  const officialEntries = sanitizeEntries(entries);
+  const byId = new Map<string, PoolHubEntry>();
+  poolHubMock.forEach(entry => {
+    byId.set(entry.id, entry);
+  });
+  officialEntries.forEach(entry => {
+    if (!byId.has(entry.id)) {
+      byId.set(entry.id, entry);
+    }
+  });
+  return [...byId.values()].sort((a, b) => b.updatedAt - a.updatedAt);
+};
 
 const buildInitialStore = (): PoolHubStore => ({
   version: CURRENT_STORE_VERSION,
@@ -48,7 +62,7 @@ const migrateV4 = (raw: string): PoolHubStore => {
     if (parsed && parsed.version === 4 && Array.isArray(parsed.entries)) {
       return {
         version: CURRENT_STORE_VERSION,
-        entries: sanitizeEntries(parsed.entries),
+        entries: mergeWithSeedEntries(parsed.entries),
         userRatings: parsed.userRatings ?? {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -71,7 +85,7 @@ const migrateV3 = (raw: string): PoolHubStore => {
     if (parsed && parsed.version === 3 && Array.isArray(parsed.entries)) {
       return {
         version: CURRENT_STORE_VERSION,
-        entries: sanitizeEntries(parsed.entries),
+        entries: mergeWithSeedEntries(parsed.entries),
         userRatings: parsed.userRatings ?? {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -94,7 +108,7 @@ const migrateV2 = (raw: string): PoolHubStore => {
     if (parsed && parsed.version === 2 && Array.isArray(parsed.entries)) {
       return {
         version: CURRENT_STORE_VERSION,
-        entries: sanitizeEntries(parsed.entries),
+        entries: mergeWithSeedEntries(parsed.entries),
         userRatings: parsed.userRatings ? { legacy: parsed.userRatings } : {},
         comments: Array.isArray(parsed.comments) ? parsed.comments : [],
         flaggedEntries: {},
@@ -112,7 +126,7 @@ const migrateV1 = (raw: string): PoolHubStore => {
     if (parsed && parsed.version === 1 && Array.isArray(parsed.entries)) {
       return {
         version: CURRENT_STORE_VERSION,
-        entries: sanitizeEntries(parsed.entries),
+        entries: mergeWithSeedEntries(parsed.entries),
         userRatings: {},
         comments: [],
         flaggedEntries: {},
@@ -128,6 +142,12 @@ const loadStore = (): PoolHubStore => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      const v6 = window.localStorage.getItem('promptgen:pool_hub_store:v6');
+      if (v6) {
+        const migrated = migrateV4(v6);
+        saveStore(migrated);
+        return migrated;
+      }
       const v5 = window.localStorage.getItem('promptgen:pool_hub_store:v5');
       if (v5) {
         const migrated = migrateV4(v5);
@@ -235,7 +255,7 @@ export const importHubStore = (payload: PoolHubStore) => {
   }
   saveStore({
     version: CURRENT_STORE_VERSION,
-    entries: sanitizeEntries(payload.entries),
+    entries: mergeWithSeedEntries(payload.entries),
     userRatings: payload.userRatings ?? {},
     comments: payload.comments ?? [],
     flaggedEntries: payload.flaggedEntries ?? {},
