@@ -294,6 +294,7 @@ export function PoolHubPage({
   const [publicProfiles, setPublicProfiles] = useState<PublicProfile[]>([]);
   const [myProfile, setMyProfile] = useState<PublicProfile | null>(null);
   const [creatorStatsByUserId, setCreatorStatsByUserId] = useState<Record<string, CreatorStats>>({});
+  const [detailActionMessage, setDetailActionMessage] = useState<string | null>(null);
 
   const refreshUserPools = async () => {
     try {
@@ -647,13 +648,19 @@ export function PoolHubPage({
       const creatorEntries = entries.filter(entry =>
         entry.creatorId ? entry.creatorId === selectedEntry.creatorId : entry.creator === selectedEntry.creator
       );
-      setCreatorStats(getCreatorSummaryFromPoolEntries(creatorEntries));
+      setCreatorStats(
+        mergeCreatorSummaryWithStats(
+          getCreatorSummaryFromPoolEntries(creatorEntries),
+          selectedEntry.creatorId ? creatorStatsByUserId[selectedEntry.creatorId] : null
+        )
+      );
     } else {
       setCreatorStats(getCreatorSummaryFromPoolEntries([]));
     }
     setCommentError(null);
     setCommentBody('');
-  }, [selectedEntry?.id, userId, entries]);
+    setDetailActionMessage(null);
+  }, [selectedEntry?.id, selectedEntry?.creatorId, userId, entries, creatorStatsByUserId]);
 
   const handleAddToActive = async () => {
     if (!isLoggedIn) {
@@ -670,6 +677,7 @@ export function PoolHubPage({
     if (!confirmed) return;
     await importPoolPayload({ version: 1, pool: selectedEntry.payload as Pool }, 'merge');
     setAddMessage('Added to User Pools (merged).');
+    setDetailActionMessage('Added to User Pools.');
     refreshUserPools();
   };
 
@@ -795,6 +803,7 @@ export function PoolHubPage({
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
+    setDetailActionMessage('Pool JSON downloaded.');
   };
 
   const handleUpload = () => {
@@ -896,6 +905,54 @@ export function PoolHubPage({
     const items = (selectedEntry.payload as Pool).items;
     return showAllItems ? items : items.slice(0, 8);
   }, [selectedEntry, showAllItems]);
+
+  const selectedPoolItems = useMemo(() => {
+    if (!selectedEntry) return [];
+    return (selectedEntry.payload as Pool).items;
+  }, [selectedEntry]);
+
+  const selectedPoolSections = useMemo(() => {
+    const grouped = new Map<string, Pool['items']>();
+    selectedPoolItems.forEach(item => {
+      const key = item.section?.trim() || 'Unsectioned';
+      grouped.set(key, [...(grouped.get(key) ?? []), item]);
+    });
+    return [...grouped.entries()];
+  }, [selectedPoolItems]);
+
+  const selectedPoolSectionCount = useMemo(() => {
+    return selectedPoolSections.some(([section]) => section !== 'Unsectioned')
+      ? selectedPoolSections.length
+      : 0;
+  }, [selectedPoolSections]);
+
+  const selectedCreatorProfile = useMemo(() => {
+    if (!selectedEntry) return null;
+    return resolveCreatorProfile(selectedEntry);
+  }, [selectedEntry, publicProfileByName, publicProfileByUserId]);
+
+  const detailStatusChips = useMemo(() => {
+    if (!selectedEntry) return [];
+    const chips = [
+      isOfficialPoolEntry(selectedEntry) ? 'MorpBase' : 'Community',
+      selectedEntry.category,
+      ...selectedEntry.languages.map(language => language.toUpperCase()),
+    ];
+    if (selectedPoolSectionCount > 0) {
+      chips.push('Sectioned');
+    }
+    return chips;
+  }, [selectedEntry, selectedPoolSectionCount]);
+
+  const detailStatChips = useMemo(() => {
+    if (!selectedEntry) return [];
+    return [
+      `${selectedEntry.downloads} downloads`,
+      `${selectedEntry.ratingAvg.toFixed(1)} rating`,
+      `${selectedPoolItems.length} items`,
+      selectedPoolSectionCount > 0 ? `${selectedPoolSectionCount} sections` : null,
+    ].filter(Boolean) as string[];
+  }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount]);
 
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
@@ -1579,124 +1636,196 @@ export function PoolHubPage({
       >
         {!selectedEntry ? null : (
           <div className="pool-hub-detail-modal-body">
-            <div className="pool-hub-detail-hero">
-              <div>
-                <div className="pool-hub-detail-title">{selectedEntry.title}</div>
-                <div className="pool-hub-detail-summary">{selectedEntry.summary}</div>
-              </div>
-              <div className="pool-hub-detail-actions">
-                <button
-                  type="button"
-                  className="pool-hub-primary"
-                  onClick={handleAddToActive}
-                  disabled={!canInteract}
-                  title={canInteract ? 'Add to your library' : 'Upgrade to Pro to add'}
-                >
-                  Add to User Pools
-                </button>
-                <button type="button" className="pool-hub-secondary" onClick={handleDownloadPool}>
-                  Download JSON
-                </button>
-                {onGoToUserPools && (
-                  <button type="button" className="pool-hub-secondary" onClick={onGoToUserPools}>
-                    Open User Pools
-                  </button>
-                )}
-                {userId && selectedEntry.creatorId === userId && (
-                  <button type="button" className="pool-hub-danger" onClick={handleDeletePool}>
-                    Delete from Hub
-                  </button>
-                )}
-              </div>
-            </div>
-            {addMessage && <div className="pool-hub-message">{addMessage}</div>}
-            <div className="pool-hub-detail-meta">
-              {(selectedEntry.creator || selectedEntry.creatorId) && (
-                <button
-                type="button"
-                className="pool-hub-link-button"
-                onClick={() => {
-                    openCreatorProfileFromEntry(selectedEntry);
-                }}
-              >
-                By {resolveCreatorName(selectedEntry)}
-                </button>
-              )}
-              {isOfficialPoolEntry(selectedEntry) && <span className="pool-hub-official-badge">MorpBase</span>}
-              {((userId && selectedEntry.creatorId === userId) || (!userId && userName && selectedEntry.creator === userName)) && (
-                <span className="pool-hub-owner-badge">Your upload</span>
-              )}
-              <span>{selectedEntry.category}</span>
-              <span>{selectedEntry.languages.join(', ').toUpperCase()}</span>
-              <span>{selectedEntry.license}</span>
-              <span>{selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})</span>
-            </div>
-            <p className="pool-hub-detail-description">{selectedEntry.description}</p>
-            {(selectedEntry.creator || selectedEntry.creatorId) && (
-              <div className="pool-hub-creator-card">
-                <div className="pool-hub-creator-title">{resolveCreatorName(selectedEntry)}</div>
-                <div className="pool-hub-creator-meta">
-                  <span>{creatorStats.uploads} uploads</span>
-                  <span>{creatorStats.totalDownloads} downloads</span>
-                  <span>Avg {creatorStats.avgRating.toFixed(1)} rating</span>
-                </div>
-              </div>
-            )}
-            <div className="pool-hub-detail-split">
-              <div className="pool-hub-report-card">
-                <div className="pool-hub-section-title">Report</div>
-                <div className="pool-hub-muted">See something off? Flag this pool.</div>
-                <input
-                  type="text"
-                  value={reportReason}
-                  onChange={event => setReportReason(event.target.value)}
-                  placeholder="Reason (optional)"
-                />
-                <button type="button" className="pool-hub-secondary" onClick={handleReport}>
-                  Report pool
-                </button>
-              </div>
-              <div className="pool-hub-rating">
-                <div className="pool-hub-rating-label">Your rating</div>
-                <div className="pool-hub-rating-stars">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      type="button"
-                      className={`pool-hub-star ${userRating && userRating >= star ? 'active' : ''}`}
-                      onClick={() => handleRate(star)}
-                      disabled={!canInteract}
-                    >
-                      *
-                    </button>
-                  ))}
-                </div>
-                <div className="pool-hub-rating-meta">
-                  Avg {selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})
-                </div>
-              </div>
-            </div>
-            <div className="pool-hub-detail-items">
-              <div className="pool-hub-detail-items-header">
-                <span>Items ({(selectedEntry.payload as Pool).items.length})</span>
-                <button
-                  type="button"
-                  className="pool-hub-link"
-                  onClick={() => setShowAllItems(prev => !prev)}
-                >
-                  {showAllItems ? 'Show less' : 'Show all'}
-                </button>
-              </div>
-              <div className="pool-hub-detail-items-list">
-                {visibleItems.map(item => (
-                  <div key={item.id} className="pool-hub-item">
-                    <div className="pool-hub-item-text">{item.text}</div>
-                    {'tags' in item && item.tags && item.tags.length > 0 && (
-                      <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
+            <div className="pool-hub-detail-shell">
+              <div className="pool-hub-detail-main">
+                <div className="pool-hub-detail-title-block">
+                  <div className="pool-hub-detail-title">{selectedEntry.title}</div>
+                  <div className="pool-hub-detail-summary">{selectedEntry.summary}</div>
+                  <div className="pool-hub-detail-chip-row pool-hub-detail-chip-row-stats">
+                    {detailStatChips.map(chip => (
+                      <span key={chip} className="pool-hub-detail-chip pool-hub-detail-chip-stat">{chip}</span>
+                    ))}
+                  </div>
+                  <div className="pool-hub-detail-chip-row">
+                    {(selectedEntry.creator || selectedEntry.creatorId) && (
+                      <button
+                        type="button"
+                        className="pool-hub-link-button pool-hub-detail-chip pool-hub-detail-chip-link"
+                        onClick={() => {
+                          openCreatorProfileFromEntry(selectedEntry);
+                        }}
+                      >
+                        By {resolveCreatorName(selectedEntry)}
+                      </button>
+                    )}
+                    {detailStatusChips.map(chip => (
+                      <span key={chip} className="pool-hub-detail-chip">{chip}</span>
+                    ))}
+                    {((userId && selectedEntry.creatorId === userId) || (!userId && userName && selectedEntry.creator === userName)) && (
+                      <span className="pool-hub-owner-badge">Your upload</span>
                     )}
                   </div>
-                ))}
+                  <p className="pool-hub-detail-description">{selectedEntry.description}</p>
+                </div>
+
+                <div className="pool-hub-detail-items">
+                  <div className="pool-hub-detail-items-header">
+                    <span>
+                      {selectedPoolSectionCount > 0 ? 'Sample Items' : 'Items'} ({selectedPoolItems.length})
+                    </span>
+                    <button
+                      type="button"
+                      className="pool-hub-link"
+                      onClick={() => setShowAllItems(prev => !prev)}
+                    >
+                      {showAllItems ? 'Show less' : 'Show all'}
+                    </button>
+                  </div>
+                  {selectedPoolSectionCount > 0 ? (
+                    <div className="pool-hub-detail-items-grouped">
+                      {selectedPoolSections.map(([section, items]) => {
+                        const shownItems = showAllItems ? items : items.slice(0, 4);
+                        return (
+                          <div key={section} className="pool-hub-item-group">
+                            <div className="pool-hub-item-group-title">
+                              {section}
+                              <span>{items.length}</span>
+                            </div>
+                            <div className="pool-hub-detail-items-list">
+                              {shownItems.map(item => (
+                                <div key={item.id} className="pool-hub-item">
+                                  <div className="pool-hub-item-text">{item.text}</div>
+                                  {item.tags && item.tags.length > 0 && (
+                                    <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="pool-hub-detail-items-list">
+                      {visibleItems.map(item => (
+                        <div key={item.id} className="pool-hub-item">
+                          <div className="pool-hub-item-text">{item.text}</div>
+                          {'tags' in item && item.tags && item.tags.length > 0 && (
+                            <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
+
+              <aside className="pool-hub-detail-rail">
+                <div className="pool-hub-detail-rail-card pool-hub-detail-action-card">
+                  <div className="pool-hub-section-title">Actions</div>
+                  <div className="pool-hub-detail-actions">
+                    <button
+                      type="button"
+                      className="pool-hub-primary"
+                      onClick={handleAddToActive}
+                      disabled={!canInteract}
+                      title={canInteract ? 'Add to your library' : 'Upgrade to Pro to add'}
+                    >
+                      Add to User Pools
+                    </button>
+                    {onGoToUserPools && (
+                      <button type="button" className="pool-hub-secondary" onClick={onGoToUserPools}>
+                        Open User Pools
+                      </button>
+                    )}
+                    <button type="button" className="pool-hub-secondary" onClick={handleDownloadPool}>
+                      Download JSON
+                    </button>
+                    {userId && selectedEntry.creatorId === userId && (
+                      <button type="button" className="pool-hub-danger" onClick={handleDeletePool}>
+                        Delete from Hub
+                      </button>
+                    )}
+                  </div>
+                  {(detailActionMessage || addMessage) && (
+                    <div className="pool-hub-message">
+                      <span>{detailActionMessage ?? addMessage}</span>
+                    </div>
+                  )}
+                </div>
+
+                {(selectedEntry.creator || selectedEntry.creatorId) && (
+                  <div className="pool-hub-detail-rail-card pool-hub-creator-card pool-hub-detail-creator-card">
+                    <div className="pool-hub-detail-creator-head">
+                      {selectedCreatorProfile?.avatarUrl ? (
+                        <img
+                          src={selectedCreatorProfile.avatarUrl}
+                          alt={resolveCreatorName(selectedEntry)}
+                          className="pool-hub-creator-avatar"
+                        />
+                      ) : (
+                        <span className="pool-hub-creator-avatar-fallback">
+                          {resolveCreatorName(selectedEntry).charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                      <div>
+                        <div className="pool-hub-creator-title">{resolveCreatorName(selectedEntry)}</div>
+                        <div className="pool-hub-muted">
+                          {isOfficialPoolEntry(selectedEntry) ? 'MorpBase Creator' : 'Community Creator'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="pool-hub-creator-meta">
+                      <span>{creatorStats.uploads} uploads</span>
+                      <span>{creatorStats.totalDownloads} downloads</span>
+                      <span>Avg {creatorStats.avgRating.toFixed(1)} rating</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="pool-hub-secondary"
+                      onClick={() => {
+                        openCreatorProfileFromEntry(selectedEntry);
+                      }}
+                    >
+                      View Creator
+                    </button>
+                  </div>
+                )}
+
+                <div className="pool-hub-detail-rail-card pool-hub-rating">
+                  <div className="pool-hub-rating-label">Your rating</div>
+                  <div className="pool-hub-rating-stars">
+                    {[1, 2, 3, 4, 5].map(star => (
+                      <button
+                        key={star}
+                        type="button"
+                        className={`pool-hub-star ${userRating && userRating >= star ? 'active' : ''}`}
+                        onClick={() => handleRate(star)}
+                        disabled={!canInteract}
+                      >
+                        *
+                      </button>
+                    ))}
+                  </div>
+                  <div className="pool-hub-rating-meta">
+                    Avg {selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})
+                  </div>
+                </div>
+
+                <div className="pool-hub-detail-rail-card pool-hub-report-card">
+                  <div className="pool-hub-section-title">Report</div>
+                  <div className="pool-hub-muted">See something off? Flag this pool.</div>
+                  <input
+                    type="text"
+                    value={reportReason}
+                    onChange={event => setReportReason(event.target.value)}
+                    placeholder="Reason (optional)"
+                  />
+                  <button type="button" className="pool-hub-secondary" onClick={handleReport}>
+                    Report pool
+                  </button>
+                </div>
+              </aside>
             </div>
             <div className="pool-hub-comments">
               <div className="pool-hub-comments-header">Comments ({detailComments.length})</div>

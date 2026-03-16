@@ -462,12 +462,40 @@
 }
 
 .pool-hub-detail-modal {
-  max-width: 920px;
+  max-width: 1180px;
 }
 
 .pool-hub-detail-modal-body {
   display: grid;
+  gap: 18px;
+}
+
+.pool-hub-detail-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.pool-hub-detail-main {
+  display: grid;
+  gap: 16px;
+}
+
+.pool-hub-detail-rail {
+  display: grid;
   gap: 14px;
+}
+
+.pool-hub-detail-rail-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(17, 20, 31, 0.94);
 }
 
 .pool-hub-panel {
@@ -626,15 +654,16 @@
   color: #cbd5f5;
 }
 
-.pool-hub-detail-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+.pool-hub-detail-title-block {
+  display: grid;
   gap: 12px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025));
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  padding: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(110, 86, 249, 0.16), transparent 36%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    rgba(16, 19, 31, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .pool-hub-detail-actions {
@@ -644,14 +673,49 @@
 }
 
 .pool-hub-detail-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-size: 30px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 800;
 }
 
 .pool-hub-detail-summary {
-  font-size: 12px;
-  color: #cbd5f5;
+  font-size: 14px;
+  color: #d8dcf5;
+  max-width: 760px;
+}
+
+.pool-hub-detail-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pool-hub-detail-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #dfe3ff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pool-hub-detail-chip-stat {
+  color: #f3f5ff;
+  background: rgba(110, 86, 249, 0.14);
+  border-color: rgba(110, 86, 249, 0.22);
+}
+
+.pool-hub-detail-chip-link {
+  font-size: 11px;
+  text-decoration: none;
+  color: #dfe3ff;
+  padding: 6px 10px;
 }
 
 .pool-hub-detail-meta {
@@ -664,9 +728,9 @@
 
 .pool-hub-detail-description {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #cbd5f5;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .pool-hub-creator-card {
@@ -681,6 +745,16 @@
 .pool-hub-creator-title {
   font-size: 13px;
   font-weight: 600;
+}
+
+.pool-hub-detail-creator-card {
+  gap: 12px;
+}
+
+.pool-hub-detail-creator-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .pool-hub-creator-meta {
@@ -728,6 +802,10 @@
 }
 
 @media (max-width: 960px) {
+  .pool-hub-detail-shell {
+    grid-template-columns: 1fr;
+  }
+
   .pool-hub-detail-split {
     grid-template-columns: 1fr;
   }
@@ -776,6 +854,10 @@
 .pool-hub-comments {
   display: grid;
   gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .pool-hub-comments-header {
@@ -838,6 +920,10 @@
 .pool-hub-detail-items {
   display: grid;
   gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .pool-hub-detail-items-header {
