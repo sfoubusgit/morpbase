@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile, SavedPrompt } from '../../types';
+import type { Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile } from '../../types';
 import {
   addHubEntry,
   addHubComment,
@@ -41,7 +41,6 @@ import {
   getMyPublicProfile,
   listPublicProfiles,
 } from '../../engine/profileStore';
-import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { getCreatorSummaryFromPoolEntries } from '../../engine/creatorSummary';
 import { Modal } from './Modal';
 import './PoolHubPage.css';
@@ -291,13 +290,8 @@ export function PoolHubPage({
   const [reportReason, setReportReason] = useState('');
   const [authNotice, setAuthNotice] = useState<string | null>(null);
   const [creatorSearchTerm, setCreatorSearchTerm] = useState('');
-  const [isCreatorProfileOpen, setIsCreatorProfileOpen] = useState(false);
-  const [selectedCreatorId, setSelectedCreatorId] = useState<string | null>(null);
   const [publicProfiles, setPublicProfiles] = useState<PublicProfile[]>([]);
   const [myProfile, setMyProfile] = useState<PublicProfile | null>(null);
-  const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
-  const [publicPromptsLoading, setPublicPromptsLoading] = useState(false);
-  const [publicPromptsError, setPublicPromptsError] = useState<string | null>(null);
 
   const refreshUserPools = async () => {
     try {
@@ -514,84 +508,25 @@ export function PoolHubPage({
     });
   }, [creatorProfiles, creatorSearchTerm]);
 
-  const selectedCreatorProfile = useMemo(() => {
-    if (!selectedCreatorId) return null;
-    return creatorProfiles.find(profile => profile.id === selectedCreatorId) ?? null;
-  }, [creatorProfiles, selectedCreatorId]);
-
   const openCreatorProfile = (creatorId: string) => {
     const target = creatorProfiles.find(profile => profile.id === creatorId) ?? null;
-    if (!target) return;
-    if (onOpenCreatorProfile) {
-      onOpenCreatorProfile({
-        creatorId: target.userId ?? null,
-        creatorName: target.name,
-      });
-      return;
-    }
-    setSelectedCreatorId(creatorId);
-    setIsCreatorProfileOpen(true);
+    if (!target || !onOpenCreatorProfile) return;
+    onOpenCreatorProfile({
+      creatorId: target.userId ?? null,
+      creatorName: target.name,
+    });
   };
 
   const openCreatorProfileFromEntry = (entry: { creator?: string; creatorId?: string }) => {
     const profile = resolveCreatorProfile(entry);
     const creatorName = profile?.displayName ?? entry.creator ?? null;
     if (!creatorName && !entry.creatorId) return;
-
-    if (onOpenCreatorProfile) {
-      onOpenCreatorProfile({
-        creatorId: entry.creatorId ?? null,
-        creatorName,
-      });
-      return;
-    }
-
-    const creatorLookupId = entry.creatorId
-      ? `id:${entry.creatorId}`
-      : creatorName
-        ? `name:${creatorName}`
-        : null;
-
-    if (!creatorLookupId) return;
-    setSelectedCreatorId(creatorLookupId);
-    setIsCreatorProfileOpen(true);
+    if (!onOpenCreatorProfile) return;
+    onOpenCreatorProfile({
+      creatorId: entry.creatorId ?? null,
+      creatorName,
+    });
   };
-
-  useEffect(() => {
-    let isActive = true;
-    const loadPrompts = async () => {
-      if (!isCreatorProfileOpen || !selectedCreatorProfile?.userId) {
-        setPublicPrompts([]);
-        setPublicPromptsError(null);
-        return;
-      }
-      if (!selectedCreatorProfile.profile?.showPublicPrompts) {
-        setPublicPrompts([]);
-        setPublicPromptsError(null);
-        return;
-      }
-      setPublicPromptsLoading(true);
-      try {
-        const prompts = await listPublicPromptsByUser(selectedCreatorProfile.userId);
-        if (isActive) {
-          setPublicPrompts(prompts);
-          setPublicPromptsError(null);
-        }
-      } catch (err: any) {
-        if (isActive) {
-          setPublicPromptsError(err?.message ?? 'Failed to load public prompts.');
-        }
-      } finally {
-        if (isActive) {
-          setPublicPromptsLoading(false);
-        }
-      }
-    };
-    loadPrompts();
-    return () => {
-      isActive = false;
-    };
-  }, [isCreatorProfileOpen, selectedCreatorProfile?.userId, selectedCreatorProfile?.profile?.showPublicPrompts]);
 
   const filteredEntries = useMemo(() => {
     const activeEntries = entries;
@@ -2242,117 +2177,6 @@ export function PoolHubPage({
           {adminError && <div className="pool-hub-error">{adminError}</div>}
         </div>
       </details>
-      <Modal
-        isOpen={isCreatorProfileOpen}
-        onClose={() => setIsCreatorProfileOpen(false)}
-        title="Creator Profile"
-        className="pool-hub-creator-modal"
-      >
-        {selectedCreatorProfile ? (
-          <div className="pool-hub-creator-profile">
-            <div className="pool-hub-creator-header">
-              <div className="pool-hub-creator-identity">
-                {selectedCreatorProfile.profile?.avatarUrl ? (
-                  <img
-                    src={selectedCreatorProfile.profile.avatarUrl}
-                    alt={selectedCreatorProfile.name}
-                    className="pool-hub-creator-avatar-lg"
-                  />
-                ) : (
-                  <span className="pool-hub-creator-avatar-lg pool-hub-creator-avatar-fallback">
-                    {selectedCreatorProfile.name.charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <div>
-                  <h3>{selectedCreatorProfile.name}</h3>
-                  {selectedCreatorProfile.profile?.bio && (
-                    <p className="pool-hub-creator-bio">{selectedCreatorProfile.profile.bio}</p>
-                  )}
-                </div>
-              </div>
-              <div className="pool-hub-creator-stats">
-                <span>{selectedCreatorProfile.uploads} uploads</span>
-                <span>{selectedCreatorProfile.totalDownloads} downloads</span>
-                <span>{selectedCreatorProfile.avgRating.toFixed(1)} avg rating</span>
-              </div>
-            </div>
-            {selectedCreatorProfile.profile?.links && (
-              <div className="pool-hub-creator-links">
-                {Object.entries(selectedCreatorProfile.profile.links).map(([label, url]) => (
-                  <a key={label} href={url} target="_blank" rel="noreferrer">
-                    {label}
-                  </a>
-                ))}
-              </div>
-            )}
-            <div className="pool-hub-creator-tags">
-              {(selectedCreatorProfile.profile?.tags && selectedCreatorProfile.profile.tags.length > 0
-                ? selectedCreatorProfile.profile.tags
-                : Object.entries(selectedCreatorProfile.tags)
-                  .sort((a, b) => b[1] - a[1])
-                  .slice(0, 8)
-                  .map(([tag]) => tag)
-              ).map(tag => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
-            <div className="pool-hub-creator-uploads">
-              {selectedCreatorProfile.entries.length === 0 ? (
-                <div className="pool-hub-empty">No Hub uploads yet.</div>
-              ) : (
-                selectedCreatorProfile.entries.map(entry => (
-                  <button
-                    key={entry.id}
-                    type="button"
-                    className="pool-hub-creator-upload"
-                    onClick={() => {
-                      setSelectedId(entry.id);
-                      setIsDetailOpen(true);
-                      setIsCreatorProfileOpen(false);
-                    }}
-                  >
-                    <div>
-                      <div className="pool-hub-creator-upload-title">{entry.title}</div>
-                      <div className="pool-hub-creator-upload-summary">{entry.summary}</div>
-                    </div>
-                    <span>{entry.ratingAvg.toFixed(1)}</span>
-                  </button>
-                ))
-              )}
-            </div>
-            <div className="pool-hub-creator-prompts">
-              <div className="pool-hub-section-title">Public prompts</div>
-              {!selectedCreatorProfile.profile?.showPublicPrompts ? (
-                <div className="pool-hub-empty">This creator keeps prompts private.</div>
-              ) : publicPromptsLoading ? (
-                <div className="pool-hub-empty">Loading prompts...</div>
-              ) : publicPromptsError ? (
-                <div className="pool-hub-error">{publicPromptsError}</div>
-              ) : publicPrompts.length === 0 ? (
-                <div className="pool-hub-empty">No public prompts yet.</div>
-              ) : (
-                <div className="pool-hub-creator-prompt-list">
-                  {publicPrompts.map(prompt => (
-                    <div key={prompt.id} className="pool-hub-creator-prompt">
-                      <div className="pool-hub-creator-prompt-title">{prompt.name}</div>
-                      <div className="pool-hub-creator-prompt-text">{prompt.positive}</div>
-                      {(prompt.model || prompt.purpose || prompt.usedAt) && (
-                        <div className="pool-hub-creator-prompt-meta">
-                          {prompt.model && <span>Model: {prompt.model}</span>}
-                          {prompt.purpose && <span>Purpose: {prompt.purpose}</span>}
-                          {prompt.usedAt && <span>Used: {prompt.usedAt}</span>}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="pool-hub-empty">Creator profile not found.</div>
-        )}
-      </Modal>
     </div>
   );
 }
