@@ -62,6 +62,10 @@ import {
 } from '../engine/workingSetStore';
 import { isCurrentUserAdmin } from '../engine/adminStore';
 import {
+  trackAnalyticsPageView,
+  trackAnalyticsSessionStart,
+} from '../engine/analyticsStore';
+import {
   createTerritory,
   deleteTerritory,
   getActiveTerritoryId,
@@ -1775,6 +1779,48 @@ export function App() {
       // ignore
     }
   }, [activePage]);
+
+  const analyticsPageKey = useMemo(() => {
+    if (!hasSeenLanding) {
+      return 'landing';
+    }
+    return activePage;
+  }, [activePage, hasSeenLanding]);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    void trackAnalyticsSessionStart({
+      pageKey: analyticsPageKey,
+      userId: authUser?.id ?? null,
+      metadata: {
+        appVersion: 'internal-v1',
+      },
+    });
+  }, [analyticsPageKey, authReady, authUser?.id]);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    void trackAnalyticsPageView({
+      pageKey: analyticsPageKey,
+      userId: authUser?.id ?? null,
+      metadata:
+        activePage === 'creator-profile'
+          ? {
+              creatorId: selectedCreatorProfileTarget?.creatorId ?? null,
+              creatorName: selectedCreatorProfileTarget?.creatorName ?? null,
+            }
+          : null,
+    });
+  }, [
+    activePage,
+    analyticsPageKey,
+    authReady,
+    authUser?.id,
+    selectedCreatorProfileTarget?.creatorId,
+    selectedCreatorProfileTarget?.creatorName,
+  ]);
 
   useEffect(() => {
     const syncFromHash = () => {
