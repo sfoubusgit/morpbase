@@ -390,4 +390,65 @@ export const poolHubMock: PoolHubEntry[] = [
       ]
     ),
   },
+  {
+    id: 'hub_alien_invade_earth_in_summer',
+    creator: 'MorpBase',
+    title: 'Alien Invade Earth in Summer',
+    summary: 'Sunlit invasion chaos, suburban extraterrestrials, and bright apocalyptic absurdity.',
+    description:
+      'An official MorpBase pool for summer invasion scenes: UFOs above beaches and suburbs, heat-haze panic, colorful alien presence, bright daylight destruction, and playful end-of-the-world contrast.',
+    tags: ['alien', 'summer', 'invasion', 'sci-fi', 'suburban', 'daylight'],
+    category: 'Illustration',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'alien_invade_earth_in_summer_pool',
+      'Alien Invade Earth in Summer',
+      now - day,
+      now,
+      [
+        { text: 'sunlit alien scout in iridescent invasion armor', section: 'Subjects', tags: ['subject', 'alien', 'armor'] },
+        { text: 'terrified beachgoer staring at a descending UFO', section: 'Subjects', tags: ['subject', 'human', 'reaction'] },
+        { text: 'extraterrestrial commander standing calmly in suburban daylight', section: 'Subjects', tags: ['subject', 'commander', 'suburb'] },
+
+        { text: 'summer suburb with sprinklers running beneath hovering saucers', section: 'Environment', tags: ['environment', 'suburb', 'ufo'] },
+        { text: 'crowded beach under a sky filled with alien ships', section: 'Environment', tags: ['environment', 'beach', 'ships'] },
+        { text: 'sun-bleached city street with evacuation chaos and bright smoke', section: 'Environment', tags: ['environment', 'city', 'evacuation'] },
+
+        { text: 'chrome UFO with glowing underside panels', section: 'Props', tags: ['props', 'ufo', 'chrome'] },
+        { text: 'alien energy rifle and translucent invasion shield', section: 'Props', tags: ['props', 'weapon', 'shield'] },
+        { text: 'abandoned pool toys, lawn chairs, and overturned coolers', section: 'Props', tags: ['props', 'summer', 'aftermath'] },
+
+        { text: 'harsh summer sunlight with crisp heat-washed contrast', section: 'Lighting', tags: ['lighting', 'sunlight', 'contrast'] },
+        { text: 'blue-sky daylight broken by strange green reflections from the ships', section: 'Lighting', tags: ['lighting', 'reflections', 'ships'] },
+        { text: 'hot suburban glare mixed with alien beam light', section: 'Lighting', tags: ['lighting', 'glare', 'beam'] },
+
+        { text: 'surreal bright-day panic', section: 'Mood', tags: ['mood', 'surreal', 'panic'] },
+        { text: 'playful apocalyptic absurdity', section: 'Mood', tags: ['mood', 'apocalyptic', 'absurd'] },
+        { text: 'sun-drenched invasion tension', section: 'Mood', tags: ['mood', 'summer', 'tension'] },
+
+        { text: 'sun-faded plastics, hot asphalt, and reflective alien alloys', section: 'Materials', tags: ['materials', 'plastic', 'alloy'] },
+        { text: 'sweaty skin, beach fabrics, and glossy extraterrestrial surfaces', section: 'Materials', tags: ['materials', 'skin', 'fabric'] },
+        { text: 'melted tar, broken glass, and polished ship metal', section: 'Materials', tags: ['materials', 'glass', 'metal'] },
+
+        { text: 'bright invasion concept art', section: 'Style', tags: ['style', 'invasion', 'concept-art'] },
+        { text: 'summer sci-fi disaster illustration', section: 'Style', tags: ['style', 'summer', 'disaster'] },
+        { text: 'sunlit suburban apocalypse visual language', section: 'Style', tags: ['style', 'suburban', 'apocalypse'] },
+
+        { text: 'wide cinematic view of beachgoers beneath descending ships', section: 'Composition', tags: ['composition', 'wide', 'beach'] },
+        { text: 'low-angle shot of the alien commander against a blue summer sky', section: 'Composition', tags: ['composition', 'low-angle', 'commander'] },
+        { text: 'street-level chaos framed by looming UFO silhouettes', section: 'Composition', tags: ['composition', 'street-level', 'ufo'] },
+
+        { text: 'heat haze warping the air beneath the ships', section: 'Effects', tags: ['effects', 'heat-haze', 'air'] },
+        { text: 'alien beam trails cutting through drifting summer smoke', section: 'Effects', tags: ['effects', 'beams', 'smoke'] },
+        { text: 'dust, debris, and inflatable toys tumbling across the scene', section: 'Effects', tags: ['effects', 'debris', 'motion'] },
+      ]
+    ),
+  },
 ];
