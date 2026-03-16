@@ -75,6 +75,8 @@ type WorkingSetUploadState = {
   jsonInput: string;
 };
 
+const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
+
 const DEFAULT_UPLOAD_STATE: UploadFormState = {
   creator: '',
   title: '',
@@ -232,6 +234,11 @@ const parseProfileLinks = (raw: string) => {
     links[label || `Link ${index + 1}`] = url;
   });
   return Object.keys(links).length > 0 ? links : null;
+};
+
+const isOfficialPoolEntry = (entry: { creator?: string; creatorId?: string }) => {
+  const creatorName = entry.creator?.trim().toLowerCase() ?? '';
+  return entry.creatorId === 'morpbase-official' || OFFICIAL_CREATOR_NAMES.has(creatorName);
 };
 
 type PoolHubPageProps = {
@@ -630,6 +637,16 @@ export function PoolHubPage({
 
     return sorted;
   }, [entries, workingSetEntries, hubMode, searchTerm, tagFilter, categoryFilter, languageFilter, sortMode, showMyUploads, userName, userId, minRating]);
+
+  const officialPoolEntries = useMemo(() => {
+    if (hubMode !== 'pools') return [];
+    return filteredEntries.filter(entry => isOfficialPoolEntry(entry));
+  }, [filteredEntries, hubMode]);
+
+  const communityPoolEntries = useMemo(() => {
+    if (hubMode !== 'pools') return [];
+    return filteredEntries.filter(entry => !isOfficialPoolEntry(entry));
+  }, [filteredEntries, hubMode]);
 
   const selectedEntry = useMemo(() => {
     if (hubMode === 'working-sets') {
@@ -1120,6 +1137,62 @@ export function PoolHubPage({
 
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
+  const renderHubCard = (entry: PoolHubEntry | WorkingSetHubEntry) => (
+    <button
+      key={entry.id}
+      type="button"
+      className={`pool-hub-card ${entry.id === selectedEntry?.id ? 'active' : ''}`}
+      onClick={() => {
+        if (hubMode === 'working-sets') {
+          setSelectedWorkingSetId(entry.id);
+        } else {
+          setSelectedId(entry.id);
+        }
+        setAddMessage(null);
+        setShowAllItems(false);
+      }}
+    >
+      <div className="pool-hub-card-hero" />
+      <div className="pool-hub-card-body">
+        <div className="pool-hub-card-title">{entry.title}</div>
+        <div className="pool-hub-card-summary">{entry.summary}</div>
+        {(entry.creator || entry.creatorId) && (
+          <div className="pool-hub-card-creator">
+            <button
+              type="button"
+              className="pool-hub-link-button"
+              onClick={(event) => {
+                event.stopPropagation();
+                const creatorId = entry.creatorId
+                  ? `id:${entry.creatorId}`
+                  : `name:${resolveCreatorName(entry)}`;
+                openCreatorProfile(creatorId);
+              }}
+            >
+              by {resolveCreatorName(entry)}
+            </button>
+            {hubMode === 'pools' && isOfficialPoolEntry(entry) && (
+              <span className="pool-hub-official-badge">MorpBase</span>
+            )}
+            {((userId && entry.creatorId === userId) || (!userId && userName && entry.creator === userName)) && (
+              <span className="pool-hub-owner-badge">Your upload</span>
+            )}
+          </div>
+        )}
+        <div className="pool-hub-card-meta">
+          <span>{entry.category}</span>
+          <span>{entry.ratingAvg.toFixed(1)} / 5</span>
+          <span>{entry.downloads} downloads</span>
+        </div>
+        <div className="pool-hub-card-tags">
+          {entry.tags.slice(0, 4).map(tag => (
+            <span key={tag}>{tag}</span>
+          ))}
+        </div>
+      </div>
+    </button>
+  );
+
   return (
     <div className="pool-hub-page">
       <header className="pool-hub-header">
@@ -1343,68 +1416,57 @@ export function PoolHubPage({
 
       <div className="pool-hub-layout">
         <section className="pool-hub-panel pool-hub-panel-grid">
-          <div className="pool-hub-grid">
-            {filteredEntries.length === 0 ? (
-              <div className="pool-hub-empty">
-                {showMyUploads
-                  ? `No uploads yet. Upload a ${hubMode === 'working-sets' ? 'working set' : 'pool'} to see it here.`
-                  : `No ${hubMode === 'working-sets' ? 'working sets' : 'pools'} match your filters.`}
-              </div>
-            ) : (
-              filteredEntries.map(entry => (
-                <button
-                  key={entry.id}
-                  type="button"
-                  className={`pool-hub-card ${entry.id === selectedEntry?.id ? 'active' : ''}`}
-                  onClick={() => {
-                    if (hubMode === 'working-sets') {
-                      setSelectedWorkingSetId(entry.id);
-                    } else {
-                      setSelectedId(entry.id);
-                    }
-                    setAddMessage(null);
-                    setShowAllItems(false);
-                  }}
-                >
-                  <div className="pool-hub-card-hero" />
-                  <div className="pool-hub-card-body">
-                    <div className="pool-hub-card-title">{entry.title}</div>
-                    <div className="pool-hub-card-summary">{entry.summary}</div>
-                    {(entry.creator || entry.creatorId) && (
-                      <div className="pool-hub-card-creator">
-                        <button
-                          type="button"
-                          className="pool-hub-link-button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            const creatorId = entry.creatorId
-                              ? `id:${entry.creatorId}`
-                              : `name:${resolveCreatorName(entry)}`;
-                            openCreatorProfile(creatorId);
-                          }}
-                        >
-                          by {resolveCreatorName(entry)}
-                        </button>
-                        {((userId && entry.creatorId === userId) || (!userId && userName && entry.creator === userName)) && (
-                          <span className="pool-hub-owner-badge">Your upload</span>
-                        )}
-                      </div>
-                    )}
-                    <div className="pool-hub-card-meta">
-                      <span>{entry.category}</span>
-                      <span>{entry.ratingAvg.toFixed(1)} / 5</span>
-                      <span>{entry.downloads} downloads</span>
-                    </div>
-                    <div className="pool-hub-card-tags">
-                      {entry.tags.slice(0, 4).map(tag => (
-                        <span key={tag}>{tag}</span>
-                      ))}
-                    </div>
+          {filteredEntries.length === 0 ? (
+            <div className="pool-hub-empty">
+              {showMyUploads
+                ? `No uploads yet. Upload a ${hubMode === 'working-sets' ? 'working set' : 'pool'} to see it here.`
+                : `No ${hubMode === 'working-sets' ? 'working sets' : 'pools'} match your filters.`}
+            </div>
+          ) : hubMode === 'pools' ? (
+            <div className="pool-hub-source-sections">
+              <div className="pool-hub-source-section">
+                <div className="pool-hub-source-section-header">
+                  <div>
+                    <div className="pool-hub-section-title">MorpBase Pools</div>
+                    <div className="pool-hub-muted">Official curated pools provided by MorpBase.</div>
                   </div>
-                </button>
-              ))
-            )}
-          </div>
+                  <span className="pool-hub-source-count">{officialPoolEntries.length}</span>
+                </div>
+                {officialPoolEntries.length === 0 ? (
+                  <div className="pool-hub-empty pool-hub-source-empty">
+                    No official MorpBase pools are published here yet.
+                  </div>
+                ) : (
+                  <div className="pool-hub-grid">
+                    {officialPoolEntries.map(entry => renderHubCard(entry))}
+                  </div>
+                )}
+              </div>
+
+              <div className="pool-hub-source-section">
+                <div className="pool-hub-source-section-header">
+                  <div>
+                    <div className="pool-hub-section-title">Community Pools</div>
+                    <div className="pool-hub-muted">Downloadable pools uploaded by MorpBase users.</div>
+                  </div>
+                  <span className="pool-hub-source-count">{communityPoolEntries.length}</span>
+                </div>
+                {communityPoolEntries.length === 0 ? (
+                  <div className="pool-hub-empty pool-hub-source-empty">
+                    No community pools match your current filters.
+                  </div>
+                ) : (
+                  <div className="pool-hub-grid">
+                    {communityPoolEntries.map(entry => renderHubCard(entry))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="pool-hub-grid">
+              {filteredEntries.map(entry => renderHubCard(entry))}
+            </div>
+          )}
         </section>
 
         <aside className="pool-hub-panel pool-hub-panel-detail">
