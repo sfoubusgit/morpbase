@@ -619,7 +619,9 @@
 
 .pool-hub-grid {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 340px));
   gap: 12px;
+  justify-content: start;
 }
 
 .pool-hub-source-sections {
@@ -668,6 +670,8 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 0;
+  width: 100%;
+  max-width: 340px;
   padding: 12px;
   border-radius: 18px;
   background:
@@ -1072,6 +1076,10 @@
 }
 
 @media (max-width: 960px) {
+  .pool-hub-grid {
+    grid-template-columns: 1fr;
+  }
+
   .pool-hub-detail-shell {
     grid-template-columns: 1fr;
   }
