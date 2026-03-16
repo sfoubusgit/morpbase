@@ -21,6 +21,24 @@ import { defaultUserPools } from '../../data/defaultUserPools';
 import { Modal } from './Modal';
 import './UserPoolsPage.css';
 
+const TERRITORY_PRESETS = [
+  {
+    id: 'summer-shockfront',
+    name: 'Summer Shockfront',
+    description: 'A bright combined territory where playful summer action collides with surreal daylight alien invasion.',
+    sources: [
+      { poolName: 'Alien Invade Earth in Summer', section: 'Subjects' },
+      { poolName: 'Alien Invade Earth in Summer', section: 'Environment' },
+      { poolName: 'Alien Invade Earth in Summer', section: 'Lighting' },
+      { poolName: 'Alien Invade Earth in Summer', section: 'Effects' },
+      { poolName: 'Adventure Time: Paintball Mania', section: 'Props' },
+      { poolName: 'Adventure Time: Paintball Mania', section: 'Mood' },
+      { poolName: 'Adventure Time: Paintball Mania', section: 'Style' },
+      { poolName: 'Adventure Time: Paintball Mania', section: 'Composition' },
+    ],
+  },
+] as const;
+
 type UserPoolsPageProps = {
   onAddToPrompt?: (text: string) => void;
   onAppendToPrompt?: (text: string, targetId?: string) => void;
@@ -306,6 +324,57 @@ export function UserPoolsPage({
 
   const getPoolSections = (poolId: string) =>
     sectionedPools.find(pool => pool.id === poolId)?.availableSections ?? [];
+
+  const applyTerritoryPreset = (presetId: string) => {
+    const preset = TERRITORY_PRESETS.find(entry => entry.id === presetId);
+    if (!preset) return;
+
+    const resolvedSources: Array<{ poolId: string; section: string }> = [];
+    const missingPools = new Set<string>();
+    const missingSections: string[] = [];
+
+    preset.sources.forEach(source => {
+      const pool = sectionedPools.find(entry => entry.name === source.poolName);
+      if (!pool) {
+        missingPools.add(source.poolName);
+        return;
+      }
+      if (!pool.availableSections.includes(source.section)) {
+        missingSections.push(`${source.section} in ${source.poolName}`);
+        return;
+      }
+      resolvedSources.push({
+        poolId: pool.id,
+        section: source.section,
+      });
+    });
+
+    if (resolvedSources.length === 0) {
+      setTerritoryError(`Missing required pools in your library: ${[...missingPools].join(', ')}.`);
+      setTerritoryMessage('Add those official pools to User Pools first, then load the preset again.');
+      return;
+    }
+
+    setTerritoryDraftId(null);
+    setTerritoryName(preset.name);
+    setTerritoryDescription(preset.description);
+    setTerritorySources(resolvedSources);
+    setTerritoryError(
+      missingPools.size > 0 || missingSections.length > 0
+        ? [
+            missingPools.size > 0 ? `Missing pools: ${[...missingPools].join(', ')}` : '',
+            missingSections.length > 0 ? `Missing sections: ${missingSections.join(', ')}` : '',
+          ]
+            .filter(Boolean)
+            .join(' • ')
+        : null
+    );
+    setTerritoryMessage(
+      missingPools.size > 0 || missingSections.length > 0
+        ? 'Loaded the available parts of the preset. Add the missing sources to complete it.'
+        : `Loaded preset Territory: ${preset.name}`
+    );
+  };
 
   const resetTerritoryDraft = () => {
     setTerritoryDraftId(null);
@@ -1587,6 +1656,18 @@ export function UserPoolsPage({
           <div className="user-pools-territory-overview">
             <div className="user-pools-helper">
               Compose a creative territory from selected pool sections, then open it in Builder.
+            </div>
+            <div className="user-pools-territory-preset-row">
+              {TERRITORY_PRESETS.map(preset => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  className="user-pools-territory-preset"
+                  onClick={() => applyTerritoryPreset(preset.id)}
+                >
+                  Load {preset.name}
+                </button>
+              ))}
             </div>
             <div className="user-pools-territory-stat-row">
               <div className="user-pools-territory-stat">
