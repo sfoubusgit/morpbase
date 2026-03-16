@@ -954,6 +954,36 @@ export function PoolHubPage({
     ].filter(Boolean) as string[];
   }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount]);
 
+  const detailInfoRows = useMemo(() => {
+    if (!selectedEntry) return [];
+    return [
+      ['Type', 'Pool'],
+      ['Category', selectedEntry.category],
+      ['Language', selectedEntry.languages.join(', ').toUpperCase()],
+      ['License', selectedEntry.license],
+      ['Published', new Date(selectedEntry.createdAt).toLocaleDateString()],
+      ['Updated', new Date(selectedEntry.updatedAt).toLocaleDateString()],
+    ] as Array<[string, string]>;
+  }, [selectedEntry]);
+
+  const detailStructureRows = useMemo(() => {
+    if (!selectedEntry) return [];
+    return [
+      ['Items', String(selectedPoolItems.length)],
+      ['Sections', selectedPoolSectionCount > 0 ? String(selectedPoolSectionCount) : 'Flat pool'],
+      [
+        'Layout',
+        selectedPoolSectionCount > 0
+          ? selectedPoolSections
+              .map(([section]) => section)
+              .slice(0, 5)
+              .join(', ')
+          : 'Unsectioned',
+      ],
+      ['Creator', resolveCreatorName(selectedEntry)],
+    ] as Array<[string, string]>;
+  }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount, selectedPoolSections]);
+
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
   const renderHubCard = (entry: PoolHubEntry) => (
@@ -1811,6 +1841,30 @@ export function PoolHubPage({
                     Avg {selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})
                   </div>
                 </div>
+
+                <details className="pool-hub-detail-rail-card pool-hub-detail-panel" open>
+                  <summary className="pool-hub-detail-panel-summary">Details</summary>
+                  <div className="pool-hub-detail-panel-body">
+                    {detailInfoRows.map(([label, value]) => (
+                      <div key={label} className="pool-hub-detail-row">
+                        <span className="pool-hub-detail-row-label">{label}</span>
+                        <span className="pool-hub-detail-row-value">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+
+                <details className="pool-hub-detail-rail-card pool-hub-detail-panel">
+                  <summary className="pool-hub-detail-panel-summary">Structure</summary>
+                  <div className="pool-hub-detail-panel-body">
+                    {detailStructureRows.map(([label, value]) => (
+                      <div key={label} className="pool-hub-detail-row">
+                        <span className="pool-hub-detail-row-label">{label}</span>
+                        <span className="pool-hub-detail-row-value">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </details>
 
                 <div className="pool-hub-detail-rail-card pool-hub-report-card">
                   <div className="pool-hub-section-title">Report</div>

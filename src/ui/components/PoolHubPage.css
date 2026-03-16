@@ -498,6 +498,53 @@
     rgba(17, 20, 31, 0.94);
 }
 
+.pool-hub-detail-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.pool-hub-detail-panel-summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #e3e8ff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pool-hub-detail-panel-summary::-webkit-details-marker {
+  display: none;
+}
+
+.pool-hub-detail-panel-body {
+  display: grid;
+  gap: 0;
+  padding: 0 14px 14px 14px;
+}
+
+.pool-hub-detail-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pool-hub-detail-row-label {
+  font-size: 11px;
+  color: #9fa8c9;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pool-hub-detail-row-value {
+  font-size: 12px;
+  color: #edf1ff;
+  text-align: right;
+}
+
 .pool-hub-panel {
   background: rgba(15, 18, 28, 0.86);
   border-radius: 20px;
