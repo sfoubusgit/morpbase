@@ -1001,53 +1001,78 @@ export function PoolHubPage({
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
   const renderHubCard = (entry: PoolHubEntry) => (
-    <button
-      key={entry.id}
-      type="button"
-      className={`pool-hub-card ${entry.id === selectedEntry?.id ? 'active' : ''}`}
-      onClick={() => {
-        setSelectedId(entry.id);
-        setIsDetailOpen(true);
-        setAddMessage(null);
-        setShowAllItems(false);
-      }}
-    >
-      <div className="pool-hub-card-hero" />
-      <div className="pool-hub-card-body">
-        <div className="pool-hub-card-title">{entry.title}</div>
-        <div className="pool-hub-card-summary">{entry.summary}</div>
-        {(entry.creator || entry.creatorId) && (
-          <div className="pool-hub-card-creator">
-            <button
-              type="button"
-              className="pool-hub-link-button"
-              onClick={(event) => {
-                event.stopPropagation();
-                openCreatorProfileFromEntry(entry);
-              }}
-            >
-              by {resolveCreatorName(entry)}
-            </button>
-            {hubMode === 'pools' && isOfficialPoolEntry(entry) && (
-              <span className="pool-hub-official-badge">MorpBase</span>
-            )}
-            {((userId && entry.creatorId === userId) || (!userId && userName && entry.creator === userName)) && (
-              <span className="pool-hub-owner-badge">Your upload</span>
-            )}
+    (() => {
+      const entryItems = (entry.payload as Pool).items;
+      const sectionNames = [...new Set(entryItems.map(item => item.section?.trim()).filter(Boolean))];
+      const heroStyle = entry.heroImageUrl
+        ? { backgroundImage: `linear-gradient(180deg, rgba(10, 12, 20, 0.08), rgba(10, 12, 20, 0.5)), url(${entry.heroImageUrl})` }
+        : undefined;
+
+      return (
+        <button
+          key={entry.id}
+          type="button"
+          className={`pool-hub-card ${entry.id === selectedEntry?.id ? 'active' : ''}`}
+          onClick={() => {
+            setSelectedId(entry.id);
+            setIsDetailOpen(true);
+            setAddMessage(null);
+            setShowAllItems(false);
+          }}
+        >
+          <div className="pool-hub-card-hero" style={heroStyle}>
+            <div className="pool-hub-card-hero-top">
+              <div className="pool-hub-card-badges">
+                <span className={`pool-hub-card-badge ${isOfficialPoolEntry(entry) ? 'pool-hub-card-badge-official' : ''}`}>
+                  {isOfficialPoolEntry(entry) ? 'MorpBase' : 'Community'}
+                </span>
+                {sectionNames.length > 0 && (
+                  <span className="pool-hub-card-badge">{sectionNames.length} sections</span>
+                )}
+              </div>
+              <div className="pool-hub-card-stat">{entry.downloads} dl</div>
+            </div>
+            <div className="pool-hub-card-hero-bottom">
+              <div className="pool-hub-card-hero-title">{entry.title}</div>
+              <div className="pool-hub-card-hero-meta">
+                <span>{entry.ratingAvg.toFixed(1)} rating</span>
+                <span>{entryItems.length} items</span>
+              </div>
+            </div>
           </div>
-        )}
-        <div className="pool-hub-card-meta">
-          <span>{entry.category}</span>
-          <span>{entry.ratingAvg.toFixed(1)} / 5</span>
-          <span>{entry.downloads} downloads</span>
-        </div>
-        <div className="pool-hub-card-tags">
-          {entry.tags.slice(0, 4).map(tag => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </div>
-      </div>
-    </button>
+          <div className="pool-hub-card-body">
+            <div className="pool-hub-card-summary">{entry.summary}</div>
+            {(entry.creator || entry.creatorId) && (
+              <div className="pool-hub-card-creator">
+                <button
+                  type="button"
+                  className="pool-hub-link-button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    openCreatorProfileFromEntry(entry);
+                  }}
+                >
+                  by {resolveCreatorName(entry)}
+                </button>
+                {((userId && entry.creatorId === userId) || (!userId && userName && entry.creator === userName)) && (
+                  <span className="pool-hub-owner-badge">Your upload</span>
+                )}
+              </div>
+            )}
+            <div className="pool-hub-card-meta">
+              <span>{entry.category}</span>
+              <span>{entry.languages.join(', ').toUpperCase()}</span>
+              <span>{entry.license}</span>
+            </div>
+            <div className="pool-hub-card-tags">
+              {(sectionNames.length > 0 ? sectionNames : entry.tags).slice(0, 4).map(tag => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
+          </div>
+        </button>
+      );
+    })()
   );
 
   const detailComments = comments;
