@@ -7,6 +7,22 @@
     radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 24%);
 }
 
+.pool-hub-mode-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .pool-hub-top {
   display: grid;
   gap: 16px;
@@ -366,8 +382,21 @@
 
 .pool-hub-layout {
   display: grid;
-  grid-template-columns: 1.45fr 1fr;
+  grid-template-columns: 1fr;
   gap: 20px;
+}
+
+.pool-hub-panel-detail {
+  display: none;
+}
+
+.pool-hub-detail-modal {
+  max-width: 920px;
+}
+
+.pool-hub-detail-modal-body {
+  display: grid;
+  gap: 14px;
 }
 
 .pool-hub-panel {

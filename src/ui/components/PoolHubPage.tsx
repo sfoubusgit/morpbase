@@ -261,7 +261,7 @@ export function PoolHubPage({
   manualUrl,
 }: PoolHubPageProps) {
   const canInteract = isLoggedIn && isPro;
-  const [hubMode, setHubMode] = useState<HubMode>('pools');
+  const hubMode: HubMode = 'pools';
   const [entries, setEntries] = useState<PoolHubEntry[]>(() => listHubEntries());
   const [workingSetEntries, setWorkingSetEntries] = useState<WorkingSetHubEntry[]>(() => listWorkingSetHubEntries());
   const [selectedId, setSelectedId] = useState<string>(entries[0]?.id ?? '');
@@ -274,6 +274,7 @@ export function PoolHubPage({
   const [minRating, setMinRating] = useState(0);
   const [showAllItems, setShowAllItems] = useState(false);
   const [addMessage, setAddMessage] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isWorkingSetUploadOpen, setIsWorkingSetUploadOpen] = useState(false);
   const [showMyUploads, setShowMyUploads] = useState(false);
@@ -335,17 +336,6 @@ export function PoolHubPage({
     } catch {
       setUserPools([]);
       setSelectedUserPoolId('');
-    }
-  };
-
-  const refreshUserWorkingSets = async () => {
-    try {
-      const sets = await listWorkingSets();
-      setUserWorkingSets(sets);
-      setSelectedUserWorkingSetId(sets[0]?.id ?? '');
-    } catch {
-      setUserWorkingSets([]);
-      setSelectedUserWorkingSetId('');
     }
   };
 
@@ -446,29 +436,24 @@ export function PoolHubPage({
   };
 
   useEffect(() => {
-    if (hubMode === 'working-sets') {
-      setSelectedWorkingSetId(workingSetEntries[0]?.id ?? '');
-      refreshUserWorkingSets();
-    } else {
-      setSelectedId(entries[0]?.id ?? '');
-      refreshUserPools();
-    }
+    setSelectedId(entries[0]?.id ?? '');
+    refreshUserPools();
     setShowAllItems(false);
     setAddMessage(null);
-  }, [hubMode, entries, workingSetEntries]);
+  }, [entries]);
 
   const categories = useMemo(() => {
-    const source = hubMode === 'working-sets' ? workingSetEntries : entries;
+    const source = entries;
     return Array.from(new Set(source.map(entry => entry.category))).sort();
-  }, [entries, workingSetEntries, hubMode]);
+  }, [entries]);
 
   const languages = useMemo(() => {
-    const source = hubMode === 'working-sets' ? workingSetEntries : entries;
+    const source = entries;
     return Array.from(new Set(source.flatMap(entry => entry.languages))).sort();
-  }, [entries, workingSetEntries, hubMode]);
+  }, [entries]);
 
   const creatorProfiles = useMemo(() => {
-    const source = hubMode === 'working-sets' ? workingSetEntries : entries;
+    const source = entries;
     const profiles = new Map<string, {
       id: string;
       name: string;
@@ -529,7 +514,7 @@ export function PoolHubPage({
       if (b.uploads !== a.uploads) return b.uploads - a.uploads;
       return a.name.localeCompare(b.name);
     });
-  }, [entries, workingSetEntries, hubMode, publicProfiles, publicProfileByUserId, publicProfileByName]);
+  }, [entries, publicProfiles, publicProfileByUserId, publicProfileByName]);
 
   const filteredCreators = useMemo(() => {
     const term = creatorSearchTerm.trim().toLowerCase();
@@ -590,7 +575,7 @@ export function PoolHubPage({
   }, [isCreatorProfileOpen, selectedCreatorProfile?.userId, selectedCreatorProfile?.profile?.showPublicPrompts]);
 
   const filteredEntries = useMemo(() => {
-    const activeEntries = hubMode === 'working-sets' ? workingSetEntries : entries;
+    const activeEntries = entries;
     const term = searchTerm.trim().toLowerCase();
     const tagTerm = tagFilter.trim().toLowerCase();
     const tagParts = tagTerm
@@ -636,83 +621,51 @@ export function PoolHubPage({
     });
 
     return sorted;
-  }, [entries, workingSetEntries, hubMode, searchTerm, tagFilter, categoryFilter, languageFilter, sortMode, showMyUploads, userName, userId, minRating]);
+  }, [entries, searchTerm, tagFilter, categoryFilter, languageFilter, sortMode, showMyUploads, userName, userId, minRating]);
 
   const officialPoolEntries = useMemo(() => {
-    if (hubMode !== 'pools') return [];
     return filteredEntries.filter(entry => isOfficialPoolEntry(entry));
-  }, [filteredEntries, hubMode]);
+  }, [filteredEntries]);
 
   const communityPoolEntries = useMemo(() => {
-    if (hubMode !== 'pools') return [];
     return filteredEntries.filter(entry => !isOfficialPoolEntry(entry));
-  }, [filteredEntries, hubMode]);
+  }, [filteredEntries]);
 
   const selectedEntry = useMemo(() => {
-    if (hubMode === 'working-sets') {
-      const match = filteredEntries.find(entry => entry.id === selectedWorkingSetId);
-      if (match) return match;
-      return filteredEntries[0] ?? null;
-    }
     const match = filteredEntries.find(entry => entry.id === selectedId);
     if (match) return match;
     return filteredEntries[0] ?? null;
-  }, [filteredEntries, selectedId, selectedWorkingSetId, hubMode]);
+  }, [filteredEntries, selectedId]);
 
   useEffect(() => {
     if (!selectedEntry) {
       setUserRatingState(null);
-      setWorkingSetUserRatingState(null);
       setComments([]);
-      setWorkingSetComments([]);
       setCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
-      setWorkingSetCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
       return;
     }
-    if (hubMode === 'working-sets') {
-      if (userId) {
-        setWorkingSetUserRatingState(getWorkingSetUserRating(selectedEntry.id, userId));
-      } else {
-        setWorkingSetUserRatingState(null);
-      }
-      setWorkingSetComments(listWorkingSetHubComments(selectedEntry.id));
-      if (selectedEntry.creator) {
-        const creatorEntries = workingSetEntries.filter(entry =>
-          entry.creatorId ? entry.creatorId === selectedEntry.creatorId : entry.creator === selectedEntry.creator
-        );
-        const uploads = creatorEntries.length;
-        const totalDownloads = creatorEntries.reduce((sum, entry) => sum + entry.downloads, 0);
-        const avgRating = uploads === 0
-          ? 0
-          : creatorEntries.reduce((sum, entry) => sum + entry.ratingAvg, 0) / uploads;
-        setWorkingSetCreatorStats({ uploads, totalDownloads, avgRating });
-      } else {
-        setWorkingSetCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
-      }
+    if (userId) {
+      setUserRatingState(getUserRating(selectedEntry.id, userId));
     } else {
-      if (userId) {
-        setUserRatingState(getUserRating(selectedEntry.id, userId));
-      } else {
-        setUserRatingState(null);
-      }
-      setComments(listHubComments(selectedEntry.id));
-      if (selectedEntry.creator) {
-        const creatorEntries = entries.filter(entry =>
-          entry.creatorId ? entry.creatorId === selectedEntry.creatorId : entry.creator === selectedEntry.creator
-        );
-        const uploads = creatorEntries.length;
-        const totalDownloads = creatorEntries.reduce((sum, entry) => sum + entry.downloads, 0);
-        const avgRating = uploads === 0
-          ? 0
-          : creatorEntries.reduce((sum, entry) => sum + entry.ratingAvg, 0) / uploads;
-        setCreatorStats({ uploads, totalDownloads, avgRating });
-      } else {
-        setCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
-      }
+      setUserRatingState(null);
+    }
+    setComments(listHubComments(selectedEntry.id));
+    if (selectedEntry.creator) {
+      const creatorEntries = entries.filter(entry =>
+        entry.creatorId ? entry.creatorId === selectedEntry.creatorId : entry.creator === selectedEntry.creator
+      );
+      const uploads = creatorEntries.length;
+      const totalDownloads = creatorEntries.reduce((sum, entry) => sum + entry.downloads, 0);
+      const avgRating = uploads === 0
+        ? 0
+        : creatorEntries.reduce((sum, entry) => sum + entry.ratingAvg, 0) / uploads;
+      setCreatorStats({ uploads, totalDownloads, avgRating });
+    } else {
+      setCreatorStats({ uploads: 0, totalDownloads: 0, avgRating: 0 });
     }
     setCommentError(null);
     setCommentBody('');
-  }, [selectedEntry?.id, userId, entries, workingSetEntries, hubMode]);
+  }, [selectedEntry?.id, userId, entries]);
 
   const handleSaveProfile = async () => {
     if (!isLoggedIn) {
@@ -753,7 +706,7 @@ export function PoolHubPage({
 
   const handleAddToActive = async () => {
     if (!isLoggedIn) {
-      setAuthNotice(hubMode === 'working-sets' ? 'Log in to add Working Sets.' : 'Log in to add pools to User Pools.');
+      setAuthNotice('Log in to add pools to User Pools.');
       onRequestLogin?.();
       return;
     }
@@ -762,15 +715,6 @@ export function PoolHubPage({
       return;
     }
     if (!selectedEntry) return;
-    if (hubMode === 'working-sets') {
-      const confirmed = window.confirm('Add this Working Set to your Working Sets? Existing sets with the same name will merge.');
-      if (!confirmed) return;
-      const imported = await importWorkingSetPayload({ version: 2, workingSet: selectedEntry.payload as WorkingSet }, 'merge');
-      setActiveWorkingSetId(imported.id);
-      setAddMessage('Added to Working Sets (merged).');
-      refreshUserWorkingSets();
-      return;
-    }
     const confirmed = window.confirm('Add this pool to User Pools? Existing pools with the same name will merge.');
     if (!confirmed) return;
     await importPoolPayload({ version: 1, pool: selectedEntry.payload as Pool }, 'merge');
@@ -780,7 +724,7 @@ export function PoolHubPage({
 
   const handleRate = (rating: number) => {
     if (!isLoggedIn) {
-      setAuthNotice(hubMode === 'working-sets' ? 'Log in to rate Working Sets.' : 'Log in to rate pools.');
+      setAuthNotice('Log in to rate pools.');
       onRequestLogin?.();
       return;
     }
@@ -790,12 +734,6 @@ export function PoolHubPage({
     }
     if (!selectedEntry) return;
     if (!userId) return;
-    if (hubMode === 'working-sets') {
-      const next = setWorkingSetUserRating(selectedEntry.id, userId, rating);
-      setWorkingSetEntries(next);
-      setWorkingSetUserRatingState(rating);
-      return;
-    }
     const next = setUserRating(selectedEntry.id, userId, rating);
     setEntries(next);
     setUserRatingState(rating);
@@ -818,77 +756,48 @@ export function PoolHubPage({
       return;
     }
     const authorLabel = commentAuthor.trim() || userName || 'Anonymous';
-    if (hubMode === 'working-sets') {
-      addWorkingSetHubComment(selectedEntry.id, authorLabel, trimmed, userId ?? undefined);
-      setWorkingSetComments(listWorkingSetHubComments(selectedEntry.id));
-    } else {
-      addHubComment(selectedEntry.id, authorLabel, trimmed, userId ?? undefined);
-      setComments(listHubComments(selectedEntry.id));
-    }
+    addHubComment(selectedEntry.id, authorLabel, trimmed, userId ?? undefined);
+    setComments(listHubComments(selectedEntry.id));
     setCommentBody('');
     setCommentError(null);
   };
 
   const handleEditComment = (commentId: string, body: string) => {
     if (!userId) return;
-    if (hubMode === 'working-sets') {
-      updateWorkingSetHubComment(commentId, userId, body);
-      setWorkingSetComments(listWorkingSetHubComments(selectedEntry?.id ?? ''));
-    } else {
-      updateHubComment(commentId, userId, body);
-      setComments(listHubComments(selectedEntry?.id ?? ''));
-    }
+    updateHubComment(commentId, userId, body);
+    setComments(listHubComments(selectedEntry?.id ?? ''));
     setEditingCommentId(null);
     setEditingCommentBody('');
   };
 
   const handleDeleteComment = (commentId: string) => {
     if (!userId) return;
-    if (hubMode === 'working-sets') {
-      deleteWorkingSetHubComment(commentId, userId);
-      setWorkingSetComments(listWorkingSetHubComments(selectedEntry?.id ?? ''));
-    } else {
-      deleteHubComment(commentId, userId);
-      setComments(listHubComments(selectedEntry?.id ?? ''));
-    }
+    deleteHubComment(commentId, userId);
+    setComments(listHubComments(selectedEntry?.id ?? ''));
   };
 
   const handleReport = () => {
     if (!selectedEntry) return;
     const reason = reportReason.trim() || 'Report';
-    if (hubMode === 'working-sets') {
-      flagWorkingSetHubEntry(selectedEntry.id, reason);
-    } else {
-      flagHubEntry(selectedEntry.id, reason);
-    }
+    flagHubEntry(selectedEntry.id, reason);
     setReportReason('');
   };
 
   const handleDeletePool = () => {
     if (!selectedEntry || !userId) return;
     if (selectedEntry.creatorId !== userId) return;
-    const confirmed = window.confirm(
-      hubMode === 'working-sets'
-        ? 'Delete this Working Set from the Hub? This cannot be undone.'
-        : 'Delete this pool from the Hub? This cannot be undone.'
-    );
+    const confirmed = window.confirm('Delete this pool from the Hub? This cannot be undone.');
     if (!confirmed) return;
-    if (hubMode === 'working-sets') {
-      const next = removeWorkingSetHubEntry(selectedEntry.id);
-      setWorkingSetEntries(next);
-      setSelectedWorkingSetId(next[0]?.id ?? '');
-      setAddMessage('Working Set removed from Hub.');
-      return;
-    }
     const next = removeHubEntry(selectedEntry.id);
     setEntries(next);
     setSelectedId(next[0]?.id ?? '');
+    setIsDetailOpen(false);
     setAddMessage('Pool removed from Hub.');
   };
 
   const handleExportHub = () => {
     try {
-      const payload = hubMode === 'working-sets' ? exportWorkingSetHubStore() : exportHubStore();
+      const payload = exportHubStore();
       setAdminJson(JSON.stringify(payload, null, 2));
       setAdminMessage('Exported Hub data.');
       setAdminError(null);
@@ -900,13 +809,8 @@ export function PoolHubPage({
   const handleImportHub = () => {
     try {
       const parsed = JSON.parse(adminJson);
-      if (hubMode === 'working-sets') {
-        importWorkingSetHubStore(parsed);
-        setWorkingSetEntries(listWorkingSetHubEntries());
-      } else {
-        importHubStore(parsed);
-        setEntries(listHubEntries());
-      }
+      importHubStore(parsed);
+      setEntries(listHubEntries());
       setAdminMessage('Imported Hub data.');
       setAdminError(null);
     } catch (err: any) {
@@ -917,22 +821,15 @@ export function PoolHubPage({
   const handleResetHub = () => {
     const confirmed = window.confirm('Reset Hub data to defaults? This will erase local Hub edits.');
     if (!confirmed) return;
-    if (hubMode === 'working-sets') {
-      const next = resetWorkingSetHubStore();
-      setWorkingSetEntries(next);
-    } else {
-      const next = resetHubStore();
-      setEntries(next);
-    }
+    const next = resetHubStore();
+    setEntries(next);
     setAdminMessage('Hub data reset.');
     setAdminError(null);
   };
 
   const handleDownloadPool = () => {
     if (!selectedEntry) return;
-    const payload = hubMode === 'working-sets'
-      ? { version: 2, workingSet: selectedEntry.payload }
-      : { version: 1, pool: selectedEntry.payload };
+    const payload = { version: 1, pool: selectedEntry.payload };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -942,7 +839,7 @@ export function PoolHubPage({
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
-    link.download = `${safeName || (hubMode === 'working-sets' ? 'working-set' : 'pool')}.json`;
+    link.download = `${safeName || 'pool'}.json`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -952,59 +849,6 @@ export function PoolHubPage({
   const handleUpload = () => {
     setUploadError(null);
     setUploadSuccess(null);
-    if (hubMode === 'working-sets') {
-      try {
-        const workingSet = parseWorkingSetPayload(workingSetUploadState.jsonInput, workingSetUploadState.title);
-        if (!workingSetUploadState.title.trim()) {
-          throw new Error('Title is required.');
-        }
-        const trimmedTitle = workingSetUploadState.title.trim() || workingSet.name;
-        const existing = workingSetEntries.some(entry => entry.title.toLowerCase() === trimmedTitle.toLowerCase());
-        if (existing) {
-          throw new Error('A Working Set with this title already exists.');
-        }
-        const now = Date.now();
-        const creatorName = myProfile?.displayName?.trim()
-          || workingSetUploadState.creator.trim()
-          || userName
-          || '';
-        if (!creatorName) {
-          throw new Error('Creator name is required. Create a public profile or enter a creator name.');
-        }
-        const entry: WorkingSetHubEntry = {
-          id: createId('hub_ws'),
-          creator: creatorName,
-          creatorId: userId || undefined,
-          title: trimmedTitle,
-          summary: workingSetUploadState.summary.trim() || 'New community working set upload.',
-          description: workingSetUploadState.description.trim() || 'No description provided.',
-          tags: workingSetUploadState.tags
-            .split(',')
-            .map(tag => tag.trim())
-            .filter(Boolean),
-          category: workingSetUploadState.category || 'General',
-          languages: [workingSetUploadState.language || 'en'],
-          license: workingSetUploadState.license || 'CC-BY',
-          heroImageUrl: workingSetUploadState.heroImageUrl.trim() || null,
-          ratingAvg: 0,
-          ratingCount: 0,
-          downloads: 0,
-          createdAt: now,
-          updatedAt: now,
-          payload: workingSet,
-        };
-        const next = addWorkingSetHubEntry(entry);
-        setWorkingSetEntries(next);
-        setSelectedWorkingSetId(entry.id);
-        setUploadSuccess('Working Set uploaded to the Hub (saved locally).');
-        setWorkingSetUploadState(DEFAULT_WS_UPLOAD_STATE);
-        setWorkingSetUploadPreview(null);
-        setIsWorkingSetUploadOpen(false);
-      } catch (err: any) {
-        setUploadError(err?.message ?? 'Failed to upload Working Set.');
-      }
-      return;
-    }
     try {
       const pool = parsePoolPayload(uploadState.jsonInput, uploadState.title);
       if (!uploadState.title.trim()) {
@@ -1049,6 +893,7 @@ export function PoolHubPage({
       const next = addHubEntry(entry);
       setEntries(next);
       setSelectedId(entry.id);
+      setIsDetailOpen(true);
       setUploadSuccess('Pool uploaded to the Hub (saved locally).');
       setUploadState(DEFAULT_UPLOAD_STATE);
       setUploadPreview(null);
@@ -1063,16 +908,6 @@ export function PoolHubPage({
     const reader = new FileReader();
     reader.onload = () => {
       const result = typeof reader.result === 'string' ? reader.result : '';
-      if (hubMode === 'working-sets') {
-        setWorkingSetUploadState(prev => ({ ...prev, jsonInput: result }));
-        try {
-          const previewSet = parseWorkingSetPayload(result, workingSetUploadState.title);
-          setWorkingSetUploadPreview(previewSet);
-        } catch {
-          setWorkingSetUploadPreview(null);
-        }
-        return;
-      }
       setUploadState(prev => ({ ...prev, jsonInput: result }));
       try {
         const previewPool = parsePoolPayload(result, uploadState.title);
@@ -1086,26 +921,6 @@ export function PoolHubPage({
 
   const handleImportFromUserPools = async () => {
     setUploadError(null);
-    if (hubMode === 'working-sets') {
-      if (!selectedUserWorkingSetId) {
-        setUploadError('Select a Working Set first.');
-        return;
-      }
-      try {
-        const payload = await exportWorkingSetPayload(selectedUserWorkingSetId);
-        const setName = payload.workingSet.name;
-        setWorkingSetUploadState(prev => ({
-          ...prev,
-          title: prev.title.trim() ? prev.title : setName,
-          summary: prev.summary.trim() ? prev.summary : 'Imported from Working Sets.',
-          jsonInput: JSON.stringify(payload, null, 2),
-        }));
-        setWorkingSetUploadPreview(payload.workingSet);
-      } catch (err: any) {
-        setUploadError(err?.message ?? 'Failed to import from Working Sets.');
-      }
-      return;
-    }
     if (!selectedUserPoolId) {
       setUploadError('Select a User Pool first.');
       return;
@@ -1127,27 +942,20 @@ export function PoolHubPage({
 
   const visibleItems = useMemo(() => {
     if (!selectedEntry) return [];
-    if (hubMode === 'working-sets') {
-      const allItems = Object.values((selectedEntry.payload as WorkingSet).categoryBuckets ?? {}).flat();
-      return showAllItems ? allItems : allItems.slice(0, 8);
-    }
     const items = (selectedEntry.payload as Pool).items;
     return showAllItems ? items : items.slice(0, 8);
-  }, [selectedEntry, showAllItems, hubMode]);
+  }, [selectedEntry, showAllItems]);
 
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
-  const renderHubCard = (entry: PoolHubEntry | WorkingSetHubEntry) => (
+  const renderHubCard = (entry: PoolHubEntry) => (
     <button
       key={entry.id}
       type="button"
       className={`pool-hub-card ${entry.id === selectedEntry?.id ? 'active' : ''}`}
       onClick={() => {
-        if (hubMode === 'working-sets') {
-          setSelectedWorkingSetId(entry.id);
-        } else {
-          setSelectedId(entry.id);
-        }
+        setSelectedId(entry.id);
+        setIsDetailOpen(true);
         setAddMessage(null);
         setShowAllItems(false);
       }}
@@ -1193,28 +1001,15 @@ export function PoolHubPage({
     </button>
   );
 
+  const detailComments = comments;
+
   return (
     <div className="pool-hub-page">
       <div className="pool-hub-top">
         <header className="pool-hub-header">
           <div className="pool-hub-hero">
             <div className="pool-hub-hero-main">
-              <div className="pool-hub-mode-toggle">
-                <button
-                  type="button"
-                  className={hubMode === 'pools' ? 'active' : ''}
-                  onClick={() => setHubMode('pools')}
-                >
-                  Pools
-                </button>
-                <button
-                  type="button"
-                  className={hubMode === 'working-sets' ? 'active' : ''}
-                  onClick={() => setHubMode('working-sets')}
-                >
-                  Working Sets
-                </button>
-              </div>
+              <div className="pool-hub-mode-label">Pool Library</div>
               <div>
                 <h2>Pool Hub</h2>
                 <p>Discover curated MorpBase libraries and community-made downloads in one place.</p>
@@ -1247,7 +1042,7 @@ export function PoolHubPage({
                 className="pool-hub-primary"
                 onClick={() => {
                   if (!isLoggedIn) {
-                    setAuthNotice(hubMode === 'working-sets' ? 'Log in to upload Working Sets.' : 'Log in to upload pools.');
+                    setAuthNotice('Log in to upload pools.');
                     onRequestLogin?.();
                     return;
                   }
@@ -1257,23 +1052,15 @@ export function PoolHubPage({
                   }
                   setUploadError(null);
                   setUploadSuccess(null);
-                  if (hubMode === 'working-sets') {
-                    setWorkingSetUploadState({
-                      ...DEFAULT_WS_UPLOAD_STATE,
-                      creator: creatorDisplayName,
-                    });
-                    setIsWorkingSetUploadOpen(true);
-                  } else {
-                    setUploadState({
-                      ...DEFAULT_UPLOAD_STATE,
-                      creator: creatorDisplayName,
-                    });
-                    setIsUploadOpen(true);
-                  }
+                  setUploadState({
+                    ...DEFAULT_UPLOAD_STATE,
+                    creator: creatorDisplayName,
+                  });
+                  setIsUploadOpen(true);
                 }}
                 disabled={!canInteract}
               >
-                {hubMode === 'working-sets' ? 'Upload Working Set' : 'Upload Pool'}
+                Upload Pool
               </button>
             </div>
           </div>
@@ -1292,7 +1079,7 @@ export function PoolHubPage({
           <div className="pool-hub-toolbar">
             <input
               type="text"
-              placeholder={hubMode === 'working-sets' ? 'Search working sets' : 'Search pools'}
+              placeholder="Search pools"
               value={searchTerm}
               onChange={event => setSearchTerm(event.target.value)}
             />
@@ -1796,6 +1583,245 @@ export function PoolHubPage({
         </aside>
 
       </div>
+
+      <Modal
+        isOpen={isDetailOpen && Boolean(selectedEntry)}
+        onClose={() => setIsDetailOpen(false)}
+        title={selectedEntry?.title ?? 'Pool details'}
+        className="pool-hub-detail-modal"
+      >
+        {!selectedEntry ? null : (
+          <div className="pool-hub-detail-modal-body">
+            <div className="pool-hub-detail-hero">
+              <div>
+                <div className="pool-hub-detail-title">{selectedEntry.title}</div>
+                <div className="pool-hub-detail-summary">{selectedEntry.summary}</div>
+              </div>
+              <div className="pool-hub-detail-actions">
+                <button
+                  type="button"
+                  className="pool-hub-primary"
+                  onClick={handleAddToActive}
+                  disabled={!canInteract}
+                  title={canInteract ? 'Add to your library' : 'Upgrade to Pro to add'}
+                >
+                  Add to User Pools
+                </button>
+                <button type="button" className="pool-hub-secondary" onClick={handleDownloadPool}>
+                  Download JSON
+                </button>
+                {onGoToUserPools && (
+                  <button type="button" className="pool-hub-secondary" onClick={onGoToUserPools}>
+                    Open User Pools
+                  </button>
+                )}
+                {userId && selectedEntry.creatorId === userId && (
+                  <button type="button" className="pool-hub-danger" onClick={handleDeletePool}>
+                    Delete from Hub
+                  </button>
+                )}
+              </div>
+            </div>
+            {addMessage && <div className="pool-hub-message">{addMessage}</div>}
+            <div className="pool-hub-detail-meta">
+              {(selectedEntry.creator || selectedEntry.creatorId) && (
+                <button
+                  type="button"
+                  className="pool-hub-link-button"
+                  onClick={() => {
+                    const creatorId = selectedEntry.creatorId
+                      ? `id:${selectedEntry.creatorId}`
+                      : `name:${resolveCreatorName(selectedEntry)}`;
+                    openCreatorProfile(creatorId);
+                  }}
+                >
+                  By {resolveCreatorName(selectedEntry)}
+                </button>
+              )}
+              {isOfficialPoolEntry(selectedEntry) && <span className="pool-hub-official-badge">MorpBase</span>}
+              {((userId && selectedEntry.creatorId === userId) || (!userId && userName && selectedEntry.creator === userName)) && (
+                <span className="pool-hub-owner-badge">Your upload</span>
+              )}
+              <span>{selectedEntry.category}</span>
+              <span>{selectedEntry.languages.join(', ').toUpperCase()}</span>
+              <span>{selectedEntry.license}</span>
+              <span>{selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})</span>
+            </div>
+            <p className="pool-hub-detail-description">{selectedEntry.description}</p>
+            {(selectedEntry.creator || selectedEntry.creatorId) && (
+              <div className="pool-hub-creator-card">
+                <div className="pool-hub-creator-title">{resolveCreatorName(selectedEntry)}</div>
+                <div className="pool-hub-creator-meta">
+                  <span>{creatorStats.uploads} uploads</span>
+                  <span>{creatorStats.totalDownloads} downloads</span>
+                  <span>Avg {creatorStats.avgRating.toFixed(1)} rating</span>
+                </div>
+              </div>
+            )}
+            <div className="pool-hub-detail-split">
+              <div className="pool-hub-report-card">
+                <div className="pool-hub-section-title">Report</div>
+                <div className="pool-hub-muted">See something off? Flag this pool.</div>
+                <input
+                  type="text"
+                  value={reportReason}
+                  onChange={event => setReportReason(event.target.value)}
+                  placeholder="Reason (optional)"
+                />
+                <button type="button" className="pool-hub-secondary" onClick={handleReport}>
+                  Report pool
+                </button>
+              </div>
+              <div className="pool-hub-rating">
+                <div className="pool-hub-rating-label">Your rating</div>
+                <div className="pool-hub-rating-stars">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      type="button"
+                      className={`pool-hub-star ${userRating && userRating >= star ? 'active' : ''}`}
+                      onClick={() => handleRate(star)}
+                      disabled={!canInteract}
+                    >
+                      *
+                    </button>
+                  ))}
+                </div>
+                <div className="pool-hub-rating-meta">
+                  Avg {selectedEntry.ratingAvg.toFixed(1)} ({selectedEntry.ratingCount})
+                </div>
+              </div>
+            </div>
+            <div className="pool-hub-detail-items">
+              <div className="pool-hub-detail-items-header">
+                <span>Items ({(selectedEntry.payload as Pool).items.length})</span>
+                <button
+                  type="button"
+                  className="pool-hub-link"
+                  onClick={() => setShowAllItems(prev => !prev)}
+                >
+                  {showAllItems ? 'Show less' : 'Show all'}
+                </button>
+              </div>
+              <div className="pool-hub-detail-items-list">
+                {visibleItems.map(item => (
+                  <div key={item.id} className="pool-hub-item">
+                    <div className="pool-hub-item-text">{item.text}</div>
+                    {'tags' in item && item.tags && item.tags.length > 0 && (
+                      <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="pool-hub-comments">
+              <div className="pool-hub-comments-header">Comments ({detailComments.length})</div>
+              <div className="pool-hub-comments-form">
+                <input
+                  type="text"
+                  placeholder="Your name (optional)"
+                  value={commentAuthor}
+                  onChange={event => setCommentAuthor(event.target.value)}
+                  disabled={!canInteract}
+                />
+                <textarea
+                  rows={3}
+                  placeholder="Write a comment"
+                  value={commentBody}
+                  onChange={event => setCommentBody(event.target.value)}
+                  disabled={!canInteract}
+                />
+                {commentError && <div className="pool-hub-error">{commentError}</div>}
+                <div className="pool-hub-comments-actions">
+                  <button
+                    type="button"
+                    className="pool-hub-secondary"
+                    onClick={() => {
+                      setCommentBody('');
+                      setCommentError(null);
+                    }}
+                    disabled={!canInteract}
+                  >
+                    Clear
+                  </button>
+                  <button type="button" className="pool-hub-primary" onClick={handleAddComment} disabled={!canInteract}>
+                    Post Comment
+                  </button>
+                </div>
+                <div className="pool-hub-comments-list">
+                  {detailComments.length === 0 ? (
+                    <div className="pool-hub-empty">No comments yet.</div>
+                  ) : (
+                    detailComments.map(comment => (
+                      <div key={comment.id} className="pool-hub-comment">
+                        <div className="pool-hub-comment-head">
+                          <span className="pool-hub-comment-author">
+                            {comment.authorId && comment.authorId === userId ? 'You' : comment.author}
+                          </span>
+                          <span className="pool-hub-comment-date">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {editingCommentId === comment.id ? (
+                          <>
+                            <textarea
+                              rows={3}
+                              value={editingCommentBody}
+                              onChange={event => setEditingCommentBody(event.target.value)}
+                            />
+                            <div className="pool-hub-comments-actions">
+                              <button
+                                type="button"
+                                className="pool-hub-secondary"
+                                onClick={() => {
+                                  setEditingCommentId(null);
+                                  setEditingCommentBody('');
+                                }}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="button"
+                                className="pool-hub-primary"
+                                onClick={() => handleEditComment(comment.id, editingCommentBody)}
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="pool-hub-comment-body">{comment.body}</div>
+                        )}
+                        {comment.authorId && comment.authorId === userId && editingCommentId !== comment.id && (
+                          <div className="pool-hub-comments-actions">
+                            <button
+                              type="button"
+                              className="pool-hub-secondary"
+                              onClick={() => {
+                                setEditingCommentId(comment.id);
+                                setEditingCommentBody(comment.body);
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="pool-hub-secondary"
+                              onClick={() => handleDeleteComment(comment.id)}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
 
       <Modal
         isOpen={isUploadOpen}
@@ -2335,11 +2361,8 @@ export function PoolHubPage({
                     type="button"
                     className="pool-hub-creator-upload"
                     onClick={() => {
-                      if (hubMode === 'working-sets') {
-                        setSelectedWorkingSetId(entry.id);
-                      } else {
-                        setSelectedId(entry.id);
-                      }
+                      setSelectedId(entry.id);
+                      setIsDetailOpen(true);
                       setIsCreatorProfileOpen(false);
                     }}
                   >
