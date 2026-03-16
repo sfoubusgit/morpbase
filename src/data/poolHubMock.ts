@@ -268,4 +268,65 @@ export const poolHubMock: PoolHubEntry[] = [
       ]
     ),
   },
+  {
+    id: 'hub_desert_oracle_trains',
+    creator: 'MorpBase',
+    title: 'Desert Oracle Trains',
+    summary: 'Mystic locomotives, dune pilgrimage stations, and sun-scorched prophetic travel.',
+    description:
+      'An official MorpBase pool for surreal desert rail worlds filled with ceremonial trains, veiled conductors, shimmering heat, sacred transit architecture, and visionary nomadic atmosphere.',
+    tags: ['desert', 'train', 'oracle', 'surreal', 'pilgrimage', 'sunlit'],
+    category: 'Illustration',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'desert_oracle_trains_pool',
+      'Desert Oracle Trains',
+      now - day,
+      now,
+      [
+        { text: 'veiled oracle conductor with mirrored sun-visor and ceremonial staff', section: 'Subjects', tags: ['subject', 'oracle', 'conductor'] },
+        { text: 'desert pilgrim archivist carrying scrolls of future routes', section: 'Subjects', tags: ['subject', 'pilgrim', 'archivist'] },
+        { text: 'sun-marked locomotive priest standing beside a sacred engine', section: 'Subjects', tags: ['subject', 'priest', 'locomotive'] },
+
+        { text: 'endless dune rail line beneath a blazing white sky', section: 'Environment', tags: ['environment', 'dunes', 'rail'] },
+        { text: 'sand-buried pilgrimage station carved from pale stone', section: 'Environment', tags: ['environment', 'station', 'stone'] },
+        { text: 'mirage-washed desert platform with prayer banners and track shrines', section: 'Environment', tags: ['environment', 'platform', 'mirage'] },
+
+        { text: 'ornamental brass locomotive with etched prophetic symbols', section: 'Props', tags: ['props', 'locomotive', 'brass'] },
+        { text: 'sun clock timetable discs and hanging route talismans', section: 'Props', tags: ['props', 'clock', 'talismans'] },
+        { text: 'ceremonial luggage trunks wrapped in woven desert cloth', section: 'Props', tags: ['props', 'luggage', 'cloth'] },
+
+        { text: 'high noon desert light with sharp ochre highlights', section: 'Lighting', tags: ['lighting', 'desert', 'high-noon'] },
+        { text: 'golden haze diffusing the far horizon and rails', section: 'Lighting', tags: ['lighting', 'haze', 'horizon'] },
+        { text: 'long warm reflections across brass panels and pale stone', section: 'Lighting', tags: ['lighting', 'reflections', 'brass'] },
+
+        { text: 'solemn prophetic travel energy', section: 'Mood', tags: ['mood', 'prophetic', 'solemn'] },
+        { text: 'heat-struck mystical pilgrimage atmosphere', section: 'Mood', tags: ['mood', 'pilgrimage', 'heat'] },
+        { text: 'quiet surreal anticipation before departure', section: 'Mood', tags: ['mood', 'surreal', 'anticipation'] },
+
+        { text: 'sun-bleached stone, brushed brass, and dust-softened wood', section: 'Materials', tags: ['materials', 'stone', 'brass'] },
+        { text: 'woven desert textiles fluttering in dry wind', section: 'Materials', tags: ['materials', 'textiles', 'wind'] },
+        { text: 'glass panels clouded by sand and heat', section: 'Materials', tags: ['materials', 'glass', 'sand'] },
+
+        { text: 'surreal desert rail concept art', section: 'Style', tags: ['style', 'surreal', 'concept-art'] },
+        { text: 'sun-baked mystical travel illustration', section: 'Style', tags: ['style', 'travel', 'illustration'] },
+        { text: 'prophetic nomad-engine visual language', section: 'Style', tags: ['style', 'nomad', 'oracle'] },
+
+        { text: 'wide cinematic station view with train emerging through haze', section: 'Composition', tags: ['composition', 'wide', 'cinematic'] },
+        { text: 'low-angle hero framing of the oracle beside the engine', section: 'Composition', tags: ['composition', 'hero', 'low-angle'] },
+        { text: 'long-perspective rails cutting through layered dunes', section: 'Composition', tags: ['composition', 'perspective', 'dunes'] },
+
+        { text: 'shimmering heat distortion above tracks and stone', section: 'Effects', tags: ['effects', 'heat', 'distortion'] },
+        { text: 'fine windblown sand curling around the platform', section: 'Effects', tags: ['effects', 'sand', 'wind'] },
+        { text: 'mirage bloom softening distant train silhouettes', section: 'Effects', tags: ['effects', 'mirage', 'bloom'] },
+      ]
+    ),
+  },
 ];
