@@ -1,4 +1,3 @@
-import { PromptPreview } from './PromptPreview';
 import { PromptLibrary } from './PromptLibrary';
 import './PromptsPage.css';
 
@@ -7,10 +6,6 @@ type PromptsPageProps = {
   customAdditions?: string[];
   editedPositive?: string | null;
   editedNegative?: string | null;
-  onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
-  onClearPrompt?: () => void;
-  onUndoClearPrompt?: () => void;
-  canUndoClearPrompt?: boolean;
   onAddToPrompt?: (text: string) => void;
   authUser?: { id: string } | null;
   isPro?: boolean;
@@ -22,10 +17,6 @@ export function PromptsPage({
   customAdditions = [],
   editedPositive,
   editedNegative,
-  onEditedOutputChange,
-  onClearPrompt,
-  onUndoClearPrompt,
-  canUndoClearPrompt = false,
   onAddToPrompt,
   authUser,
   isPro = false,
@@ -52,6 +43,12 @@ export function PromptsPage({
 
       <div className="prompts-layout">
         <section className="prompts-panel prompts-panel-main">
+          <div className="prompts-library-card">
+            <div className="prompts-library-intro">
+              <h3>Library Tips</h3>
+              <p>Use tags to group prompt styles, then export or import your library when you want backups or reuse.</p>
+            </div>
+          </div>
           <PromptLibrary
             prompt={prompt ?? null}
             customAdditions={customAdditions}
@@ -65,23 +62,6 @@ export function PromptsPage({
             showLocalPrompts={false}
           />
         </section>
-
-        <aside className="prompts-panel prompts-panel-sidebar">
-          <div className="prompts-library-card">
-          <div className="prompts-library-intro">
-            <h3>Library Tips</h3>
-            <p>Use tags to group prompt styles, then export or import your library when you want backups or reuse.</p>
-          </div>
-        </div>
-          <PromptPreview
-            prompt={prompt ?? null}
-            customAdditions={customAdditions}
-            onEditedOutputChange={onEditedOutputChange}
-            onClear={onClearPrompt}
-            onUndoClear={onUndoClearPrompt}
-            canUndoClear={canUndoClearPrompt}
-          />
-        </aside>
       </div>
     </div>
   );

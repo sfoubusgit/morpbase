@@ -33,9 +33,7 @@
 }
 
 .prompts-layout {
-  display: grid;
-  grid-template-columns: 2.4fr 1fr;
-  gap: 20px;
+  display: block;
 }
 
 .prompts-panel {
@@ -47,14 +45,6 @@
   flex-direction: column;
   gap: 12px;
   min-height: 360px;
-}
-
-.prompts-panel-sidebar {
-  position: sticky;
-  top: 80px;
-  align-self: start;
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
 }
 
 .prompts-library-card {
@@ -77,12 +67,6 @@
 
 @media (max-width: 1200px) {
   .prompts-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .prompts-panel-sidebar {
-    position: relative;
-    top: 0;
-    max-height: none;
+    display: block;
   }
 }
