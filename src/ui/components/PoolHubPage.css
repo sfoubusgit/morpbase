@@ -780,6 +780,93 @@
   line-height: 1.6;
 }
 
+.pool-hub-detail-preview-card {
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    radial-gradient(circle at top left, rgba(110, 86, 249, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
+    rgba(16, 18, 29, 0.95);
+}
+
+.pool-hub-detail-preview-media {
+  min-height: 300px;
+  max-height: 460px;
+  overflow: hidden;
+}
+
+.pool-hub-detail-preview-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pool-hub-detail-preview-surface {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.pool-hub-detail-preview-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pool-hub-detail-preview-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pool-hub-detail-preview-counts span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #e6ebff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pool-hub-detail-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.pool-hub-detail-preview-panel {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pool-hub-detail-preview-label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #f2f4ff;
+}
+
+.pool-hub-detail-preview-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pool-hub-detail-preview-item {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #d5daf3;
+}
+
 .pool-hub-creator-card {
   display: grid;
   gap: 6px;

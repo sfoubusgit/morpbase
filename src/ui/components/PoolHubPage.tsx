@@ -984,6 +984,20 @@ export function PoolHubPage({
     ] as Array<[string, string]>;
   }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount, selectedPoolSections]);
 
+  const previewSections = useMemo(() => {
+    if (selectedPoolSectionCount > 0) {
+      return selectedPoolSections.slice(0, 3).map(([section, items]) => ({
+        label: section,
+        items: items.slice(0, 3).map(item => item.text),
+      }));
+    }
+
+    return [{
+      label: 'Highlights',
+      items: selectedPoolItems.slice(0, 5).map(item => item.text),
+    }];
+  }, [selectedPoolItems, selectedPoolSectionCount, selectedPoolSections]);
+
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
   const renderHubCard = (entry: PoolHubEntry) => (
@@ -1696,6 +1710,47 @@ export function PoolHubPage({
                     )}
                   </div>
                   <p className="pool-hub-detail-description">{selectedEntry.description}</p>
+                </div>
+
+                <div className="pool-hub-detail-preview-card">
+                  {selectedEntry.heroImageUrl ? (
+                    <div className="pool-hub-detail-preview-media">
+                      <img
+                        src={selectedEntry.heroImageUrl}
+                        alt={selectedEntry.title}
+                        className="pool-hub-detail-preview-image"
+                      />
+                    </div>
+                  ) : (
+                    <div className="pool-hub-detail-preview-surface">
+                      <div className="pool-hub-detail-preview-head">
+                        <div>
+                          <div className="pool-hub-section-title">Preview</div>
+                          <div className="pool-hub-muted">
+                            {selectedPoolSectionCount > 0
+                              ? 'A quick look at the pool structure and representative sections.'
+                              : 'A quick look at representative items from this pool.'}
+                          </div>
+                        </div>
+                        <div className="pool-hub-detail-preview-counts">
+                          <span>{selectedPoolItems.length} items</span>
+                          <span>{selectedPoolSectionCount > 0 ? `${selectedPoolSectionCount} sections` : 'Flat pool'}</span>
+                        </div>
+                      </div>
+                      <div className="pool-hub-detail-preview-grid">
+                        {previewSections.map(section => (
+                          <div key={section.label} className="pool-hub-detail-preview-panel">
+                            <div className="pool-hub-detail-preview-label">{section.label}</div>
+                            <div className="pool-hub-detail-preview-list">
+                              {section.items.map(item => (
+                                <div key={item} className="pool-hub-detail-preview-item">{item}</div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pool-hub-detail-items">
