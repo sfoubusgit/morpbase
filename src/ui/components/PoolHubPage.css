@@ -50,6 +50,34 @@
   gap: 14px;
 }
 
+.pool-hub-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pool-hub-hero-stat {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pool-hub-hero-stat strong {
+  font-size: 22px;
+  line-height: 1;
+  color: #fbfcff;
+}
+
+.pool-hub-hero-stat span {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #c7cdef;
+}
+
 .pool-hub-hero-side {
   display: flex;
   flex-direction: column;
@@ -218,6 +246,23 @@
   gap: 12px;
 }
 
+.pool-hub-toolbar-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pool-hub-toolbar-summary span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 11px;
+  color: #d9def8;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .pool-hub-support-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 0.9fr);
@@ -258,6 +303,13 @@
   color: #f3f4f6;
 }
 
+.pool-hub-profile-subtitle {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #aeb6da;
+}
+
 .pool-hub-profile-hint {
   font-size: 11px;
   color: #9fa0b8;
@@ -279,6 +331,14 @@
   gap: 6px;
   font-size: 12px;
   color: #cbd5f5;
+}
+
+.pool-hub-creator-search-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .pool-hub-creator-search input {
@@ -1410,6 +1470,10 @@
   .pool-hub-hero,
   .pool-hub-support-grid,
   .pool-hub-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pool-hub-hero-stats {
     grid-template-columns: 1fr;
   }
 }

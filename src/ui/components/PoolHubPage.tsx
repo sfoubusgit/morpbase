@@ -1076,6 +1076,11 @@ export function PoolHubPage({
   );
 
   const detailComments = comments;
+  const hubOverviewStats = useMemo(() => ([
+    { label: 'Official Pools', value: officialPoolEntries.length },
+    { label: 'Community Pools', value: communityPoolEntries.length },
+    { label: 'Visible Creators', value: creatorProfiles.length },
+  ]), [officialPoolEntries.length, communityPoolEntries.length, creatorProfiles.length]);
 
   return (
     <div className="pool-hub-page">
@@ -1087,6 +1092,14 @@ export function PoolHubPage({
               <div>
                 <h2>Pool Hub</h2>
                 <p>Discover curated MorpBase libraries and community-made downloads in one place.</p>
+              </div>
+              <div className="pool-hub-hero-stats">
+                {hubOverviewStats.map(stat => (
+                  <div key={stat.label} className="pool-hub-hero-stat">
+                    <strong>{stat.value}</strong>
+                    <span>{stat.label}</span>
+                  </div>
+                ))}
               </div>
               <div className="pool-hub-hero-badges">
                 {isLoggedIn && userName ? (
@@ -1147,7 +1160,11 @@ export function PoolHubPage({
           <div className="pool-hub-toolbar-header">
             <div>
               <div className="pool-hub-section-title">Browse and filter</div>
-              <div className="pool-hub-muted">Search by theme, creator language, rating, and category.</div>
+              <div className="pool-hub-muted">Search by theme, creator language, rating, category, and upload ownership.</div>
+            </div>
+            <div className="pool-hub-toolbar-summary">
+              <span>{filteredEntries.length} results</span>
+              <span>{sortMode === 'downloads' ? 'Sorted by downloads' : sortMode === 'top' ? 'Sorted by rating' : sortMode === 'newest' ? 'Sorted by newest' : 'Sorted by trending'}</span>
             </div>
           </div>
           <div className="pool-hub-toolbar">
@@ -1219,6 +1236,7 @@ export function PoolHubPage({
           <div className="pool-hub-profile-panel">
             <div className="pool-hub-profile-info">
               <div className="pool-hub-profile-title">Public creator profile</div>
+              <div className="pool-hub-profile-subtitle">Identity and visibility</div>
               <div className="pool-hub-profile-hint">
                 Your public profile can appear in creator search even before you publish anything, unless you disable discovery in My Profile.
               </div>
@@ -1255,6 +1273,15 @@ export function PoolHubPage({
             </div>
           </div>
           <div className="pool-hub-creator-search">
+            <div className="pool-hub-creator-search-head">
+              <div>
+                <div className="pool-hub-profile-title">Creator search</div>
+                <div className="pool-hub-profile-subtitle">Find public MorpBase creators</div>
+              </div>
+              {creatorSearchTerm.trim() && (
+                <div className="pool-hub-muted">{filteredCreators.length} matches</div>
+              )}
+            </div>
             <label>
               Search users
               <input
