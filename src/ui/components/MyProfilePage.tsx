@@ -35,6 +35,7 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -155,6 +156,43 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
     }
   };
 
+  const handleAvatarFile = async (file: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setError('Avatar upload must be an image file.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Avatar image must be 2 MB or smaller.');
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setError(null);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = typeof reader.result === 'string' ? reader.result : '';
+          if (!result) {
+            reject(new Error('Failed to read avatar image.'));
+            return;
+          }
+          resolve(result);
+        };
+        reader.onerror = () => reject(new Error('Failed to read avatar image.'));
+        reader.readAsDataURL(file);
+      });
+
+      setForm(prev => ({ ...prev, avatarUrl: dataUrl }));
+      setMessage('Avatar image ready. Save profile to publish it.');
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to prepare avatar image.');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <div className="my-profile-page">
@@ -223,8 +261,32 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
                 onChange={event => setForm(prev => ({ ...prev, avatarUrl: event.target.value }))}
                 placeholder="https://..."
               />
-              <span className="my-profile-field-hint">This field can later be upgraded to real avatar upload without changing the page structure.</span>
+              <span className="my-profile-field-hint">Paste an image URL or upload a local image below.</span>
             </label>
+            <label>
+              Upload avatar
+              <input
+                type="file"
+                accept="image/*"
+                onChange={event => void handleAvatarFile(event.target.files?.[0] ?? null)}
+              />
+              <span className="my-profile-field-hint">
+                {uploadingAvatar
+                  ? 'Preparing avatar image...'
+                  : 'First-pass upload stores the image inside your profile data until a full media pipeline is added.'}
+              </span>
+            </label>
+            {form.avatarUrl && (
+              <div className="my-profile-avatar-actions">
+                <button
+                  type="button"
+                  className="my-profile-secondary-button"
+                  onClick={() => setForm(prev => ({ ...prev, avatarUrl: '' }))}
+                >
+                  Remove avatar
+                </button>
+              </div>
+            )}
           </section>
 
           <section className="my-profile-section">

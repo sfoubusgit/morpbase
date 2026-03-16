@@ -175,6 +175,12 @@
   justify-content: flex-end;
 }
 
+.my-profile-avatar-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: -0.2rem;
+}
+
 .my-profile-actions button,
 .my-profile-empty button {
   border: 0;
@@ -183,6 +189,15 @@
   color: #120f1d;
   font-weight: 700;
   padding: 0.82rem 1.15rem;
+  cursor: pointer;
+}
+
+.my-profile-secondary-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f1ff;
+  padding: 0.72rem 1rem;
   cursor: pointer;
 }
 
