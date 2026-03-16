@@ -440,6 +440,9 @@ export function PoolHubPage({
     }>();
 
     publicProfiles.forEach(profile => {
+      if (profile.discoverableInSearch === false) {
+        return;
+      }
       const id = `id:${profile.userId}`;
       profiles.set(id, {
         id,
@@ -456,6 +459,9 @@ export function PoolHubPage({
 
     source.forEach(entry => {
       const profile = resolveCreatorProfile(entry);
+      if (profile?.discoverableInSearch === false) {
+        return;
+      }
       const name = profile?.displayName ?? entry.creator;
       if (!name) return;
       const id = entry.creatorId ? `id:${entry.creatorId}` : `name:${name}`;
@@ -517,6 +523,30 @@ export function PoolHubPage({
       return;
     }
     setSelectedCreatorId(creatorId);
+    setIsCreatorProfileOpen(true);
+  };
+
+  const openCreatorProfileFromEntry = (entry: { creator?: string; creatorId?: string }) => {
+    const profile = resolveCreatorProfile(entry);
+    const creatorName = profile?.displayName ?? entry.creator ?? null;
+    if (!creatorName && !entry.creatorId) return;
+
+    if (onOpenCreatorProfile) {
+      onOpenCreatorProfile({
+        creatorId: entry.creatorId ?? null,
+        creatorName,
+      });
+      return;
+    }
+
+    const creatorLookupId = entry.creatorId
+      ? `id:${entry.creatorId}`
+      : creatorName
+        ? `name:${creatorName}`
+        : null;
+
+    if (!creatorLookupId) return;
+    setSelectedCreatorId(creatorLookupId);
     setIsCreatorProfileOpen(true);
   };
 
@@ -916,10 +946,7 @@ export function PoolHubPage({
               className="pool-hub-link-button"
               onClick={(event) => {
                 event.stopPropagation();
-                const creatorId = entry.creatorId
-                  ? `id:${entry.creatorId}`
-                  : `name:${resolveCreatorName(entry)}`;
-                openCreatorProfile(creatorId);
+                openCreatorProfileFromEntry(entry);
               }}
             >
               by {resolveCreatorName(entry)}
@@ -1091,7 +1118,7 @@ export function PoolHubPage({
             <div className="pool-hub-profile-info">
               <div className="pool-hub-profile-title">Public creator profile</div>
               <div className="pool-hub-profile-hint">
-                Your public profile appears in Hub user search, even before you publish anything.
+                Your public profile can appear in creator search even before you publish anything, unless you disable discovery in My Profile.
               </div>
             </div>
             <div className="pool-hub-profile-actions">
@@ -1277,10 +1304,7 @@ export function PoolHubPage({
                     type="button"
                     className="pool-hub-link-button"
                     onClick={() => {
-                      const creatorId = selectedEntry.creatorId
-                        ? `id:${selectedEntry.creatorId}`
-                        : `name:${resolveCreatorName(selectedEntry)}`;
-                      openCreatorProfile(creatorId);
+                      openCreatorProfileFromEntry(selectedEntry);
                     }}
                   >
                     By {resolveCreatorName(selectedEntry)}
@@ -1573,16 +1597,13 @@ export function PoolHubPage({
             <div className="pool-hub-detail-meta">
               {(selectedEntry.creator || selectedEntry.creatorId) && (
                 <button
-                  type="button"
-                  className="pool-hub-link-button"
-                  onClick={() => {
-                    const creatorId = selectedEntry.creatorId
-                      ? `id:${selectedEntry.creatorId}`
-                      : `name:${resolveCreatorName(selectedEntry)}`;
-                    openCreatorProfile(creatorId);
-                  }}
-                >
-                  By {resolveCreatorName(selectedEntry)}
+                type="button"
+                className="pool-hub-link-button"
+                onClick={() => {
+                    openCreatorProfileFromEntry(selectedEntry);
+                }}
+              >
+                By {resolveCreatorName(selectedEntry)}
                 </button>
               )}
               {isOfficialPoolEntry(selectedEntry) && <span className="pool-hub-official-badge">MorpBase</span>}
