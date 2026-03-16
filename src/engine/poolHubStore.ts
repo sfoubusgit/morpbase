@@ -1,8 +1,8 @@
 import type { PoolHubEntry } from '../types';
 import { poolHubMock } from '../data/poolHubMock';
 
-const STORAGE_KEY = 'promptgen:pool_hub_store:v8';
-const CURRENT_STORE_VERSION = 8;
+const STORAGE_KEY = 'promptgen:pool_hub_store:v9';
+const CURRENT_STORE_VERSION = 9;
 const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
 
 type PoolHubComment = {
@@ -17,7 +17,7 @@ type PoolHubComment = {
 };
 
 type PoolHubStore = {
-  version: 8;
+  version: 9;
   entries: PoolHubEntry[];
   userRatings: Record<string, Record<string, number>>;
   comments: PoolHubComment[];
@@ -142,6 +142,12 @@ const loadStore = (): PoolHubStore => {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
+      const v8 = window.localStorage.getItem('promptgen:pool_hub_store:v8');
+      if (v8) {
+        const migrated = migrateV4(v8);
+        saveStore(migrated);
+        return migrated;
+      }
       const v7 = window.localStorage.getItem('promptgen:pool_hub_store:v7');
       if (v7) {
         const migrated = migrateV4(v7);
@@ -190,7 +196,14 @@ const loadStore = (): PoolHubStore => {
     if (!parsed || parsed.version !== CURRENT_STORE_VERSION || !Array.isArray(parsed.entries)) {
       return buildInitialStore();
     }
-    return parsed;
+    const merged = {
+      ...parsed,
+      entries: mergeWithSeedEntries(parsed.entries),
+    };
+    if (merged.entries.length !== parsed.entries.length) {
+      saveStore(merged);
+    }
+    return merged;
   } catch {
     return buildInitialStore();
   }
