@@ -157,7 +157,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/cathedral_wizard.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
