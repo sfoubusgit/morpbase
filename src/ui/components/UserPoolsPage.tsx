@@ -1810,9 +1810,18 @@ export function UserPoolsPage({
             </details>
           </div>
           <div className="user-pools-territories user-pools-territories-saved">
+            <div className="user-pools-territories-saved-header">
+              <div>
+                <div className="user-pools-territories-saved-title">Saved Territories</div>
+                <div className="user-pools-territories-saved-copy">
+                  Use, revisit, and manage your finished Territory setups here.
+                </div>
+              </div>
+              <span className="user-pools-subsection-meta">{territories.length}</span>
+            </div>
             <details className="user-pools-territory-section" open>
               <summary>
-                Saved Territories
+                Territory Library
                 <span className="user-pools-subsection-meta">{territories.length}</span>
               </summary>
               <div className="user-pools-territory-section-body">

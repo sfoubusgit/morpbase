@@ -217,6 +217,28 @@
 
 .user-pools-territories-saved {
   margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.user-pools-territories-saved-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 2px;
+}
+
+.user-pools-territories-saved-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.user-pools-territories-saved-copy {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #9fa0b8;
 }
 
 .user-pools-territory-overview {
