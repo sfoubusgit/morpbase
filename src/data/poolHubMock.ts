@@ -58,6 +58,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'neon-drenched strength coach with augmented posture rig', section: 'Subjects', tags: ['subject', 'coach', 'augmented'] },
         { text: 'performance-obsessed athlete with holographic stat projections', section: 'Subjects', tags: ['subject', 'athlete', 'stats'] },
 
+        { text: 'reactor-powered squat rack with glowing structural joints', section: 'Objects', tags: ['objects', 'squat-rack', 'reactor'] },
+        { text: 'modular hypertrophy machine with holographic resistance rails', section: 'Objects', tags: ['objects', 'machine', 'holographic'] },
+        { text: 'chrome posing platform ringed by biometric sensors', section: 'Objects', tags: ['objects', 'platform', 'sensors'] },
+        { text: 'smart cable tower with luminous pulley arms', section: 'Objects', tags: ['objects', 'cable-tower', 'luminous'] },
+        { text: 'neural recovery pod with a transparent shell canopy', section: 'Objects', tags: ['objects', 'recovery-pod', 'transparent'] },
+        { text: 'industrial supplement reactor dispensing glowing performance serum', section: 'Objects', tags: ['objects', 'supplement-reactor', 'serum'] },
+
         { text: 'neon-lit cyberspace gym with reflective black floors', section: 'Environment', tags: ['environment', 'gym', 'neon'] },
         { text: 'brutalist training chamber with holographic mirrors', section: 'Environment', tags: ['environment', 'interior', 'holographic'] },
         { text: 'industrial fitness lab with vapor haze and LED strips', section: 'Environment', tags: ['environment', 'industrial', 'lab'] },
@@ -181,6 +188,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'smoke-veiled island warlock with incandescent eyes', section: 'Subjects', tags: ['subject', 'warlock', 'smoke'] },
         { text: 'ritual duelists of the fire temple facing the volcano wind', section: 'Subjects', tags: ['subject', 'duelist', 'temple'] },
         { text: 'ash-covered apprentice summoner standing before a magma vent', section: 'Subjects', tags: ['subject', 'apprentice', 'magma'] },
+
+        { text: 'obsidian altar carved with glowing eruption runes', section: 'Objects', tags: ['objects', 'altar', 'obsidian'] },
+        { text: 'molten crystal throne radiating volcanic heat', section: 'Objects', tags: ['objects', 'throne', 'molten-crystal'] },
+        { text: 'basalt monolith shrine split by lines of lava light', section: 'Objects', tags: ['objects', 'monolith', 'lava-light'] },
+        { text: 'fire temple brazier tower belching ember smoke', section: 'Objects', tags: ['objects', 'brazier-tower', 'embers'] },
+        { text: 'summoning gate of black stone and suspended magma glass', section: 'Objects', tags: ['objects', 'summoning-gate', 'magma-glass'] },
+        { text: 'ritual plinth holding an unstable volcanic relic core', section: 'Objects', tags: ['objects', 'plinth', 'relic-core'] },
 
         { text: 'volcano island ringed by black cliffs and lava channels', section: 'Environment', tags: ['environment', 'island', 'volcano'] },
         { text: 'obsidian temple terrace overlooking a molten caldera', section: 'Environment', tags: ['environment', 'temple', 'caldera'] },
@@ -306,6 +320,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'orbital archivist priest draped in steel-thread robes', section: 'Subjects', tags: ['subject', 'archivist', 'robes'] },
         { text: 'silent guardian monk holding a reactor-key halberd', section: 'Subjects', tags: ['subject', 'guardian', 'halberd'] },
 
+        { text: 'cathedral reactor altar wrapped in sacred machine housings', section: 'Objects', tags: ['objects', 'reactor-altar', 'machine'] },
+        { text: 'reliquary star engine suspended inside a gothic shrine frame', section: 'Objects', tags: ['objects', 'star-engine', 'reliquary'] },
+        { text: 'processional incense censor drone with engraved brass ribs', section: 'Objects', tags: ['objects', 'censor-drone', 'brass'] },
+        { text: 'monastic navigation throne facing stained glass star charts', section: 'Objects', tags: ['objects', 'navigation-throne', 'charts'] },
+        { text: 'vaulted hymn organ made of steel pipes and light conduits', section: 'Objects', tags: ['objects', 'hymn-organ', 'steel'] },
+        { text: 'saintly servo relic mounted on a ceremonial column', section: 'Objects', tags: ['objects', 'servo-relic', 'column'] },
+
         { text: 'cathedral-like starship nave with vaulted steel arches', section: 'Environment', tags: ['environment', 'starship', 'nave'] },
         { text: 'sacred reactor chamber glowing beneath gothic buttresses', section: 'Environment', tags: ['environment', 'reactor', 'gothic'] },
         { text: 'orbital monastery cloister open to the starfield', section: 'Environment', tags: ['environment', 'monastery', 'orbital'] },
@@ -429,6 +450,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'coral oracle queen with shell-veiled expression', section: 'Subjects', tags: ['subject', 'oracle', 'shell'] },
         { text: 'deep-sea noble draped in translucent royal fabric', section: 'Subjects', tags: ['subject', 'noble', 'fabric'] },
         { text: 'reef court singer with glowing markings and sea-glass ornaments', section: 'Subjects', tags: ['subject', 'court', 'ornaments'] },
+
+        { text: 'coral throne grown from luminous reef branches', section: 'Objects', tags: ['objects', 'throne', 'coral'] },
+        { text: 'pearl lantern cluster floating above the palace floor', section: 'Objects', tags: ['objects', 'lanterns', 'pearl'] },
+        { text: 'sea-glass altar covered in glowing shell sigils', section: 'Objects', tags: ['objects', 'altar', 'sea-glass'] },
+        { text: 'cathedral coral arch framing the queen’s chamber', section: 'Objects', tags: ['objects', 'coral-arch', 'chamber'] },
+        { text: 'bioluminescent scepter stand surrounded by tiny lantern fish', section: 'Objects', tags: ['objects', 'scepter-stand', 'fish'] },
+        { text: 'ancient reef monolith etched with tidal runes', section: 'Objects', tags: ['objects', 'monolith', 'tidal-runes'] },
 
         { text: 'bioluminescent reef palace beneath a glowing midnight sea', section: 'Environment', tags: ['environment', 'reef', 'palace'] },
         { text: 'cathedral coral grove filled with drifting lantern fish', section: 'Environment', tags: ['environment', 'coral', 'fish'] },
@@ -554,6 +582,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'desert station elder wrapped in wind-whipped robes', section: 'Subjects', tags: ['subject', 'elder', 'robes'] },
         { text: 'brass-eyed route seer standing on the platform edge', section: 'Subjects', tags: ['subject', 'seer', 'platform'] },
 
+        { text: 'prophetic brass locomotive crowned with sun sigils', section: 'Objects', tags: ['objects', 'locomotive', 'sun-sigils'] },
+        { text: 'shrine platform clock tower wrapped in route banners', section: 'Objects', tags: ['objects', 'clock-tower', 'banners'] },
+        { text: 'desert signal obelisk etched with travel omens', section: 'Objects', tags: ['objects', 'obelisk', 'omens'] },
+        { text: 'ceremonial rail altar covered in brass prayer discs', section: 'Objects', tags: ['objects', 'rail-altar', 'prayer-discs'] },
+        { text: 'mirage engine shrine half-buried in dune sand', section: 'Objects', tags: ['objects', 'engine-shrine', 'dunes'] },
+        { text: 'sacred station canopy made of pale stone and woven shade cloth', section: 'Objects', tags: ['objects', 'station-canopy', 'shade-cloth'] },
+
         { text: 'endless dune rail line beneath a blazing white sky', section: 'Environment', tags: ['environment', 'dunes', 'rail'] },
         { text: 'sand-buried pilgrimage station carved from pale stone', section: 'Environment', tags: ['environment', 'station', 'stone'] },
         { text: 'mirage-washed desert platform with prayer banners and track shrines', section: 'Environment', tags: ['environment', 'platform', 'mirage'] },
@@ -677,6 +712,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'reckless attacker charging with dual splatter blasters', section: 'Subjects', tags: ['subject', 'attacker', 'blasters'] },
         { text: 'wide-smiling cartoon defender crouched behind cover', section: 'Subjects', tags: ['subject', 'defender', 'cover'] },
         { text: 'battle-hyped camper with overstuffed paint gear', section: 'Subjects', tags: ['subject', 'camper', 'gear'] },
+
+        { text: 'inflatable bunker castle streaked with neon paint', section: 'Objects', tags: ['objects', 'bunker-castle', 'paint'] },
+        { text: 'sticker-covered paintball blaster crate at midfield', section: 'Objects', tags: ['objects', 'blaster-crate', 'stickers'] },
+        { text: 'wobbling watchtower made of plywood and rope', section: 'Objects', tags: ['objects', 'watchtower', 'plywood'] },
+        { text: 'giant splatter target board propped beside the tree line', section: 'Objects', tags: ['objects', 'target-board', 'splatter'] },
+        { text: 'camp flag station dripping with color hits', section: 'Objects', tags: ['objects', 'flag-station', 'color'] },
+        { text: 'foam barricade tunnel blasted with fresh paint', section: 'Objects', tags: ['objects', 'barricade-tunnel', 'fresh-paint'] },
 
         { text: 'makeshift outdoor paintball arena built from colorful obstacles', section: 'Environment', tags: ['environment', 'arena', 'obstacles'] },
         { text: 'summer-camp battlefield with inflatable bunkers and tree cover', section: 'Environment', tags: ['environment', 'camp', 'bunkers'] },
@@ -802,6 +844,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'gleaming alien trooper marching through a sprinkler mist', section: 'Subjects', tags: ['subject', 'trooper', 'sprinkler'] },
         { text: 'beachside teen clutching a cooler while the sky fills with ships', section: 'Subjects', tags: ['subject', 'teen', 'ships'] },
 
+        { text: 'descending chrome saucer casting a cold green shadow', section: 'Objects', tags: ['objects', 'saucer', 'green-shadow'] },
+        { text: 'suburban rooftop mothership beacon tower', section: 'Objects', tags: ['objects', 'beacon-tower', 'mothership'] },
+        { text: 'alien drop pod steaming on hot pavement', section: 'Objects', tags: ['objects', 'drop-pod', 'pavement'] },
+        { text: 'hovering specimen carrier with transparent belly chambers', section: 'Objects', tags: ['objects', 'specimen-carrier', 'transparent'] },
+        { text: 'boardwalk invasion scanner mounted on tripod legs', section: 'Objects', tags: ['objects', 'scanner', 'boardwalk'] },
+        { text: 'massive beachside command saucer above the surf', section: 'Objects', tags: ['objects', 'command-saucer', 'surf'] },
+
         { text: 'summer suburb with sprinklers running beneath hovering saucers', section: 'Environment', tags: ['environment', 'suburb', 'ufo'] },
         { text: 'crowded beach under a sky filled with alien ships', section: 'Environment', tags: ['environment', 'beach', 'ships'] },
         { text: 'sun-bleached city street with evacuation chaos and bright smoke', section: 'Environment', tags: ['environment', 'city', 'evacuation'] },
@@ -896,9 +945,9 @@ export const poolHubMock: PoolHubEntry[] = [
     id: 'hub_dark_alien_spaceships',
     creator: 'MorpBase',
     title: 'Dark Alien Spaceships',
-    summary: 'A deep subject-only pool of ominous extraterrestrial craft, living hulls, and predatory cosmic silhouettes.',
+    summary: 'A deep pool of ominous extraterrestrial craft, eclipse-scale motherships, and predatory cosmic silhouettes.',
     description:
-      'An official MorpBase subject pool focused entirely on dark alien spacecraft. Built as a dense source library for hostile motherships, biomechanical cruisers, abyssal scout craft, and other sinister extraterrestrial silhouettes that can be dropped into worlds, invasions, and cosmic horror scenes.',
+      'An official MorpBase pool focused entirely on dark alien spacecraft and invasion-scale cosmic structures. Built as a dense source library for hostile motherships, biomechanical cruisers, abyssal scout craft, and other sinister extraterrestrial silhouettes that can be dropped into worlds, invasions, and cosmic horror scenes.',
     tags: ['alien', 'spaceship', 'dark', 'sci-fi', 'subject-pool', 'cosmic-horror'],
     category: 'Illustration',
     languages: ['en'],
@@ -951,6 +1000,13 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'storm-sized invasion ark with tiered shell plating and abyssal engines', section: 'Subjects', tags: ['subject', 'invasion-ark', 'storm-sized'] },
         { text: 'dagger-like reconnaissance ship trailing a ribbon of black static', section: 'Subjects', tags: ['subject', 'reconnaissance', 'static'] },
         { text: 'reef-like alien cruiser with coral-spine protrusions and dark lumens', section: 'Subjects', tags: ['subject', 'cruiser', 'reef-like'] },
+
+        { text: 'cathedral-black mothership eclipse frame', section: 'Objects', tags: ['objects', 'mothership', 'eclipse'] },
+        { text: 'ring-shaped portal ship with a dead central void', section: 'Objects', tags: ['objects', 'portal-ship', 'void'] },
+        { text: 'shard-built flagship of interlocking dark monoliths', section: 'Objects', tags: ['objects', 'flagship', 'monoliths'] },
+        { text: 'orbital siege engine disguised as a broken moon', section: 'Objects', tags: ['objects', 'siege-engine', 'moon'] },
+        { text: 'black sun command ship with a radiant core halo', section: 'Objects', tags: ['objects', 'command-ship', 'halo'] },
+        { text: 'living cathedral vessel with a fused vertebrae hull', section: 'Objects', tags: ['objects', 'cathedral-vessel', 'vertebrae'] },
       ]
     ),
   },
