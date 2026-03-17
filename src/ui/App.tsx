@@ -559,6 +559,10 @@ export function App() {
     return usableNodeIds[currentIndex - 1] ?? null;
   }, [usableNodeIds]);
 
+  const getFirstUsableNodeIdForCategory = useCallback((categoryId: string): string | null => {
+    return usableNodeIds.find(nodeId => getCategoryForNode(nodeId) === categoryId) ?? null;
+  }, [getCategoryForNode, usableNodeIds]);
+
   const getTerritoryBiasedAdjacentNodeId = useCallback((nodeId: string | null, direction: 'next' | 'previous') => {
     const fallbackNodeId = getAdjacentUsableNodeId(nodeId, direction);
     if (territoryNavigationMode !== 'biased' || !activeTerritoryCategoryIds.length || usableNodeIds.length === 0) {
@@ -569,70 +573,56 @@ export function App() {
       return fallbackNodeId;
     }
 
-    const currentIndex = usableNodeIds.indexOf(nodeId);
-    if (currentIndex === -1) {
+    const currentCategoryId = getCategoryForNode(nodeId);
+    if (!currentCategoryId) {
       return fallbackNodeId;
     }
 
-    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
-    const step = direction === 'next' ? 1 : -1;
+    const orderedPreferredCategories = activeCategoryOrder.filter(categoryId => (
+      activeTerritoryCategoryIds.includes(categoryId)
+      && getFirstUsableNodeIdForCategory(categoryId)
+    ));
 
-    for (
-      let index = currentIndex + step;
-      index >= 0 && index < usableNodeIds.length;
-      index += step
-    ) {
-      const candidateNodeId = usableNodeIds[index];
-      const categoryId = getCategoryForNode(candidateNodeId);
-      if (categoryId && preferredCategorySet.has(categoryId)) {
-        return candidateNodeId;
-      }
+    if (orderedPreferredCategories.length === 0) {
+      return fallbackNodeId;
     }
 
-    return fallbackNodeId;
-  }, [activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, territoryNavigationMode, usableNodeIds]);
+    const currentCategoryIndex = orderedPreferredCategories.indexOf(currentCategoryId);
+    if (currentCategoryIndex === -1) {
+      return fallbackNodeId;
+    }
+
+    const nextCategoryIndex = direction === 'next' ? currentCategoryIndex + 1 : currentCategoryIndex - 1;
+    if (nextCategoryIndex < 0 || nextCategoryIndex >= orderedPreferredCategories.length) {
+      return null;
+    }
+
+    return getFirstUsableNodeIdForCategory(orderedPreferredCategories[nextCategoryIndex]);
+  }, [activeCategoryOrder, activeTerritoryCategoryIds, getAdjacentUsableNodeId, getCategoryForNode, getFirstUsableNodeIdForCategory, territoryNavigationMode, usableNodeIds.length]);
 
   const getPreferredTerritoryStartNodeId = useCallback(() => {
     if (!activeTerritoryCategoryIds.length) return '';
 
-    const preferredCategorySet = new Set(activeTerritoryCategoryIds);
-    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
-      const categoryId = getCategoryForNode(nodeId);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    if (preferredUsableNodeId) {
-      return preferredUsableNodeId;
+    for (const categoryId of activeCategoryOrder) {
+      if (!activeTerritoryCategoryIds.includes(categoryId)) continue;
+      const preferredNodeId = getFirstUsableNodeIdForCategory(categoryId);
+      if (preferredNodeId) return preferredNodeId;
     }
 
-    const preferredQuestionNode = questionNodes.find(node => {
-      const categoryId = getCategoryForNode(node.id);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    return preferredQuestionNode?.id ?? '';
-  }, [activeTerritoryCategoryIds, getCategoryForNode, questionNodes, usableNodeIds]);
+    return '';
+  }, [activeCategoryOrder, activeTerritoryCategoryIds, getFirstUsableNodeIdForCategory]);
 
   const getPreferredStartNodeIdForCategoryIds = useCallback((categoryIds: string[]) => {
     if (categoryIds.length === 0) return '';
 
-    const preferredCategorySet = new Set(categoryIds);
-    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
-      const categoryId = getCategoryForNode(nodeId);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    if (preferredUsableNodeId) {
-      return preferredUsableNodeId;
+    for (const categoryId of activeCategoryOrder) {
+      if (!categoryIds.includes(categoryId)) continue;
+      const preferredNodeId = getFirstUsableNodeIdForCategory(categoryId);
+      if (preferredNodeId) return preferredNodeId;
     }
 
-    const preferredQuestionNode = questionNodes.find(node => {
-      const categoryId = getCategoryForNode(node.id);
-      return categoryId ? preferredCategorySet.has(categoryId) : false;
-    });
-
-    return preferredQuestionNode?.id ?? '';
-  }, [getCategoryForNode, questionNodes, usableNodeIds]);
+    return '';
+  }, [activeCategoryOrder, getFirstUsableNodeIdForCategory]);
 
   const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
   const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
