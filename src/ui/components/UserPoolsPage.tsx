@@ -1605,284 +1605,286 @@ export function UserPoolsPage({
             </>
           )}
         </section>
-        <aside className="user-pools-panel user-pools-panel-territories">
-          <div className="user-pools-panel-header">
-            <h3>
-              Territories
-              <span className="user-pools-title-icon" aria-hidden="true" />
-            </h3>
-            {territoriesLoading && <span className="user-pools-subsection-meta">Loading...</span>}
-          </div>
-          <div className="user-pools-territory-overview">
-            <div className="user-pools-helper">
-              Compose a creative territory from selected pool sections, then open it in Builder.
+        <div className="user-pools-territory-column">
+          <aside className="user-pools-panel user-pools-panel-territories">
+            <div className="user-pools-panel-header">
+              <h3>
+                Territories
+                <span className="user-pools-title-icon" aria-hidden="true" />
+              </h3>
+              {territoriesLoading && <span className="user-pools-subsection-meta">Loading...</span>}
             </div>
-            <div className="user-pools-territory-stat-row">
-              <div className="user-pools-territory-stat">
-                <strong>{territories.length}</strong>
-                <span>saved territories</span>
+            <div className="user-pools-territory-overview">
+              <div className="user-pools-helper">
+                Compose a creative territory from selected pool sections, then open it in Builder.
               </div>
-              <div className="user-pools-territory-stat">
-                <strong>{sectionedPools.length}</strong>
-                <span>sectioned pools</span>
-              </div>
-            </div>
-            {activeTerritoryId && (
-              <div className="user-pools-territory-active-summary">
-                Active Territory:{' '}
-                <strong>{territories.find(territory => territory.id === activeTerritoryId)?.name ?? 'Unknown'}</strong>
-              </div>
-            )}
-          </div>
-          <div className="user-pools-territories">
-            <details className="user-pools-territory-section" open>
-              <summary>Compose Territory</summary>
-              <div className="user-pools-territory-section-body">
-                <div className="user-pools-territory-form">
-                  <div className="user-pools-territory-editor-block">
-                    <div className="user-pools-subsection-header">
-                      <h4>{territoryDraftId ? 'Edit Territory' : 'New Territory'}</h4>
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Territory name"
-                      value={territoryName}
-                      onChange={event => setTerritoryName(event.target.value)}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Short description (optional)"
-                      value={territoryDescription}
-                      onChange={event => setTerritoryDescription(event.target.value)}
-                    />
-                  </div>
-                  <div className="user-pools-territory-editor-block">
-                    <div className="user-pools-subsection-header">
-                      <h4>Sources</h4>
-                      <span className="user-pools-subsection-meta">{territorySources.length}</span>
-                    </div>
-                    <div className="user-pools-territory-sources">
-                      {territorySources.length === 0 ? (
-                        <div className="user-pools-empty">Add a sectioned pool first to compose a Territory.</div>
-                      ) : (
-                        territorySources.map((source, index) => (
-                          <div key={`${source.poolId}_${index}`} className="user-pools-territory-source-row">
-                            <div className="user-pools-territory-source-order">
-                              <button
-                                type="button"
-                                className="user-pools-inline-secondary"
-                                onClick={() => handleMoveTerritorySource(index, 'up')}
-                                disabled={index === 0}
-                                title="Move source up"
-                              >
-                                Up
-                              </button>
-                              <button
-                                type="button"
-                                className="user-pools-inline-secondary"
-                                onClick={() => handleMoveTerritorySource(index, 'down')}
-                                disabled={index === territorySources.length - 1}
-                                title="Move source down"
-                              >
-                                Down
-                              </button>
-                            </div>
-                            <select
-                              value={source.poolId}
-                              onChange={event => handleChangeTerritorySource(index, 'poolId', event.target.value)}
-                            >
-                              {sectionedPools.map(pool => (
-                                <option key={pool.id} value={pool.id}>
-                                  {pool.name}
-                                </option>
-                              ))}
-                            </select>
-                            <select
-                              value={source.section}
-                              onChange={event => handleChangeTerritorySource(index, 'section', event.target.value)}
-                            >
-                              <option value={WHOLE_POOL_SECTION_VALUE}>{WHOLE_POOL_SECTION_LABEL}</option>
-                              {getPoolSections(source.poolId).map(section => (
-                                <option key={section} value={section}>
-                                  {section}
-                                </option>
-                              ))}
-                            </select>
-                            <button
-                              type="button"
-                              className="user-pools-inline-danger"
-                              onClick={() => handleRemoveTerritorySource(index)}
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                    <div className="user-pools-territory-form-actions">
-                      <button type="button" onClick={handleAddTerritorySource} disabled={sectionedPools.length === 0}>
-                        Add Source
-                      </button>
-                      <button type="button" onClick={handleSaveTerritory} disabled={sectionedPools.length === 0}>
-                        {territoryDraftId ? 'Save Territory' : 'Create Territory'}
-                      </button>
-                      {territoryDraftId && (
-                        <button type="button" onClick={resetTerritoryDraft}>
-                          Cancel
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {territoryError && <div className="user-pools-error">{territoryError}</div>}
-                  {territoryMessage && <div className="user-pools-message">{territoryMessage}</div>}
+              <div className="user-pools-territory-stat-row">
+                <div className="user-pools-territory-stat">
+                  <strong>{territories.length}</strong>
+                  <span>saved territories</span>
+                </div>
+                <div className="user-pools-territory-stat">
+                  <strong>{sectionedPools.length}</strong>
+                  <span>sectioned pools</span>
                 </div>
               </div>
-            </details>
+              {activeTerritoryId && (
+                <div className="user-pools-territory-active-summary">
+                  Active Territory:{' '}
+                  <strong>{territories.find(territory => territory.id === activeTerritoryId)?.name ?? 'Unknown'}</strong>
+                </div>
+              )}
+            </div>
+            <div className="user-pools-territories">
+              <details className="user-pools-territory-section" open>
+                <summary>Compose Territory</summary>
+                <div className="user-pools-territory-section-body">
+                  <div className="user-pools-territory-form">
+                    <div className="user-pools-territory-editor-block">
+                      <div className="user-pools-subsection-header">
+                        <h4>{territoryDraftId ? 'Edit Territory' : 'New Territory'}</h4>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Territory name"
+                        value={territoryName}
+                        onChange={event => setTerritoryName(event.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Short description (optional)"
+                        value={territoryDescription}
+                        onChange={event => setTerritoryDescription(event.target.value)}
+                      />
+                    </div>
+                    <div className="user-pools-territory-editor-block">
+                      <div className="user-pools-subsection-header">
+                        <h4>Sources</h4>
+                        <span className="user-pools-subsection-meta">{territorySources.length}</span>
+                      </div>
+                      <div className="user-pools-territory-sources">
+                        {territorySources.length === 0 ? (
+                          <div className="user-pools-empty">Add a sectioned pool first to compose a Territory.</div>
+                        ) : (
+                          territorySources.map((source, index) => (
+                            <div key={`${source.poolId}_${index}`} className="user-pools-territory-source-row">
+                              <div className="user-pools-territory-source-order">
+                                <button
+                                  type="button"
+                                  className="user-pools-inline-secondary"
+                                  onClick={() => handleMoveTerritorySource(index, 'up')}
+                                  disabled={index === 0}
+                                  title="Move source up"
+                                >
+                                  Up
+                                </button>
+                                <button
+                                  type="button"
+                                  className="user-pools-inline-secondary"
+                                  onClick={() => handleMoveTerritorySource(index, 'down')}
+                                  disabled={index === territorySources.length - 1}
+                                  title="Move source down"
+                                >
+                                  Down
+                                </button>
+                              </div>
+                              <select
+                                value={source.poolId}
+                                onChange={event => handleChangeTerritorySource(index, 'poolId', event.target.value)}
+                              >
+                                {sectionedPools.map(pool => (
+                                  <option key={pool.id} value={pool.id}>
+                                    {pool.name}
+                                  </option>
+                                ))}
+                              </select>
+                              <select
+                                value={source.section}
+                                onChange={event => handleChangeTerritorySource(index, 'section', event.target.value)}
+                              >
+                                <option value={WHOLE_POOL_SECTION_VALUE}>{WHOLE_POOL_SECTION_LABEL}</option>
+                                {getPoolSections(source.poolId).map(section => (
+                                  <option key={section} value={section}>
+                                    {section}
+                                  </option>
+                                ))}
+                              </select>
+                              <button
+                                type="button"
+                                className="user-pools-inline-danger"
+                                onClick={() => handleRemoveTerritorySource(index)}
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      <div className="user-pools-territory-form-actions">
+                        <button type="button" onClick={handleAddTerritorySource} disabled={sectionedPools.length === 0}>
+                          Add Source
+                        </button>
+                        <button type="button" onClick={handleSaveTerritory} disabled={sectionedPools.length === 0}>
+                          {territoryDraftId ? 'Save Territory' : 'Create Territory'}
+                        </button>
+                        {territoryDraftId && (
+                          <button type="button" onClick={resetTerritoryDraft}>
+                            Cancel
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {territoryError && <div className="user-pools-error">{territoryError}</div>}
+                    {territoryMessage && <div className="user-pools-message">{territoryMessage}</div>}
+                  </div>
+                </div>
+              </details>
 
-            <details className="user-pools-territory-section" open={territoryDraftSummary.sources.length > 0}>
-              <summary>
-                Draft Summary
-                <span className="user-pools-subsection-meta">{territoryDraftSummary.uniqueSourceCount} sources</span>
-              </summary>
-              <div className="user-pools-territory-section-body">
-                <div className="user-pools-territory-summary">
-                  {territoryDraftSummary.sources.length === 0 ? (
-                    <div className="user-pools-empty">Choose at least one pool section to define the Territory.</div>
-                  ) : (
-                    <>
-                      {territoryDraftSummary.warnings.length > 0 && (
-                        <div className="user-pools-territory-warning-list">
-                          {territoryDraftSummary.warnings.map(warning => (
-                            <div key={warning} className="user-pools-territory-warning">
-                              {warning}
+              <details className="user-pools-territory-section" open={territoryDraftSummary.sources.length > 0}>
+                <summary>
+                  Draft Summary
+                  <span className="user-pools-subsection-meta">{territoryDraftSummary.uniqueSourceCount} sources</span>
+                </summary>
+                <div className="user-pools-territory-section-body">
+                  <div className="user-pools-territory-summary">
+                    {territoryDraftSummary.sources.length === 0 ? (
+                      <div className="user-pools-empty">Choose at least one pool section to define the Territory.</div>
+                    ) : (
+                      <>
+                        {territoryDraftSummary.warnings.length > 0 && (
+                          <div className="user-pools-territory-warning-list">
+                            {territoryDraftSummary.warnings.map(warning => (
+                              <div key={warning} className="user-pools-territory-warning">
+                                {warning}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="user-pools-territory-stat-row">
+                          <div className="user-pools-territory-stat">
+                            <strong>{territoryDraftSummary.sections.length}</strong>
+                            <span>shared sections</span>
+                          </div>
+                          <div className="user-pools-territory-stat">
+                            <strong>{territoryDraftSummary.estimatedItems}</strong>
+                            <span>source items</span>
+                          </div>
+                        </div>
+                        <div className="user-pools-territory-chip-row">
+                          {territoryDraftSummary.sections.map(entry => (
+                            <span key={entry.section} className="user-pools-territory-chip">
+                              {entry.section} x{entry.count}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="user-pools-territory-review-list">
+                          {territoryDraftSummary.sources.map((source, index) => (
+                            <div
+                              key={`${source.poolId}_${source.section}_${index}`}
+                              className={`user-pools-territory-review-item ${territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 ? 'warning' : ''} ${source.itemCount === 0 ? 'empty' : ''}`}
+                            >
+                              <div>
+                                <div className="user-pools-territory-review-title">
+                                  {source.section} from {source.poolName}
+                                </div>
+                                <div className="user-pools-territory-review-meta">
+                                  {source.itemCount} pool items available in this section
+                                </div>
+                                {territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 && (
+                                  <div className="user-pools-territory-review-note">
+                                    Duplicate source selection
+                                  </div>
+                                )}
+                                {source.itemCount === 0 && (
+                                  <div className="user-pools-territory-review-note">
+                                    Empty section source
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
-                      )}
-                      <div className="user-pools-territory-stat-row">
-                        <div className="user-pools-territory-stat">
-                          <strong>{territoryDraftSummary.sections.length}</strong>
-                          <span>shared sections</span>
-                        </div>
-                        <div className="user-pools-territory-stat">
-                          <strong>{territoryDraftSummary.estimatedItems}</strong>
-                          <span>source items</span>
-                        </div>
-                      </div>
-                      <div className="user-pools-territory-chip-row">
-                        {territoryDraftSummary.sections.map(entry => (
-                          <span key={entry.section} className="user-pools-territory-chip">
-                            {entry.section} x{entry.count}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="user-pools-territory-review-list">
-                        {territoryDraftSummary.sources.map((source, index) => (
-                          <div
-                            key={`${source.poolId}_${source.section}_${index}`}
-                            className={`user-pools-territory-review-item ${territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 ? 'warning' : ''} ${source.itemCount === 0 ? 'empty' : ''}`}
-                          >
-                            <div>
-                              <div className="user-pools-territory-review-title">
-                                {source.section} from {source.poolName}
-                              </div>
-                              <div className="user-pools-territory-review-meta">
-                                {source.itemCount} pool items available in this section
-                              </div>
-                              {territoryDraftSummary.duplicateCounts.get(source.duplicateKey)! > 1 && (
-                                <div className="user-pools-territory-review-note">
-                                  Duplicate source selection
-                                </div>
-                              )}
-                              {source.itemCount === 0 && (
-                                <div className="user-pools-territory-review-note">
-                                  Empty section source
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </details>
-          </div>
-        </aside>
-        <section className="user-pools-panel user-pools-panel-saved-territories">
-          <div className="user-pools-panel-header">
-            <h3>
-              Saved Territories
-              <span className="user-pools-title-icon" aria-hidden="true" />
-            </h3>
-            <span className="user-pools-subsection-meta">{territories.length}</span>
-          </div>
-          <div className="user-pools-helper">
-            Use, revisit, and manage your finished Territory setups here.
-          </div>
-          <div className="user-pools-territory-list">
-            {territories.length === 0 ? (
-              <div className="user-pools-empty">No Territories yet.</div>
-            ) : (
-              territories.map(territory => {
-                const visibleSources = territory.sources.slice(0, TERRITORY_CARD_SOURCE_PREVIEW_LIMIT);
-                const hiddenSourceCount = Math.max(0, territory.sources.length - visibleSources.length);
+              </details>
+            </div>
+          </aside>
+          <section className="user-pools-panel user-pools-panel-saved-territories">
+            <div className="user-pools-panel-header">
+              <h3>
+                Saved Territories
+                <span className="user-pools-title-icon" aria-hidden="true" />
+              </h3>
+              <span className="user-pools-subsection-meta">{territories.length}</span>
+            </div>
+            <div className="user-pools-helper">
+              Use, revisit, and manage your finished Territory setups here.
+            </div>
+            <div className="user-pools-territory-list">
+              {territories.length === 0 ? (
+                <div className="user-pools-empty">No Territories yet.</div>
+              ) : (
+                territories.map(territory => {
+                  const visibleSources = territory.sources.slice(0, TERRITORY_CARD_SOURCE_PREVIEW_LIMIT);
+                  const hiddenSourceCount = Math.max(0, territory.sources.length - visibleSources.length);
 
-                return (
-                  <div
-                    key={territory.id}
-                    className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
-                  >
-                    <div className="user-pools-territory-card-header">
-                      <div>
-                        <div className="user-pools-territory-name">{territory.name}</div>
-                        {territory.description && (
-                          <div className="user-pools-territory-description">{territory.description}</div>
+                  return (
+                    <div
+                      key={territory.id}
+                      className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
+                    >
+                      <div className="user-pools-territory-card-header">
+                        <div>
+                          <div className="user-pools-territory-name">{territory.name}</div>
+                          {territory.description && (
+                            <div className="user-pools-territory-description">{territory.description}</div>
+                          )}
+                        </div>
+                        {territory.id === activeTerritoryId && (
+                          <span className="user-pools-territory-active-pill">Active</span>
                         )}
                       </div>
-                      {territory.id === activeTerritoryId && (
-                        <span className="user-pools-territory-active-pill">Active</span>
-                      )}
+                      <div className="user-pools-territory-chip-row">
+                        {visibleSources.map(source => (
+                          <span key={source.id} className="user-pools-territory-chip">
+                            {source.section} from {source.poolName}
+                          </span>
+                        ))}
+                        {hiddenSourceCount > 0 && (
+                          <span className="user-pools-territory-chip user-pools-territory-chip-more">
+                            +{hiddenSourceCount} more
+                          </span>
+                        )}
+                      </div>
+                      <div className="user-pools-row-actions">
+                        <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
+                          Use in Builder
+                        </button>
+                        <button type="button" onClick={() => handleEditTerritory(territory)}>
+                          Edit
+                        </button>
+                        <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                    <div className="user-pools-territory-chip-row">
-                      {visibleSources.map(source => (
-                        <span key={source.id} className="user-pools-territory-chip">
-                          {source.section} from {source.poolName}
-                        </span>
-                      ))}
-                      {hiddenSourceCount > 0 && (
-                        <span className="user-pools-territory-chip user-pools-territory-chip-more">
-                          +{hiddenSourceCount} more
-                        </span>
-                      )}
-                    </div>
-                    <div className="user-pools-row-actions">
-                      <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
-                        Use in Builder
-                      </button>
-                      <button type="button" onClick={() => handleEditTerritory(territory)}>
-                        Edit
-                      </button>
-                      <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
+                  );
+                })
+              )}
+            </div>
+            {activeTerritoryId && (
+              <button
+                type="button"
+                className="user-pools-territory-deactivate"
+                onClick={onDeactivateTerritory}
+              >
+                Turn Off Active Territory
+              </button>
             )}
-          </div>
-          {activeTerritoryId && (
-            <button
-              type="button"
-              className="user-pools-territory-deactivate"
-              onClick={onDeactivateTerritory}
-            >
-              Turn Off Active Territory
-            </button>
-          )}
-        </section>
+          </section>
+        </div>
       </div>
 
       <Modal

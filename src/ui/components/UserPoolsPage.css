@@ -79,16 +79,20 @@
   min-height: 360px;
 }
 
+.user-pools-territory-column {
+  grid-column: 3;
+  display: grid;
+  gap: 16px;
+  align-self: start;
+}
+
 .user-pools-panel-territories {
   position: sticky;
   top: 80px;
   align-self: start;
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
 }
 
 .user-pools-panel-saved-territories {
-  grid-column: 3;
   align-self: start;
 }
 
@@ -134,6 +138,10 @@
 @media (max-width: 1200px) {
   .user-pools-layout {
     grid-template-columns: 1fr;
+  }
+
+  .user-pools-territory-column {
+    grid-column: auto;
   }
 
   .user-pools-panel-saved-territories {
