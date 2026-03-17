@@ -1,8 +1,8 @@
 import type { PoolHubEntry } from '../types';
 import { poolHubMock } from '../data/poolHubMock';
 
-const STORAGE_KEY = 'promptgen:pool_hub_store:v10';
-const CURRENT_STORE_VERSION = 10;
+const STORAGE_KEY = 'promptgen:pool_hub_store:v11';
+const CURRENT_STORE_VERSION = 11;
 const OFFICIAL_CREATOR_NAMES = new Set(['morpbase', 'morpbase official']);
 
 type PoolHubComment = {
@@ -17,7 +17,7 @@ type PoolHubComment = {
 };
 
 type PoolHubStore = {
-  version: 10;
+  version: 11;
   entries: PoolHubEntry[];
   userRatings: Record<string, Record<string, number>>;
   comments: PoolHubComment[];
