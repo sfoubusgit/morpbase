@@ -255,7 +255,7 @@ export function PoolHubPage({
   const [languageFilter, setLanguageFilter] = useState('all');
   const [sortMode, setSortMode] = useState<SortMode>('trending');
   const [minRating, setMinRating] = useState(0);
-  const [showAllItems, setShowAllItems] = useState(false);
+  const [expandedItemGroups, setExpandedItemGroups] = useState<Record<string, boolean>>({});
   const [addMessage, setAddMessage] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
@@ -426,7 +426,7 @@ export function PoolHubPage({
   useEffect(() => {
     setSelectedId(entries[0]?.id ?? '');
     refreshUserPools();
-    setShowAllItems(false);
+    setExpandedItemGroups({});
     setAddMessage(null);
   }, [entries]);
 
@@ -904,8 +904,8 @@ export function PoolHubPage({
   const visibleItems = useMemo(() => {
     if (!selectedEntry) return [];
     const items = (selectedEntry.payload as Pool).items;
-    return showAllItems ? items : items.slice(0, 8);
-  }, [selectedEntry, showAllItems]);
+    return items.slice(0, 8);
+  }, [selectedEntry]);
 
   const selectedPoolItems = useMemo(() => {
     if (!selectedEntry) return [];
@@ -999,6 +999,15 @@ export function PoolHubPage({
     }];
   }, [selectedPoolItems, selectedPoolSectionCount, selectedPoolSections]);
 
+  const isItemGroupExpanded = (groupKey: string) => expandedItemGroups[groupKey] === true;
+
+  const toggleItemGroupExpanded = (groupKey: string) => {
+    setExpandedItemGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
+
   const creatorDisplayName = myProfile?.displayName ?? userName ?? '';
 
   const renderHubCard = (entry: PoolHubEntry) => (
@@ -1018,7 +1027,7 @@ export function PoolHubPage({
             setSelectedId(entry.id);
             setIsDetailOpen(true);
             setAddMessage(null);
-            setShowAllItems(false);
+            setExpandedItemGroups({});
             void trackAnalyticsEvent({
               eventType: 'pool_open',
               pageKey: 'pool-hub',
@@ -1689,24 +1698,30 @@ export function PoolHubPage({
                       : (selectedEntry.payload as Pool).items.length}
                     )
                   </span>
-                  <button
-                    type="button"
-                    className="pool-hub-link"
-                    onClick={() => setShowAllItems(prev => !prev)}
-                  >
-                    {showAllItems ? 'Show less' : 'Show all'}
-                  </button>
                 </div>
                 {hubMode === 'working-sets' ? (
                   <div className="pool-hub-detail-items-grouped">
                     {Object.entries((selectedEntry.payload as WorkingSet).categoryBuckets ?? {}).map(
                       ([categoryId, items]) => {
-                        const shownItems = showAllItems ? items : items.slice(0, 4);
+                        const groupKey = `sidebar-working-set:${selectedEntry.id}:${categoryId}`;
+                        const isExpanded = isItemGroupExpanded(groupKey);
+                        const shownItems = isExpanded ? items : items.slice(0, 4);
                         return (
                           <div key={categoryId} className="pool-hub-item-group">
                             <div className="pool-hub-item-group-title">
-                              {categoryId.replace(/-/g, ' ')}
-                              <span>{items.length}</span>
+                              <div>
+                                {categoryId.replace(/-/g, ' ')}
+                                <span>{items.length}</span>
+                              </div>
+                              {items.length > 4 && (
+                                <button
+                                  type="button"
+                                  className="pool-hub-link"
+                                  onClick={() => toggleItemGroupExpanded(groupKey)}
+                                >
+                                  {isExpanded ? 'Show less' : 'Show all'}
+                                </button>
+                              )}
                             </div>
                             <div className="pool-hub-detail-items-list">
                               {shownItems.map(item => (
@@ -1826,23 +1841,29 @@ export function PoolHubPage({
                     <span>
                       {selectedPoolSectionCount > 0 ? 'Sample Items' : 'Items'} ({selectedPoolItems.length})
                     </span>
-                    <button
-                      type="button"
-                      className="pool-hub-link"
-                      onClick={() => setShowAllItems(prev => !prev)}
-                    >
-                      {showAllItems ? 'Show less' : 'Show all'}
-                    </button>
                   </div>
                   {selectedPoolSectionCount > 0 ? (
                     <div className="pool-hub-detail-items-grouped">
                       {selectedPoolSections.map(([section, items]) => {
-                        const shownItems = showAllItems ? items : items.slice(0, 4);
+                        const groupKey = `modal-pool:${selectedEntry.id}:${section}`;
+                        const isExpanded = isItemGroupExpanded(groupKey);
+                        const shownItems = isExpanded ? items : items.slice(0, 4);
                         return (
                           <div key={section} className="pool-hub-item-group">
                             <div className="pool-hub-item-group-title">
-                              {section}
-                              <span>{items.length}</span>
+                              <div>
+                                {section}
+                                <span>{items.length}</span>
+                              </div>
+                              {items.length > 4 && (
+                                <button
+                                  type="button"
+                                  className="pool-hub-link"
+                                  onClick={() => toggleItemGroupExpanded(groupKey)}
+                                >
+                                  {isExpanded ? 'Show less' : 'Show all'}
+                                </button>
+                              )}
                             </div>
                             <div className="pool-hub-detail-items-list">
                               {shownItems.map(item => (
