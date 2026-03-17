@@ -36,7 +36,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Pixel Art',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/32_32_pixel_hero_image.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
