@@ -8,6 +8,7 @@ export type PoolItem = {
 
 export const POOL_SECTION_OPTIONS = [
   'Subjects',
+  'Objects',
   'Environment',
   'Props',
   'Lighting',

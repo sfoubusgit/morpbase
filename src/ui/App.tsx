@@ -92,6 +92,7 @@ const DEFAULT_MODEL_PROFILE: ModelProfile = {
 
 const TERRITORY_SECTION_CATEGORY_MAP: Record<string, string[]> = {
   Subjects: ['subject'],
+  Objects: ['subject'],
   Environment: ['environment'],
   Props: ['subject', 'environment'],
   Lighting: ['lighting'],
