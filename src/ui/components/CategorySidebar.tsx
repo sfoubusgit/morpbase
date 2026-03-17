@@ -17,6 +17,7 @@
  */
 
 import { useState } from 'react';
+import type { BuilderCategoryId, BuilderModeId, BuilderStageDefinition } from '../../types';
 import './CategorySidebar.css';
 
 /**
@@ -58,37 +59,14 @@ interface CategorySidebarProps {
   activeTerritoryName?: string | null;
   highlightedCategoryIds?: string[];
   territoryFocusMode?: 'biased' | 'full';
+  modeLabel: string;
+  modeDescription: string;
+  modeId: BuilderModeId;
+  modeOptions: Array<{ id: BuilderModeId; label: string }>;
+  onModeChange: (modeId: BuilderModeId) => void;
+  stageDefinitions: BuilderStageDefinition[];
+  suggestedCategoryId?: BuilderCategoryId | null;
 }
-
-interface StageDefinition {
-  id: string;
-  label: string;
-  hint: string;
-  categories: string[];
-  optional?: boolean;
-}
-
-const CATEGORY_STAGES: StageDefinition[] = [
-  {
-    id: 'define',
-    label: 'Define',
-    hint: 'Start with the main idea of the image.',
-    categories: ['subject', 'style', 'environment'],
-  },
-  {
-    id: 'refine',
-    label: 'Refine',
-    hint: 'Shape mood, framing, and subject behavior.',
-    categories: ['lighting', 'camera', 'actions'],
-  },
-  {
-    id: 'finish',
-    label: 'Finish',
-    hint: 'Optional polish, atmosphere, and final treatment.',
-    categories: ['quality', 'effects', 'post-processing', 'anatomy-details'],
-    optional: true,
-  },
-];
 
 const ADVANCED_CATEGORY_IDS = new Set(['post-processing', 'anatomy-details']);
 
@@ -146,6 +124,13 @@ export function CategorySidebar({
   activeTerritoryName,
   highlightedCategoryIds = [],
   territoryFocusMode = 'full',
+  modeLabel,
+  modeDescription,
+  modeId,
+  modeOptions,
+  onModeChange,
+  stageDefinitions,
+  suggestedCategoryId = null,
 }: CategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
@@ -253,6 +238,23 @@ export function CategorySidebar({
           <div className="category-sidebar-title-wrapper">
             <h3 className="category-sidebar-title">Builder Flow</h3>
           </div>
+          <div className="category-sidebar-hint">
+            <strong>{modeLabel}</strong>{' '}
+            {modeDescription}
+          </div>
+          <label className="category-sidebar-hint category-sidebar-mode-select">
+            <span>Workflow Mode</span>
+            <select
+              value={modeId}
+              onChange={event => onModeChange(event.target.value as BuilderModeId)}
+            >
+              {modeOptions.map(option => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           {activeTerritoryName && (
             <div className="category-sidebar-hint category-sidebar-hint-territory">
               <strong>{activeTerritoryName}</strong>{' '}
@@ -261,7 +263,7 @@ export function CategorySidebar({
                 : 'is highlighting the Builder areas most relevant to this Territory.'}
             </div>
           )}
-          {CATEGORY_STAGES.map(stage => {
+          {stageDefinitions.map(stage => {
             const stageEntries = stage.categories
               .map(categoryId => [categoryId, categoryMap[categoryId]] as const)
               .filter(([categoryId]) => !territoryScopedView || highlightedCategorySet.has(categoryId))
@@ -310,6 +312,7 @@ export function CategorySidebar({
                       const isAdvancedCategory = ADVANCED_CATEGORY_IDS.has(categoryId);
                       const isTerritoryRelevant = highlightedCategorySet.has(categoryId);
                       const canExpandCategory = !territoryScopedView;
+                      const isSuggestedCategory = suggestedCategoryId === categoryId;
 
                       return (
                         <div key={categoryId} className="category-group">
@@ -324,6 +327,9 @@ export function CategorySidebar({
                               </span>
                               {isTerritoryRelevant && (
                                 <span className="category-item-badge category-item-badge-territory">Territory</span>
+                              )}
+                              {isSuggestedCategory && (
+                                <span className="category-item-badge">Suggested</span>
                               )}
                               {isAdvancedCategory && (
                                 <span className="category-item-badge">Advanced</span>
@@ -437,24 +443,6 @@ export function CategorySidebar({
                               })}
                             </div>
                           )}
-                          {categoryId === 'anatomy-details' && (
-                            <div className="category-sidebar-actions">
-                              <button
-                                type="button"
-                                className="category-sidebar-action-btn"
-                                onClick={onOpenRandom}
-                              >
-                                Random
-                              </button>
-                              <button
-                                type="button"
-                                className="category-sidebar-action-btn"
-                                onClick={onOpenTutorial}
-                              >
-                                Tutorial
-                              </button>
-                            </div>
-                          )}
                         </div>
                       );
                     })}
@@ -463,6 +451,28 @@ export function CategorySidebar({
               </section>
             );
           })}
+          {(onOpenRandom || onOpenTutorial) && (
+            <div className="category-sidebar-actions">
+              {onOpenRandom && (
+                <button
+                  type="button"
+                  className="category-sidebar-action-btn"
+                  onClick={onOpenRandom}
+                >
+                  Random
+                </button>
+              )}
+              {onOpenTutorial && (
+                <button
+                  type="button"
+                  className="category-sidebar-action-btn"
+                  onClick={onOpenTutorial}
+                >
+                  Tutorial
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

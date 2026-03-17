@@ -534,8 +534,14 @@ export function UserPoolsPage({
 
   const handleAddTerritorySource = () => {
     const fallbackPool = sectionedPools[0];
-    if (!fallbackPool) return;
+    if (!fallbackPool) {
+      setTerritoryError('Create or update a pool with sectioned items before adding Territory sources.');
+      setTerritoryMessage(null);
+      return;
+    }
     setTerritorySourcesTouched(true);
+    setTerritoryError(null);
+    setTerritoryMessage(null);
     setTerritorySources(prev => [
       ...prev,
       {
@@ -1663,6 +1669,11 @@ export function UserPoolsPage({
                         <h4>Sources</h4>
                         <span className="user-pools-subsection-meta">{territorySources.length}</span>
                       </div>
+                      {sectionedPools.length === 0 && (
+                        <div className="user-pools-empty">
+                          Territories are built from pool sections. Add sections to at least one pool item first, then come back here to compose Territory sources.
+                        </div>
+                      )}
                       <div className="user-pools-territory-sources">
                         {territorySources.length === 0 ? (
                           <div className="user-pools-empty">Add a sectioned pool first to compose a Territory.</div>
@@ -1722,10 +1733,10 @@ export function UserPoolsPage({
                         )}
                       </div>
                       <div className="user-pools-territory-form-actions">
-                        <button type="button" onClick={handleAddTerritorySource} disabled={sectionedPools.length === 0}>
+                        <button type="button" onClick={handleAddTerritorySource}>
                           Add Source
                         </button>
-                        <button type="button" onClick={handleSaveTerritory} disabled={sectionedPools.length === 0}>
+                        <button type="button" onClick={handleSaveTerritory}>
                           {territoryDraftId ? 'Save Territory' : 'Create Territory'}
                         </button>
                         {territoryDraftId && (

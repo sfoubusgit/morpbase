@@ -14,10 +14,11 @@
  * - Store domain rules
  */
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
-import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, Pool, PoolItem, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, Modifier, ModelProfile, Pool, PoolItem, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
+import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
 import { loadQuestionNodes, QuestionNode } from '../data/loadQuestionNodes';
 import { validateAllCategories } from '../data/validateCategoryIntegration';
 import './App.css';
@@ -190,6 +191,18 @@ export function App() {
   
   // UI State: Global weight enabled/disabled
   const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(false);
+  const [activeBuilderMode, setActiveBuilderMode] = useState<BuilderModeId>(() => {
+    try {
+      const saved = window.localStorage.getItem('morpbase:builder_mode');
+      if (saved && saved in BUILDER_MODE_CONFIGS) {
+        return saved as BuilderModeId;
+      }
+    } catch {
+      // ignore
+    }
+    return DEFAULT_BUILDER_MODE_ID;
+  });
+  const lastModeRepositionRef = useRef<BuilderModeId | null>(null);
   
   // UI State: User pool prompt additions
   const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>([]);
@@ -351,7 +364,17 @@ export function App() {
   // The order determines the interview flow: subject -> style -> lighting -> [future categories]
   // 
   // Categories must also exist in CATEGORY_MAP with their root nodeId
-  const CATEGORY_ORDER: string[] = ['subject', 'style', 'lighting', 'camera', 'environment', 'quality', 'effects', 'post-processing', 'actions', 'anatomy-details'];
+  const CATEGORY_ORDER: BuilderCategoryId[] = [...BUILDER_CATEGORY_IDS];
+  const activeBuilderModeConfig = useMemo(() => BUILDER_MODE_CONFIGS[activeBuilderMode], [activeBuilderMode]);
+  const activeCategoryOrder = activeBuilderModeConfig.categoryOrder;
+  const activeStageDefinitions = activeBuilderModeConfig.stages;
+  const builderModeOptions = useMemo(
+    () => BUILDER_MODE_ORDER.map(modeId => ({
+      id: modeId,
+      label: BUILDER_MODE_CONFIGS[modeId].label,
+    })),
+    []
+  );
   const collectNodeIds = (items: Array<{ nodeId?: string; subcategories?: any[] }>): string[] => {
     const nodeIds: string[] = [];
     items.forEach(item => {
@@ -459,7 +482,7 @@ export function App() {
   const getAllSubcategoryNodeIds = useCallback((nodes: QuestionNode[]): string[] => {
     const allNodeIds: string[] = [];
     
-    for (const categoryId of CATEGORY_ORDER) {
+    for (const categoryId of activeCategoryOrder) {
       const categoryItems = CATEGORY_MAP[categoryId] || [];
       
       // For each subcategory in this category
@@ -479,36 +502,7 @@ export function App() {
     }
     
     return allNodeIds;
-  }, []);
-
-  /**
-   * Get the next subcategory node ID in sequential order
-   * Returns the next subcategory, or loops back to the first if at the end
-   */
-  const getNextSubcategoryNodeId = useCallback((currentNodeId: string | null, nodes: QuestionNode[]): string | null => {
-    const allNodeIds = getAllSubcategoryNodeIds(nodes);
-    
-    if (allNodeIds.length === 0) {
-      return null;
-    }
-    
-    if (!currentNodeId) {
-      // No current node - return first subcategory
-      return allNodeIds[0];
-    }
-    
-    // Find current node index
-    const currentIndex = allNodeIds.indexOf(currentNodeId);
-    
-    if (currentIndex === -1) {
-      // Current node not found in list - return first subcategory
-      return allNodeIds[0];
-    }
-    
-    // Get next index (loop back to 0 if at end)
-    const nextIndex = (currentIndex + 1) % allNodeIds.length;
-    return allNodeIds[nextIndex];
-  }, [getAllSubcategoryNodeIds]);
+  }, [activeCategoryOrder]);
 
   // Determine initial node ID
   const getInitialNodeId = useCallback((nodes: QuestionNode[]): string => {
@@ -525,54 +519,6 @@ export function App() {
            '';
   }, [getAllSubcategoryNodeIds]);
 
-  /**
-   * Get the next category node ID in the interview order
-   * Returns the root node ID for the next category, or null if no more categories
-   * @deprecated - Use getNextSubcategoryNodeId instead for sequential navigation
-   */
-  const getNextCategoryNodeId = useCallback((currentCategoryId: string | null, nodes: QuestionNode[]): string | null => {
-    if (!currentCategoryId) {
-      // If no current category, return first category's first subcategory
-      const firstCategory = CATEGORY_ORDER[0];
-      return getFirstSubcategoryNodeId(firstCategory, nodes);
-    }
-    
-    // Find current category index by checking if current node belongs to any category
-    let currentIndex = -1;
-    for (let i = 0; i < CATEGORY_ORDER.length; i++) {
-      const cat = CATEGORY_ORDER[i];
-      const categoryItems = CATEGORY_MAP[cat] || [];
-      // Check if current node is in this category (including subcategories)
-      const isInCategory = categoryItems.some(item => {
-        if (item.nodeId === currentCategoryId) return true;
-        if (item.subcategories) {
-          return item.subcategories.some(sub => sub.nodeId === currentCategoryId);
-        }
-        return false;
-      });
-      if (isInCategory) {
-        currentIndex = i;
-        break;
-      }
-    }
-    
-    if (currentIndex === -1) {
-      // Current node not in category order, return first category's first subcategory
-      const firstCategory = CATEGORY_ORDER[0];
-      return getFirstSubcategoryNodeId(firstCategory, nodes);
-    }
-    
-    // Get next category
-    const nextIndex = currentIndex + 1;
-    if (nextIndex >= CATEGORY_ORDER.length) {
-      // No more categories
-      return null;
-    }
-    
-    const nextCategory = CATEGORY_ORDER[nextIndex];
-    return getFirstSubcategoryNodeId(nextCategory, nodes);
-  }, []);
-  
   // UI State: Navigation
   const [currentNodeId, setCurrentNodeId] = useState<string>('');
   const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
@@ -743,6 +689,14 @@ export function App() {
       console.error('[App] Failed to load question nodes:', err);
     }
   }, [attributeDefinitions, getInitialNodeId]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('morpbase:builder_mode', activeBuilderMode);
+    } catch {
+      // ignore
+    }
+  }, [activeBuilderMode]);
 
   // Get current question node
   const currentNode: QuestionNode | undefined = questionNodes.find(n => n.id === currentNodeId);
@@ -1757,6 +1711,87 @@ export function App() {
     if (!categoryId) return 'Builder';
     return BUILDER_CATEGORY_LABELS[categoryId] ?? 'Builder';
   }, [currentNode?.id, getCategoryForNode]);
+  const committedBuilderCategoryIds = useMemo(() => {
+    const committed = new Set<BuilderCategoryId>();
+    selections.forEach((selection, attributeId) => {
+      if (!selection.isEnabled) return;
+      const definition = effectiveAttributeDefinitions.find(def => def.id === attributeId);
+      if (!definition) return;
+      if ((BUILDER_CATEGORY_IDS as readonly string[]).includes(definition.category)) {
+        committed.add(definition.category as BuilderCategoryId);
+      }
+    });
+    return committed;
+  }, [selections, effectiveAttributeDefinitions]);
+  const suggestedBuilderCategoryId = useMemo<BuilderCategoryId | null>(() => {
+    const currentCategoryId = getCategoryForNode(currentNode?.id ?? null);
+
+    for (const categoryId of activeBuilderModeConfig.suggestedNextOrder) {
+      if (
+        territoryNavigationMode === 'biased'
+        && activeTerritoryCategoryIds.length > 0
+        && !activeTerritoryCategoryIds.includes(categoryId)
+      ) {
+        continue;
+      }
+      if (categoryId === currentCategoryId) continue;
+      if (!committedBuilderCategoryIds.has(categoryId)) {
+        return categoryId;
+      }
+    }
+
+    for (const categoryId of activeBuilderModeConfig.suggestedNextOrder) {
+      if (
+        territoryNavigationMode === 'biased'
+        && activeTerritoryCategoryIds.length > 0
+        && !activeTerritoryCategoryIds.includes(categoryId)
+      ) {
+        continue;
+      }
+      if (categoryId !== currentCategoryId) {
+        return categoryId;
+      }
+    }
+
+    return null;
+  }, [activeBuilderModeConfig.suggestedNextOrder, activeTerritoryCategoryIds, committedBuilderCategoryIds, currentNode?.id, getCategoryForNode, territoryNavigationMode]);
+
+  const handleChangeBuilderMode = useCallback((modeId: BuilderModeId) => {
+    setActiveBuilderMode(modeId);
+    setHasReachedEndViaNext(false);
+    setBuilderNotice(`${BUILDER_MODE_CONFIGS[modeId].label} is now guiding Builder flow.`);
+  }, []);
+
+  useEffect(() => {
+    if (questionNodes.length === 0 || usableNodeIds.length === 0) return;
+    if (lastModeRepositionRef.current === activeBuilderMode) return;
+
+    const currentCategoryId = getCategoryForNode(currentNodeId);
+    const nextModeStartCategory = activeBuilderModeConfig.startCategoryId;
+    const shouldRepositionToModeStart =
+      !currentCategoryId
+      || currentCategoryId === nextModeStartCategory
+      || committedBuilderCategoryIds.size === 0;
+
+    if (!shouldRepositionToModeStart) {
+      lastModeRepositionRef.current = activeBuilderMode;
+      return;
+    }
+
+    const preferredNodeId = usableNodeIds.find(nodeId => getCategoryForNode(nodeId) === nextModeStartCategory)
+      ?? getPreferredTerritoryStartNodeId()
+      ?? getInitialUsableNodeId()
+      ?? getInitialNodeId(questionNodes);
+
+    if (!preferredNodeId || preferredNodeId === currentNodeId) {
+      lastModeRepositionRef.current = activeBuilderMode;
+      return;
+    }
+
+    setCurrentNodeId(preferredNodeId);
+    setNavigationHistory(prev => (prev[prev.length - 1] === preferredNodeId ? prev : [...prev, preferredNodeId]));
+    lastModeRepositionRef.current = activeBuilderMode;
+  }, [activeBuilderMode, activeBuilderModeConfig.startCategoryId, committedBuilderCategoryIds.size, currentNodeId, getCategoryForNode, getInitialNodeId, getInitialUsableNodeId, getPreferredTerritoryStartNodeId, questionNodes, usableNodeIds]);
 
   const currentTerritoryItems = useMemo(() => {
     if (!activeTerritory) return [];
@@ -2277,6 +2312,13 @@ export function App() {
                 activeTerritoryName={activeTerritory?.name ?? null}
                 highlightedCategoryIds={activeTerritoryCategoryIds}
                 territoryFocusMode={territoryNavigationMode}
+                modeLabel={activeBuilderModeConfig.label}
+                modeDescription={activeBuilderModeConfig.description}
+                modeId={activeBuilderMode}
+                modeOptions={builderModeOptions}
+                onModeChange={handleChangeBuilderMode}
+                stageDefinitions={activeStageDefinitions}
+                suggestedCategoryId={suggestedBuilderCategoryId}
               />
           <div className="interview-container">
             <div className="app-main">
