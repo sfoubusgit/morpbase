@@ -209,6 +209,36 @@ export function UserPoolsPage({
       .filter(pool => pool.availableSections.length > 0);
   }, [pools]);
 
+  const buildInitialTerritorySources = () => {
+    const fallbackPool = sectionedPools[0];
+    if (!fallbackPool) return [];
+    return [{ poolId: fallbackPool.id, section: fallbackPool.availableSections[0] ?? '' }];
+  };
+
+  const expandTerritoryDraftSource = (source: { poolId: string; section: string }) => {
+    const pool = sectionedPools.find(entry => entry.id === source.poolId);
+    if (!pool) return [];
+
+    const section = source.section.trim();
+    if (!section) return [];
+
+    if (section === WHOLE_POOL_SECTION_VALUE) {
+      return pool.availableSections
+        .filter(Boolean)
+        .map(sectionName => ({
+          poolId: pool.id,
+          poolName: pool.name,
+          section: sectionName,
+        }));
+    }
+
+    return [{
+      poolId: pool.id,
+      poolName: pool.name,
+      section,
+    }];
+  };
+
   const territoryDraftSummary = useMemo(() => {
     const normalizedSources = territorySources
       .flatMap(source => expandTerritoryDraftSource(source))
@@ -300,36 +330,6 @@ export function UserPoolsPage({
       }
       return next;
     });
-  };
-
-  const buildInitialTerritorySources = () => {
-    const fallbackPool = sectionedPools[0];
-    if (!fallbackPool) return [];
-    return [{ poolId: fallbackPool.id, section: fallbackPool.availableSections[0] ?? '' }];
-  };
-
-  const expandTerritoryDraftSource = (source: { poolId: string; section: string }) => {
-    const pool = sectionedPools.find(entry => entry.id === source.poolId);
-    if (!pool) return [];
-
-    const section = source.section.trim();
-    if (!section) return [];
-
-    if (section === WHOLE_POOL_SECTION_VALUE) {
-      return pool.availableSections
-        .filter(Boolean)
-        .map(sectionName => ({
-          poolId: pool.id,
-          poolName: pool.name,
-          section: sectionName,
-        }));
-    }
-
-    return [{
-      poolId: pool.id,
-      poolName: pool.name,
-      section,
-    }];
   };
 
   const getPoolSections = (poolId: string) =>
