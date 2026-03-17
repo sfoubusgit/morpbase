@@ -58,6 +58,8 @@ type UserPoolsPageProps = {
 };
 
 const TERRITORY_CARD_SOURCE_PREVIEW_LIMIT = 4;
+const WHOLE_POOL_SECTION_VALUE = '__whole_pool__';
+const WHOLE_POOL_SECTION_LABEL = 'Whole Pool';
 
 export function UserPoolsPage({
   onAddToPrompt,
@@ -209,18 +211,17 @@ export function UserPoolsPage({
 
   const territoryDraftSummary = useMemo(() => {
     const normalizedSources = territorySources
+      .flatMap(source => expandTerritoryDraftSource(source))
       .map(source => {
         const pool = sectionedPools.find(entry => entry.id === source.poolId);
         if (!pool) return null;
-        const section = source.section.trim();
-        if (!section) return null;
-        const itemCount = pool.items.filter(item => item.section?.trim() === section).length;
+        const itemCount = pool.items.filter(item => item.section?.trim() === source.section).length;
         return {
           poolId: pool.id,
           poolName: pool.name,
-          section,
+          section: source.section,
           itemCount,
-          duplicateKey: `${pool.id}::${section}`,
+          duplicateKey: `${pool.id}::${source.section}`,
         };
       })
       .filter((source): source is { poolId: string; poolName: string; section: string; itemCount: number; duplicateKey: string } => Boolean(source));
@@ -305,6 +306,30 @@ export function UserPoolsPage({
     const fallbackPool = sectionedPools[0];
     if (!fallbackPool) return [];
     return [{ poolId: fallbackPool.id, section: fallbackPool.availableSections[0] ?? '' }];
+  };
+
+  const expandTerritoryDraftSource = (source: { poolId: string; section: string }) => {
+    const pool = sectionedPools.find(entry => entry.id === source.poolId);
+    if (!pool) return [];
+
+    const section = source.section.trim();
+    if (!section) return [];
+
+    if (section === WHOLE_POOL_SECTION_VALUE) {
+      return pool.availableSections
+        .filter(Boolean)
+        .map(sectionName => ({
+          poolId: pool.id,
+          poolName: pool.name,
+          section: sectionName,
+        }));
+    }
+
+    return [{
+      poolId: pool.id,
+      poolName: pool.name,
+      section,
+    }];
   };
 
   const getPoolSections = (poolId: string) =>
@@ -551,7 +576,10 @@ export function UserPoolsPage({
           const nextSections = getPoolSections(value);
           return {
             poolId: value,
-            section: nextSections.includes(source.section) ? source.section : (nextSections[0] ?? ''),
+            section:
+              source.section === WHOLE_POOL_SECTION_VALUE || nextSections.includes(source.section)
+                ? source.section
+                : (nextSections[0] ?? ''),
           };
         }
         return {
@@ -610,17 +638,7 @@ export function UserPoolsPage({
     }
 
     const normalizedSources = territorySources
-      .map(source => {
-        const pool = sectionedPools.find(entry => entry.id === source.poolId);
-        if (!pool) return null;
-        const section = source.section.trim();
-        if (!section) return null;
-        return {
-          poolId: pool.id,
-          poolName: pool.name,
-          section,
-        };
-      })
+      .flatMap(source => expandTerritoryDraftSource(source))
       .filter((source): source is TerritorySourceInput => Boolean(source));
 
     if (normalizedSources.length === 0) {
@@ -1683,6 +1701,7 @@ export function UserPoolsPage({
                               value={source.section}
                               onChange={event => handleChangeTerritorySource(index, 'section', event.target.value)}
                             >
+                              <option value={WHOLE_POOL_SECTION_VALUE}>{WHOLE_POOL_SECTION_LABEL}</option>
                               {getPoolSections(source.poolId).map(section => (
                                 <option key={section} value={section}>
                                   {section}
