@@ -1659,24 +1659,12 @@ export function App() {
     setEditedNegativeOutput(negative);
   }, []);
 
-  const handleAddPromptFragment = useCallback((fragmentId: string) => {
-    const definition = PROMPT_FRAGMENT_DEFINITIONS.find(item => item.id === fragmentId);
-    if (!definition) return;
+  const handleTogglePromptFragment = useCallback((fragmentId: string) => {
     setSelectedPromptFragments(prev => (
       prev.some(item => item.id === fragmentId)
-        ? prev
-        : [...prev, { id: fragmentId, position: definition.defaultPosition }]
+        ? prev.filter(item => item.id !== fragmentId)
+        : [...prev, { id: fragmentId }]
     ));
-  }, []);
-
-  const handleRemovePromptFragment = useCallback((fragmentId: string) => {
-    setSelectedPromptFragments(prev => prev.filter(item => item.id !== fragmentId));
-  }, []);
-
-  const handleChangePromptFragmentPosition = useCallback((fragmentId: string, position: 'start' | 'middle' | 'end') => {
-    setSelectedPromptFragments(prev => prev.map(item => (
-      item.id === fragmentId ? { ...item, position } : item
-    )));
   }, []);
 
   // Convert Map state to props format for children
@@ -1717,7 +1705,7 @@ export function App() {
         return {
           id: `fragment:${fragment.id}`,
           text: definition.outputText,
-          position: fragment.position,
+          position: 'end',
           sourceType: 'fragment' as const,
         };
       })
@@ -2517,10 +2505,8 @@ export function App() {
                 )}
               </div>
               <PromptFragmentsPanel
-                selectedFragments={selectedPromptFragments}
-                onAddFragment={handleAddPromptFragment}
-                onRemoveFragment={handleRemovePromptFragment}
-                onChangePosition={handleChangePromptFragmentPosition}
+                selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
+                onToggleFragment={handleTogglePromptFragment}
               />
               <details className="builder-sidebar-panel builder-guidance-sidebar">
                 <summary>

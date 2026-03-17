@@ -9,5 +9,4 @@ export type PromptAdditionEntry = {
 
 export type SelectedPromptFragment = {
   id: string;
-  position: PromptAdditionPosition;
 };

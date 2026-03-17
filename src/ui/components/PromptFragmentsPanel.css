@@ -9,53 +9,6 @@
   line-height: 1.45;
 }
 
-.prompt-fragments-selected {
-  display: grid;
-  gap: 0.7rem;
-}
-
-.prompt-fragments-selected-item {
-  display: grid;
-  gap: 0.65rem;
-  padding: 0.85rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.prompt-fragments-selected-main {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.prompt-fragments-selected-label {
-  font-weight: 600;
-}
-
-.prompt-fragments-selected-text {
-  color: var(--text-secondary, #a8adb7);
-  font-size: 0.9rem;
-}
-
-.prompt-fragments-selected-controls {
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-}
-
-.prompt-fragments-selected-controls select {
-  flex: 1 1 auto;
-}
-
-.prompt-fragments-selected-controls button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  color: inherit;
-  border-radius: 10px;
-  padding: 0.45rem 0.7rem;
-  cursor: pointer;
-}
-
 .prompt-fragments-library {
   display: flex;
   flex-wrap: wrap;
