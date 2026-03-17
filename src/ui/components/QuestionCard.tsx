@@ -93,6 +93,9 @@ interface QuestionCardProps {
   /** Visible Builder area label */
   sectionTitle?: string;
 
+  /** Current Builder flow explanation */
+  flowHint?: string;
+
   /** Territory source fragments relevant to the current Builder step */
   territoryItems?: Array<{
     id: string;
@@ -143,6 +146,7 @@ export function QuestionCard({
   canGoNext,
   territoryContext = null,
   sectionTitle,
+  flowHint,
   territoryItems = [],
   onToggleTerritoryItem,
   onSetTerritoryItemOutputOverride,
@@ -218,6 +222,11 @@ export function QuestionCard({
         <h2 className="question-card-title">{titleText}</h2>
         {helperQuestion && (
           <p className="question-card-description">{helperQuestion}</p>
+        )}
+        {flowHint && (
+          <div className="question-card-flow-hint">
+            {flowHint}
+          </div>
         )}
         {territoryContext && (
           <div className={`question-card-territory ${territoryContext.isRelevant ? 'relevant' : 'outside'}`}>

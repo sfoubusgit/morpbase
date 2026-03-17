@@ -1759,6 +1759,23 @@ export function App() {
     if (!categoryId) return 'Builder';
     return BUILDER_CATEGORY_LABELS[categoryId] ?? 'Builder';
   }, [currentNode?.id, getCategoryForNode]);
+  const territoryOrderedCategoryIds = useMemo(() => (
+    activeCategoryOrder.filter(categoryId => (
+      activeTerritoryCategoryIds.includes(categoryId)
+      && usableNodeIds.some(nodeId => getCategoryForNode(nodeId) === categoryId)
+    ))
+  ), [activeCategoryOrder, activeTerritoryCategoryIds, getCategoryForNode, usableNodeIds]);
+  const currentBuilderFlowHint = useMemo(() => {
+    if (activeTerritory && territoryNavigationMode === 'biased') {
+      return `Territory-biased navigation is active. Next will jump between the Builder areas mapped to ${activeTerritory.name}.`;
+    }
+
+    if (activeTerritory) {
+      return `Full Builder navigation is active while ${activeTerritory.name} continues to highlight relevant areas.`;
+    }
+
+    return `${activeBuilderModeConfig.label} is shaping the order and suggestions in Builder.`;
+  }, [activeBuilderModeConfig.label, activeTerritory, territoryNavigationMode]);
   const committedBuilderCategoryIds = useMemo(() => {
     const committed = new Set<BuilderCategoryId>();
     selections.forEach((selection, attributeId) => {
@@ -1773,6 +1790,18 @@ export function App() {
   }, [selections, effectiveAttributeDefinitions]);
   const suggestedBuilderCategoryId = useMemo<BuilderCategoryId | null>(() => {
     const currentCategoryId = getCategoryForNode(currentNode?.id ?? null);
+    if (territoryNavigationMode === 'biased' && territoryOrderedCategoryIds.length > 0) {
+      if (!currentCategoryId) {
+        return territoryOrderedCategoryIds[0] ?? null;
+      }
+
+      const currentIndex = territoryOrderedCategoryIds.indexOf(currentCategoryId);
+      if (currentIndex === -1) {
+        return territoryOrderedCategoryIds[0] ?? null;
+      }
+
+      return territoryOrderedCategoryIds[currentIndex + 1] ?? null;
+    }
 
     for (const categoryId of activeBuilderModeConfig.suggestedNextOrder) {
       if (
@@ -1802,7 +1831,7 @@ export function App() {
     }
 
     return null;
-  }, [activeBuilderModeConfig.suggestedNextOrder, activeTerritoryCategoryIds, committedBuilderCategoryIds, currentNode?.id, getCategoryForNode, territoryNavigationMode]);
+  }, [activeBuilderModeConfig.suggestedNextOrder, activeTerritoryCategoryIds, committedBuilderCategoryIds, currentNode?.id, getCategoryForNode, territoryNavigationMode, territoryOrderedCategoryIds]);
 
   const handleChangeBuilderMode = useCallback((modeId: BuilderModeId) => {
     setActiveBuilderMode(modeId);
@@ -2436,6 +2465,7 @@ export function App() {
                   canGoBack={navigationHistory.length > 1}
                   canGoNext={true}
                   sectionTitle={currentBuilderAreaLabel}
+                  flowHint={currentBuilderFlowHint}
                   territoryContext={currentTerritoryContext}
                   territoryItems={currentTerritoryItems}
                   onToggleTerritoryItem={itemId => {

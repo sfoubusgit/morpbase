@@ -259,7 +259,7 @@ export function CategorySidebar({
             <div className="category-sidebar-hint category-sidebar-hint-territory">
               <strong>{activeTerritoryName}</strong>{' '}
               {territoryScopedView
-                ? 'is limiting the sidebar to the Builder areas mapped to this Territory.'
+                ? 'is limiting the sidebar to the Builder areas mapped to this Territory. In this mode, Next jumps between mapped Builder areas.'
                 : 'is highlighting the Builder areas most relevant to this Territory.'}
             </div>
           )}
