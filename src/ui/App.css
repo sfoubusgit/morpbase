@@ -22,6 +22,14 @@ select:focus-visible,
   border-radius: var(--radius-sm);
 }
 
+/* Native select popups need explicit option colors on Windows, otherwise
+   custom white select text can make opened dropdown items unreadable. */
+select option,
+select optgroup {
+  background: #151824;
+  color: #f4f7ff;
+}
+
 /* Disabled elements must not receive focus-visible styling */
 .disabled:focus-visible,
 [disabled]:focus-visible {
