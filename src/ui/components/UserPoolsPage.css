@@ -63,7 +63,7 @@
 
 .user-pools-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.65fr) minmax(320px, 1.1fr);
+  grid-template-columns: minmax(270px, 0.9fr) minmax(0, 1.35fr) minmax(380px, 1.35fr);
   gap: 20px;
   align-items: start;
 }
