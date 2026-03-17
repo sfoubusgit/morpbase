@@ -1755,15 +1755,14 @@ export function App() {
       })
       .filter(entry => entry.sectionItems.length > 0);
 
-    const TERRITORY_ITEM_LIMIT = 10;
     let itemIndex = 0;
 
-    while (items.length < TERRITORY_ITEM_LIMIT) {
+    while (true) {
       let addedThisPass = false;
 
       relevantSources.forEach(({ source, sectionItems }) => {
         const item = sectionItems[itemIndex];
-        if (!item || items.length >= TERRITORY_ITEM_LIMIT) return;
+        if (!item) return;
 
         const normalizedText = item.text.trim().toLowerCase();
         if (!normalizedText || seenTexts.has(normalizedText)) return;
