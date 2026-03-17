@@ -1809,87 +1809,80 @@ export function UserPoolsPage({
               </div>
             </details>
           </div>
-          <div className="user-pools-territories user-pools-territories-saved">
-            <div className="user-pools-territories-saved-header">
-              <div>
-                <div className="user-pools-territories-saved-title">Saved Territories</div>
-                <div className="user-pools-territories-saved-copy">
-                  Use, revisit, and manage your finished Territory setups here.
-                </div>
-              </div>
-              <span className="user-pools-subsection-meta">{territories.length}</span>
-            </div>
-            <details className="user-pools-territory-section" open>
-              <summary>
-                Territory Library
-                <span className="user-pools-subsection-meta">{territories.length}</span>
-              </summary>
-              <div className="user-pools-territory-section-body">
-                <div className="user-pools-territory-list">
-                  {territories.length === 0 ? (
-                    <div className="user-pools-empty">No Territories yet.</div>
-                  ) : (
-                    territories.map(territory => {
-                      const visibleSources = territory.sources.slice(0, TERRITORY_CARD_SOURCE_PREVIEW_LIMIT);
-                      const hiddenSourceCount = Math.max(0, territory.sources.length - visibleSources.length);
-
-                      return (
-                        <div
-                          key={territory.id}
-                          className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
-                        >
-                          <div className="user-pools-territory-card-header">
-                            <div>
-                              <div className="user-pools-territory-name">{territory.name}</div>
-                              {territory.description && (
-                                <div className="user-pools-territory-description">{territory.description}</div>
-                              )}
-                            </div>
-                            {territory.id === activeTerritoryId && (
-                              <span className="user-pools-territory-active-pill">Active</span>
-                            )}
-                          </div>
-                          <div className="user-pools-territory-chip-row">
-                            {visibleSources.map(source => (
-                              <span key={source.id} className="user-pools-territory-chip">
-                                {source.section} from {source.poolName}
-                              </span>
-                            ))}
-                            {hiddenSourceCount > 0 && (
-                              <span className="user-pools-territory-chip user-pools-territory-chip-more">
-                                +{hiddenSourceCount} more
-                              </span>
-                            )}
-                          </div>
-                          <div className="user-pools-row-actions">
-                            <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
-                              Use in Builder
-                            </button>
-                            <button type="button" onClick={() => handleEditTerritory(territory)}>
-                              Edit
-                            </button>
-                            <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-                {activeTerritoryId && (
-                  <button
-                    type="button"
-                    className="user-pools-territory-deactivate"
-                    onClick={onDeactivateTerritory}
-                  >
-                    Turn Off Active Territory
-                  </button>
-                )}
-              </div>
-            </details>
-          </div>
         </aside>
+        <section className="user-pools-panel user-pools-panel-saved-territories">
+          <div className="user-pools-panel-header">
+            <h3>
+              Saved Territories
+              <span className="user-pools-title-icon" aria-hidden="true" />
+            </h3>
+            <span className="user-pools-subsection-meta">{territories.length}</span>
+          </div>
+          <div className="user-pools-helper">
+            Use, revisit, and manage your finished Territory setups here.
+          </div>
+          <div className="user-pools-territory-list">
+            {territories.length === 0 ? (
+              <div className="user-pools-empty">No Territories yet.</div>
+            ) : (
+              territories.map(territory => {
+                const visibleSources = territory.sources.slice(0, TERRITORY_CARD_SOURCE_PREVIEW_LIMIT);
+                const hiddenSourceCount = Math.max(0, territory.sources.length - visibleSources.length);
+
+                return (
+                  <div
+                    key={territory.id}
+                    className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
+                  >
+                    <div className="user-pools-territory-card-header">
+                      <div>
+                        <div className="user-pools-territory-name">{territory.name}</div>
+                        {territory.description && (
+                          <div className="user-pools-territory-description">{territory.description}</div>
+                        )}
+                      </div>
+                      {territory.id === activeTerritoryId && (
+                        <span className="user-pools-territory-active-pill">Active</span>
+                      )}
+                    </div>
+                    <div className="user-pools-territory-chip-row">
+                      {visibleSources.map(source => (
+                        <span key={source.id} className="user-pools-territory-chip">
+                          {source.section} from {source.poolName}
+                        </span>
+                      ))}
+                      {hiddenSourceCount > 0 && (
+                        <span className="user-pools-territory-chip user-pools-territory-chip-more">
+                          +{hiddenSourceCount} more
+                        </span>
+                      )}
+                    </div>
+                    <div className="user-pools-row-actions">
+                      <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
+                        Use in Builder
+                      </button>
+                      <button type="button" onClick={() => handleEditTerritory(territory)}>
+                        Edit
+                      </button>
+                      <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          {activeTerritoryId && (
+            <button
+              type="button"
+              className="user-pools-territory-deactivate"
+              onClick={onDeactivateTerritory}
+            >
+              Turn Off Active Territory
+            </button>
+          )}
+        </section>
       </div>
 
       <Modal
