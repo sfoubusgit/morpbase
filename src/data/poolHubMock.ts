@@ -1173,6 +1173,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
+    heroImageUrl: '/medieval_complete_Set.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
