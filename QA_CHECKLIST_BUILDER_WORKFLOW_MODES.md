@@ -110,9 +110,10 @@ With an active Territory:
 
 With Territory navigation set to `biased`:
 
-- `Next` still respects Territory bias
-- mode-aware order still appears to be the base workflow
-- Territory bias acts like a preference layer, not total chaos
+- `Next` moves between Territory-mapped Builder categories rather than walking the normal subcategory stream
+- the sequence of Territory categories still reflects the active Builder mode order underneath
+- the current step lands in a sensible first usable node for each Territory category
+- switching to `Full Builder` restores ordinary Builder traversal while keeping Territory highlighting
 
 ### 11. Territory Highlighting
 
@@ -120,6 +121,7 @@ Verify:
 
 - Territory-relevant categories still highlight correctly
 - suggested mode category does not break Territory badges
+- in `biased`, the suggested category aligns with the next Territory-mapped Builder area
 - both visual cues can coexist
 
 ## Error And Edge Checks
@@ -166,3 +168,4 @@ Builder Workflow Modes v1 is behaving credibly if:
 3. Territory coexistence still feels coherent
 4. switching modes is safe and non-destructive
 5. the feature helps orientation instead of adding confusion
+6. Territory-biased navigation feels intentional rather than like hidden standard Builder traversal
