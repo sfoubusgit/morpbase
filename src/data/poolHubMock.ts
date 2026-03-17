@@ -903,6 +903,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
+    heroImageUrl: '/The%20Motherships%20Arrival.png.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
