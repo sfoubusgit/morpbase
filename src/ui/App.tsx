@@ -1737,19 +1737,40 @@ export function App() {
       outputText?: string;
     }> = [];
 
-    activeTerritory.sources.forEach(source => {
-      const mappedCategories = TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? [];
-      if (!mappedCategories.includes(categoryId)) return;
+    const relevantSources = activeTerritory.sources
+      .filter(source => {
+        const mappedCategories = TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? [];
+        return mappedCategories.includes(categoryId);
+      })
+      .map(source => {
+        const pool = territoryPools.find(entry => entry.id === source.poolId);
+        const sectionItems = (pool?.items ?? [])
+          .filter(item => item.section?.trim() === source.section)
+          .slice(0, 6);
 
-      const pool = territoryPools.find(entry => entry.id === source.poolId);
-      const sectionItems = (pool?.items ?? [])
-        .filter(item => item.section?.trim() === source.section)
-        .slice(0, 6);
+        return {
+          source,
+          sectionItems,
+        };
+      })
+      .filter(entry => entry.sectionItems.length > 0);
 
-      sectionItems.forEach(item => {
+    const TERRITORY_ITEM_LIMIT = 10;
+    let itemIndex = 0;
+
+    while (items.length < TERRITORY_ITEM_LIMIT) {
+      let addedThisPass = false;
+
+      relevantSources.forEach(({ source, sectionItems }) => {
+        const item = sectionItems[itemIndex];
+        if (!item || items.length >= TERRITORY_ITEM_LIMIT) return;
+
         const normalizedText = item.text.trim().toLowerCase();
         if (!normalizedText || seenTexts.has(normalizedText)) return;
+
         seenTexts.add(normalizedText);
+        addedThisPass = true;
+
         const runtimeId = `territory:${source.poolId}:${source.section}:${item.id}`;
         const selectedEntry = selectedItems.get(runtimeId);
         items.push({
@@ -1764,9 +1785,12 @@ export function App() {
           outputText: poolOutputOverrides.get(runtimeId) ?? item.text,
         });
       });
-    });
 
-    return items.slice(0, 10);
+      if (!addedThisPass) break;
+      itemIndex += 1;
+    }
+
+    return items;
   }, [activeTerritory, currentNode?.id, getCategoryForNode, poolOutputOverrides, poolPromptItems, territoryPools]);
 
   // Extract prompt and error from engine result
