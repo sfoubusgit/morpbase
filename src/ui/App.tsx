@@ -309,6 +309,7 @@ export function App() {
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
+  const lastTerritoryRepositionKeyRef = useRef<string>('');
   const [selectedCreatorProfileTarget, setSelectedCreatorProfileTarget] = useState<{
     creatorId?: string | null;
     creatorName?: string | null;
@@ -611,6 +612,27 @@ export function App() {
 
     return preferredQuestionNode?.id ?? '';
   }, [activeTerritoryCategoryIds, getCategoryForNode, questionNodes, usableNodeIds]);
+
+  const getPreferredStartNodeIdForCategoryIds = useCallback((categoryIds: string[]) => {
+    if (categoryIds.length === 0) return '';
+
+    const preferredCategorySet = new Set(categoryIds);
+    const preferredUsableNodeId = usableNodeIds.find(nodeId => {
+      const categoryId = getCategoryForNode(nodeId);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    if (preferredUsableNodeId) {
+      return preferredUsableNodeId;
+    }
+
+    const preferredQuestionNode = questionNodes.find(node => {
+      const categoryId = getCategoryForNode(node.id);
+      return categoryId ? preferredCategorySet.has(categoryId) : false;
+    });
+
+    return preferredQuestionNode?.id ?? '';
+  }, [getCategoryForNode, questionNodes, usableNodeIds]);
 
   const getInitialUsableNodeId = useCallback(() => usableNodeIds[0] ?? '', [usableNodeIds]);
   const isCurrentNodeUsable = isNodeUsable(currentNodeId, questionNodes, effectiveAttributeDefinitions);
@@ -1241,7 +1263,13 @@ export function App() {
           }
         : null,
     });
-    const preferredStartNodeId = territory ? getPreferredTerritoryStartNodeId() : '';
+    const preferredStartNodeId = territory
+      ? getPreferredStartNodeIdForCategoryIds(
+          [...new Set(
+            territory.sources.flatMap(source => TERRITORY_SECTION_CATEGORY_MAP[source.section] ?? [])
+          )]
+        )
+      : '';
     if (preferredStartNodeId) {
       setCurrentNodeId(preferredStartNodeId);
       setNavigationHistory([preferredStartNodeId]);
@@ -1254,6 +1282,36 @@ export function App() {
         : 'Territory mode is off.'
     );
   };
+
+  useEffect(() => {
+    if (territoryNavigationMode !== 'biased' || !activeTerritoryId || activeTerritoryCategoryIds.length === 0) {
+      return;
+    }
+
+    const key = `${activeTerritoryId}:${territoryNavigationMode}`;
+    if (lastTerritoryRepositionKeyRef.current === key) {
+      return;
+    }
+
+    const currentCategoryId = getCategoryForNode(currentNodeId);
+    const currentInsideTerritory = currentCategoryId ? activeTerritoryCategoryIds.includes(currentCategoryId) : false;
+    if (currentInsideTerritory) {
+      lastTerritoryRepositionKeyRef.current = key;
+      return;
+    }
+
+    const preferredStartNodeId = getPreferredTerritoryStartNodeId();
+    if (!preferredStartNodeId || preferredStartNodeId === currentNodeId) {
+      lastTerritoryRepositionKeyRef.current = key;
+      return;
+    }
+
+    setCurrentNodeId(preferredStartNodeId);
+    setNavigationHistory([preferredStartNodeId]);
+    setHasReachedEndViaNext(false);
+    setUnavailableJumpNodeId(null);
+    lastTerritoryRepositionKeyRef.current = key;
+  }, [activeTerritoryCategoryIds, activeTerritoryId, currentNodeId, getCategoryForNode, getPreferredTerritoryStartNodeId, territoryNavigationMode]);
 
   const handleOpenTerritoryEditor = (territoryId: string) => {
     setTerritoryEditTargetId(territoryId);
