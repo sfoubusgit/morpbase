@@ -1808,7 +1808,8 @@ export function UserPoolsPage({
                 </div>
               </div>
             </details>
-
+          </div>
+          <div className="user-pools-territories user-pools-territories-saved">
             <details className="user-pools-territory-section" open>
               <summary>
                 Saved Territories
