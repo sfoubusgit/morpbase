@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import type { SavedPrompt } from '../../types';
+import type { PromptAdditionEntry, SavedPrompt } from '../../types';
 import {
   createPrompt,
   deletePrompt,
@@ -9,11 +9,13 @@ import {
 } from '../../engine/promptStore';
 import { trackAnalyticsEvent } from '../../engine/analyticsStore';
 import { Modal } from './Modal';
+import { composePromptWithAdditions } from '../promptAdditions';
 import './PromptLibrary.css';
 
 type PromptLibraryProps = {
   prompt: any | null;
   customAdditions?: string[];
+  positionedAdditions?: PromptAdditionEntry[];
   editedPositive?: string | null;
   editedNegative?: string | null;
   onAddToPrompt?: (text: string) => void;
@@ -51,16 +53,19 @@ const saveLocalPrompts = (prompts: SavedPrompt[]) => {
 const buildPromptText = (
   prompt: any,
   customAdditions: string[],
+  positionedAdditions: PromptAdditionEntry[],
   editedPositive?: string | null,
   editedNegative?: string | null
 ) => {
-  const additionsText = customAdditions.filter(Boolean).join(', ');
+  const normalizedAdditions = positionedAdditions.length > 0
+    ? positionedAdditions
+    : customAdditions.filter(Boolean).map((text, index) => ({
+        id: `legacy_addition_${index}`,
+        text,
+        position: 'end' as const,
+      }));
   const positive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
-  const combinedPositive = positive
-    ? additionsText
-      ? `${positive}, ${additionsText}`
-      : positive
-    : additionsText;
+  const combinedPositive = composePromptWithAdditions(positive, normalizedAdditions);
   const negative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
   const effectivePositive = editedPositive ?? combinedPositive;
   const effectiveNegative = editedNegative ?? negative;
@@ -74,6 +79,7 @@ const buildPromptText = (
 export function PromptLibrary({
   prompt,
   customAdditions = [],
+  positionedAdditions = [],
   editedPositive,
   editedNegative,
   onAddToPrompt,
@@ -98,8 +104,8 @@ export function PromptLibrary({
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
   const currentText = useMemo(
-    () => buildPromptText(prompt, customAdditions, editedPositive, editedNegative),
-    [prompt, customAdditions, editedPositive, editedNegative]
+    () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
+    [prompt, customAdditions, positionedAdditions, editedPositive, editedNegative]
   );
 
   const refresh = async () => {

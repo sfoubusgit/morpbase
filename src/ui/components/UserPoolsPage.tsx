@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState, useEffect } from 'react';
 import { POOL_SECTION_OPTIONS } from '../../types';
-import type { Pool, PoolFolder, PoolItem, Territory, TerritorySourceInput } from '../../types';
+import type { Pool, PoolFolder, PoolItem, PromptAdditionEntry, Territory, TerritorySourceInput } from '../../types';
 import {
   addItemToPool,
   createPool,
@@ -27,6 +27,7 @@ type UserPoolsPageProps = {
   onRandomizePoolItems?: (items: string[]) => void;
   prompt?: any | null;
   customAdditions?: string[];
+  positionedAdditions?: PromptAdditionEntry[];
   editedPositive?: string | null;
   editedNegative?: string | null;
   onEditedOutputChange?: (positive: string | null, negative: string | null) => void;

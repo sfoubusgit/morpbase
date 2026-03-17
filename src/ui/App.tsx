@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
-import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, Pool, PoolItem, Prompt, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
+import { AttributeDefinition, AttributeSelection, Modifier, ModelProfile, Pool, PoolItem, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { loadQuestionNodes, QuestionNode } from '../data/loadQuestionNodes';
@@ -31,6 +31,7 @@ import { Modal } from './components/Modal';
 import { UserPoolsPage } from './components/UserPoolsPage';
 import { PoolHubPage } from './components/PoolHubPage';
 import { PromptLibrary } from './components/PromptLibrary';
+import { PromptFragmentsPanel } from './components/PromptFragmentsPanel';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
 import { WorkingSetsPage } from './components/WorkingSetsPage';
@@ -40,6 +41,7 @@ import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
+import { PROMPT_FRAGMENT_DEFINITIONS } from '../data/promptFragments';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -198,6 +200,7 @@ export function App() {
   const [editedPositiveOutput, setEditedPositiveOutput] = useState<string | null>(null);
   const [editedNegativeOutput, setEditedNegativeOutput] = useState<string | null>(null);
   const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(new Map());
+  const [selectedPromptFragments, setSelectedPromptFragments] = useState<SelectedPromptFragment[]>([]);
 
   // UI State: Clear prompt undo (single step)
   const [clearUndoState, setClearUndoState] = useState<{
@@ -206,6 +209,7 @@ export function App() {
     poolPromptItems: PromptAdditionItem[];
     poolOutputOverrides: Map<string, string>;
     selectionOutputOverrides: Map<string, string>;
+    selectedPromptFragments: SelectedPromptFragment[];
   } | null>(null);
   
   // UI State: Model Profile
@@ -1619,7 +1623,8 @@ export function App() {
     const hasSelections = selections.size > 0;
     const hasModifiers = modifiers.size > 0;
     const hasPoolItems = poolPromptItems.length > 0;
-    if (!hasSelections && !hasModifiers && !hasPoolItems) {
+    const hasPromptFragments = selectedPromptFragments.length > 0;
+    if (!hasSelections && !hasModifiers && !hasPoolItems && !hasPromptFragments) {
       return;
     }
     setClearUndoState({
@@ -1628,13 +1633,15 @@ export function App() {
       poolPromptItems: [...poolPromptItems],
       poolOutputOverrides: new Map(poolOutputOverrides),
       selectionOutputOverrides: new Map(selectionOutputOverrides),
+      selectedPromptFragments: [...selectedPromptFragments],
     });
     setSelections(new Map());
     setModifiers(new Map());
     setPoolPromptItems([]);
     setPoolOutputOverrides(new Map());
     setSelectionOutputOverrides(new Map());
-  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides]);
+    setSelectedPromptFragments([]);
+  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments]);
 
   const handleUndoClearPrompt = useCallback(() => {
     if (!clearUndoState) return;
@@ -1643,12 +1650,33 @@ export function App() {
     setPoolPromptItems([...clearUndoState.poolPromptItems]);
     setPoolOutputOverrides(new Map(clearUndoState.poolOutputOverrides));
     setSelectionOutputOverrides(new Map(clearUndoState.selectionOutputOverrides));
+    setSelectedPromptFragments([...clearUndoState.selectedPromptFragments]);
     setClearUndoState(null);
   }, [clearUndoState]);
 
   const handleEditedOutputChange = useCallback((positive: string | null, negative: string | null) => {
     setEditedPositiveOutput(positive);
     setEditedNegativeOutput(negative);
+  }, []);
+
+  const handleAddPromptFragment = useCallback((fragmentId: string) => {
+    const definition = PROMPT_FRAGMENT_DEFINITIONS.find(item => item.id === fragmentId);
+    if (!definition) return;
+    setSelectedPromptFragments(prev => (
+      prev.some(item => item.id === fragmentId)
+        ? prev
+        : [...prev, { id: fragmentId, position: definition.defaultPosition }]
+    ));
+  }, []);
+
+  const handleRemovePromptFragment = useCallback((fragmentId: string) => {
+    setSelectedPromptFragments(prev => prev.filter(item => item.id !== fragmentId));
+  }, []);
+
+  const handleChangePromptFragmentPosition = useCallback((fragmentId: string, position: 'start' | 'middle' | 'end') => {
+    setSelectedPromptFragments(prev => prev.map(item => (
+      item.id === fragmentId ? { ...item, position } : item
+    )));
   }, []);
 
   // Convert Map state to props format for children
@@ -1681,6 +1709,29 @@ export function App() {
   const poolAdditionItems = poolPromptItems.map((item, index) => {
     return { id: item.id, text: formatPromptAdditionText(item) };
   });
+  const promptAdditionEntries = useMemo<PromptAdditionEntry[]>(() => {
+    const fragmentEntries = selectedPromptFragments
+      .map(fragment => {
+        const definition = PROMPT_FRAGMENT_DEFINITIONS.find(item => item.id === fragment.id);
+        if (!definition) return null;
+        return {
+          id: `fragment:${fragment.id}`,
+          text: definition.outputText,
+          position: fragment.position,
+          sourceType: 'fragment' as const,
+        };
+      })
+      .filter(Boolean) as PromptAdditionEntry[];
+
+    const poolEntries: PromptAdditionEntry[] = poolPromptItems.map(item => ({
+      id: item.id,
+      text: formatPromptAdditionText(item),
+      position: 'end',
+      sourceType: item.sourceType ?? 'pool',
+    }));
+
+    return [...fragmentEntries, ...poolEntries];
+  }, [selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -2138,6 +2189,7 @@ export function App() {
           onRandomizePoolItems={handleRandomizePoolItems}
           prompt={prompt}
           customAdditions={poolAdditionTexts}
+          positionedAdditions={promptAdditionEntries}
           editedPositive={editedPositiveOutput}
           editedNegative={editedNegativeOutput}
           onEditedOutputChange={handleEditedOutputChange}
@@ -2194,6 +2246,7 @@ export function App() {
           manualUrl={manualUrl}
           prompt={prompt}
           customAdditions={poolAdditionTexts}
+          positionedAdditions={promptAdditionEntries}
           editedPositive={editedPositiveOutput}
           editedNegative={editedNegativeOutput}
           onEditedOutputChange={handleEditedOutputChange}
@@ -2489,6 +2542,7 @@ export function App() {
               <PromptPreview 
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
+                positionedAdditions={promptAdditionEntries}
                 exportMode={exportMode}
                 onExportModeChange={setExportMode}
                 onEditedOutputChange={handleEditedOutputChange}
@@ -2499,6 +2553,7 @@ export function App() {
               <PromptLibrary
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
+                positionedAdditions={promptAdditionEntries}
                 editedPositive={editedPositiveOutput}
                 editedNegative={editedNegativeOutput}
                 onAddToPrompt={handleAddPoolItem}
@@ -2509,6 +2564,12 @@ export function App() {
                 showLocalPrompts={true}
                 hideSaveBar={true}
                 externalOpenSaveSignal={savePromptOpenSignal}
+              />
+              <PromptFragmentsPanel
+                selectedFragments={selectedPromptFragments}
+                onAddFragment={handleAddPromptFragment}
+                onRemoveFragment={handleRemovePromptFragment}
+                onChangePosition={handleChangePromptFragmentPosition}
               />
             </div>
             

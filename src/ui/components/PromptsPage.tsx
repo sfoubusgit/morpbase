@@ -1,9 +1,11 @@
+import type { PromptAdditionEntry } from '../../types';
 import { PromptLibrary } from './PromptLibrary';
 import './PromptsPage.css';
 
 type PromptsPageProps = {
   prompt?: any | null;
   customAdditions?: string[];
+  positionedAdditions?: PromptAdditionEntry[];
   editedPositive?: string | null;
   editedNegative?: string | null;
   onAddToPrompt?: (text: string) => void;
@@ -15,6 +17,7 @@ type PromptsPageProps = {
 export function PromptsPage({
   prompt,
   customAdditions = [],
+  positionedAdditions = [],
   editedPositive,
   editedNegative,
   onAddToPrompt,
@@ -52,6 +55,7 @@ export function PromptsPage({
           <PromptLibrary
             prompt={prompt ?? null}
             customAdditions={customAdditions}
+            positionedAdditions={positionedAdditions}
             editedPositive={editedPositive}
             editedNegative={editedNegative}
             onAddToPrompt={onAddToPrompt}

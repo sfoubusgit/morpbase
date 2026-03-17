@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { PromptAdditionEntry } from '../../types';
+import { composePromptWithAdditions, composeStructuredAdditionSections } from '../promptAdditions';
 import './PromptPreview.css';
 
 const SECTION_HEADER_MAP: Record<string, string> = {
@@ -31,6 +33,7 @@ interface PromptPreviewProps {
   prompt: any | null;
   onCopy?: () => void;
   customAdditions?: string[];
+  positionedAdditions?: PromptAdditionEntry[];
   exportMode?: PromptExportMode;
   onExportModeChange?: (mode: PromptExportMode) => void;
   onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
@@ -133,7 +136,7 @@ function joinNonEmpty(parts: string[], separator: string): string {
   return parts.map(part => part.trim()).filter(Boolean).join(separator);
 }
 
-function formatStructuredPrompt(prompt: any, additionsText: string): string | null {
+function formatStructuredPrompt(prompt: any, additionsText: string, positionedAdditions: PromptAdditionEntry[]): string | null {
   if (!prompt?.sections || Object.keys(prompt.sections).length === 0) {
     return null;
   }
@@ -154,7 +157,15 @@ function formatStructuredPrompt(prompt: any, additionsText: string): string | nu
     lines.pop();
   }
 
-  if (additionsText) {
+  const additionSections = composeStructuredAdditionSections(positionedAdditions);
+
+  additionSections.forEach(section => {
+    lines.push('');
+    lines.push(`${section.label}:`);
+    lines.push(section.text);
+  });
+
+  if (additionSections.length === 0 && additionsText) {
     lines.push('');
     lines.push('Custom:');
     lines.push(additionsText);
@@ -167,6 +178,7 @@ export function PromptPreview({
   prompt,
   onCopy,
   customAdditions = [],
+  positionedAdditions = [],
   exportMode = 'clean',
   onExportModeChange,
   onEditedOutputChange,
@@ -188,10 +200,17 @@ export function PromptPreview({
   const displayPositive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
   const displayNegative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
   const additionsText = customAdditions.filter(Boolean).join(', ');
-  const mergedPositive = joinNonEmpty([displayPositive, additionsText], ', ');
+  const normalizedAdditions = positionedAdditions.length > 0
+    ? positionedAdditions
+    : customAdditions.filter(Boolean).map((text, index) => ({
+        id: `legacy_addition_${index}`,
+        text,
+        position: 'end' as const,
+      }));
+  const mergedPositive = composePromptWithAdditions(displayPositive, normalizedAdditions);
   const cleanedPositive = cleanPromptText(mergedPositive);
   const cleanedNegative = cleanPromptText(displayNegative);
-  const structuredPositive = formatStructuredPrompt(prompt, additionsText) || mergedPositive;
+  const structuredPositive = formatStructuredPrompt(prompt, additionsText, normalizedAdditions) || mergedPositive;
 
   const generatedPositiveForMode = exportMode === 'clean' ? cleanedPositive : structuredPositive;
   const generatedNegativeForMode = exportMode === 'clean' ? cleanedNegative : displayNegative;
@@ -200,8 +219,8 @@ export function PromptPreview({
   const currentNegative = editedNegative ?? generatedNegativeForMode;
   const shouldIncludeNegativeInCopy = exportMode === 'structured_with_negative';
   const sourceSignature = useMemo(
-    () => JSON.stringify([displayPositive, displayNegative, additionsText, exportMode, structuredPositive, cleanedPositive, cleanedNegative]),
-    [displayPositive, displayNegative, additionsText, exportMode, structuredPositive, cleanedPositive, cleanedNegative]
+    () => JSON.stringify([displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]),
+    [displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]
   );
   const previousSourceSignature = useRef(sourceSignature);
 
