@@ -51,6 +51,7 @@ const toPoolInitiativePhrase = (row: any): PoolInitiativePhrase | null => {
   return {
     id,
     text,
+    autoApplyOnActivate: row?.autoApplyOnActivate === true,
   };
 };
 

@@ -8,12 +8,18 @@ const buildPool = (
   name: string,
   createdAt: number,
   updatedAt: number,
-  items: Array<{ text: string; section: string; tags?: string[]; note?: string }>
+  items: Array<{ text: string; section: string; tags?: string[]; note?: string }>,
+  initiativePhrases: Array<{ text: string; autoApplyOnActivate?: boolean }> = []
 ) => ({
   id,
   name,
   createdAt,
   updatedAt,
+  initiativePhrases: initiativePhrases.map((phrase, index) => ({
+    id: `${id}_initiative_${index + 1}`,
+    text: phrase.text,
+    autoApplyOnActivate: phrase.autoApplyOnActivate === true,
+  })),
   items: items.map((item, index) => ({
     id: `${id}_item_${index + 1}`,
     text: item.text,
@@ -113,6 +119,11 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'light snow flecks crossing the portrait', section: 'Effects', tags: ['pixel-art', 'effects', 'snow'] },
         { text: 'tiny star-like shimmer accents', section: 'Effects', tags: ['pixel-art', 'effects', 'shimmer'] },
         { text: 'subtle scanline texture', section: 'Effects', tags: ['pixel-art', 'effects', 'scanline'] },
+      ],
+      [
+        { text: 'clean 32x32 pixel art portrait', autoApplyOnActivate: true },
+        { text: 'limited palette portrait sprite' },
+        { text: 'centered bust portrait framing' },
       ]
     ),
   },

@@ -80,7 +80,7 @@ export const defaultUserPools: Pool[] = [
     createdAt: now,
     updatedAt: now,
     initiativePhrases: [
-      { id: '__default_pool_pixel_portrait_init_1__', text: 'clean 32x32 pixel art portrait' },
+      { id: '__default_pool_pixel_portrait_init_1__', text: 'clean 32x32 pixel art portrait', autoApplyOnActivate: true },
       { id: '__default_pool_pixel_portrait_init_2__', text: 'limited palette portrait sprite' },
       { id: '__default_pool_pixel_portrait_init_3__', text: 'centered bust portrait framing' },
     ],

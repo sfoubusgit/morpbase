@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { POOL_SECTION_OPTIONS } from '../../types';
 import type { Pool, PoolFolder, PoolInitiativePhrase, PoolItem, PromptAdditionEntry, Territory, TerritorySourceInput } from '../../types';
 import {
@@ -141,6 +141,7 @@ export function UserPoolsPage({
   const [territorySourcesTouched, setTerritorySourcesTouched] = useState(false);
   const [territoryError, setTerritoryError] = useState<string | null>(null);
   const [territoryMessage, setTerritoryMessage] = useState<string | null>(null);
+  const lastAutoAppliedPoolIdRef = useRef<string | null>(null);
   const gateMessage = !authReady
     ? 'Loading your pools...'
     : !authUser
@@ -955,6 +956,16 @@ export function UserPoolsPage({
     onApplyPoolInitiativePhrases?.(activePool.initiativePhrases, activePool);
   };
 
+  useEffect(() => {
+    if (!activePoolId || !activePool) return;
+    if (lastAutoAppliedPoolIdRef.current === activePoolId) return;
+    const autoPhrases = (activePool.initiativePhrases ?? []).filter(phrase => phrase.autoApplyOnActivate);
+    if (autoPhrases.length > 0) {
+      onApplyPoolInitiativePhrases?.(autoPhrases, activePool);
+    }
+    lastAutoAppliedPoolIdRef.current = activePoolId;
+  }, [activePoolId, activePool, onApplyPoolInitiativePhrases]);
+
   const toggleRandomizerPool = (poolId: string) => {
     setRandomizerPoolSelection(prev => {
       const next = new Map(prev);
@@ -1366,7 +1377,7 @@ export function UserPoolsPage({
                               <div className="user-pools-row-name">{pool.name}</div>
                               {isDefaultPool && <span className="user-pools-default-inline-pill">Default</span>}
                               <div className="user-pools-row-meta">
-                                {pool.items.length} items • {new Date(pool.updatedAt).toLocaleDateString()}
+                                {pool.items.length} items - {new Date(pool.updatedAt).toLocaleDateString()}
                               </div>
                             </button>
                             <div className="user-pools-row-actions">
@@ -1691,7 +1702,7 @@ export function UserPoolsPage({
 
                   <div className="user-pools-bulk">
                     <div className="user-pools-helper">
-                      Bulk add one item per line. Choose one section once for the whole batch, or override it per line with a second “|”.
+                      Bulk add one item per line. Choose one section once for the whole batch, or override it per line with a second '|'.
                     </div>
                     <select value={bulkSection} onChange={event => setBulkSection(event.target.value)}>
                       <option value="">No section</option>
@@ -2206,6 +2217,7 @@ export function UserPoolsPage({
     </div>
   );
 }
+
 
 
 

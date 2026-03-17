@@ -150,11 +150,27 @@ const parsePoolPayload = (raw: string, fallbackName: string): Pool => {
     throw new Error('Pool items cannot be empty.');
   }
 
+  const initiativePhrases = Array.isArray(candidate.initiativePhrases)
+    ? candidate.initiativePhrases
+        .map((entry: any, index: number) => {
+          if (!entry || typeof entry.text !== 'string') return null;
+          const text = entry.text.trim();
+          if (!text) return null;
+          return {
+            id: entry.id && typeof entry.id === 'string' ? entry.id : `${poolId}_initiative_${index + 1}`,
+            text,
+            autoApplyOnActivate: entry.autoApplyOnActivate === true,
+          };
+        })
+        .filter(Boolean) as Pool['initiativePhrases']
+    : [];
+
   return {
     id: poolId,
     name,
     createdAt: typeof candidate.createdAt === 'number' ? candidate.createdAt : now,
     updatedAt: typeof candidate.updatedAt === 'number' ? candidate.updatedAt : now,
+    initiativePhrases,
     items,
   };
 };

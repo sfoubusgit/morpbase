@@ -1586,14 +1586,18 @@ export function App() {
   const handleApplyPoolInitiativePhrases = useCallback((phrases: Array<{ id: string; text: string }>, pool: Pool) => {
     const next = phrases
       .map(phrase => ({
-        id: `pool_default_${pool.id}_${phrase.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        id: `pool_default_${pool.id}_${phrase.id}`,
         text: phrase.text.trim(),
         weight: 1.0,
         sourceType: 'pool-default' as const,
       }))
       .filter(entry => entry.text);
     if (next.length === 0) return;
-    setPoolPromptItems(prev => [...prev, ...next]);
+    setPoolPromptItems(prev => {
+      const nextIds = new Set(next.map(entry => entry.id));
+      const preserved = prev.filter(entry => !nextIds.has(entry.id));
+      return [...preserved, ...next];
+    });
     setBuilderNotice(`Applied ${next.length} default phrase${next.length === 1 ? '' : 's'} from "${pool.name}".`);
   }, []);
 

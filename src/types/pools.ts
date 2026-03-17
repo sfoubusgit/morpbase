@@ -9,6 +9,7 @@ export type PoolItem = {
 export type PoolInitiativePhrase = {
   id: string;
   text: string;
+  autoApplyOnActivate?: boolean;
 };
 
 export const POOL_SECTION_OPTIONS = [
