@@ -25,6 +25,62 @@ const buildPool = (
 
 export const poolHubMock: PoolHubEntry[] = [
   {
+    id: 'hub_32x32_pixel_art_portrait',
+    creator: 'MorpBase',
+    creatorId: 'morpbase-official',
+    title: '32x32 Pixel Art Portrait',
+    summary: 'A compact official pool for readable 32x32 pixel portrait workflows, expressions, and stylized portrait iteration.',
+    description:
+      'An official MorpBase pool built specifically for 32x32 pixel portrait workflows. It focuses on readable character portraits, limited-palette style language, simplified lighting, portrait composition, emotional tone, and small atmospheric effects so users can iterate sprite-like portraits cleanly inside Builder.',
+    tags: ['pixel-art', '32x32', 'portrait', 'sprite', 'retro', 'character'],
+    category: 'Pixel Art',
+    languages: ['en'],
+    license: 'CC-BY',
+    heroImageUrl: null,
+    ratingAvg: 0,
+    ratingCount: 0,
+    downloads: 0,
+    createdAt: now - day,
+    updatedAt: now,
+    payload: buildPool(
+      'pixel_art_portrait_32_pool',
+      '32x32 Pixel Art Portrait',
+      now - day,
+      now,
+      [
+        { text: 'young mage with short silver hair', section: 'Subjects', tags: ['pixel-art', 'portrait', 'mage'] },
+        { text: 'cyberpunk mechanic with tired eyes', section: 'Subjects', tags: ['pixel-art', 'portrait', 'cyberpunk'] },
+        { text: 'stern knight with a scar across one cheek', section: 'Subjects', tags: ['pixel-art', 'portrait', 'knight'] },
+        { text: 'village girl with long braided hair', section: 'Subjects', tags: ['pixel-art', 'portrait', 'village'] },
+
+        { text: 'clean 32x32 pixel art portrait', section: 'Style', tags: ['pixel-art', 'style', '32x32'] },
+        { text: 'SNES-inspired character portrait', section: 'Style', tags: ['pixel-art', 'style', 'snes'] },
+        { text: 'limited palette portrait sprite', section: 'Style', tags: ['pixel-art', 'style', 'palette'] },
+        { text: 'crisp pixel clustering with readable face shapes', section: 'Style', tags: ['pixel-art', 'style', 'clustering'] },
+
+        { text: 'warm side lighting with strong readable contrast', section: 'Lighting', tags: ['pixel-art', 'lighting', 'warm'] },
+        { text: 'cool moonlit rim light', section: 'Lighting', tags: ['pixel-art', 'lighting', 'moonlight'] },
+        { text: 'soft tavern candle glow', section: 'Lighting', tags: ['pixel-art', 'lighting', 'candle'] },
+        { text: 'flat daylight with simplified sprite shading', section: 'Lighting', tags: ['pixel-art', 'lighting', 'daylight'] },
+
+        { text: 'quiet melancholy', section: 'Mood', tags: ['pixel-art', 'mood', 'melancholy'] },
+        { text: 'heroic resolve', section: 'Mood', tags: ['pixel-art', 'mood', 'heroic'] },
+        { text: 'playful confidence', section: 'Mood', tags: ['pixel-art', 'mood', 'playful'] },
+        { text: 'haunted stillness', section: 'Mood', tags: ['pixel-art', 'mood', 'haunted'] },
+
+        { text: 'centered bust portrait framing', section: 'Composition', tags: ['pixel-art', 'composition', 'bust'] },
+        { text: 'tight face close-up crop', section: 'Composition', tags: ['pixel-art', 'composition', 'close-up'] },
+        { text: 'three-quarter portrait view', section: 'Composition', tags: ['pixel-art', 'composition', 'three-quarter'] },
+        { text: 'dialogue-window portrait framing', section: 'Composition', tags: ['pixel-art', 'composition', 'dialogue'] },
+
+        { text: 'faint ember particles', section: 'Effects', tags: ['pixel-art', 'effects', 'embers'] },
+        { text: 'subtle rain overlay', section: 'Effects', tags: ['pixel-art', 'effects', 'rain'] },
+        { text: 'tiny magical sparkles', section: 'Effects', tags: ['pixel-art', 'effects', 'magic'] },
+        { text: 'soft CRT glow', section: 'Effects', tags: ['pixel-art', 'effects', 'crt'] },
+      ]
+    ),
+  },
+  {
     id: 'hub_creatine_cyberspace_gym',
     creator: 'MorpBase',
     title: 'Creatine Cyberspace Gym',

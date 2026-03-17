@@ -222,10 +222,42 @@
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  margin-top: 8px;
 }
 
 .user-pools-initiative-actions input {
   flex: 1 1 260px;
+}
+
+.user-pools-initiative-block {
+  background: linear-gradient(180deg, rgba(20, 28, 42, 0.82), rgba(14, 18, 28, 0.9));
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
+.user-pools-initiative-list {
+  display: grid;
+  gap: 10px;
+}
+
+.user-pools-initiative-item {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.16);
+}
+
+.user-pools-initiative-item-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9cc5ff;
+}
+
+.user-pools-initiative-item-actions {
+  justify-content: flex-end;
 }
 
 .user-pools-create {
@@ -1061,6 +1093,9 @@
 .user-pools-default-detail-actions {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .user-pools-default-detail-actions button {
@@ -1070,6 +1105,53 @@
   border-radius: 10px;
   padding: 6px 10px;
   cursor: pointer;
+}
+
+.user-pools-action-primary,
+.user-pools-action-secondary,
+.user-pools-action-danger {
+  border-radius: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.user-pools-action-primary {
+  background: rgba(59, 130, 246, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  color: #dbeafe;
+}
+
+.user-pools-action-primary:hover {
+  background: rgba(59, 130, 246, 0.28);
+  border-color: rgba(96, 165, 250, 0.52);
+}
+
+.user-pools-action-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.user-pools-action-secondary {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
+.user-pools-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.user-pools-action-danger {
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  color: #fecaca;
+}
+
+.user-pools-action-danger:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(248, 113, 113, 0.42);
 }
 
 .user-pools-json {

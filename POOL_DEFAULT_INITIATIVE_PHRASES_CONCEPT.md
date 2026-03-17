@@ -43,7 +43,7 @@ They also have a natural starting posture.
 
 For example, a Pool like:
 
-- `Pixel Art Portrait Lab`
+- `32x32 Pixel Art Portrait`
 
 may want to establish a baseline such as:
 
@@ -170,7 +170,7 @@ This is especially useful for:
 
 ### Pool
 
-- `Pixel Art Portrait Lab`
+- `32x32 Pixel Art Portrait`
 
 ### Possible Initiative Phrases
 

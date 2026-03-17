@@ -74,7 +74,7 @@ export const defaultUserPools: Pool[] = [
   },
   {
     id: '__default_pool_pixel_portrait__',
-    name: 'Pixel Art Portrait Lab',
+    name: '32x32 Pixel Art Portrait',
     folderId: defaultFolderId,
     folderName: 'Default Pools',
     createdAt: now,

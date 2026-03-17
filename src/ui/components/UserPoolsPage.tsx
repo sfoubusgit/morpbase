@@ -1441,24 +1441,23 @@ export function UserPoolsPage({
               </div>
               <div className="user-pools-default-detail-actions">
                 {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 && (
-                  <button type="button" onClick={handleApplyInitiativePhrases}>
+                  <button type="button" className="user-pools-action-primary" onClick={handleApplyInitiativePhrases}>
                     Apply Defaults
                   </button>
                 )}
-                <button type="button" onClick={() => handleDuplicateDefaultPool(activePool)}>
+                <button type="button" className="user-pools-action-secondary" onClick={() => handleDuplicateDefaultPool(activePool)}>
                   Copy To My Pools
                 </button>
               </div>
-              <details className="user-pools-collapsible" open>
+              <details className="user-pools-collapsible user-pools-initiative-block" open>
                 <summary>Default Initiative Phrases</summary>
                 <div className="user-pools-collapsible-body">
                   {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 ? (
-                    <div className="user-pools-items">
+                    <div className="user-pools-initiative-list">
                       {activePool.initiativePhrases.map(phrase => (
-                        <div key={phrase.id} className="user-pools-item">
-                          <div className="user-pools-item-content">
-                            <div className="user-pools-item-text">{phrase.text}</div>
-                          </div>
+                        <div key={phrase.id} className="user-pools-initiative-item">
+                          <div className="user-pools-initiative-item-label">Default phrase</div>
+                          <div className="user-pools-item-text">{phrase.text}</div>
                         </div>
                       ))}
                     </div>
@@ -1577,7 +1576,7 @@ export function UserPoolsPage({
               </div>
               {itemError && <div className="user-pools-error">{itemError}</div>}
 
-              <details className="user-pools-collapsible" open>
+              <details className="user-pools-collapsible user-pools-initiative-block" open>
                 <summary>Default Initiative Phrases</summary>
                 <div className="user-pools-collapsible-body">
                   <div className="user-pools-helper">
@@ -1590,11 +1589,12 @@ export function UserPoolsPage({
                       value={newInitiativePhraseText}
                       onChange={event => setNewInitiativePhraseText(event.target.value)}
                     />
-                    <button type="button" onClick={() => void handleAddInitiativePhrase()}>
+                    <button type="button" className="user-pools-action-secondary" onClick={() => void handleAddInitiativePhrase()}>
                       Add Phrase
                     </button>
                     <button
                       type="button"
+                      className="user-pools-action-primary"
                       onClick={handleApplyInitiativePhrases}
                       disabled={!activePool.initiativePhrases || activePool.initiativePhrases.length === 0}
                     >
@@ -1602,9 +1602,10 @@ export function UserPoolsPage({
                     </button>
                   </div>
                   {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 ? (
-                    <div className="user-pools-items">
+                    <div className="user-pools-initiative-list">
                       {activePool.initiativePhrases.map(phrase => (
-                        <div key={phrase.id} className="user-pools-item">
+                        <div key={phrase.id} className="user-pools-initiative-item">
+                          <div className="user-pools-initiative-item-label">Default phrase</div>
                           <div className="user-pools-item-content">
                             {editingInitiativePhraseId === phrase.id ? (
                               <input
@@ -1616,14 +1617,15 @@ export function UserPoolsPage({
                               <div className="user-pools-item-text">{phrase.text}</div>
                             )}
                           </div>
-                          <div className="user-pools-item-actions">
+                          <div className="user-pools-item-actions user-pools-initiative-item-actions">
                             {editingInitiativePhraseId === phrase.id ? (
                               <>
-                                <button type="button" onClick={() => void handleSaveInitiativePhrase(phrase)}>
+                                <button type="button" className="user-pools-action-primary" onClick={() => void handleSaveInitiativePhrase(phrase)}>
                                   Save
                                 </button>
                                 <button
                                   type="button"
+                                  className="user-pools-action-secondary"
                                   onClick={() => {
                                     setEditingInitiativePhraseId(null);
                                     setEditingInitiativePhraseText('');
@@ -1634,10 +1636,10 @@ export function UserPoolsPage({
                               </>
                             ) : (
                               <>
-                                <button type="button" onClick={() => handleStartEditInitiativePhrase(phrase)}>
+                                <button type="button" className="user-pools-action-secondary" onClick={() => handleStartEditInitiativePhrase(phrase)}>
                                   Edit
                                 </button>
-                                <button type="button" onClick={() => void handleDeleteInitiativePhrase(phrase.id)}>
+                                <button type="button" className="user-pools-action-danger" onClick={() => void handleDeleteInitiativePhrase(phrase.id)}>
                                   Delete
                                 </button>
                               </>

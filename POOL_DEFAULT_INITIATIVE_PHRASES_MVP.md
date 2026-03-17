@@ -34,7 +34,7 @@ They also have a natural starting posture.
 
 Examples:
 
-- `Pixel Art Portrait Lab`
+- `32x32 Pixel Art Portrait`
 - a cinematic mech showcase Pool
 - a fantasy relic study Pool
 
@@ -192,7 +192,7 @@ The MVP should first be tested on Pools where a default baseline obviously helps
 
 Good candidates:
 
-- `Pixel Art Portrait Lab`
+- `32x32 Pixel Art Portrait`
 - cinematic portrait Pools
 - object showcase Pools
 - highly stylized workflow Pools
