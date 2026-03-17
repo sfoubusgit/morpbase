@@ -309,6 +309,7 @@ export function CategorySidebar({
                       const isExpanded = expandedCategories.has(categoryId);
                       const isAdvancedCategory = ADVANCED_CATEGORY_IDS.has(categoryId);
                       const isTerritoryRelevant = highlightedCategorySet.has(categoryId);
+                      const canExpandCategory = !territoryScopedView;
 
                       return (
                         <div key={categoryId} className="category-group">
@@ -329,17 +330,19 @@ export function CategorySidebar({
                               )}
                               {visited && <span className="dot-indicator" title="Has committed selections" />}
                             </div>
-                            <button
-                              className={`category-expand-button ${isExpanded ? "expanded" : ""}`}
-                              onClick={(e) => toggleCategory(categoryId, e)}
-                              title={isExpanded ? "Collapse" : "Expand"}
-                            >
-                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                              </svg>
-                            </button>
+                            {canExpandCategory && (
+                              <button
+                                className={`category-expand-button ${isExpanded ? "expanded" : ""}`}
+                                onClick={(e) => toggleCategory(categoryId, e)}
+                                title={isExpanded ? "Collapse" : "Expand"}
+                              >
+                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                  <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              </button>
+                            )}
                           </div>
-                          {isExpanded && (
+                          {canExpandCategory && isExpanded && (
                             <div className="category-dropdown">
                               {items.map((item, index) => {
                                 const itemKey = `${categoryId}-${index}`;
