@@ -129,6 +129,7 @@ export function UserPoolsPage({
   const [territoryName, setTerritoryName] = useState('');
   const [territoryDescription, setTerritoryDescription] = useState('');
   const [territorySources, setTerritorySources] = useState<Array<{ poolId: string; section: string }>>([]);
+  const [territorySourcesTouched, setTerritorySourcesTouched] = useState(false);
   const [territoryError, setTerritoryError] = useState<string | null>(null);
   const [territoryMessage, setTerritoryMessage] = useState<string | null>(null);
   const gateMessage = !authReady
@@ -313,6 +314,7 @@ export function UserPoolsPage({
     setTerritoryDraftId(null);
     setTerritoryName('');
     setTerritoryDescription('');
+    setTerritorySourcesTouched(false);
     setTerritorySources(buildInitialTerritorySources());
     setTerritoryError(null);
   };
@@ -363,8 +365,9 @@ export function UserPoolsPage({
   useEffect(() => {
     if (territorySources.length > 0) return;
     if (sectionedPools.length === 0) return;
+    if (territorySourcesTouched) return;
     setTerritorySources(buildInitialTerritorySources());
-  }, [sectionedPools, territorySources.length]);
+  }, [sectionedPools, territorySources.length, territorySourcesTouched]);
 
   useEffect(() => {
     if (!territoryEditTargetId) return;
@@ -506,6 +509,7 @@ export function UserPoolsPage({
   const handleAddTerritorySource = () => {
     const fallbackPool = sectionedPools[0];
     if (!fallbackPool) return;
+    setTerritorySourcesTouched(true);
     setTerritorySources(prev => [
       ...prev,
       {
@@ -519,6 +523,7 @@ export function UserPoolsPage({
     const pool = sectionedPools.find(entry => entry.id === poolId);
     if (!pool || !section.trim()) return;
 
+    setTerritorySourcesTouched(true);
     setTerritorySources(prev => {
       const alreadyIncluded = prev.some(source => source.poolId === poolId && source.section === section);
       if (alreadyIncluded) return prev;
@@ -538,6 +543,7 @@ export function UserPoolsPage({
     field: 'poolId' | 'section',
     value: string
   ) => {
+    setTerritorySourcesTouched(true);
     setTerritorySources(prev =>
       prev.map((source, sourceIndex) => {
         if (sourceIndex !== index) return source;
@@ -557,10 +563,12 @@ export function UserPoolsPage({
   };
 
   const handleRemoveTerritorySource = (index: number) => {
+    setTerritorySourcesTouched(true);
     setTerritorySources(prev => prev.filter((_, sourceIndex) => sourceIndex !== index));
   };
 
   const handleMoveTerritorySource = (index: number, direction: 'up' | 'down') => {
+    setTerritorySourcesTouched(true);
     setTerritorySources(prev => {
       const targetIndex = direction === 'up' ? index - 1 : index + 1;
       if (targetIndex < 0 || targetIndex >= prev.length) {
@@ -578,6 +586,7 @@ export function UserPoolsPage({
     setTerritoryDraftId(territory.id);
     setTerritoryName(territory.name);
     setTerritoryDescription(territory.description ?? '');
+    setTerritorySourcesTouched(true);
     setTerritorySources(
       territory.sources.map(source => ({
         poolId: source.poolId,
@@ -1684,7 +1693,6 @@ export function UserPoolsPage({
                               type="button"
                               className="user-pools-inline-danger"
                               onClick={() => handleRemoveTerritorySource(index)}
-                              disabled={territorySources.length === 1}
                             >
                               Remove
                             </button>
