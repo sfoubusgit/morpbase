@@ -528,6 +528,12 @@
   font-size: 11px;
 }
 
+.user-pools-territory-chip-more {
+  color: #c9cff5;
+  background: rgba(110, 86, 249, 0.14);
+  border-color: rgba(110, 86, 249, 0.28);
+}
+
 .user-pools-create input {
   flex: 1;
   background: rgba(255, 255, 255, 0.06);

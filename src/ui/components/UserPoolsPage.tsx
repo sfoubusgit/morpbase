@@ -57,6 +57,8 @@ type UserPoolsPageProps = {
   onTerritoryEditTargetHandled?: () => void;
 };
 
+const TERRITORY_CARD_SOURCE_PREVIEW_LIMIT = 4;
+
 export function UserPoolsPage({
   onAddToPrompt,
   onAppendToPrompt,
@@ -1790,42 +1792,52 @@ export function UserPoolsPage({
                   {territories.length === 0 ? (
                     <div className="user-pools-empty">No Territories yet.</div>
                   ) : (
-                    territories.map(territory => (
-                      <div
-                        key={territory.id}
-                        className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
-                      >
-                        <div className="user-pools-territory-card-header">
-                          <div>
-                            <div className="user-pools-territory-name">{territory.name}</div>
-                            {territory.description && (
-                              <div className="user-pools-territory-description">{territory.description}</div>
+                    territories.map(territory => {
+                      const visibleSources = territory.sources.slice(0, TERRITORY_CARD_SOURCE_PREVIEW_LIMIT);
+                      const hiddenSourceCount = Math.max(0, territory.sources.length - visibleSources.length);
+
+                      return (
+                        <div
+                          key={territory.id}
+                          className={`user-pools-territory-card ${territory.id === activeTerritoryId ? 'active' : ''}`}
+                        >
+                          <div className="user-pools-territory-card-header">
+                            <div>
+                              <div className="user-pools-territory-name">{territory.name}</div>
+                              {territory.description && (
+                                <div className="user-pools-territory-description">{territory.description}</div>
+                              )}
+                            </div>
+                            {territory.id === activeTerritoryId && (
+                              <span className="user-pools-territory-active-pill">Active</span>
                             )}
                           </div>
-                          {territory.id === activeTerritoryId && (
-                            <span className="user-pools-territory-active-pill">Active</span>
-                          )}
+                          <div className="user-pools-territory-chip-row">
+                            {visibleSources.map(source => (
+                              <span key={source.id} className="user-pools-territory-chip">
+                                {source.section} from {source.poolName}
+                              </span>
+                            ))}
+                            {hiddenSourceCount > 0 && (
+                              <span className="user-pools-territory-chip user-pools-territory-chip-more">
+                                +{hiddenSourceCount} more
+                              </span>
+                            )}
+                          </div>
+                          <div className="user-pools-row-actions">
+                            <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
+                              Use in Builder
+                            </button>
+                            <button type="button" onClick={() => handleEditTerritory(territory)}>
+                              Edit
+                            </button>
+                            <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                        <div className="user-pools-territory-chip-row">
-                          {territory.sources.map(source => (
-                            <span key={source.id} className="user-pools-territory-chip">
-                              {source.section} from {source.poolName}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="user-pools-row-actions">
-                          <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
-                            Use in Builder
-                          </button>
-                          <button type="button" onClick={() => handleEditTerritory(territory)}>
-                            Edit
-                          </button>
-                          <button type="button" onClick={() => void onDeleteTerritory?.(territory.id)}>
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
                 {activeTerritoryId && (
