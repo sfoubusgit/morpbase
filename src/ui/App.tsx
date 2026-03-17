@@ -2235,6 +2235,7 @@ export function App() {
                 onOpenTutorial={() => setIsAppTutorialOpen(true)}
                 activeTerritoryName={activeTerritory?.name ?? null}
                 highlightedCategoryIds={activeTerritoryCategoryIds}
+                territoryFocusMode={territoryNavigationMode}
               />
           <div className="interview-container">
             <div className="app-main">
@@ -2480,7 +2481,7 @@ export function App() {
                   </div>
                   {activeTerritory && (
                     <div className="builder-guidance-territory-note">
-                      Territory highlight is active. The sidebar is showing the Builder areas most relevant to this Territory first, without hiding the rest, and navigation mode is currently set to {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'}.
+                      Territory focus is active. In {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'} mode, the sidebar {territoryNavigationMode === 'biased' ? 'is limited to Territory-mapped Builder areas.' : 'shows the full Builder while still highlighting Territory-relevant areas.'}
                     </div>
                   )}
                 </div>

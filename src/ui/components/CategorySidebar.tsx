@@ -57,6 +57,7 @@ interface CategorySidebarProps {
   /** Territory-driven Builder relevance highlights */
   activeTerritoryName?: string | null;
   highlightedCategoryIds?: string[];
+  territoryFocusMode?: 'biased' | 'full';
 }
 
 interface StageDefinition {
@@ -144,6 +145,7 @@ export function CategorySidebar({
   onOpenTutorial,
   activeTerritoryName,
   highlightedCategoryIds = [],
+  territoryFocusMode = 'full',
 }: CategorySidebarProps) {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [expandedSubcategories, setExpandedSubcategories] = useState<Set<string>>(new Set());
@@ -151,6 +153,11 @@ export function CategorySidebar({
     new Set(['define', 'refine'])
   );
   const highlightedCategorySet = new Set(highlightedCategoryIds);
+  const territoryScopedView = Boolean(
+    activeTerritoryName
+    && territoryFocusMode === 'biased'
+    && highlightedCategorySet.size > 0
+  );
 
   // Check if a category has selections
   const hasCommitted = (nodeIds: string[]): boolean => {
@@ -248,12 +255,16 @@ export function CategorySidebar({
           </div>
           {activeTerritoryName && (
             <div className="category-sidebar-hint category-sidebar-hint-territory">
-              <strong>{activeTerritoryName}</strong> is highlighting the Builder areas most relevant to this Territory.
+              <strong>{activeTerritoryName}</strong>{' '}
+              {territoryScopedView
+                ? 'is limiting the sidebar to the Builder areas mapped to this Territory.'
+                : 'is highlighting the Builder areas most relevant to this Territory.'}
             </div>
           )}
           {CATEGORY_STAGES.map(stage => {
             const stageEntries = stage.categories
               .map(categoryId => [categoryId, categoryMap[categoryId]] as const)
+              .filter(([categoryId]) => !territoryScopedView || highlightedCategorySet.has(categoryId))
               .filter(([, items]) => Array.isArray(items) && items.length > 0);
 
             if (stageEntries.length === 0) {
