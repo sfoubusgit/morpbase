@@ -217,6 +217,17 @@
   color: #9fa0b8;
 }
 
+.user-pools-initiative-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.user-pools-initiative-actions input {
+  flex: 1 1 260px;
+}
+
 .user-pools-create {
   display: flex;
   gap: 8px;

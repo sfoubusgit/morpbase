@@ -1,4 +1,4 @@
-import type { Pool, PoolFolder, PoolItem, PoolStore } from '../types';
+import type { Pool, PoolFolder, PoolInitiativePhrase, PoolItem, PoolStore } from '../types';
 import { supabase } from './supabaseClient';
 import { getProfile } from './authStore';
 
@@ -29,6 +29,11 @@ const toPool = (poolRow: any, items: PoolItem[]): Pool => ({
   createdAt: new Date(poolRow.created_at).getTime(),
   updatedAt: new Date(poolRow.updated_at).getTime(),
   items,
+  initiativePhrases: Array.isArray(poolRow.initiative_phrases)
+    ? poolRow.initiative_phrases
+        .map((entry: any) => toPoolInitiativePhrase(entry))
+        .filter((entry): entry is PoolInitiativePhrase => Boolean(entry))
+    : [],
 });
 
 const toPoolItem = (row: any): PoolItem => ({
@@ -38,6 +43,22 @@ const toPoolItem = (row: any): PoolItem => ({
   tags: row.tags ?? undefined,
   note: row.note ?? undefined,
 });
+
+const toPoolInitiativePhrase = (row: any): PoolInitiativePhrase | null => {
+  const text = typeof row?.text === 'string' ? normalizeText(row.text) : '';
+  if (!text) return null;
+  const id = typeof row?.id === 'string' && row.id.trim() ? row.id.trim() : `initiative_${Math.random().toString(36).slice(2, 10)}`;
+  return {
+    id,
+    text,
+  };
+};
+
+const normalizeInitiativePhrases = (phrases: PoolInitiativePhrase[] | undefined): PoolInitiativePhrase[] => (
+  (phrases ?? [])
+    .map(entry => toPoolInitiativePhrase(entry))
+    .filter((entry): entry is PoolInitiativePhrase => Boolean(entry))
+);
 
 export const listPools = async (): Promise<Pool[]> => {
   const userId = await requireProfileId();
@@ -119,14 +140,28 @@ export const getPool = async (poolId: string): Promise<Pool | null> => {
 };
 
 export const createPool = async (name: string, folderId?: string | null): Promise<Pool> => {
+  return createPoolWithInitiativePhrases(name, folderId, []);
+};
+
+export const createPoolWithInitiativePhrases = async (
+  name: string,
+  folderId?: string | null,
+  initiativePhrases: PoolInitiativePhrase[] = []
+): Promise<Pool> => {
   const trimmed = normalizeText(name);
   if (!trimmed) {
     throw new Error('Pool name cannot be empty.');
   }
   const userId = await requireProfileId();
+  const normalizedInitiativePhrases = normalizeInitiativePhrases(initiativePhrases);
   const { data, error } = await supabase
     .from('pools')
-    .insert({ user_id: userId, name: trimmed, folder_id: folderId ?? null })
+    .insert({
+      user_id: userId,
+      name: trimmed,
+      folder_id: folderId ?? null,
+      initiative_phrases: normalizedInitiativePhrases,
+    })
     .select('*')
     .single();
   if (error) throw error;
@@ -190,6 +225,21 @@ export const movePoolToFolder = async (poolId: string, folderId?: string | null)
   const { data, error } = await supabase
     .from('pools')
     .update({ folder_id: folderId ?? null })
+    .eq('id', poolId)
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data ? toPool(data, []) : null;
+};
+
+export const updatePoolInitiativePhrases = async (
+  poolId: string,
+  initiativePhrases: PoolInitiativePhrase[]
+): Promise<Pool | null> => {
+  const payload = normalizeInitiativePhrases(initiativePhrases);
+  const { data, error } = await supabase
+    .from('pools')
+    .update({ initiative_phrases: payload })
     .eq('id', poolId)
     .select('*')
     .single();
@@ -279,6 +329,7 @@ export const importPoolPayload = async (
   }
   const userId = await requireProfileId();
   const incoming = payload.pool;
+  const normalizedInitiativePhrases = normalizeInitiativePhrases(incoming.initiativePhrases);
   const existing = await listPools();
   const existingIndex = existing.findIndex(pool => pool.name === incoming.name);
 
@@ -293,7 +344,11 @@ export const importPoolPayload = async (
   if (existingIndex === -1) {
     const { data: newPool, error } = await supabase
       .from('pools')
-      .insert({ user_id: userId, name: normalizeText(incoming.name) })
+      .insert({
+        user_id: userId,
+        name: normalizeText(incoming.name),
+        initiative_phrases: normalizedInitiativePhrases,
+      })
       .select('*')
       .single();
     if (error) throw error;
@@ -308,6 +363,10 @@ export const importPoolPayload = async (
   }
 
   const targetPool = existing[existingIndex];
+  await supabase
+    .from('pools')
+    .update({ initiative_phrases: normalizedInitiativePhrases })
+    .eq('id', targetPool.id);
   if (mode === 'replace') {
     await supabase.from('pool_items').delete().eq('pool_id', targetPool.id);
   }

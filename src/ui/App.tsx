@@ -154,7 +154,7 @@ export function App() {
     id: string;
     text: string;
     weight?: number;
-    sourceType?: 'pool' | 'territory';
+    sourceType?: 'pool' | 'territory' | 'pool-default';
   };
 
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
@@ -1583,6 +1583,20 @@ export function App() {
     });
   }, []);
 
+  const handleApplyPoolInitiativePhrases = useCallback((phrases: Array<{ id: string; text: string }>, pool: Pool) => {
+    const next = phrases
+      .map(phrase => ({
+        id: `pool_default_${pool.id}_${phrase.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        text: phrase.text.trim(),
+        weight: 1.0,
+        sourceType: 'pool-default' as const,
+      }))
+      .filter(entry => entry.text);
+    if (next.length === 0) return;
+    setPoolPromptItems(prev => [...prev, ...next]);
+    setBuilderNotice(`Applied ${next.length} default phrase${next.length === 1 ? '' : 's'} from "${pool.name}".`);
+  }, []);
+
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
     text: string;
@@ -2286,6 +2300,7 @@ export function App() {
           manualUrl={manualUrl}
           onAddToPrompt={handleAddPoolItem}
           onAppendToPrompt={handleAppendPoolItem}
+          onApplyPoolInitiativePhrases={handleApplyPoolInitiativePhrases}
           onRandomizePoolItems={handleRandomizePoolItems}
           prompt={prompt}
           customAdditions={poolAdditionTexts}

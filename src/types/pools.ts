@@ -6,6 +6,11 @@ export type PoolItem = {
   note?: string;
 };
 
+export type PoolInitiativePhrase = {
+  id: string;
+  text: string;
+};
+
 export const POOL_SECTION_OPTIONS = [
   'Subjects',
   'Objects',
@@ -37,6 +42,7 @@ export type Pool = {
   createdAt: number;
   updatedAt: number;
   items: PoolItem[];
+  initiativePhrases?: PoolInitiativePhrase[];
 };
 
 export type PoolStore = {

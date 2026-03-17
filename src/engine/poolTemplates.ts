@@ -1,12 +1,12 @@
 import type { Pool } from '../types';
-import { createPool } from './poolStore';
+import { createPoolWithInitiativePhrases } from './poolStore';
 import { supabase } from './supabaseClient';
 
 const normalizeText = (value: string): string =>
   value.replace(/\s+/g, ' ').trim();
 
 export const createPoolFromTemplate = async (template: Pool, name: string): Promise<Pool> => {
-  const created = await createPool(name);
+  const created = await createPoolWithInitiativePhrases(name, null, template.initiativePhrases ?? []);
   const items = template.items
     .map(item => ({
       pool_id: created.id,
@@ -33,6 +33,10 @@ export const createPoolFromTemplate = async (template: Pool, name: string): Prom
       tags: item.tags?.map(normalizeText).filter(Boolean) ?? undefined,
       note: item.note ? normalizeText(item.note) : undefined,
     })),
+    initiativePhrases: template.initiativePhrases?.map(entry => ({
+      ...entry,
+      text: normalizeText(entry.text),
+    })) ?? [],
     updatedAt: Date.now(),
   };
 };

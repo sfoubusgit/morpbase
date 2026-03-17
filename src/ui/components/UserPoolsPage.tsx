@@ -1,6 +1,6 @@
 ﻿import { useMemo, useState, useEffect } from 'react';
 import { POOL_SECTION_OPTIONS } from '../../types';
-import type { Pool, PoolFolder, PoolItem, PromptAdditionEntry, Territory, TerritorySourceInput } from '../../types';
+import type { Pool, PoolFolder, PoolInitiativePhrase, PoolItem, PromptAdditionEntry, Territory, TerritorySourceInput } from '../../types';
 import {
   addItemToPool,
   createPool,
@@ -13,6 +13,7 @@ import {
   listPools,
   movePoolToFolder,
   renamePool,
+  updatePoolInitiativePhrases,
   updatePoolFolderOrder,
   updatePoolItem,
 } from '../../engine/poolStore';
@@ -24,6 +25,7 @@ import './UserPoolsPage.css';
 type UserPoolsPageProps = {
   onAddToPrompt?: (text: string) => void;
   onAppendToPrompt?: (text: string, targetId?: string) => void;
+  onApplyPoolInitiativePhrases?: (phrases: Array<{ id: string; text: string }>, pool: Pool) => void;
   onRandomizePoolItems?: (items: string[]) => void;
   prompt?: any | null;
   customAdditions?: string[];
@@ -65,6 +67,7 @@ const WHOLE_POOL_SECTION_LABEL = 'Whole Pool';
 export function UserPoolsPage({
   onAddToPrompt,
   onAppendToPrompt,
+  onApplyPoolInitiativePhrases,
   onRandomizePoolItems,
   customAdditions = [],
   additionItems = [],
@@ -104,6 +107,9 @@ export function UserPoolsPage({
   const [editingItemSection, setEditingItemSection] = useState('');
   const [editingItemTags, setEditingItemTags] = useState('');
   const [editingItemNote, setEditingItemNote] = useState('');
+  const [editingInitiativePhraseId, setEditingInitiativePhraseId] = useState<string | null>(null);
+  const [editingInitiativePhraseText, setEditingInitiativePhraseText] = useState('');
+  const [newInitiativePhraseText, setNewInitiativePhraseText] = useState('');
   const [editingAddItemId, setEditingAddItemId] = useState<string | null>(null);
   const [editingAddItemText, setEditingAddItemText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -394,6 +400,12 @@ export function UserPoolsPage({
     if (territorySourcesTouched) return;
     setTerritorySources(buildInitialTerritorySources());
   }, [sectionedPools, territorySources.length, territorySourcesTouched]);
+
+  useEffect(() => {
+    setEditingInitiativePhraseId(null);
+    setEditingInitiativePhraseText('');
+    setNewInitiativePhraseText('');
+  }, [activePoolId]);
 
   useEffect(() => {
     if (!territoryEditTargetId) return;
@@ -874,6 +886,73 @@ export function UserPoolsPage({
     } catch (err: any) {
       setItemError(err?.message ?? 'Failed to update item.');
     }
+  };
+
+  const persistInitiativePhrases = async (poolId: string, nextPhrases: PoolInitiativePhrase[]) => {
+    if (!authUser || !isPro) {
+      setItemError('Upgrade to Pro to edit initiative phrases.');
+      return false;
+    }
+
+    setItemError(null);
+    try {
+      await updatePoolInitiativePhrases(poolId, nextPhrases);
+      await refreshPools();
+      return true;
+    } catch (err: any) {
+      setItemError(err?.message ?? 'Failed to update initiative phrases.');
+      return false;
+    }
+  };
+
+  const handleAddInitiativePhrase = async () => {
+    if (!activePool || isDefaultPoolSelected) return;
+    const trimmed = newInitiativePhraseText.trim();
+    if (!trimmed) return;
+    const nextPhrases = [
+      ...(activePool.initiativePhrases ?? []),
+      {
+        id: `initiative_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        text: trimmed,
+      },
+    ];
+    const didSave = await persistInitiativePhrases(activePool.id, nextPhrases);
+    if (!didSave) return;
+    setNewInitiativePhraseText('');
+  };
+
+  const handleStartEditInitiativePhrase = (phrase: PoolInitiativePhrase) => {
+    setEditingInitiativePhraseId(phrase.id);
+    setEditingInitiativePhraseText(phrase.text);
+  };
+
+  const handleSaveInitiativePhrase = async (phrase: PoolInitiativePhrase) => {
+    if (!activePool || isDefaultPoolSelected) return;
+    const trimmed = editingInitiativePhraseText.trim();
+    if (!trimmed) return;
+    const nextPhrases = (activePool.initiativePhrases ?? []).map(entry => (
+      entry.id === phrase.id ? { ...entry, text: trimmed } : entry
+    ));
+    const didSave = await persistInitiativePhrases(activePool.id, nextPhrases);
+    if (!didSave) return;
+    setEditingInitiativePhraseId(null);
+    setEditingInitiativePhraseText('');
+  };
+
+  const handleDeleteInitiativePhrase = async (phraseId: string) => {
+    if (!activePool || isDefaultPoolSelected) return;
+    const nextPhrases = (activePool.initiativePhrases ?? []).filter(entry => entry.id !== phraseId);
+    const didSave = await persistInitiativePhrases(activePool.id, nextPhrases);
+    if (!didSave) return;
+    if (editingInitiativePhraseId === phraseId) {
+      setEditingInitiativePhraseId(null);
+      setEditingInitiativePhraseText('');
+    }
+  };
+
+  const handleApplyInitiativePhrases = () => {
+    if (!activePool || !activePool.initiativePhrases || activePool.initiativePhrases.length === 0) return;
+    onApplyPoolInitiativePhrases?.(activePool.initiativePhrases, activePool);
   };
 
   const toggleRandomizerPool = (poolId: string) => {
@@ -1361,10 +1440,33 @@ export function UserPoolsPage({
                 />
               </div>
               <div className="user-pools-default-detail-actions">
+                {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 && (
+                  <button type="button" onClick={handleApplyInitiativePhrases}>
+                    Apply Defaults
+                  </button>
+                )}
                 <button type="button" onClick={() => handleDuplicateDefaultPool(activePool)}>
                   Copy To My Pools
                 </button>
               </div>
+              <details className="user-pools-collapsible" open>
+                <summary>Default Initiative Phrases</summary>
+                <div className="user-pools-collapsible-body">
+                  {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 ? (
+                    <div className="user-pools-items">
+                      {activePool.initiativePhrases.map(phrase => (
+                        <div key={phrase.id} className="user-pools-item">
+                          <div className="user-pools-item-content">
+                            <div className="user-pools-item-text">{phrase.text}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="user-pools-empty">This pool has no initiative phrases.</div>
+                  )}
+                </div>
+              </details>
               <div className="user-pools-items">
                 {filteredItems.length === 0 ? (
                   <div className="user-pools-empty">No items match your search or tag filter.</div>
@@ -1474,6 +1576,81 @@ export function UserPoolsPage({
                 </div>
               </div>
               {itemError && <div className="user-pools-error">{itemError}</div>}
+
+              <details className="user-pools-collapsible" open>
+                <summary>Default Initiative Phrases</summary>
+                <div className="user-pools-collapsible-body">
+                  <div className="user-pools-helper">
+                    Initiative phrases are optional Pool-owned starter phrases. They can be applied into Builder as visible prompt additions.
+                  </div>
+                  <div className="user-pools-initiative-actions">
+                    <input
+                      type="text"
+                      placeholder="New initiative phrase"
+                      value={newInitiativePhraseText}
+                      onChange={event => setNewInitiativePhraseText(event.target.value)}
+                    />
+                    <button type="button" onClick={() => void handleAddInitiativePhrase()}>
+                      Add Phrase
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleApplyInitiativePhrases}
+                      disabled={!activePool.initiativePhrases || activePool.initiativePhrases.length === 0}
+                    >
+                      Apply Defaults
+                    </button>
+                  </div>
+                  {activePool.initiativePhrases && activePool.initiativePhrases.length > 0 ? (
+                    <div className="user-pools-items">
+                      {activePool.initiativePhrases.map(phrase => (
+                        <div key={phrase.id} className="user-pools-item">
+                          <div className="user-pools-item-content">
+                            {editingInitiativePhraseId === phrase.id ? (
+                              <input
+                                type="text"
+                                value={editingInitiativePhraseText}
+                                onChange={event => setEditingInitiativePhraseText(event.target.value)}
+                              />
+                            ) : (
+                              <div className="user-pools-item-text">{phrase.text}</div>
+                            )}
+                          </div>
+                          <div className="user-pools-item-actions">
+                            {editingInitiativePhraseId === phrase.id ? (
+                              <>
+                                <button type="button" onClick={() => void handleSaveInitiativePhrase(phrase)}>
+                                  Save
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingInitiativePhraseId(null);
+                                    setEditingInitiativePhraseText('');
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button type="button" onClick={() => handleStartEditInitiativePhrase(phrase)}>
+                                  Edit
+                                </button>
+                                <button type="button" onClick={() => void handleDeleteInitiativePhrase(phrase.id)}>
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="user-pools-empty">No initiative phrases yet.</div>
+                  )}
+                </div>
+              </details>
 
               <details className="user-pools-collapsible">
                 <summary>Add Content</summary>

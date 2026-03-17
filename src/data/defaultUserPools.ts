@@ -11,6 +11,7 @@ export const defaultUserPools: Pool[] = [
     folderName: 'Default Pools',
     createdAt: now,
     updatedAt: now,
+    initiativePhrases: [],
     items: [
       { id: '__default_pool_cinematic_camera_1__', text: 'low angle shot', tags: ['camera', 'cinematic'] },
       { id: '__default_pool_cinematic_camera_2__', text: 'dramatic close-up', tags: ['camera', 'portrait'] },
@@ -27,6 +28,7 @@ export const defaultUserPools: Pool[] = [
     folderName: 'Default Pools',
     createdAt: now,
     updatedAt: now,
+    initiativePhrases: [],
     items: [
       { id: '__default_pool_atmosphere_1__', text: 'volumetric fog', tags: ['atmosphere', 'fog'] },
       { id: '__default_pool_atmosphere_2__', text: 'floating dust particles', tags: ['atmosphere', 'particles'] },
@@ -43,6 +45,7 @@ export const defaultUserPools: Pool[] = [
     folderName: 'Default Pools',
     createdAt: now,
     updatedAt: now,
+    initiativePhrases: [],
     items: [
       { id: '__default_pool_portrait_1__', text: 'highly detailed face', tags: ['portrait', 'detail'] },
       { id: '__default_pool_portrait_2__', text: 'natural skin texture', tags: ['portrait', 'realism'] },
@@ -59,6 +62,7 @@ export const defaultUserPools: Pool[] = [
     folderName: 'Default Pools',
     createdAt: now,
     updatedAt: now,
+    initiativePhrases: [],
     items: [
       { id: '__default_pool_quality_1__', text: 'ultra detailed', tags: ['quality'] },
       { id: '__default_pool_quality_2__', text: 'clean composition', tags: ['quality', 'composition'] },
@@ -75,6 +79,11 @@ export const defaultUserPools: Pool[] = [
     folderName: 'Default Pools',
     createdAt: now,
     updatedAt: now,
+    initiativePhrases: [
+      { id: '__default_pool_pixel_portrait_init_1__', text: 'clean 32x32 pixel art portrait' },
+      { id: '__default_pool_pixel_portrait_init_2__', text: 'limited palette portrait sprite' },
+      { id: '__default_pool_pixel_portrait_init_3__', text: 'centered bust portrait framing' },
+    ],
     items: [
       { id: '__default_pool_pixel_portrait_1__', text: 'young mage with short silver hair', section: 'Subjects', tags: ['pixel-art', 'portrait', 'mage'] },
       { id: '__default_pool_pixel_portrait_2__', text: 'cyberpunk mechanic with tired eyes', section: 'Subjects', tags: ['pixel-art', 'portrait', 'cyberpunk'] },
