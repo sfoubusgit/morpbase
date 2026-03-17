@@ -2516,6 +2516,12 @@ export function App() {
                   <div className="territory-reactivate-text">Create a Territory in User Pools to use Builder focus mode.</div>
                 )}
               </div>
+              <PromptFragmentsPanel
+                selectedFragments={selectedPromptFragments}
+                onAddFragment={handleAddPromptFragment}
+                onRemoveFragment={handleRemovePromptFragment}
+                onChangePosition={handleChangePromptFragmentPosition}
+              />
               <details className="builder-sidebar-panel builder-guidance-sidebar">
                 <summary>
                   <span className="builder-sidebar-panel-label">Builder Guide</span>
@@ -2564,12 +2570,6 @@ export function App() {
                 showLocalPrompts={true}
                 hideSaveBar={true}
                 externalOpenSaveSignal={savePromptOpenSignal}
-              />
-              <PromptFragmentsPanel
-                selectedFragments={selectedPromptFragments}
-                onAddFragment={handleAddPromptFragment}
-                onRemoveFragment={handleRemovePromptFragment}
-                onChangePosition={handleChangePromptFragmentPosition}
               />
             </div>
             
