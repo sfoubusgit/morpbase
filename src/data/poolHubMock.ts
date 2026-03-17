@@ -1097,6 +1097,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Illustration',
     languages: ['en'],
     license: 'CC-BY',
+    heroImageUrl: '/medieval_environment_hero_image.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
