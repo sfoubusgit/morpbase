@@ -60,6 +60,10 @@ type PromptSourceSummary = {
   label: string;
 };
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function splitPromptFragments(text: string): string[] {
   const fragments: string[] = [];
   let current = '';
@@ -188,6 +192,40 @@ function getPromptSourceMeta(sourceType?: PromptAdditionEntry['sourceType']): Pr
   }
 }
 
+function renderHighlightedText(text: string, phrases: string[]) {
+  if (!text.trim() || phrases.length === 0) {
+    return text;
+  }
+
+  const uniquePhrases = [...new Set(phrases.map(phrase => phrase.trim()).filter(Boolean))]
+    .sort((a, b) => b.length - a.length);
+
+  if (uniquePhrases.length === 0) {
+    return text;
+  }
+
+  const pattern = uniquePhrases.map(escapeRegExp).join('|');
+  if (!pattern) {
+    return text;
+  }
+
+  const regex = new RegExp(`(${pattern})`, 'gi');
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (!part) return null;
+
+    const isMatch = uniquePhrases.some(phrase => phrase.toLowerCase() === part.toLowerCase());
+    if (!isMatch) return part;
+
+    return (
+      <mark key={`${part}-${index}`} className="prompt-preview-source-highlight">
+        {part}
+      </mark>
+    );
+  });
+}
+
 function formatStructuredPrompt(prompt: any, additionsText: string, positionedAdditions: PromptAdditionEntry[]): string | null {
   if (!prompt?.sections || Object.keys(prompt.sections).length === 0) {
     return null;
@@ -255,6 +293,7 @@ export function PromptPreview({
     positive: null,
     negative: null,
   });
+  const [highlightedSourceId, setHighlightedSourceId] = useState<string | null>(null);
 
   const displayPositive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
   const displayNegative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
@@ -287,6 +326,12 @@ export function PromptPreview({
 
     return Array.from(groups.values());
   }, [normalizedAdditions]);
+  const highlightedSourceTexts = useMemo(() => {
+    if (!highlightedSourceId) return [];
+    return normalizedAdditions
+      .filter(entry => getPromptSourceMeta(entry.sourceType).id === highlightedSourceId)
+      .map(entry => entry.text);
+  }, [highlightedSourceId, normalizedAdditions]);
   const hasEditedOutput = editedPositive !== null || editedNegative !== null;
   const currentPositive = editedPositive ?? generatedPositiveForMode;
   const currentNegative = editedNegative ?? generatedNegativeForMode;
@@ -315,6 +360,16 @@ export function PromptPreview({
       onEditedOutputChange?.(null, null);
     }
   }, [sourceSignature, isEditMode, hasEditedOutput, onEditedOutputChange]);
+
+  useEffect(() => {
+    if (!highlightedSourceId) return;
+
+    const timeout = window.setTimeout(() => {
+      setHighlightedSourceId(null);
+    }, 1800);
+
+    return () => window.clearTimeout(timeout);
+  }, [highlightedSourceId]);
 
   const handleEnterEditMode = () => {
     setEditSnapshot({
@@ -530,11 +585,25 @@ export function PromptPreview({
           <div className="prompt-preview-sources-title">Prompt Sources</div>
           <div className="prompt-preview-sources-chips">
             {promptSourceSummaries.map(source => (
-              <span key={source.id} className="prompt-preview-source-chip">
+              <button
+                key={source.id}
+                type="button"
+                className={`prompt-preview-source-chip ${highlightedSourceId === source.id ? 'active' : ''}`}
+                onClick={() => setHighlightedSourceId(source.id)}
+              >
                 {source.label}
-              </span>
+              </button>
             ))}
           </div>
+          {highlightedSourceTexts.length > 0 && (
+            <div className="prompt-preview-source-reveal">
+              {highlightedSourceTexts.map((text, index) => (
+                <span key={`${text}-${index}`} className="prompt-preview-source-reveal-item">
+                  {text}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -599,7 +668,9 @@ export function PromptPreview({
           <div className="prompt-preview-section">
             <label className="prompt-preview-label">Prompt</label>
             <div className="prompt-preview-text">
-              {currentPositive || 'Select prompt elements to start building your prompt.'}
+              {currentPositive
+                ? renderHighlightedText(currentPositive, highlightedSourceTexts)
+                : 'Select prompt elements to start building your prompt.'}
             </div>
           </div>
         )}
@@ -610,7 +681,9 @@ export function PromptPreview({
               <label className="prompt-preview-label">Negative Prompt</label>
               <span className="prompt-preview-negative-pill">Export companion</span>
             </div>
-            <div className="prompt-preview-text prompt-preview-text-negative">{currentNegative}</div>
+            <div className="prompt-preview-text prompt-preview-text-negative">
+              {renderHighlightedText(currentNegative, highlightedSourceTexts)}
+            </div>
           </div>
         )}
       </div>
