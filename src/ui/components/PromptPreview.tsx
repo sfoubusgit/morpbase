@@ -37,7 +37,7 @@ interface PromptPreviewProps {
   activeModeLabel?: string | null;
   activeTerritoryName?: string | null;
   territoryFocusMode?: 'biased' | 'full' | null;
-  activePoolName?: string | null;
+  activePoolNames?: string[];
   availableIdpSets?: PoolIdpSet[];
   activeIdpSetId?: string | null;
   onSelectIdpSet?: (setId: string) => void;
@@ -189,7 +189,7 @@ export function PromptPreview({
   activeModeLabel = null,
   activeTerritoryName = null,
   territoryFocusMode = null,
-  activePoolName = null,
+  activePoolNames = [],
   availableIdpSets = [],
   activeIdpSetId = null,
   onSelectIdpSet,
@@ -418,9 +418,9 @@ export function PromptPreview({
               Mode: <strong>{activeModeLabel}</strong>
             </span>
           )}
-          {activePoolName && (
+          {activePoolNames.length > 0 && (
             <span className="prompt-preview-workflow-chip">
-              Pool: <strong>{activePoolName}</strong>
+              Pools: <strong>{activePoolNames.join(', ')}</strong>
             </span>
           )}
           {activeIdpSet && (

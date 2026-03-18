@@ -32,7 +32,7 @@ import { Modal } from './components/Modal';
 import { UserPoolsPage } from './components/UserPoolsPage';
 import { PoolHubPage } from './components/PoolHubPage';
 import { PromptLibrary } from './components/PromptLibrary';
-import { PromptFragmentsPanel } from './components/PromptFragmentsPanel';
+import { FloatingPromptFragments } from './components/FloatingPromptFragments';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
 import { WorkingSetsPage } from './components/WorkingSetsPage';
@@ -2054,6 +2054,15 @@ export function App() {
 
     return items;
   }, [activeTerritory, currentNode?.id, getCategoryForNode, poolOutputOverrides, poolPromptItems, territoryPools]);
+  const activeWorkflowPoolNames = useMemo(() => {
+    if (activeTerritory) {
+      const names = activeTerritory.sources
+        .map(source => territoryPools.find(pool => pool.id === source.poolId)?.name ?? null)
+        .filter((name): name is string => Boolean(name));
+      return [...new Set(names)];
+    }
+    return activeIdpPool?.name ? [activeIdpPool.name] : [];
+  }, [activeIdpPool, activeTerritory, territoryPools]);
 
   // Extract prompt and error from engine result
   const prompt: Prompt | null = engineResult && 'positiveTokens' in engineResult ? engineResult : null;
@@ -2736,7 +2745,7 @@ export function App() {
                   <div className="territory-reactivate-text">Create a Territory in User Pools to use Builder focus mode.</div>
                 )}
               </div>
-              <PromptFragmentsPanel
+              <FloatingPromptFragments
                 selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
                 onToggleFragment={handleTogglePromptFragment}
               />
@@ -2770,7 +2779,7 @@ export function App() {
                 activeModeLabel={activeBuilderModeConfig.label}
                 activeTerritoryName={activeTerritory?.name ?? null}
                 territoryFocusMode={activeTerritory ? territoryNavigationMode : null}
-                activePoolName={activeIdpPool?.name ?? null}
+                activePoolNames={activeWorkflowPoolNames}
                 availableIdpSets={activeIdpPool?.idpSets ?? []}
                 activeIdpSetId={activeIdpSetId}
                 onSelectIdpSet={handleSelectActiveIdpSet}
