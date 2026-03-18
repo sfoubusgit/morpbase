@@ -1822,7 +1822,12 @@ export function App() {
     const poolEntries: PromptAdditionEntry[] = poolPromptItems.map(item => ({
       id: item.id,
       text: formatPromptAdditionText(item),
-      position: 'end',
+      position:
+        item.sourceType === 'idp-set'
+          ? 'start'
+          : item.sourceType === 'pool-default'
+            ? 'start'
+            : 'end',
       sourceType: item.sourceType ?? 'pool',
     }));
 
