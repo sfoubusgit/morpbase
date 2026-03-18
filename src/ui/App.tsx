@@ -1813,7 +1813,7 @@ export function App() {
         return {
           id: `fragment:${fragment.id}`,
           text: definition.outputText,
-          position: 'end',
+          position: 'start',
           sourceType: 'fragment' as const,
         };
       })
@@ -1831,7 +1831,7 @@ export function App() {
       sourceType: item.sourceType ?? 'pool',
     }));
 
-    return [...fragmentEntries, ...poolEntries];
+    return [...poolEntries, ...fragmentEntries];
   }, [selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
 
   // Add allowCustomExtension to attribute definitions for current question
