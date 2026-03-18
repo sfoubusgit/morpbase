@@ -1600,8 +1600,40 @@ export function App() {
       const preserved = prev.filter(entry => !nextIds.has(entry.id));
       return [...preserved, ...next];
     });
-    setActiveIdpPool(pool.idpSets && pool.idpSets.length > 0 ? pool : null);
-    setActiveIdpSetId(pool.idpSets && pool.idpSets.length > 0 ? (pool.idpSets[0]?.id ?? null) : null);
+    if (pool.idpSets && pool.idpSets.length > 0) {
+      const initialSet = pool.idpSets[0];
+      const idpItems = initialSet.phrases
+        .map(phrase => ({
+          id: `pool_idp_${pool.id}_${initialSet.id}_${phrase.id}`,
+          text: phrase.text.trim(),
+          weight: 1.0,
+          sourceType: 'idp-set' as const,
+        }))
+        .filter(item => item.text);
+      setPoolPromptItems(prev => {
+        const preserved = prev.filter(item => {
+          if (item.sourceType === 'idp-set' && item.id.startsWith(`pool_idp_${pool.id}_`)) {
+            return false;
+          }
+          return !next.some(entry => entry.id === item.id);
+        });
+        return [...preserved, ...next, ...idpItems];
+      });
+      setPoolOutputOverrides(prev => {
+        const updated = new Map(prev);
+        [...updated.keys()].forEach(key => {
+          if (key.startsWith(`pool_idp_${pool.id}_`) || key.startsWith(`pool_default_${pool.id}_`)) {
+            updated.delete(key);
+          }
+        });
+        return updated;
+      });
+      setActiveIdpPool(pool);
+      setActiveIdpSetId(initialSet.id);
+    } else {
+      setActiveIdpPool(null);
+      setActiveIdpSetId(null);
+    }
     setBuilderNotice(`Applied ${next.length} default phrase${next.length === 1 ? '' : 's'} from "${pool.name}".`);
   }, []);
 
