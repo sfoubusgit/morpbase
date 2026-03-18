@@ -1595,6 +1595,7 @@ export function UserPoolsPage({
                   </div>
                   <div className="user-pools-initiative-actions">
                     <input
+                      className="user-pools-initiative-input"
                       type="text"
                       placeholder="New initiative phrase"
                       value={newInitiativePhraseText}

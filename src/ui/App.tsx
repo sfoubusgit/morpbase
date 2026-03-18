@@ -1657,8 +1657,19 @@ export function App() {
     });
     setSelections(new Map());
     setModifiers(new Map());
-    setPoolPromptItems([]);
-    setPoolOutputOverrides(new Map());
+    setPoolPromptItems(poolPromptItems.filter(item => item.sourceType === 'pool-default'));
+    setPoolOutputOverrides(prev => {
+      const preservedIds = new Set(
+        poolPromptItems
+          .filter(item => item.sourceType === 'pool-default')
+          .map(item => item.id)
+      );
+      const next = new Map<string, string>();
+      prev.forEach((value, key) => {
+        if (preservedIds.has(key)) next.set(key, value);
+      });
+      return next;
+    });
     setSelectionOutputOverrides(new Map());
     setSelectedPromptFragments([]);
   }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments]);
