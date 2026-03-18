@@ -165,12 +165,41 @@ const parsePoolPayload = (raw: string, fallbackName: string): Pool => {
         .filter(Boolean) as Pool['initiativePhrases']
     : [];
 
+  const idpSets = Array.isArray(candidate.idpSets)
+    ? candidate.idpSets
+        .map((set: any, setIndex: number) => {
+          const name = typeof set?.name === 'string' ? set.name.trim() : '';
+          if (!name) return null;
+          const phrases = Array.isArray(set?.phrases)
+            ? set.phrases
+                .map((entry: any, phraseIndex: number) => {
+                  if (!entry || typeof entry.text !== 'string') return null;
+                  const text = entry.text.trim();
+                  if (!text) return null;
+                  return {
+                    id: entry.id && typeof entry.id === 'string' ? entry.id : `${poolId}_idp_${setIndex + 1}_${phraseIndex + 1}`,
+                    text,
+                  };
+                })
+                .filter(Boolean)
+            : [];
+          if (phrases.length === 0) return null;
+          return {
+            id: set.id && typeof set.id === 'string' ? set.id : `${poolId}_set_${setIndex + 1}`,
+            name,
+            phrases,
+          };
+        })
+        .filter(Boolean) as Pool['idpSets']
+    : [];
+
   return {
     id: poolId,
     name,
     createdAt: typeof candidate.createdAt === 'number' ? candidate.createdAt : now,
     updatedAt: typeof candidate.updatedAt === 'number' ? candidate.updatedAt : now,
     initiativePhrases,
+    idpSets,
     items,
   };
 };

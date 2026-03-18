@@ -9,7 +9,8 @@ const buildPool = (
   createdAt: number,
   updatedAt: number,
   items: Array<{ text: string; section: string; tags?: string[]; note?: string }>,
-  initiativePhrases: Array<{ text: string; autoApplyOnActivate?: boolean }> = []
+  initiativePhrases: Array<{ text: string; autoApplyOnActivate?: boolean }> = [],
+  idpSets: Array<{ name: string; phrases: string[] }> = []
 ) => ({
   id,
   name,
@@ -19,6 +20,14 @@ const buildPool = (
     id: `${id}_initiative_${index + 1}`,
     text: phrase.text,
     autoApplyOnActivate: phrase.autoApplyOnActivate === true,
+  })),
+  idpSets: idpSets.map((set, setIndex) => ({
+    id: `${id}_set_${setIndex + 1}`,
+    name: set.name,
+    phrases: set.phrases.map((text, phraseIndex) => ({
+      id: `${id}_set_${setIndex + 1}_phrase_${phraseIndex + 1}`,
+      text,
+    })),
   })),
   items: items.map((item, index) => ({
     id: `${id}_item_${index + 1}`,
@@ -221,6 +230,32 @@ export const poolHubMock: PoolHubEntry[] = [
         { text: 'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing', autoApplyOnActivate: true },
         { text: 'large glowing eyes with delicate ornamental accessories' },
         { text: 'soft crystalline highlights with magical sparkle accents' },
+      ],
+      [
+        {
+          name: 'Celestial Shrine',
+          phrases: [
+            'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+            'large glowing eyes with delicate floral and shrine-like ornaments',
+            'soft crystalline highlights with celestial sparkles and sacred glow accents',
+          ],
+        },
+        {
+          name: 'Magical Idol',
+          phrases: [
+            'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+            'large sparkling eyes with elegant ribbons, jewel ornaments, and magical idol accessories',
+            'soft crystalline highlights with radiant glitter accents, polished charm motifs, and candy-color glow',
+          ],
+        },
+        {
+          name: 'Occult Pastel',
+          phrases: [
+            'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+            'large glowing eyes with occult ornaments and delicate crescent accessories',
+            'soft crystalline highlights with eerie pastel sparkles and arcane glow accents',
+          ],
+        },
       ]
     ),
   },

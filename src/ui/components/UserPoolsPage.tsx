@@ -1477,6 +1477,31 @@ export function UserPoolsPage({
                   )}
                 </div>
               </details>
+              {activePool.idpSets && activePool.idpSets.length > 0 && (
+                <details className="user-pools-collapsible user-pools-idp-block" open>
+                  <summary>IDP Sets</summary>
+                  <div className="user-pools-collapsible-body">
+                    <div className="user-pools-helper">
+                      These sets represent different identity baselines inside the same workflow family.
+                    </div>
+                    <div className="user-pools-idp-set-list">
+                      {activePool.idpSets.map(set => (
+                        <div key={set.id} className="user-pools-idp-set">
+                          <div className="user-pools-idp-set-header">
+                            <div className="user-pools-idp-set-title">{set.name}</div>
+                            <div className="user-pools-idp-set-meta">{set.phrases.length} phrase{set.phrases.length === 1 ? '' : 's'}</div>
+                          </div>
+                          <div className="user-pools-idp-set-phrases">
+                            {set.phrases.map(phrase => (
+                              <div key={phrase.id} className="user-pools-idp-set-phrase">{phrase.text}</div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+              )}
               <div className="user-pools-items">
                 {filteredItems.length === 0 ? (
                   <div className="user-pools-empty">No items match your search or tag filter.</div>
@@ -1665,6 +1690,31 @@ export function UserPoolsPage({
                   )}
                 </div>
               </details>
+              {activePool.idpSets && activePool.idpSets.length > 0 && (
+                <details className="user-pools-collapsible user-pools-idp-block" open>
+                  <summary>IDP Sets</summary>
+                  <div className="user-pools-collapsible-body">
+                    <div className="user-pools-helper">
+                      These sets show the different identity baselines this pool can support.
+                    </div>
+                    <div className="user-pools-idp-set-list">
+                      {activePool.idpSets.map(set => (
+                        <div key={set.id} className="user-pools-idp-set">
+                          <div className="user-pools-idp-set-header">
+                            <div className="user-pools-idp-set-title">{set.name}</div>
+                            <div className="user-pools-idp-set-meta">{set.phrases.length} phrase{set.phrases.length === 1 ? '' : 's'}</div>
+                          </div>
+                          <div className="user-pools-idp-set-phrases">
+                            {set.phrases.map(phrase => (
+                              <div key={phrase.id} className="user-pools-idp-set-phrase">{phrase.text}</div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+              )}
 
               <details className="user-pools-collapsible">
                 <summary>Add Content</summary>

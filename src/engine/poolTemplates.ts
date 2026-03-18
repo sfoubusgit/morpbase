@@ -6,7 +6,7 @@ const normalizeText = (value: string): string =>
   value.replace(/\s+/g, ' ').trim();
 
 export const createPoolFromTemplate = async (template: Pool, name: string): Promise<Pool> => {
-  const created = await createPoolWithInitiativePhrases(name, null, template.initiativePhrases ?? []);
+  const created = await createPoolWithInitiativePhrases(name, null, template.initiativePhrases ?? [], template.idpSets ?? []);
   const items = template.items
     .map(item => ({
       pool_id: created.id,
@@ -36,6 +36,14 @@ export const createPoolFromTemplate = async (template: Pool, name: string): Prom
     initiativePhrases: template.initiativePhrases?.map(entry => ({
       ...entry,
       text: normalizeText(entry.text),
+    })) ?? [],
+    idpSets: template.idpSets?.map(set => ({
+      ...set,
+      name: normalizeText(set.name),
+      phrases: set.phrases.map(phrase => ({
+        ...phrase,
+        text: normalizeText(phrase.text),
+      })),
     })) ?? [],
     updatedAt: Date.now(),
   };

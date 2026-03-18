@@ -12,6 +12,17 @@ export type PoolInitiativePhrase = {
   autoApplyOnActivate?: boolean;
 };
 
+export type PoolIdpSetPhrase = {
+  id: string;
+  text: string;
+};
+
+export type PoolIdpSet = {
+  id: string;
+  name: string;
+  phrases: PoolIdpSetPhrase[];
+};
+
 export const POOL_SECTION_OPTIONS = [
   'Subjects',
   'Objects',
@@ -44,6 +55,7 @@ export type Pool = {
   updatedAt: number;
   items: PoolItem[];
   initiativePhrases?: PoolInitiativePhrase[];
+  idpSets?: PoolIdpSet[];
 };
 
 export type PoolStore = {

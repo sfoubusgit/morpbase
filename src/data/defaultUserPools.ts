@@ -174,6 +174,62 @@ export const defaultUserPools: Pool[] = [
         text: 'soft crystalline highlights with magical sparkle accents',
       },
     ],
+    idpSets: [
+      {
+        id: '__default_pool_celestial_pixel_portrait_set_1__',
+        name: 'Celestial Shrine',
+        phrases: [
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_1_phrase_1__',
+            text: 'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_1_phrase_2__',
+            text: 'large glowing eyes with delicate floral and shrine-like ornaments',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_1_phrase_3__',
+            text: 'soft crystalline highlights with celestial sparkles and sacred glow accents',
+          },
+        ],
+      },
+      {
+        id: '__default_pool_celestial_pixel_portrait_set_2__',
+        name: 'Magical Idol',
+        phrases: [
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_2_phrase_1__',
+            text: 'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_2_phrase_2__',
+            text: 'large sparkling eyes with elegant ribbons, jewel ornaments, and magical idol accessories',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_2_phrase_3__',
+            text: 'soft crystalline highlights with radiant glitter accents, polished charm motifs, and candy-color glow',
+          },
+        ],
+      },
+      {
+        id: '__default_pool_celestial_pixel_portrait_set_3__',
+        name: 'Occult Pastel',
+        phrases: [
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_3_phrase_1__',
+            text: 'luminous anime pixel portrait, centered symmetrical bust framing, pastel celestial glow, ornate decorative sprite detailing',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_3_phrase_2__',
+            text: 'large glowing eyes with occult ornaments and delicate crescent accessories',
+          },
+          {
+            id: '__default_pool_celestial_pixel_portrait_set_3_phrase_3__',
+            text: 'soft crystalline highlights with eerie pastel sparkles and arcane glow accents',
+          },
+        ],
+      },
+    ],
     items: [
       { id: '__default_pool_celestial_pixel_portrait_1__', text: 'celestial shrine maiden with luminous floral ornaments', section: 'Subjects', tags: ['celestial', 'pixel-art', 'portrait', 'shrine'] },
       { id: '__default_pool_celestial_pixel_portrait_2__', text: 'moon-blessed oracle with glowing ceremonial hairpieces', section: 'Subjects', tags: ['celestial', 'pixel-art', 'portrait', 'oracle'] },
