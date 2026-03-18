@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { PROMPT_FRAGMENT_DEFINITIONS } from '../../data/promptFragments';
 import './FloatingPromptFragments.css';
 
@@ -41,6 +42,7 @@ export function FloatingPromptFragments({
   selectedFragmentIds,
   onToggleFragment,
 }: FloatingPromptFragmentsProps) {
+  const [mounted, setMounted] = useState(false);
   const selectedIds = useMemo(() => new Set(selectedFragmentIds), [selectedFragmentIds]);
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState<boolean>(() => {
@@ -71,6 +73,10 @@ export function FloatingPromptFragments({
     originY: number;
     moved: boolean;
   } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -180,7 +186,11 @@ export function FloatingPromptFragments({
 
   const selectedCount = selectedFragmentIds.length;
 
-  return (
+  if (!mounted || typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal((
     <div className="floating-prompt-fragments-root">
       <button
         type="button"
@@ -240,5 +250,5 @@ export function FloatingPromptFragments({
         </div>
       )}
     </div>
-  );
+  ), document.body);
 }
