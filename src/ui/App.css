@@ -260,10 +260,7 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 
 .interview-layout {
   display: flex;
-  justify-content: center;
-  gap: 24px;
   min-height: calc(100vh - 72px);
-  padding: 0 20px 0 12px;
 }
 
 .builder-shell {
@@ -272,13 +269,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 }
 
 .interview-container {
-  flex: 0 1 1420px;
-  width: min(1420px, calc(100vw - 360px));
+  flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 60%) minmax(400px, 40%);
   gap: 28px;
-  max-width: none;
-  margin: 0;
+  max-width: 1520px;
+  margin: 0 auto;
   padding: 32px;
   min-height: 0;
   height: 100vh;
@@ -517,6 +513,8 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 .app-main {
   display: flex;
   flex-direction: column;
+  width: min(100%, 920px);
+  justify-self: center;
   min-height: 0;
   height: 100%;
 }
@@ -1026,15 +1024,13 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 }
 
 @media (max-width: 1200px) {
-  .interview-layout {
-    gap: 0;
-    padding: 0;
+  .interview-container {
+    grid-template-columns: 1fr;
   }
 
-  .interview-container {
-    flex: 1;
-    width: auto;
-    grid-template-columns: 1fr;
+  .app-main {
+    width: 100%;
+    justify-self: stretch;
   }
 
   .app-sidebar {
