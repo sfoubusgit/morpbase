@@ -1585,6 +1585,45 @@ export function App() {
     });
   }, []);
 
+  const applyIdpSetToSession = useCallback((pool: Pool, setId?: string | null) => {
+    if (!pool.idpSets || pool.idpSets.length === 0) {
+      setActiveIdpPool(null);
+      setActiveIdpSetId(null);
+      return;
+    }
+    const nextSet = pool.idpSets.find(set => set.id === setId) ?? pool.idpSets[0];
+    if (!nextSet) return;
+    const nextItems = nextSet.phrases
+      .map(phrase => ({
+        id: `pool_idp_${pool.id}_${nextSet.id}_${phrase.id}`,
+        text: phrase.text.trim(),
+        weight: 1.0,
+        sourceType: 'idp-set' as const,
+      }))
+      .filter(item => item.text);
+
+    setPoolPromptItems(prev => {
+      const preserved = prev.filter(item => {
+        if (item.sourceType === 'idp-set' && item.id.startsWith(`pool_idp_${pool.id}_`)) {
+          return false;
+        }
+        return true;
+      });
+      return [...preserved, ...nextItems];
+    });
+    setPoolOutputOverrides(prev => {
+      const updated = new Map(prev);
+      [...updated.keys()].forEach(key => {
+        if (key.startsWith(`pool_idp_${pool.id}_`)) {
+          updated.delete(key);
+        }
+      });
+      return updated;
+    });
+    setActiveIdpPool(pool);
+    setActiveIdpSetId(nextSet.id);
+  }, []);
+
   const handleApplyPoolInitiativePhrases = useCallback((phrases: Array<{ id: string; text: string }>, pool: Pool) => {
     const next = phrases
       .map(phrase => ({
@@ -1601,79 +1640,43 @@ export function App() {
       return [...preserved, ...next];
     });
     if (pool.idpSets && pool.idpSets.length > 0) {
-      const initialSet = pool.idpSets[0];
-      const idpItems = initialSet.phrases
-        .map(phrase => ({
-          id: `pool_idp_${pool.id}_${initialSet.id}_${phrase.id}`,
-          text: phrase.text.trim(),
-          weight: 1.0,
-          sourceType: 'idp-set' as const,
-        }))
-        .filter(item => item.text);
+      applyIdpSetToSession(pool, pool.idpSets[0]?.id ?? null);
       setPoolPromptItems(prev => {
-        const preserved = prev.filter(item => {
-          if (item.sourceType === 'idp-set' && item.id.startsWith(`pool_idp_${pool.id}_`)) {
-            return false;
-          }
-          return !next.some(entry => entry.id === item.id);
-        });
-        return [...preserved, ...next, ...idpItems];
+        const withoutDuplicates = prev.filter(item => !next.some(entry => entry.id === item.id));
+        return [...withoutDuplicates, ...next];
       });
       setPoolOutputOverrides(prev => {
         const updated = new Map(prev);
         [...updated.keys()].forEach(key => {
-          if (key.startsWith(`pool_idp_${pool.id}_`) || key.startsWith(`pool_default_${pool.id}_`)) {
+          if (key.startsWith(`pool_default_${pool.id}_`)) {
             updated.delete(key);
           }
         });
         return updated;
       });
-      setActiveIdpPool(pool);
-      setActiveIdpSetId(initialSet.id);
     } else {
       setActiveIdpPool(null);
       setActiveIdpSetId(null);
     }
     setBuilderNotice(`Applied ${next.length} default phrase${next.length === 1 ? '' : 's'} from "${pool.name}".`);
-  }, []);
+  }, [applyIdpSetToSession]);
 
   const handleSelectActiveIdpSet = useCallback((setId: string) => {
     if (!activeIdpPool?.idpSets || activeIdpPool.idpSets.length === 0) return;
     const nextSet = activeIdpPool.idpSets.find(set => set.id === setId);
     if (!nextSet) return;
-    const nextItems = nextSet.phrases
-      .map(phrase => ({
-        id: `pool_idp_${activeIdpPool.id}_${nextSet.id}_${phrase.id}`,
-        text: phrase.text.trim(),
-        weight: 1.0,
-        sourceType: 'idp-set' as const,
-      }))
-      .filter(item => item.text);
-
-    setPoolPromptItems(prev => {
-      const preserved = prev.filter(item => {
-        if (item.sourceType === 'idp-set' && item.id.startsWith(`pool_idp_${activeIdpPool.id}_`)) {
-          return false;
-        }
-        if (item.sourceType === 'pool-default' && item.id.startsWith(`pool_default_${activeIdpPool.id}_`)) {
-          return false;
-        }
-        return true;
-      });
-      return [...preserved, ...nextItems];
-    });
-    setPoolOutputOverrides(prev => {
-      const next = new Map(prev);
-      [...next.keys()].forEach(key => {
-        if (key.startsWith(`pool_idp_${activeIdpPool.id}_`) || key.startsWith(`pool_default_${activeIdpPool.id}_`)) {
-          next.delete(key);
-        }
-      });
-      return next;
-    });
-    setActiveIdpSetId(nextSet.id);
+    applyIdpSetToSession(activeIdpPool, nextSet.id);
     setBuilderNotice(`Active IDP set changed to "${nextSet.name}".`);
-  }, [activeIdpPool]);
+  }, [activeIdpPool, applyIdpSetToSession]);
+
+  useEffect(() => {
+    if (!activeTerritory || activeIdpPool) return;
+    const candidatePool = activeTerritory.sources
+      .map(source => territoryPools.find(pool => pool.id === source.poolId))
+      .find((pool): pool is Pool => Boolean(pool?.idpSets && pool.idpSets.length > 0));
+    if (!candidatePool) return;
+    applyIdpSetToSession(candidatePool, candidatePool.idpSets?.[0]?.id ?? null);
+  }, [activeTerritory, activeIdpPool, applyIdpSetToSession, territoryPools]);
 
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
