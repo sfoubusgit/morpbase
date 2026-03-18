@@ -55,11 +55,9 @@ interface ParsedFragment {
   weight: number | null;
 }
 
-type PromptLayerGroup = {
+type PromptSourceSummary = {
   id: string;
   label: string;
-  helper: string;
-  items: PromptAdditionEntry[];
 };
 
 function splitPromptFragments(text: string): string[] {
@@ -150,49 +148,42 @@ function joinNonEmpty(parts: string[], separator: string): string {
   return parts.map(part => part.trim()).filter(Boolean).join(separator);
 }
 
-function getPromptLayerMeta(sourceType?: PromptAdditionEntry['sourceType']): { id: string; label: string; helper: string } {
+function getPromptSourceMeta(sourceType?: PromptAdditionEntry['sourceType']): PromptSourceSummary {
   switch (sourceType) {
     case 'idp-set':
       return {
         id: 'idp-set',
         label: 'IDP Baseline',
-        helper: 'Workflow identity phrases from the active IDP set.',
       };
     case 'pool-default':
       return {
         id: 'pool-default',
         label: 'Pool Defaults',
-        helper: 'Default starter phrases from the current pool.',
       };
     case 'fragment':
       return {
         id: 'fragment',
-        label: 'Global Phrase Layer',
-        helper: 'Your persistent global prompt phrases.',
+        label: 'Global Phrases',
       };
     case 'territory':
       return {
         id: 'territory',
-        label: 'Territory Material',
-        helper: 'Territory-sourced additions currently shaping the prompt.',
+        label: 'Territory',
       };
     case 'pool':
       return {
         id: 'pool',
         label: 'Pool Additions',
-        helper: 'Extra phrases added directly from pools.',
       };
     case 'character':
       return {
         id: 'character',
         label: 'Character',
-        helper: 'Reusable character identity phrases.',
       };
     default:
       return {
         id: 'other',
-        label: 'Other Additions',
-        helper: 'Additional prompt influences applied to the current session.',
+        label: 'Other',
       };
   }
 }
@@ -286,21 +277,12 @@ export function PromptPreview({
     () => availableIdpSets.find(set => set.id === activeIdpSetId) ?? availableIdpSets[0] ?? null,
     [availableIdpSets, activeIdpSetId]
   );
-  const promptLayerGroups = useMemo<PromptLayerGroup[]>(() => {
-    const groups = new Map<string, PromptLayerGroup>();
+  const promptSourceSummaries = useMemo<PromptSourceSummary[]>(() => {
+    const groups = new Map<string, PromptSourceSummary>();
 
     normalizedAdditions.forEach(entry => {
-      const meta = getPromptLayerMeta(entry.sourceType);
-      const existing = groups.get(meta.id);
-      if (existing) {
-        existing.items.push(entry);
-        return;
-      }
-
-      groups.set(meta.id, {
-        ...meta,
-        items: [entry],
-      });
+      const meta = getPromptSourceMeta(entry.sourceType);
+      if (!groups.has(meta.id)) groups.set(meta.id, meta);
     });
 
     return Array.from(groups.values());
@@ -543,27 +525,14 @@ export function PromptPreview({
         </div>
       )}
 
-      {promptLayerGroups.length > 0 && (
-        <div className="prompt-preview-layers-block">
-          <div className="prompt-preview-layers-title">Prompt Layers</div>
-          <div className="prompt-preview-layers-groups">
-            {promptLayerGroups.map(group => (
-              <div key={group.id} className="prompt-preview-layer-group">
-                <div className="prompt-preview-layer-header">
-                  <div className="prompt-preview-layer-heading">
-                    <span className="prompt-preview-layer-label">{group.label}</span>
-                    <span className="prompt-preview-layer-count">{group.items.length}</span>
-                  </div>
-                  <div className="prompt-preview-layer-helper">{group.helper}</div>
-                </div>
-                <div className="prompt-preview-layer-items">
-                  {group.items.map(item => (
-                    <div key={item.id} className="prompt-preview-layer-item">
-                      {item.text}
-                    </div>
-                  ))}
-                </div>
-              </div>
+      {promptSourceSummaries.length > 0 && (
+        <div className="prompt-preview-sources-block">
+          <div className="prompt-preview-sources-title">Prompt Sources</div>
+          <div className="prompt-preview-sources-chips">
+            {promptSourceSummaries.map(source => (
+              <span key={source.id} className="prompt-preview-source-chip">
+                {source.label}
+              </span>
             ))}
           </div>
         </div>
