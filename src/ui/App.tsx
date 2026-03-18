@@ -2767,6 +2767,10 @@ export function App() {
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
+                activeModeLabel={activeBuilderModeConfig.label}
+                activeTerritoryName={activeTerritory?.name ?? null}
+                territoryFocusMode={activeTerritory ? territoryNavigationMode : null}
+                activePoolName={activeIdpPool?.name ?? null}
                 availableIdpSets={activeIdpPool?.idpSets ?? []}
                 activeIdpSetId={activeIdpSetId}
                 onSelectIdpSet={handleSelectActiveIdpSet}

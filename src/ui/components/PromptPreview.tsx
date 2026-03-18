@@ -34,6 +34,10 @@ interface PromptPreviewProps {
   onCopy?: () => void;
   customAdditions?: string[];
   positionedAdditions?: PromptAdditionEntry[];
+  activeModeLabel?: string | null;
+  activeTerritoryName?: string | null;
+  territoryFocusMode?: 'biased' | 'full' | null;
+  activePoolName?: string | null;
   availableIdpSets?: PoolIdpSet[];
   activeIdpSetId?: string | null;
   onSelectIdpSet?: (setId: string) => void;
@@ -182,6 +186,10 @@ export function PromptPreview({
   onCopy,
   customAdditions = [],
   positionedAdditions = [],
+  activeModeLabel = null,
+  activeTerritoryName = null,
+  territoryFocusMode = null,
+  activePoolName = null,
   availableIdpSets = [],
   activeIdpSetId = null,
   onSelectIdpSet,
@@ -400,6 +408,37 @@ export function PromptPreview({
           : exportMode === 'clean'
             ? 'Clean removes obvious duplicates and keeps the export compact.'
             : 'Structured + Negative copies both the positive and negative prompt together.'}
+      </div>
+
+      <div className="prompt-preview-workflow-block">
+        <div className="prompt-preview-workflow-title">Active Workflow</div>
+        <div className="prompt-preview-workflow-chips">
+          {activeModeLabel && (
+            <span className="prompt-preview-workflow-chip">
+              Mode: <strong>{activeModeLabel}</strong>
+            </span>
+          )}
+          {activePoolName && (
+            <span className="prompt-preview-workflow-chip">
+              Pool: <strong>{activePoolName}</strong>
+            </span>
+          )}
+          {activeIdpSet && (
+            <span className="prompt-preview-workflow-chip">
+              IDP: <strong>{activeIdpSet.name}</strong>
+            </span>
+          )}
+          {activeTerritoryName && (
+            <span className="prompt-preview-workflow-chip">
+              Territory: <strong>{activeTerritoryName}</strong>
+            </span>
+          )}
+          {activeTerritoryName && territoryFocusMode && (
+            <span className="prompt-preview-workflow-chip">
+              Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
+            </span>
+          )}
+        </div>
       </div>
 
       {availableIdpSets.length > 0 && (

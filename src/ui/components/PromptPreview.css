@@ -71,6 +71,47 @@
   line-height: 1.5;
 }
 
+.prompt-preview-workflow-block {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  gap: 10px;
+}
+
+.prompt-preview-workflow-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #dbe2ff;
+}
+
+.prompt-preview-workflow-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompt-preview-workflow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(110, 86, 249, 0.12);
+  border: 1px solid rgba(110, 86, 249, 0.22);
+  color: #e7e5ff;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.prompt-preview-workflow-chip strong {
+  color: #ffffff;
+}
+
 .prompt-preview-idp-block {
   margin-bottom: 16px;
   padding: 14px;
