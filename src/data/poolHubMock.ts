@@ -148,7 +148,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Pixel Art',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/pixel_art_celestial_hero_image.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
