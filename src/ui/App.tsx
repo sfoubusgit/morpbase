@@ -154,7 +154,7 @@ export function App() {
     id: string;
     text: string;
     weight?: number;
-    sourceType?: 'pool' | 'territory' | 'pool-default';
+    sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
   };
 
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
@@ -206,6 +206,8 @@ export function App() {
   
   // UI State: User pool prompt additions
   const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>([]);
+  const [activeIdpPool, setActiveIdpPool] = useState<Pool | null>(null);
+  const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(null);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(new Map());
 
   // UI State: Freeform prompt text
@@ -1598,8 +1600,48 @@ export function App() {
       const preserved = prev.filter(entry => !nextIds.has(entry.id));
       return [...preserved, ...next];
     });
+    setActiveIdpPool(pool.idpSets && pool.idpSets.length > 0 ? pool : null);
+    setActiveIdpSetId(pool.idpSets && pool.idpSets.length > 0 ? (pool.idpSets[0]?.id ?? null) : null);
     setBuilderNotice(`Applied ${next.length} default phrase${next.length === 1 ? '' : 's'} from "${pool.name}".`);
   }, []);
+
+  const handleSelectActiveIdpSet = useCallback((setId: string) => {
+    if (!activeIdpPool?.idpSets || activeIdpPool.idpSets.length === 0) return;
+    const nextSet = activeIdpPool.idpSets.find(set => set.id === setId);
+    if (!nextSet) return;
+    const nextItems = nextSet.phrases
+      .map(phrase => ({
+        id: `pool_idp_${activeIdpPool.id}_${nextSet.id}_${phrase.id}`,
+        text: phrase.text.trim(),
+        weight: 1.0,
+        sourceType: 'idp-set' as const,
+      }))
+      .filter(item => item.text);
+
+    setPoolPromptItems(prev => {
+      const preserved = prev.filter(item => {
+        if (item.sourceType === 'idp-set' && item.id.startsWith(`pool_idp_${activeIdpPool.id}_`)) {
+          return false;
+        }
+        if (item.sourceType === 'pool-default' && item.id.startsWith(`pool_default_${activeIdpPool.id}_`)) {
+          return false;
+        }
+        return true;
+      });
+      return [...preserved, ...nextItems];
+    });
+    setPoolOutputOverrides(prev => {
+      const next = new Map(prev);
+      [...next.keys()].forEach(key => {
+        if (key.startsWith(`pool_idp_${activeIdpPool.id}_`) || key.startsWith(`pool_default_${activeIdpPool.id}_`)) {
+          next.delete(key);
+        }
+      });
+      return next;
+    });
+    setActiveIdpSetId(nextSet.id);
+    setBuilderNotice(`Active IDP set changed to "${nextSet.name}".`);
+  }, [activeIdpPool]);
 
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
@@ -1657,11 +1699,11 @@ export function App() {
     });
     setSelections(new Map());
     setModifiers(new Map());
-    setPoolPromptItems(poolPromptItems.filter(item => item.sourceType === 'pool-default'));
+    setPoolPromptItems(poolPromptItems.filter(item => item.sourceType === 'pool-default' || item.sourceType === 'idp-set'));
     setPoolOutputOverrides(prev => {
       const preservedIds = new Set(
         poolPromptItems
-          .filter(item => item.sourceType === 'pool-default')
+          .filter(item => item.sourceType === 'pool-default' || item.sourceType === 'idp-set')
           .map(item => item.id)
       );
       const next = new Map<string, string>();
@@ -2685,6 +2727,9 @@ export function App() {
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
+                availableIdpSets={activeIdpPool?.idpSets ?? []}
+                activeIdpSetId={activeIdpSetId}
+                onSelectIdpSet={handleSelectActiveIdpSet}
                 exportMode={exportMode}
                 onExportModeChange={setExportMode}
                 onEditedOutputChange={handleEditedOutputChange}

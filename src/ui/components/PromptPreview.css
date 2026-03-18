@@ -71,6 +71,65 @@
   line-height: 1.5;
 }
 
+.prompt-preview-idp-block {
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(244, 114, 182, 0.1), rgba(168, 85, 247, 0.08));
+  border: 1px solid rgba(244, 114, 182, 0.16);
+  display: grid;
+  gap: 12px;
+}
+
+.prompt-preview-idp-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.prompt-preview-idp-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffe7f5;
+}
+
+.prompt-preview-idp-subtitle {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #f5dced;
+}
+
+.prompt-preview-idp-select {
+  min-width: 180px;
+  background: rgba(20, 20, 26, 0.95);
+  border: 1px solid rgba(244, 114, 182, 0.24);
+  border-radius: 10px;
+  color: #fff;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.prompt-preview-idp-phrases {
+  display: grid;
+  gap: 8px;
+}
+
+.prompt-preview-idp-phrase {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(10, 10, 16, 0.35);
+  border: 1px solid rgba(244, 114, 182, 0.1);
+  color: #fdf2f8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .prompt-preview-action-buttons {
   display: flex;
   align-items: center;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { PromptAdditionEntry } from '../../types';
+import type { PoolIdpSet, PromptAdditionEntry } from '../../types';
 import { composePromptWithAdditions, composeStructuredAdditionSections } from '../promptAdditions';
 import './PromptPreview.css';
 
@@ -34,6 +34,9 @@ interface PromptPreviewProps {
   onCopy?: () => void;
   customAdditions?: string[];
   positionedAdditions?: PromptAdditionEntry[];
+  availableIdpSets?: PoolIdpSet[];
+  activeIdpSetId?: string | null;
+  onSelectIdpSet?: (setId: string) => void;
   exportMode?: PromptExportMode;
   onExportModeChange?: (mode: PromptExportMode) => void;
   onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
@@ -179,6 +182,9 @@ export function PromptPreview({
   onCopy,
   customAdditions = [],
   positionedAdditions = [],
+  availableIdpSets = [],
+  activeIdpSetId = null,
+  onSelectIdpSet,
   exportMode = 'clean',
   onExportModeChange,
   onEditedOutputChange,
@@ -214,6 +220,10 @@ export function PromptPreview({
 
   const generatedPositiveForMode = exportMode === 'clean' ? cleanedPositive : structuredPositive;
   const generatedNegativeForMode = exportMode === 'clean' ? cleanedNegative : displayNegative;
+  const activeIdpSet = useMemo(
+    () => availableIdpSets.find(set => set.id === activeIdpSetId) ?? availableIdpSets[0] ?? null,
+    [availableIdpSets, activeIdpSetId]
+  );
   const hasEditedOutput = editedPositive !== null || editedNegative !== null;
   const currentPositive = editedPositive ?? generatedPositiveForMode;
   const currentNegative = editedNegative ?? generatedNegativeForMode;
@@ -391,6 +401,35 @@ export function PromptPreview({
             ? 'Clean removes obvious duplicates and keeps the export compact.'
             : 'Structured + Negative copies both the positive and negative prompt together.'}
       </div>
+
+      {availableIdpSets.length > 0 && (
+        <div className="prompt-preview-idp-block">
+          <div className="prompt-preview-idp-header">
+            <div>
+              <div className="prompt-preview-idp-title">Active IDP Set</div>
+              <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
+            </div>
+            <select
+              className="prompt-preview-idp-select"
+              value={activeIdpSet?.id ?? ''}
+              onChange={event => onSelectIdpSet?.(event.target.value)}
+            >
+              {availableIdpSets.map(set => (
+                <option key={set.id} value={set.id}>
+                  {set.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {activeIdpSet && (
+            <div className="prompt-preview-idp-phrases">
+              {activeIdpSet.phrases.map(phrase => (
+                <div key={phrase.id} className="prompt-preview-idp-phrase">{phrase.text}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {editNotice && <div className="prompt-preview-edit-notice">{editNotice}</div>}
       {hasEditedOutput && !isEditMode && (
