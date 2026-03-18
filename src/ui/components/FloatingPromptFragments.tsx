@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { PROMPT_FRAGMENT_DEFINITIONS } from '../../data/promptFragments';
+import type { PromptFragmentDefinition } from '../../data/promptFragments';
 import './FloatingPromptFragments.css';
 
 type FloatingPromptFragmentsProps = {
+  fragments: PromptFragmentDefinition[];
   selectedFragmentIds: string[];
   onToggleFragment: (fragmentId: string) => void;
+  onAddCustomFragment: (text: string) => void;
+  onRemoveCustomFragment: (fragmentId: string) => void;
 };
 
 type Position = {
@@ -39,11 +42,15 @@ function clampPosition(position: Position, viewportWidth: number, viewportHeight
 }
 
 export function FloatingPromptFragments({
+  fragments,
   selectedFragmentIds,
   onToggleFragment,
+  onAddCustomFragment,
+  onRemoveCustomFragment,
 }: FloatingPromptFragmentsProps) {
   const [mounted, setMounted] = useState(false);
   const selectedIds = useMemo(() => new Set(selectedFragmentIds), [selectedFragmentIds]);
+  const [draftPhrase, setDraftPhrase] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [isCompact, setIsCompact] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -185,6 +192,8 @@ export function FloatingPromptFragments({
   }, [position]);
 
   const selectedCount = selectedFragmentIds.length;
+  const builtInFragments = fragments.filter(fragment => !fragment.tags?.includes('custom'));
+  const customFragments = fragments.filter(fragment => fragment.tags?.includes('custom'));
 
   if (!mounted || typeof document === 'undefined') {
     return null;
@@ -235,8 +244,55 @@ export function FloatingPromptFragments({
             Your global phrases stay available across the workflow. Click any phrase to add or remove it from the current prompt.
           </div>
 
+          <div className="floating-prompt-fragments-custom">
+            <div className="floating-prompt-fragments-custom-label">Your constants</div>
+            <div className="floating-prompt-fragments-custom-input-row">
+              <input
+                type="text"
+                value={draftPhrase}
+                onChange={event => setDraftPhrase(event.target.value)}
+                placeholder="Add a custom global phrase..."
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const trimmed = draftPhrase.trim();
+                  if (!trimmed) return;
+                  onAddCustomFragment(trimmed);
+                  setDraftPhrase('');
+                }}
+                disabled={!draftPhrase.trim()}
+              >
+                Add
+              </button>
+            </div>
+            {customFragments.length > 0 && (
+              <div className="floating-prompt-fragments-custom-list">
+                {customFragments.map(fragment => (
+                  <div key={fragment.id} className="floating-prompt-fragments-custom-item">
+                    <button
+                      type="button"
+                      className={`floating-prompt-fragments-chip ${selectedIds.has(fragment.id) ? 'selected' : ''}`}
+                      onClick={() => onToggleFragment(fragment.id)}
+                    >
+                      {fragment.label}
+                    </button>
+                    <button
+                      type="button"
+                      className="floating-prompt-fragments-custom-remove"
+                      onClick={() => onRemoveCustomFragment(fragment.id)}
+                      aria-label={`Remove ${fragment.label}`}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="floating-prompt-fragments-library">
-            {PROMPT_FRAGMENT_DEFINITIONS.map(fragment => (
+            {builtInFragments.map(fragment => (
               <button
                 key={fragment.id}
                 type="button"

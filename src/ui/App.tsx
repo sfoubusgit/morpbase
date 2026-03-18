@@ -42,7 +42,7 @@ import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
-import { PROMPT_FRAGMENT_DEFINITIONS } from '../data/promptFragments';
+import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -156,6 +156,7 @@ export function App() {
     weight?: number;
     sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
   };
+  const CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY = 'morpbase:custom_global_phrases';
 
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
     try {
@@ -216,6 +217,22 @@ export function App() {
   const [editedNegativeOutput, setEditedNegativeOutput] = useState<string | null>(null);
   const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(new Map());
   const [selectedPromptFragments, setSelectedPromptFragments] = useState<SelectedPromptFragment[]>([]);
+  const [customPromptFragments, setCustomPromptFragments] = useState<PromptFragmentDefinition[]>(() => {
+    try {
+      const raw = window.localStorage.getItem(CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY);
+      if (!raw) return [];
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((item): item is PromptFragmentDefinition => (
+        item
+        && typeof item.id === 'string'
+        && typeof item.label === 'string'
+        && typeof item.outputText === 'string'
+      ));
+    } catch {
+      return [];
+    }
+  });
 
   // UI State: Clear prompt undo (single step)
   const [clearUndoState, setClearUndoState] = useState<{
@@ -1767,12 +1784,48 @@ export function App() {
     setEditedNegativeOutput(negative);
   }, []);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY,
+        JSON.stringify(customPromptFragments)
+      );
+    } catch {
+      // Ignore persistence errors and keep the session usable.
+    }
+  }, [customPromptFragments]);
+
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
     setSelectedPromptFragments(prev => (
       prev.some(item => item.id === fragmentId)
         ? prev.filter(item => item.id !== fragmentId)
         : [...prev, { id: fragmentId }]
     ));
+  }, []);
+
+  const handleAddCustomPromptFragment = useCallback((text: string) => {
+    const normalized = text.trim().replace(/\s+/g, ' ');
+    if (!normalized) return;
+
+    setCustomPromptFragments(prev => {
+      const duplicate = prev.some(item => item.outputText.toLowerCase() === normalized.toLowerCase());
+      if (duplicate) return prev;
+
+      return [
+        ...prev,
+        {
+          id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+          label: normalized,
+          outputText: normalized,
+          tags: ['custom'],
+        },
+      ];
+    });
+  }, []);
+
+  const handleRemoveCustomPromptFragment = useCallback((fragmentId: string) => {
+    setCustomPromptFragments(prev => prev.filter(item => item.id !== fragmentId));
+    setSelectedPromptFragments(prev => prev.filter(item => item.id !== fragmentId));
   }, []);
 
   // Convert Map state to props format for children
@@ -1805,10 +1858,14 @@ export function App() {
   const poolAdditionItems = poolPromptItems.map((item, index) => {
     return { id: item.id, text: formatPromptAdditionText(item) };
   });
+  const availablePromptFragments = useMemo(
+    () => [...PROMPT_FRAGMENT_DEFINITIONS, ...customPromptFragments],
+    [customPromptFragments]
+  );
   const promptAdditionEntries = useMemo<PromptAdditionEntry[]>(() => {
     const fragmentEntries = selectedPromptFragments
       .map(fragment => {
-        const definition = PROMPT_FRAGMENT_DEFINITIONS.find(item => item.id === fragment.id);
+        const definition = availablePromptFragments.find(item => item.id === fragment.id);
         if (!definition) return null;
         return {
           id: `fragment:${fragment.id}`,
@@ -1832,7 +1889,7 @@ export function App() {
     }));
 
     return [...poolEntries, ...fragmentEntries];
-  }, [selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
+  }, [availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -2746,8 +2803,11 @@ export function App() {
                 )}
               </div>
               <FloatingPromptFragments
+                fragments={availablePromptFragments}
                 selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
                 onToggleFragment={handleTogglePromptFragment}
+                onAddCustomFragment={handleAddCustomPromptFragment}
+                onRemoveCustomFragment={handleRemoveCustomPromptFragment}
               />
               <details className="builder-sidebar-panel builder-guidance-sidebar">
                 <summary>
