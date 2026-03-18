@@ -2,6 +2,7 @@ export type PoolHubEntry = {
   id: string;
   creator?: string;
   creatorId?: string;
+  poolRole?: 'primary' | 'secondary';
   title: string;
   summary: string;
   description: string;

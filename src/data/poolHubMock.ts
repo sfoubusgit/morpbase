@@ -43,6 +43,7 @@ export const poolHubMock: PoolHubEntry[] = [
     id: 'hub_32x32_pixel_art_portrait',
     creator: 'MorpBase',
     creatorId: 'morpbase-official',
+    poolRole: 'primary',
     title: '32x32 Pixel Art Portrait',
     summary: 'A compact official pool for readable 32x32 pixel portrait workflows, expressions, and stylized portrait iteration.',
     description:
@@ -140,6 +141,7 @@ export const poolHubMock: PoolHubEntry[] = [
     id: 'hub_celestial_pixel_portrait',
     creator: 'MorpBase',
     creatorId: 'morpbase-official',
+    poolRole: 'primary',
     title: 'Celestial Pixel Portrait',
     summary: 'An official primary-identity pool for luminous anime pixel portraits with celestial, shrine, idol, and occult-pastel variation potential.',
     description:
@@ -263,6 +265,7 @@ export const poolHubMock: PoolHubEntry[] = [
     id: 'hub_sacred_emblems_and_handheld_relics',
     creator: 'MorpBase',
     creatorId: 'morpbase-official',
+    poolRole: 'secondary',
     title: 'Sacred Emblems and Handheld Relics',
     summary: 'An official secondary pool for symbolic portrait focal objects, relics, emblems, and their supporting aura.',
     description:

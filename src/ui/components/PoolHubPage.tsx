@@ -110,6 +110,18 @@ const scoreTrending = (entry: { downloads: number; ratingAvg: number; ratingCoun
 const createId = (prefix: string) =>
   `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
+const getPoolRoleLabel = (entry: PoolHubEntry): string | null => {
+  if (entry.poolRole === 'primary') return 'Primary Pool';
+  if (entry.poolRole === 'secondary') return 'Secondary Pool';
+  return null;
+};
+
+const getPoolRoleHelper = (entry: PoolHubEntry): string | null => {
+  if (entry.poolRole === 'primary') return 'Designed to act as a main workflow identity host.';
+  if (entry.poolRole === 'secondary') return 'Designed to extend a stronger host workflow with modular variation.';
+  return null;
+};
+
 const parsePoolPayload = (raw: string, fallbackName: string): Pool => {
   let parsed: any;
   try {
@@ -1064,6 +1076,7 @@ export function PoolHubPage({
     (() => {
       const entryItems = (entry.payload as Pool).items;
       const sectionNames = [...new Set(entryItems.map(item => item.section?.trim()).filter(Boolean))];
+      const poolRoleLabel = getPoolRoleLabel(entry);
       const heroStyle = entry.heroImageUrl
         ? { backgroundImage: `linear-gradient(180deg, rgba(10, 12, 20, 0.08), rgba(10, 12, 20, 0.5)), url(${entry.heroImageUrl})` }
         : undefined;
@@ -1101,6 +1114,11 @@ export function PoolHubPage({
                 <span className={`pool-hub-card-badge ${isOfficialPoolEntry(entry) ? 'pool-hub-card-badge-official' : ''}`}>
                   {isOfficialPoolEntry(entry) ? 'MorpBase' : 'Community'}
                 </span>
+                {poolRoleLabel && (
+                  <span className={`pool-hub-card-badge pool-hub-card-badge-role pool-hub-card-badge-role-${entry.poolRole}`}>
+                    {poolRoleLabel}
+                  </span>
+                )}
                 {sectionNames.length > 0 && (
                   <span className="pool-hub-card-badge">{sectionNames.length} sections</span>
                 )}
@@ -1816,8 +1834,18 @@ export function PoolHubPage({
             <div className="pool-hub-detail-shell">
               <div className="pool-hub-detail-main">
                 <div className="pool-hub-detail-title-block">
-                  <div className="pool-hub-detail-title">{selectedEntry.title}</div>
+                  <div className="pool-hub-detail-title-row">
+                    <div className="pool-hub-detail-title">{selectedEntry.title}</div>
+                    {getPoolRoleLabel(selectedEntry) && (
+                      <span className={`pool-hub-detail-role-badge pool-hub-detail-role-badge-${selectedEntry.poolRole}`}>
+                        {getPoolRoleLabel(selectedEntry)}
+                      </span>
+                    )}
+                  </div>
                   <div className="pool-hub-detail-summary">{selectedEntry.summary}</div>
+                  {getPoolRoleHelper(selectedEntry) && (
+                    <div className="pool-hub-detail-role-helper">{getPoolRoleHelper(selectedEntry)}</div>
+                  )}
                   <div className="pool-hub-detail-chip-row pool-hub-detail-chip-row-stats">
                     {detailStatChips.map(chip => (
                       <span key={chip} className="pool-hub-detail-chip pool-hub-detail-chip-stat">{chip}</span>
