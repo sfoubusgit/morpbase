@@ -271,9 +271,9 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 .interview-container {
   flex: 1;
   display: grid;
-  grid-template-columns: 65% 35%;
-  gap: 32px;
-  max-width: 1600px;
+  grid-template-columns: minmax(0, 62%) minmax(360px, 38%);
+  gap: 28px;
+  max-width: 1520px;
   margin: 0 auto;
   padding: 32px;
   min-height: 0;
