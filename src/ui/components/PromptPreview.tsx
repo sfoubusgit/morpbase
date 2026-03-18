@@ -55,6 +55,13 @@ interface ParsedFragment {
   weight: number | null;
 }
 
+type PromptLayerGroup = {
+  id: string;
+  label: string;
+  helper: string;
+  items: PromptAdditionEntry[];
+};
+
 function splitPromptFragments(text: string): string[] {
   const fragments: string[] = [];
   let current = '';
@@ -141,6 +148,53 @@ function cleanPromptText(text: string): string {
 
 function joinNonEmpty(parts: string[], separator: string): string {
   return parts.map(part => part.trim()).filter(Boolean).join(separator);
+}
+
+function getPromptLayerMeta(sourceType?: PromptAdditionEntry['sourceType']): { id: string; label: string; helper: string } {
+  switch (sourceType) {
+    case 'idp-set':
+      return {
+        id: 'idp-set',
+        label: 'IDP Baseline',
+        helper: 'Workflow identity phrases from the active IDP set.',
+      };
+    case 'pool-default':
+      return {
+        id: 'pool-default',
+        label: 'Pool Defaults',
+        helper: 'Default starter phrases from the current pool.',
+      };
+    case 'fragment':
+      return {
+        id: 'fragment',
+        label: 'Global Phrase Layer',
+        helper: 'Your persistent global prompt phrases.',
+      };
+    case 'territory':
+      return {
+        id: 'territory',
+        label: 'Territory Material',
+        helper: 'Territory-sourced additions currently shaping the prompt.',
+      };
+    case 'pool':
+      return {
+        id: 'pool',
+        label: 'Pool Additions',
+        helper: 'Extra phrases added directly from pools.',
+      };
+    case 'character':
+      return {
+        id: 'character',
+        label: 'Character',
+        helper: 'Reusable character identity phrases.',
+      };
+    default:
+      return {
+        id: 'other',
+        label: 'Other Additions',
+        helper: 'Additional prompt influences applied to the current session.',
+      };
+  }
 }
 
 function formatStructuredPrompt(prompt: any, additionsText: string, positionedAdditions: PromptAdditionEntry[]): string | null {
@@ -232,6 +286,25 @@ export function PromptPreview({
     () => availableIdpSets.find(set => set.id === activeIdpSetId) ?? availableIdpSets[0] ?? null,
     [availableIdpSets, activeIdpSetId]
   );
+  const promptLayerGroups = useMemo<PromptLayerGroup[]>(() => {
+    const groups = new Map<string, PromptLayerGroup>();
+
+    normalizedAdditions.forEach(entry => {
+      const meta = getPromptLayerMeta(entry.sourceType);
+      const existing = groups.get(meta.id);
+      if (existing) {
+        existing.items.push(entry);
+        return;
+      }
+
+      groups.set(meta.id, {
+        ...meta,
+        items: [entry],
+      });
+    });
+
+    return Array.from(groups.values());
+  }, [normalizedAdditions]);
   const hasEditedOutput = editedPositive !== null || editedNegative !== null;
   const currentPositive = editedPositive ?? generatedPositiveForMode;
   const currentNegative = editedNegative ?? generatedNegativeForMode;
@@ -467,6 +540,32 @@ export function PromptPreview({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {promptLayerGroups.length > 0 && (
+        <div className="prompt-preview-layers-block">
+          <div className="prompt-preview-layers-title">Prompt Layers</div>
+          <div className="prompt-preview-layers-groups">
+            {promptLayerGroups.map(group => (
+              <div key={group.id} className="prompt-preview-layer-group">
+                <div className="prompt-preview-layer-header">
+                  <div className="prompt-preview-layer-heading">
+                    <span className="prompt-preview-layer-label">{group.label}</span>
+                    <span className="prompt-preview-layer-count">{group.items.length}</span>
+                  </div>
+                  <div className="prompt-preview-layer-helper">{group.helper}</div>
+                </div>
+                <div className="prompt-preview-layer-items">
+                  {group.items.map(item => (
+                    <div key={item.id} className="prompt-preview-layer-item">
+                      {item.text}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
