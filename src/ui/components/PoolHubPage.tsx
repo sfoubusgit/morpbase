@@ -1030,6 +1030,11 @@ export function PoolHubPage({
     ] as Array<[string, string]>;
   }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount, selectedPoolSections]);
 
+  const detailIdpSets = useMemo(() => {
+    if (!selectedEntry || hubMode !== 'pools') return [];
+    return (selectedEntry.payload as Pool).idpSets ?? [];
+  }, [selectedEntry, hubMode]);
+
   const previewSections = useMemo(() => {
     if (selectedPoolSectionCount > 0) {
       return selectedPoolSections.slice(0, 3).map(([section, items]) => ({
@@ -2054,6 +2059,32 @@ export function PoolHubPage({
                     ))}
                   </div>
                 </details>
+
+                {detailIdpSets.length > 0 && (
+                  <details className="pool-hub-detail-rail-card pool-hub-detail-panel pool-hub-idp-panel" open>
+                    <summary className="pool-hub-detail-panel-summary">IDP Sets</summary>
+                    <div className="pool-hub-detail-panel-body pool-hub-idp-panel-body">
+                      <div className="pool-hub-muted">
+                        These are the named identity baselines this pool supports.
+                      </div>
+                      <div className="pool-hub-idp-set-list">
+                        {detailIdpSets.map(set => (
+                          <div key={set.id} className="pool-hub-idp-set">
+                            <div className="pool-hub-idp-set-header">
+                              <div className="pool-hub-idp-set-title">{set.name}</div>
+                              <div className="pool-hub-idp-set-meta">{set.phrases.length} phrase{set.phrases.length === 1 ? '' : 's'}</div>
+                            </div>
+                            <div className="pool-hub-idp-set-phrases">
+                              {set.phrases.map(phrase => (
+                                <div key={phrase.id} className="pool-hub-idp-set-phrase">{phrase.text}</div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </details>
+                )}
 
                 <details className="pool-hub-detail-rail-card pool-hub-detail-panel pool-hub-report-panel">
                   <summary className="pool-hub-detail-panel-summary">Report</summary>

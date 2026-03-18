@@ -584,6 +584,67 @@
   padding: 0 14px 14px 14px;
 }
 
+.pool-hub-idp-panel {
+  border-color: rgba(244, 114, 182, 0.16);
+  background:
+    linear-gradient(145deg, rgba(244, 114, 182, 0.06), rgba(168, 85, 247, 0.04)),
+    rgba(17, 20, 31, 0.94);
+}
+
+.pool-hub-idp-panel-body {
+  gap: 12px;
+}
+
+.pool-hub-idp-set-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pool-hub-idp-set {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(244, 114, 182, 0.09), rgba(168, 85, 247, 0.06));
+  border: 1px solid rgba(244, 114, 182, 0.14);
+}
+
+.pool-hub-idp-set-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pool-hub-idp-set-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffe7f5;
+}
+
+.pool-hub-idp-set-meta {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f9a8d4;
+}
+
+.pool-hub-idp-set-phrases {
+  display: grid;
+  gap: 8px;
+}
+
+.pool-hub-idp-set-phrase {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(8, 10, 18, 0.34);
+  border: 1px solid rgba(244, 114, 182, 0.08);
+  color: #f6ebf3;
+  line-height: 1.45;
+}
+
 .pool-hub-detail-row {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
