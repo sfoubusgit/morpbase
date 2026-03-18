@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 28;
+  z-index: 72;
 }
 
 .floating-prompt-fragments-trigger,
