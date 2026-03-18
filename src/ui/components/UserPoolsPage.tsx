@@ -220,7 +220,7 @@ export function UserPoolsPage({
   const buildInitialTerritorySources = () => {
     const fallbackPool = sectionedPools[0];
     if (!fallbackPool) return [];
-    return [{ poolId: fallbackPool.id, section: fallbackPool.availableSections[0] ?? '' }];
+    return [{ poolId: fallbackPool.id, section: WHOLE_POOL_SECTION_VALUE }];
   };
 
   const expandTerritoryDraftSource = (source: { poolId: string; section: string }) => {
@@ -559,7 +559,7 @@ export function UserPoolsPage({
       ...prev,
       {
         poolId: fallbackPool.id,
-        section: fallbackPool.availableSections[0] ?? '',
+        section: WHOLE_POOL_SECTION_VALUE,
       },
     ]);
   };
