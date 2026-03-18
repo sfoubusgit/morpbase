@@ -17,8 +17,8 @@ type Position = {
 };
 
 const STORAGE_KEY = 'morpbase:global_phrase_layer_position';
-const TRIGGER_WIDTH = 172;
-const TRIGGER_HEIGHT = 48;
+const TRIGGER_WIDTH = 196;
+const TRIGGER_HEIGHT = 56;
 const PANEL_WIDTH = 320;
 const SCREEN_MARGIN = 18;
 const COMPACT_BREAKPOINT = 900;
@@ -212,6 +212,9 @@ export function FloatingPromptFragments({
         aria-expanded={isOpen}
         aria-controls="floating-global-phrase-panel"
       >
+        <span className="floating-prompt-fragments-trigger-icon" aria-hidden="true">
+          GL
+        </span>
         <span className="floating-prompt-fragments-trigger-label">Global Phrase Layer</span>
         <span className="floating-prompt-fragments-trigger-meta">
           <span className="floating-prompt-fragments-trigger-count">{selectedCount}</span>
