@@ -12,6 +12,14 @@ export type SavedPrompt = {
   updatedAt: number;
 };
 
+export type PromptSet = {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
 export type SavedPromptStore = {
   version: 1;
   prompts: SavedPrompt[];

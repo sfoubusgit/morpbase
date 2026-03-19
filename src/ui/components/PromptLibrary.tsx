@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import type { PromptAdditionEntry, SavedPrompt } from '../../types';
+import type { PromptAdditionEntry, PromptSet, SavedPrompt } from '../../types';
 import {
   createPrompt,
   deletePrompt,
@@ -7,6 +7,14 @@ import {
   importPromptsPayload,
   listPrompts,
 } from '../../engine/promptStore';
+import {
+  assignPromptToSet,
+  createPromptSet,
+  deletePromptSet,
+  listPromptSetAssignments,
+  listPromptSets,
+  updatePromptSet,
+} from '../../engine/promptSetStore';
 import { trackAnalyticsEvent } from '../../engine/analyticsStore';
 import { Modal } from './Modal';
 import { composePromptWithAdditions } from '../promptAdditions';
@@ -34,6 +42,7 @@ const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
 const KEEP_SAVE_FIELDS_KEY = 'promptgen:keep_save_fields_after_saving';
 const SAVE_FORM_DRAFT_KEY = 'promptgen:save_prompt_form_draft';
 const RECENT_LOCAL_PROMPTS_LIMIT = 4;
+const CREATE_NEW_PROMPT_SET_VALUE = '__create_new_prompt_set__';
 
 type SaveFormDraft = {
   name?: string;
@@ -41,6 +50,7 @@ type SaveFormDraft = {
   model?: string;
   purpose?: string;
   note?: string;
+  promptSetId?: string;
 };
 
 const loadLocalPrompts = (): SavedPrompt[] => {
@@ -127,11 +137,14 @@ export function PromptLibrary({
   const initialDraft = initialKeepFieldsAfterSaving ? loadSaveFormDraft() : {};
   const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
   const [localPrompts, setLocalPrompts] = useState<SavedPrompt[]>([]);
+  const [promptSets, setPromptSets] = useState<PromptSet[]>([]);
+  const [promptSetAssignments, setPromptSetAssignments] = useState<Record<string, string | null>>({});
   const [name, setName] = useState(initialDraft.name ?? '');
   const [tags, setTags] = useState(initialDraft.tags ?? '');
   const [model, setModel] = useState(initialDraft.model ?? '');
   const [purpose, setPurpose] = useState(initialDraft.purpose ?? '');
   const [note, setNote] = useState(initialDraft.note ?? '');
+  const [selectedPromptSetId, setSelectedPromptSetId] = useState(initialDraft.promptSetId ?? '');
   const [libraryJson, setLibraryJson] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -139,16 +152,51 @@ export function PromptLibrary({
   const lastHandledOpenSignalRef = useRef(externalOpenSaveSignal);
   const [showAllLocalPrompts, setShowAllLocalPrompts] = useState(false);
   const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(initialKeepFieldsAfterSaving);
+  const [activePromptSetFilter, setActivePromptSetFilter] = useState<string>('all');
+  const [isCreatingPromptSetInline, setIsCreatingPromptSetInline] = useState(false);
+  const [newPromptSetName, setNewPromptSetName] = useState('');
+  const [newPromptSetDescription, setNewPromptSetDescription] = useState('');
+  const [newPromptSetMessage, setNewPromptSetMessage] = useState<string | null>(null);
+  const [editingPromptSetId, setEditingPromptSetId] = useState<string | null>(null);
+  const [editingPromptSetName, setEditingPromptSetName] = useState('');
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
     [prompt, customAdditions, positionedAdditions, editedPositive, editedNegative]
   );
-  const visibleLocalPrompts = useMemo(
-    () => showAllLocalPrompts ? localPrompts : localPrompts.slice(0, RECENT_LOCAL_PROMPTS_LIMIT),
-    [localPrompts, showAllLocalPrompts]
+  const promptSetOptions = useMemo(
+    () => promptSets.map(set => ({ value: set.id, label: set.name })),
+    [promptSets]
   );
-  const hiddenLocalPromptCount = Math.max(0, localPrompts.length - RECENT_LOCAL_PROMPTS_LIMIT);
+  const getAssignedPromptSet = (promptId: string) => {
+    const setId = promptSetAssignments[promptId];
+    if (!setId) return null;
+    return promptSets.find(set => set.id === setId) ?? null;
+  };
+  const filterPromptsBySet = (items: SavedPrompt[]) => {
+    if (activePromptSetFilter === 'all') return items;
+    if (activePromptSetFilter === 'unassigned') {
+      return items.filter(item => !promptSetAssignments[item.id]);
+    }
+    return items.filter(item => promptSetAssignments[item.id] === activePromptSetFilter);
+  };
+  const filteredLocalPromptPool = useMemo(
+    () => filterPromptsBySet(localPrompts),
+    [activePromptSetFilter, promptSetAssignments, localPrompts]
+  );
+  const visibleLocalPrompts = useMemo(
+    () => showAllLocalPrompts ? filteredLocalPromptPool : filteredLocalPromptPool.slice(0, RECENT_LOCAL_PROMPTS_LIMIT),
+    [filteredLocalPromptPool, showAllLocalPrompts]
+  );
+  const hiddenLocalPromptCount = Math.max(0, filteredLocalPromptPool.length - RECENT_LOCAL_PROMPTS_LIMIT);
+  const filteredLocalPrompts = useMemo(
+    () => visibleLocalPrompts,
+    [visibleLocalPrompts]
+  );
+  const filteredCloudPrompts = useMemo(
+    () => filterPromptsBySet(prompts),
+    [activePromptSetFilter, promptSetAssignments, prompts]
+  );
 
   const refresh = async () => {
     try {
@@ -159,10 +207,25 @@ export function PromptLibrary({
     }
   };
 
+  const refreshPromptSets = async () => {
+    try {
+      const [sets, assignments] = await Promise.all([
+        listPromptSets(),
+        listPromptSetAssignments(),
+      ]);
+      setPromptSets(sets);
+      setPromptSetAssignments(assignments);
+    } catch {
+      setPromptSets([]);
+      setPromptSetAssignments({});
+    }
+  };
+
   useEffect(() => {
     setLocalPrompts(loadLocalPrompts());
+    void refreshPromptSets();
     if (authUser) {
-      refresh();
+      void refresh();
     } else {
       setPrompts([]);
     }
@@ -202,12 +265,13 @@ export function PromptLibrary({
           model,
           purpose,
           note,
+          promptSetId: selectedPromptSetId,
         })
       );
     } catch {
       // ignore storage errors
     }
-  }, [keepFieldsAfterSaving, name, tags, model, purpose, note]);
+  }, [keepFieldsAfterSaving, name, tags, model, purpose, note, selectedPromptSetId]);
 
   const parseTags = (raw: string) =>
     raw
@@ -215,12 +279,18 @@ export function PromptLibrary({
       .map(tag => tag.trim())
       .filter(Boolean);
 
+  const resolveSelectedPromptSetId = () =>
+    selectedPromptSetId && selectedPromptSetId !== CREATE_NEW_PROMPT_SET_VALUE
+      ? selectedPromptSetId
+      : null;
+
   const resetSaveFields = () => {
     setName('');
     setTags('');
     setModel('');
     setPurpose('');
     setNote('');
+    setSelectedPromptSetId('');
     try {
       window.localStorage.removeItem(SAVE_FORM_DRAFT_KEY);
     } catch {
@@ -236,7 +306,7 @@ export function PromptLibrary({
     setError(null);
     setMessage(null);
     try {
-      await createPrompt({
+      const savedPrompt = await createPrompt({
         name,
         positive: currentText.positive,
         negative: currentText.negative,
@@ -245,6 +315,8 @@ export function PromptLibrary({
         purpose,
         note,
       });
+      await assignPromptToSet(savedPrompt.id, resolveSelectedPromptSetId());
+      await refreshPromptSets();
       if (!keepFieldsAfterSaving) {
         resetSaveFields();
       }
@@ -299,6 +371,9 @@ export function PromptLibrary({
     const next = [nextPrompt, ...localPrompts];
     setLocalPrompts(next);
     saveLocalPrompts(next);
+    void assignPromptToSet(nextPrompt.id, resolveSelectedPromptSetId()).then(() => {
+      void refreshPromptSets();
+    });
     if (!keepFieldsAfterSaving) {
       resetSaveFields();
     }
@@ -323,6 +398,9 @@ export function PromptLibrary({
     const next = localPrompts.filter(item => item.id !== promptId);
     setLocalPrompts(next);
     saveLocalPrompts(next);
+    void assignPromptToSet(promptId, null).then(() => {
+      void refreshPromptSets();
+    });
   };
 
   const handleSaveLocalToCloud = async (prompt: SavedPrompt) => {
@@ -333,7 +411,7 @@ export function PromptLibrary({
     setError(null);
     setMessage(null);
     try {
-      await createPrompt({
+      const savedPrompt = await createPrompt({
         name: prompt.name,
         positive: prompt.positive,
         negative: prompt.negative,
@@ -342,7 +420,9 @@ export function PromptLibrary({
         purpose: prompt.purpose,
         note: prompt.note,
       });
+      await assignPromptToSet(savedPrompt.id, promptSetAssignments[prompt.id] ?? null);
       await refresh();
+      await refreshPromptSets();
       void trackAnalyticsEvent({
         eventType: 'prompt_save',
         pageKey: 'generator',
@@ -360,6 +440,55 @@ export function PromptLibrary({
       onPromptSaved?.('Prompt saved to the cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
+    }
+  };
+
+  const handleCreatePromptSetInline = async () => {
+    setError(null);
+    setNewPromptSetMessage(null);
+    try {
+      const created = await createPromptSet({
+        name: newPromptSetName,
+        description: newPromptSetDescription,
+      });
+      await refreshPromptSets();
+      setSelectedPromptSetId(created.id);
+      setIsCreatingPromptSetInline(false);
+      setNewPromptSetName('');
+      setNewPromptSetDescription('');
+      setNewPromptSetMessage('Prompt Set created.');
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to create Prompt Set.');
+    }
+  };
+
+  const handleRenamePromptSet = async (setId: string) => {
+    setError(null);
+    try {
+      await updatePromptSet(setId, {
+        name: editingPromptSetName,
+      });
+      await refreshPromptSets();
+      setEditingPromptSetId(null);
+      setEditingPromptSetName('');
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to rename Prompt Set.');
+    }
+  };
+
+  const handleDeletePromptSet = async (setId: string) => {
+    setError(null);
+    try {
+      await deletePromptSet(setId);
+      await refreshPromptSets();
+      if (selectedPromptSetId === setId) {
+        setSelectedPromptSetId('');
+      }
+      if (activePromptSetFilter === setId) {
+        setActivePromptSetFilter('all');
+      }
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to delete Prompt Set.');
     }
   };
 
@@ -477,6 +606,116 @@ export function PromptLibrary({
           </details>
           {error && <div className="prompt-library-error">{error}</div>}
           {message && <div className="prompt-library-message">{message}</div>}
+          <div className="prompt-library-set-panel">
+            <div className="prompt-library-section-header">
+              <div className="prompt-library-section-title">Prompt Sets</div>
+              <button
+                type="button"
+                className="prompt-library-section-toggle"
+                onClick={() => {
+                  setIsCreatingPromptSetInline(prev => !prev);
+                  setNewPromptSetMessage(null);
+                }}
+              >
+                {isCreatingPromptSetInline ? 'Cancel' : 'Create set'}
+              </button>
+            </div>
+            {isCreatingPromptSetInline && (
+              <div className="prompt-library-set-create">
+                <input
+                  type="text"
+                  placeholder="Prompt Set name"
+                  value={newPromptSetName}
+                  onChange={event => setNewPromptSetName(event.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Description (optional)"
+                  value={newPromptSetDescription}
+                  onChange={event => setNewPromptSetDescription(event.target.value)}
+                />
+                <div className="prompt-library-set-create-actions">
+                  <button type="button" onClick={handleCreatePromptSetInline}>
+                    Create Prompt Set
+                  </button>
+                </div>
+              </div>
+            )}
+            {newPromptSetMessage && <div className="prompt-library-message">{newPromptSetMessage}</div>}
+            {promptSets.length === 0 ? (
+              <div className="prompt-library-empty">No Prompt Sets yet.</div>
+            ) : (
+              <div className="prompt-library-set-list">
+                {promptSets.map(set => (
+                  <div key={set.id} className="prompt-library-set-item">
+                    {editingPromptSetId === set.id ? (
+                      <>
+                        <input
+                          type="text"
+                          value={editingPromptSetName}
+                          onChange={event => setEditingPromptSetName(event.target.value)}
+                        />
+                        <div className="prompt-library-set-item-actions">
+                          <button type="button" onClick={() => handleRenamePromptSet(set.id)}>
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPromptSetId(null);
+                              setEditingPromptSetName('');
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="prompt-library-set-item-main">
+                          <div className="prompt-library-set-item-title">{set.name}</div>
+                          {set.description && (
+                            <div className="prompt-library-set-item-description">{set.description}</div>
+                          )}
+                        </div>
+                        <div className="prompt-library-set-item-actions">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingPromptSetId(set.id);
+                              setEditingPromptSetName(set.name);
+                            }}
+                          >
+                            Rename
+                          </button>
+                          <button type="button" onClick={() => void handleDeletePromptSet(set.id)}>
+                            Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="prompt-library-filter-row">
+            <label className="prompt-library-filter">
+              <span>Filter by Set</span>
+              <select
+                value={activePromptSetFilter}
+                onChange={event => setActivePromptSetFilter(event.target.value)}
+              >
+                <option value="all">All prompts</option>
+                <option value="unassigned">Unassigned</option>
+                {promptSetOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <div className="prompt-library-list">
             {showLocalPrompts && (
               <div className="prompt-library-section">
@@ -494,13 +733,18 @@ export function PromptLibrary({
                     </button>
                   )}
                 </div>
-                {localPrompts.length === 0 ? (
+                {filteredLocalPrompts.length === 0 ? (
                   <div className="prompt-library-empty">No local prompts yet.</div>
                 ) : (
-                  visibleLocalPrompts.map(item => (
+                  filteredLocalPrompts.map(item => (
                     <div key={item.id} className="prompt-library-item">
                       <div className="prompt-library-item-main">
                         <div className="prompt-library-item-title">{item.name}</div>
+                        {getAssignedPromptSet(item.id) && (
+                          <div className="prompt-library-item-set-chip">
+                            {getAssignedPromptSet(item.id)?.name}
+                          </div>
+                        )}
                         <div className="prompt-library-item-text">{item.positive}</div>
                         {(item.model || item.purpose || item.usedAt) && (
                           <div className="prompt-library-item-meta">
@@ -539,13 +783,18 @@ export function PromptLibrary({
                   <div className="prompt-library-empty">Log in to access your cloud prompts.</div>
                 ) : !isPro ? (
                   <div className="prompt-library-empty">Upgrade to Pro to unlock cloud prompts.</div>
-                ) : prompts.length === 0 ? (
+                ) : filteredCloudPrompts.length === 0 ? (
                   <div className="prompt-library-empty">No cloud prompts yet.</div>
                 ) : (
-                  prompts.map(item => (
+                  filteredCloudPrompts.map(item => (
                     <div key={item.id} className="prompt-library-item">
                       <div className="prompt-library-item-main">
                         <div className="prompt-library-item-title">{item.name}</div>
+                        {getAssignedPromptSet(item.id) && (
+                          <div className="prompt-library-item-set-chip">
+                            {getAssignedPromptSet(item.id)?.name}
+                          </div>
+                        )}
                         <div className="prompt-library-item-text">{item.positive}</div>
                         {(item.model || item.purpose || item.usedAt) && (
                           <div className="prompt-library-item-meta">
@@ -567,7 +816,9 @@ export function PromptLibrary({
                         </button>
                         <button type="button" onClick={async () => {
                           await deletePrompt(item.id);
+                          await assignPromptToSet(item.id, null);
                           await refresh();
+                          await refreshPromptSets();
                         }}>
                           Delete
                         </button>
@@ -593,6 +844,57 @@ export function PromptLibrary({
             value={name}
             onChange={event => setName(event.target.value)}
           />
+          <select
+            value={selectedPromptSetId}
+            onChange={event => {
+              const value = event.target.value;
+              setSelectedPromptSetId(value);
+              setNewPromptSetMessage(null);
+              if (value === CREATE_NEW_PROMPT_SET_VALUE) {
+                setIsCreatingPromptSetInline(true);
+              } else {
+                setIsCreatingPromptSetInline(false);
+              }
+            }}
+          >
+            <option value="">No Prompt Set</option>
+            {promptSetOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+            <option value={CREATE_NEW_PROMPT_SET_VALUE}>Create new set</option>
+          </select>
+          {isCreatingPromptSetInline && (
+            <div className="prompt-library-set-create prompt-library-set-create-inline">
+              <input
+                type="text"
+                placeholder="Prompt Set name"
+                value={newPromptSetName}
+                onChange={event => setNewPromptSetName(event.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="Description (optional)"
+                value={newPromptSetDescription}
+                onChange={event => setNewPromptSetDescription(event.target.value)}
+              />
+              <div className="prompt-library-set-create-actions">
+                <button type="button" onClick={handleCreatePromptSetInline}>
+                  Create set
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsCreatingPromptSetInline(false);
+                    setSelectedPromptSetId('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
           <input
             type="text"
             placeholder="Tags (comma)"
