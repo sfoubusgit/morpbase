@@ -446,63 +446,76 @@ export function PromptPreview({
   };
 
   const showStructuredSections = !hasEditedOutput && !isEditMode && exportMode !== 'clean' && prompt && 'sections' in prompt && prompt.sections && Object.keys(prompt.sections).length > 0;
+  const hasWorkflowContext = Boolean(activeModeLabel || activePoolNames.length > 0 || activeIdpSet || activeTerritoryName);
 
   return (
-    <div className="prompt-preview">
-      <div className="prompt-preview-header">
-        <div className="prompt-preview-heading">
-          <h3 className="prompt-preview-title">Prompt Preview</h3>
-          <p className="prompt-preview-subtitle">Build first, then edit the final output if you want to refine it manually.</p>
-        </div>
-        <div className="prompt-preview-header-controls">
-          <div className="prompt-preview-mode">
-            <label htmlFor="prompt-export-mode" className="prompt-preview-mode-label">
-              Export Mode
-            </label>
-            <select
-              id="prompt-export-mode"
-              className="prompt-preview-mode-select"
-              value={exportMode}
-              onChange={event => onExportModeChange?.(event.target.value as PromptExportMode)}
-            >
-              <option value="structured">Structured</option>
-              <option value="clean">Clean</option>
-              <option value="structured_with_negative">Structured + Negative</option>
-            </select>
-          </div>
-          {!isEditMode && (
-            <button
-              type="button"
-              className="prompt-preview-action-button prompt-preview-action-button-primary"
-              onClick={handleEnterEditMode}
-              disabled={!currentPositive && !currentNegative}
-            >
-              Edit Output
-            </button>
-          )}
-          {(onClear || onUndoClear) && (
-            <div className="prompt-preview-action-buttons">
-              {onUndoClear && (
-                <button
-                  type="button"
-                  className="prompt-preview-action-button"
-                  onClick={onUndoClear}
-                  disabled={!canUndoClear}
-                >
-                  Undo
-                </button>
+    <div className="prompt-preview-stack">
+      {hasWorkflowContext && (
+        <div className="prompt-workflow-panel">
+          <div className="prompt-workflow-panel-title">Workflow Context</div>
+          <div className="prompt-preview-workflow-block">
+            <div className="prompt-preview-workflow-title">Active Workflow</div>
+            <div className="prompt-preview-workflow-chips">
+              {activeModeLabel && (
+                <span className="prompt-preview-workflow-chip">
+                  Mode: <strong>{activeModeLabel}</strong>
+                </span>
               )}
-              {onClear && (
-                <button
-                  type="button"
-                  className="prompt-preview-action-button prompt-preview-action-button-danger"
-                  onClick={onClear}
+              {activePoolNames.length > 0 && (
+                <span className="prompt-preview-workflow-chip">
+                  Pools: <strong>{activePoolNames.join(', ')}</strong>
+                </span>
+              )}
+              {activeTerritoryName && (
+                <span className="prompt-preview-workflow-chip">
+                  Territory: <strong>{activeTerritoryName}</strong>
+                </span>
+              )}
+              {activeTerritoryName && territoryFocusMode && (
+                <span className="prompt-preview-workflow-chip">
+                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {availableIdpSets.length > 0 && (
+            <div className="prompt-preview-idp-block">
+              <div className="prompt-preview-idp-header">
+                <div>
+                  <div className="prompt-preview-idp-title">Active IDP Set</div>
+                  <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
+                </div>
+                <select
+                  className="prompt-preview-idp-select"
+                  value={activeIdpSet?.id ?? ''}
+                  onChange={event => onSelectIdpSet?.(event.target.value)}
                 >
-                  Clear
-                </button>
+                  {availableIdpSets.map(set => (
+                    <option key={set.id} value={set.id}>
+                      {set.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {activeIdpSet && (
+                <div className="prompt-preview-idp-phrases">
+                  {activeIdpSet.phrases.map(phrase => (
+                    <div key={phrase.id} className="prompt-preview-idp-phrase">{phrase.text}</div>
+                  ))}
+                </div>
               )}
             </div>
           )}
+        </div>
+      )}
+
+      <div className="prompt-preview">
+        <div className="prompt-preview-header">
+          <div className="prompt-preview-heading">
+            <h3 className="prompt-preview-title">Prompt Preview</h3>
+            <p className="prompt-preview-subtitle">Build first, then edit the final output if you want to refine it manually.</p>
+          </div>
           {prompt && 'tokenCount' in prompt && (
             <div className="prompt-preview-metadata">
               <span className="prompt-preview-token-count">
@@ -512,200 +525,191 @@ export function PromptPreview({
             </div>
           )}
         </div>
-      </div>
 
-      <div className="prompt-preview-export-note">
-        {exportMode === 'structured'
-          ? 'Structured keeps the prompt grouped by section.'
-          : exportMode === 'clean'
-            ? 'Clean removes obvious duplicates and keeps the export compact.'
-            : 'Structured + Negative copies both the positive and negative prompt together.'}
-      </div>
-
-      <div className="prompt-preview-workflow-block">
-        <div className="prompt-preview-workflow-title">Active Workflow</div>
-        <div className="prompt-preview-workflow-chips">
-          {activeModeLabel && (
-            <span className="prompt-preview-workflow-chip">
-              Mode: <strong>{activeModeLabel}</strong>
-            </span>
-          )}
-          {activePoolNames.length > 0 && (
-            <span className="prompt-preview-workflow-chip">
-              Pools: <strong>{activePoolNames.join(', ')}</strong>
-            </span>
-          )}
-          {activeIdpSet && (
-            <span className="prompt-preview-workflow-chip">
-              IDP: <strong>{activeIdpSet.name}</strong>
-            </span>
-          )}
-          {activeTerritoryName && (
-            <span className="prompt-preview-workflow-chip">
-              Territory: <strong>{activeTerritoryName}</strong>
-            </span>
-          )}
-          {activeTerritoryName && territoryFocusMode && (
-            <span className="prompt-preview-workflow-chip">
-              Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
-            </span>
-          )}
+        <div className="prompt-preview-export-note">
+          {exportMode === 'structured'
+            ? 'Structured keeps the prompt grouped by section.'
+            : exportMode === 'clean'
+              ? 'Clean removes obvious duplicates and keeps the export compact.'
+              : 'Structured + Negative copies both the positive and negative prompt together.'}
         </div>
-      </div>
 
-      {availableIdpSets.length > 0 && (
-        <div className="prompt-preview-idp-block">
-          <div className="prompt-preview-idp-header">
-            <div>
-              <div className="prompt-preview-idp-title">Active IDP Set</div>
-              <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
-            </div>
-            <select
-              className="prompt-preview-idp-select"
-              value={activeIdpSet?.id ?? ''}
-              onChange={event => onSelectIdpSet?.(event.target.value)}
-            >
-              {availableIdpSets.map(set => (
-                <option key={set.id} value={set.id}>
-                  {set.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          {activeIdpSet && (
-            <div className="prompt-preview-idp-phrases">
-              {activeIdpSet.phrases.map(phrase => (
-                <div key={phrase.id} className="prompt-preview-idp-phrase">{phrase.text}</div>
+        {promptSourceSummaries.length > 0 && (
+          <div className="prompt-preview-sources-block">
+            <div className="prompt-preview-sources-title">Prompt Sources</div>
+            <div className="prompt-preview-sources-chips">
+              {promptSourceSummaries.map(source => (
+                <button
+                  key={source.id}
+                  type="button"
+                  className={`prompt-preview-source-chip ${highlightedSourceId === source.id ? 'active' : ''}`}
+                  onClick={() => setHighlightedSourceId(source.id)}
+                >
+                  {source.label}
+                </button>
               ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {promptSourceSummaries.length > 0 && (
-        <div className="prompt-preview-sources-block">
-          <div className="prompt-preview-sources-title">Prompt Sources</div>
-          <div className="prompt-preview-sources-chips">
-            {promptSourceSummaries.map(source => (
-              <button
-                key={source.id}
-                type="button"
-                className={`prompt-preview-source-chip ${highlightedSourceId === source.id ? 'active' : ''}`}
-                onClick={() => setHighlightedSourceId(source.id)}
-              >
-                {source.label}
-              </button>
-            ))}
-          </div>
-          {highlightedSourceTexts.length > 0 && (
-            <div className="prompt-preview-source-reveal">
-              {highlightedSourceTexts.map((text, index) => (
-                <span key={`${text}-${index}`} className="prompt-preview-source-reveal-item">
-                  {text}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {editNotice && <div className="prompt-preview-edit-notice">{editNotice}</div>}
-      {hasEditedOutput && !isEditMode && (
-        <div className="prompt-preview-edited-badge">Edited Output</div>
-      )}
-
-      <div className="prompt-preview-content">
-        {isEditMode ? (
-          <div className="prompt-preview-edit-mode">
-            <div className="prompt-preview-section">
-              <label className="prompt-preview-label">Prompt</label>
-              <textarea
-                className="prompt-preview-textarea"
-                rows={7}
-                value={draftPositive}
-                onChange={event => handleDraftPositiveChange(event.target.value)}
-              />
-            </div>
-            <div className="prompt-preview-section prompt-preview-section-negative">
-              <label className="prompt-preview-label">Negative Prompt</label>
-              <textarea
-                className="prompt-preview-textarea prompt-preview-textarea-negative"
-                rows={5}
-                value={draftNegative}
-                onChange={event => handleDraftNegativeChange(event.target.value)}
-              />
-            </div>
-            <div className="prompt-preview-edit-actions">
-              <button type="button" className="prompt-preview-action-button prompt-preview-action-button-primary" onClick={handleApplyEdits}>
-                Apply Edits
-              </button>
-              <button type="button" className="prompt-preview-action-button" onClick={handleCancelEdits}>
-                Cancel
-              </button>
-              <button type="button" className="prompt-preview-action-button" onClick={handleResetEditedOutput}>
-                Reset to Generated
-              </button>
-            </div>
-          </div>
-        ) : showStructuredSections ? (
-          <div className="prompt-preview-sections">
-            {SECTION_ORDER.map(sectionKey => {
-              const sectionValue = prompt.sections?.[sectionKey as keyof typeof prompt.sections];
-              if (!sectionValue) return null;
-              return (
-                <div key={sectionKey} className="prompt-preview-section">
-                  <label className="prompt-preview-section-label">{SECTION_HEADER_MAP[sectionKey]}:</label>
-                  <div className="prompt-preview-section-text">{sectionValue}</div>
-                </div>
-              );
-            })}
-            {additionsText && (
-              <div className="prompt-preview-section">
-                <label className="prompt-preview-section-label">Custom</label>
-                <div className="prompt-preview-section-text">{additionsText}</div>
+            {highlightedSourceTexts.length > 0 && (
+              <div className="prompt-preview-source-reveal">
+                {highlightedSourceTexts.map((text, index) => (
+                  <span key={`${text}-${index}`} className="prompt-preview-source-reveal-item">
+                    {text}
+                  </span>
+                ))}
               </div>
             )}
           </div>
-        ) : (
-          <div className="prompt-preview-section">
-            <label className="prompt-preview-label">Prompt</label>
-            <div className="prompt-preview-text">
-              {currentPositive
-                ? renderHighlightedText(currentPositive, highlightedSourceTexts)
-                : 'Select prompt elements to start building your prompt.'}
+        )}
+
+        {editNotice && <div className="prompt-preview-edit-notice">{editNotice}</div>}
+        {hasEditedOutput && !isEditMode && (
+          <div className="prompt-preview-edited-badge">Edited Output</div>
+        )}
+
+        <div className="prompt-preview-content">
+          {isEditMode ? (
+            <div className="prompt-preview-edit-mode">
+              <div className="prompt-preview-section">
+                <label className="prompt-preview-label">Prompt</label>
+                <textarea
+                  className="prompt-preview-textarea"
+                  rows={7}
+                  value={draftPositive}
+                  onChange={event => handleDraftPositiveChange(event.target.value)}
+                />
+              </div>
+              <div className="prompt-preview-section prompt-preview-section-negative">
+                <label className="prompt-preview-label">Negative Prompt</label>
+                <textarea
+                  className="prompt-preview-textarea prompt-preview-textarea-negative"
+                  rows={5}
+                  value={draftNegative}
+                  onChange={event => handleDraftNegativeChange(event.target.value)}
+                />
+              </div>
+              <div className="prompt-preview-edit-actions">
+                <button type="button" className="prompt-preview-action-button prompt-preview-action-button-primary" onClick={handleApplyEdits}>
+                  Apply Edits
+                </button>
+                <button type="button" className="prompt-preview-action-button" onClick={handleCancelEdits}>
+                  Cancel
+                </button>
+                <button type="button" className="prompt-preview-action-button" onClick={handleResetEditedOutput}>
+                  Reset to Generated
+                </button>
+              </div>
+            </div>
+          ) : showStructuredSections ? (
+            <div className="prompt-preview-sections">
+              {SECTION_ORDER.map(sectionKey => {
+                const sectionValue = prompt.sections?.[sectionKey as keyof typeof prompt.sections];
+                if (!sectionValue) return null;
+                return (
+                  <div key={sectionKey} className="prompt-preview-section">
+                    <label className="prompt-preview-section-label">{SECTION_HEADER_MAP[sectionKey]}:</label>
+                    <div className="prompt-preview-section-text">{sectionValue}</div>
+                  </div>
+                );
+              })}
+              {additionsText && (
+                <div className="prompt-preview-section">
+                  <label className="prompt-preview-section-label">Custom</label>
+                  <div className="prompt-preview-section-text">{additionsText}</div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="prompt-preview-section">
+              <label className="prompt-preview-label">Prompt</label>
+              <div className="prompt-preview-text">
+                {currentPositive
+                  ? renderHighlightedText(currentPositive, highlightedSourceTexts)
+                  : 'Select prompt elements to start building your prompt.'}
+              </div>
+            </div>
+          )}
+
+          {currentNegative && (
+            <div className="prompt-preview-section prompt-preview-section-negative">
+              <div className="prompt-preview-negative-header">
+                <label className="prompt-preview-label">Negative Prompt</label>
+                <span className="prompt-preview-negative-pill">Export companion</span>
+              </div>
+              <div className="prompt-preview-text prompt-preview-text-negative">
+                {renderHighlightedText(currentNegative, highlightedSourceTexts)}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {!isEditMode && (
+          <div className="prompt-preview-controls-block">
+            <div className="prompt-preview-controls-top">
+              <div className="prompt-preview-mode">
+                <label htmlFor="prompt-export-mode" className="prompt-preview-mode-label">
+                  Export Mode
+                </label>
+                <select
+                  id="prompt-export-mode"
+                  className="prompt-preview-mode-select"
+                  value={exportMode}
+                  onChange={event => onExportModeChange?.(event.target.value as PromptExportMode)}
+                >
+                  <option value="structured">Structured</option>
+                  <option value="clean">Clean</option>
+                  <option value="structured_with_negative">Structured + Negative</option>
+                </select>
+              </div>
+              <div className="prompt-preview-action-buttons">
+                <button
+                  type="button"
+                  className="prompt-preview-action-button prompt-preview-action-button-primary"
+                  onClick={handleEnterEditMode}
+                  disabled={!currentPositive && !currentNegative}
+                >
+                  Edit Output
+                </button>
+                {onUndoClear && (
+                  <button
+                    type="button"
+                    className="prompt-preview-action-button"
+                    onClick={onUndoClear}
+                    disabled={!canUndoClear}
+                  >
+                    Undo
+                  </button>
+                )}
+                {onClear && (
+                  <button
+                    type="button"
+                    className="prompt-preview-action-button prompt-preview-action-button-danger"
+                    onClick={onClear}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}
 
-        {currentNegative && (
-          <div className="prompt-preview-section prompt-preview-section-negative">
-            <div className="prompt-preview-negative-header">
-              <label className="prompt-preview-label">Negative Prompt</label>
-              <span className="prompt-preview-negative-pill">Export companion</span>
-            </div>
-            <div className="prompt-preview-text prompt-preview-text-negative">
-              {renderHighlightedText(currentNegative, highlightedSourceTexts)}
-            </div>
+        {(currentPositive || currentNegative) && !isEditMode && (
+          <div className="prompt-preview-bottom-actions">
+            {onSavePrompt && (
+              <button
+                className="prompt-preview-save-button"
+                onClick={onSavePrompt}
+                type="button"
+              >
+                Save Prompt
+              </button>
+            )}
+            <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
+              {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}
+            </button>
           </div>
         )}
       </div>
-
-      {(currentPositive || currentNegative) && !isEditMode && (
-        <div className="prompt-preview-bottom-actions">
-          {onSavePrompt && (
-            <button
-              className="prompt-preview-save-button"
-              onClick={onSavePrompt}
-              type="button"
-            >
-              Save Prompt
-            </button>
-          )}
-          <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
-            {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
