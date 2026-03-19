@@ -2811,8 +2811,11 @@ export function App() {
               />
               <details className="builder-sidebar-panel builder-guidance-sidebar">
                 <summary>
-                  <span className="builder-sidebar-panel-label">Builder Guide</span>
-                  <span className="builder-guidance-summary">Choose left, build center, copy right</span>
+                  <span className="builder-guidance-heading">
+                    <span className="builder-guidance-title">Builder Guide</span>
+                    <span className="builder-guidance-summary">Choose left, build center, copy right</span>
+                  </span>
+                  <span className="builder-guidance-toggle" aria-hidden="true">Open</span>
                 </summary>
                 <div className="builder-guidance-body">
                   <p className="builder-guidance-intro">

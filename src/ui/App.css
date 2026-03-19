@@ -379,6 +379,12 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   min-height: 48px;
 }
 
+.builder-guidance-heading {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
 .builder-guidance summary::-webkit-details-marker,
 .builder-guidance-sidebar summary::-webkit-details-marker {
   display: none;
@@ -387,21 +393,44 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 .builder-guidance-title {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #f3f4f6;
+  color: #f8fbff;
   line-height: 1;
 }
 
 .builder-guidance-summary {
-  font-size: 10px;
-  color: #cdd7ff;
-  letter-spacing: 0.04em;
+  font-size: 11px;
+  color: #d7def7;
+  letter-spacing: 0.02em;
   text-transform: none;
-  text-align: right;
+  text-align: left;
   line-height: 1.2;
+}
+
+.builder-guidance-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f3f4f6;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.builder-guidance[open] .builder-guidance-toggle,
+.builder-guidance-sidebar[open] .builder-guidance-toggle {
+  background: rgba(110, 86, 249, 0.18);
+  border-color: rgba(110, 86, 249, 0.34);
+  color: #ffffff;
 }
 
 .builder-guidance-body {
