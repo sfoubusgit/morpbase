@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import type { PromptAdditionEntry, SavedPrompt } from '../../types';
 import {
   createPrompt,
@@ -32,6 +32,14 @@ const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
 const KEEP_SAVE_FIELDS_KEY = 'promptgen:keep_save_fields_after_saving';
 const SAVE_FORM_DRAFT_KEY = 'promptgen:save_prompt_form_draft';
 
+type SaveFormDraft = {
+  name?: string;
+  tags?: string;
+  model?: string;
+  purpose?: string;
+  note?: string;
+};
+
 const loadLocalPrompts = (): SavedPrompt[] => {
   try {
     const raw = window.localStorage.getItem(LOCAL_STORE_KEY);
@@ -49,6 +57,17 @@ const saveLocalPrompts = (prompts: SavedPrompt[]) => {
     window.localStorage.setItem(LOCAL_STORE_KEY, JSON.stringify({ prompts }));
   } catch {
     // ignore storage errors
+  }
+};
+
+const loadSaveFormDraft = (): SaveFormDraft => {
+  try {
+    const raw = window.localStorage.getItem(SAVE_FORM_DRAFT_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as SaveFormDraft;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
   }
 };
 
@@ -93,25 +112,26 @@ export function PromptLibrary({
   hideSaveBar = false,
   externalOpenSaveSignal = 0,
 }: PromptLibraryProps) {
-  const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
-  const [localPrompts, setLocalPrompts] = useState<SavedPrompt[]>([]);
-  const [name, setName] = useState('');
-  const [tags, setTags] = useState('');
-  const [model, setModel] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [note, setNote] = useState('');
-  const [libraryJson, setLibraryJson] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
-  const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(() => {
+  const initialKeepFieldsAfterSaving = (() => {
     try {
       return window.localStorage.getItem(KEEP_SAVE_FIELDS_KEY) === '1';
     } catch {
       return false;
     }
-  });
-  const hydrateDraftRef = useRef(false);
+  })();
+  const initialDraft = initialKeepFieldsAfterSaving ? loadSaveFormDraft() : {};
+  const [prompts, setPrompts] = useState<SavedPrompt[]>([]);
+  const [localPrompts, setLocalPrompts] = useState<SavedPrompt[]>([]);
+  const [name, setName] = useState(initialDraft.name ?? '');
+  const [tags, setTags] = useState(initialDraft.tags ?? '');
+  const [model, setModel] = useState(initialDraft.model ?? '');
+  const [purpose, setPurpose] = useState(initialDraft.purpose ?? '');
+  const [note, setNote] = useState(initialDraft.note ?? '');
+  const [libraryJson, setLibraryJson] = useState('');
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(initialKeepFieldsAfterSaving);
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
@@ -141,29 +161,6 @@ export function PromptLibrary({
       setIsSaveModalOpen(true);
     }
   }, [externalOpenSaveSignal]);
-
-  useEffect(() => {
-    if (hydrateDraftRef.current || !keepFieldsAfterSaving) return;
-    hydrateDraftRef.current = true;
-    try {
-      const raw = window.localStorage.getItem(SAVE_FORM_DRAFT_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as {
-        name?: string;
-        tags?: string;
-        model?: string;
-        purpose?: string;
-        note?: string;
-      };
-      setName(parsed.name ?? '');
-      setTags(parsed.tags ?? '');
-      setModel(parsed.model ?? '');
-      setPurpose(parsed.purpose ?? '');
-      setNote(parsed.note ?? '');
-    } catch {
-      // ignore storage errors
-    }
-  }, [keepFieldsAfterSaving]);
 
   useEffect(() => {
     try {
