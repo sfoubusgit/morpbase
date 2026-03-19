@@ -27,6 +27,7 @@ type PromptLibraryProps = {
   hideSaveBar?: boolean;
   externalOpenSaveSignal?: number;
   renderLibraryShell?: boolean;
+  onPromptSaved?: (message: string) => void;
 };
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
@@ -114,6 +115,7 @@ export function PromptLibrary({
   hideSaveBar = false,
   externalOpenSaveSignal = 0,
   renderLibraryShell = true,
+  onPromptSaved,
 }: PromptLibraryProps) {
   const initialKeepFieldsAfterSaving = (() => {
     try {
@@ -261,6 +263,7 @@ export function PromptLibrary({
         },
       });
       setMessage('Saved to cloud.');
+      onPromptSaved?.('Prompt saved to the cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }
@@ -313,6 +316,7 @@ export function PromptLibrary({
       },
     });
     setMessage('Saved locally.');
+    onPromptSaved?.('Prompt saved locally.');
   };
 
   const handleDeleteLocal = (promptId: string) => {
@@ -353,6 +357,7 @@ export function PromptLibrary({
         },
       });
       setMessage('Saved to cloud.');
+      onPromptSaved?.('Prompt saved to the cloud.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }

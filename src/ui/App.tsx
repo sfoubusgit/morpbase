@@ -392,6 +392,7 @@ export function App() {
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [isSavedPromptsDrawerOpen, setIsSavedPromptsDrawerOpen] = useState(false);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
+  const [topToastMessage, setTopToastMessage] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
   const lastTerritoryRepositionKeyRef = useRef<string>('');
   const [selectedCreatorProfileTarget, setSelectedCreatorProfileTarget] = useState<{
@@ -1536,6 +1537,16 @@ export function App() {
   }, [builderNotice]);
 
   useEffect(() => {
+    if (!topToastMessage) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setTopToastMessage(null);
+    }, 3200);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [topToastMessage]);
+
+  useEffect(() => {
     if (questionNodes.length === 0) return;
     if (usableNodeIds.length === 0) {
       setUnavailableJumpNodeId('__builder_empty__');
@@ -1732,31 +1743,6 @@ export function App() {
     setBuilderNotice(`Active IDP set changed to "${nextSet.name}".`);
   }, [activeIdpPool, applyIdpSetToSession]);
 
-  useEffect(() => {
-    if (!activeTerritory) return;
-
-    const activeTerritoryPoolIds = new Set(activeTerritory.sources.map(source => source.poolId));
-    if (activeIdpPool && activeTerritoryPoolIds.has(activeIdpPool.id)) {
-      return;
-    }
-
-    const candidatePool = activeTerritory.sources
-      .map(source => territoryPools.find(pool => pool.id === source.poolId))
-      .find((pool): pool is Pool => Boolean(
-        pool && (
-          (pool.idpSets && pool.idpSets.length > 0)
-          || (pool.initiativePhrases ?? []).some(phrase => phrase.autoApplyOnActivate)
-        )
-      ));
-
-    if (!candidatePool) {
-      replaceIdentityBaselineForPool(null, null);
-      return;
-    }
-
-    replaceIdentityBaselineForPool(candidatePool, candidatePool.idpSets?.[0]?.id ?? null);
-  }, [activeTerritory, activeIdpPool, replaceIdentityBaselineForPool, territoryPools]);
-
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
     text: string;
@@ -1846,6 +1832,31 @@ export function App() {
       setActiveIdpSetId(null);
     }
   }, [poolPromptItems]);
+
+  useEffect(() => {
+    if (!activeTerritory) return;
+
+    const activeTerritoryPoolIds = new Set(activeTerritory.sources.map(source => source.poolId));
+    if (activeIdpPool && activeTerritoryPoolIds.has(activeIdpPool.id)) {
+      return;
+    }
+
+    const candidatePool = activeTerritory.sources
+      .map(source => territoryPools.find(pool => pool.id === source.poolId))
+      .find((pool): pool is Pool => Boolean(
+        pool && (
+          (pool.idpSets && pool.idpSets.length > 0)
+          || (pool.initiativePhrases ?? []).some(phrase => phrase.autoApplyOnActivate)
+        )
+      ));
+
+    if (!candidatePool) {
+      replaceIdentityBaselineForPool(null, null);
+      return;
+    }
+
+    replaceIdentityBaselineForPool(candidatePool, candidatePool.idpSets?.[0]?.id ?? null);
+  }, [activeTerritory, activeIdpPool, replaceIdentityBaselineForPool, territoryPools]);
 
   const handleClearPrompt = useCallback(() => {
     const hasSelections = selections.size > 0;
@@ -2709,6 +2720,11 @@ export function App() {
         />
       ) : (
         <>
+        {topToastMessage && (
+          <div className="top-toast" role="status" aria-live="polite">
+            {topToastMessage}
+          </div>
+        )}
         <div className="interview-layout">
               <CategorySidebar
                 categoryMap={CATEGORY_MAP}
@@ -2995,6 +3011,7 @@ export function App() {
                 hideSaveBar={true}
                 externalOpenSaveSignal={savePromptOpenSignal}
                 renderLibraryShell={false}
+                onPromptSaved={setTopToastMessage}
               />
             </div>
 
@@ -3033,6 +3050,7 @@ export function App() {
                     showCloudPrompts={false}
                     showLocalPrompts={true}
                     hideSaveBar={true}
+                    onPromptSaved={setTopToastMessage}
                   />
                 </div>
               </div>
