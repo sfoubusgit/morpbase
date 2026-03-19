@@ -31,6 +31,7 @@ type PromptLibraryProps = {
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
 const KEEP_SAVE_FIELDS_KEY = 'promptgen:keep_save_fields_after_saving';
 const SAVE_FORM_DRAFT_KEY = 'promptgen:save_prompt_form_draft';
+const RECENT_LOCAL_PROMPTS_LIMIT = 4;
 
 type SaveFormDraft = {
   name?: string;
@@ -131,12 +132,18 @@ export function PromptLibrary({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [showAllLocalPrompts, setShowAllLocalPrompts] = useState(false);
   const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(initialKeepFieldsAfterSaving);
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
     [prompt, customAdditions, positionedAdditions, editedPositive, editedNegative]
   );
+  const visibleLocalPrompts = useMemo(
+    () => showAllLocalPrompts ? localPrompts : localPrompts.slice(0, RECENT_LOCAL_PROMPTS_LIMIT),
+    [localPrompts, showAllLocalPrompts]
+  );
+  const hiddenLocalPromptCount = Math.max(0, localPrompts.length - RECENT_LOCAL_PROMPTS_LIMIT);
 
   const refresh = async () => {
     try {
@@ -462,11 +469,24 @@ export function PromptLibrary({
       <div className="prompt-library-list">
         {showLocalPrompts && (
           <div className="prompt-library-section">
-            <div className="prompt-library-section-title">Local Prompts</div>
+            <div className="prompt-library-section-header">
+              <div className="prompt-library-section-title">Local Prompts</div>
+              {hiddenLocalPromptCount > 0 && (
+                <button
+                  type="button"
+                  className="prompt-library-section-toggle"
+                  onClick={() => setShowAllLocalPrompts(prev => !prev)}
+                >
+                  {showAllLocalPrompts
+                    ? 'Show recent only'
+                    : `Show ${hiddenLocalPromptCount} older`}
+                </button>
+              )}
+            </div>
             {localPrompts.length === 0 ? (
               <div className="prompt-library-empty">No local prompts yet.</div>
             ) : (
-              localPrompts.map(item => (
+              visibleLocalPrompts.map(item => (
                 <div key={item.id} className="prompt-library-item">
                   <div className="prompt-library-item-main">
                     <div className="prompt-library-item-title">{item.name}</div>
