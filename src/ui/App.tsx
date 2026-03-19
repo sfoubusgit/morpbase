@@ -2894,7 +2894,10 @@ export function App() {
               )}
               <PromptPreview 
                 prompt={prompt}
-                onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
+                onSavePrompt={() => {
+                  setIsSavedPromptsDrawerOpen(true);
+                  setSavePromptOpenSignal(prev => prev + 1);
+                }}
                 onOpenSavedPrompts={() => setIsSavedPromptsDrawerOpen(true)}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
