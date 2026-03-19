@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import type { PromptAdditionEntry, SavedPrompt } from '../../types';
 import {
   createPrompt,
@@ -134,6 +134,7 @@ export function PromptLibrary({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const lastHandledOpenSignalRef = useRef(externalOpenSaveSignal);
   const [showAllLocalPrompts, setShowAllLocalPrompts] = useState(false);
   const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(initialKeepFieldsAfterSaving);
 
@@ -166,7 +167,8 @@ export function PromptLibrary({
   }, [authUser]);
 
   useEffect(() => {
-    if (externalOpenSaveSignal > 0) {
+    if (externalOpenSaveSignal > lastHandledOpenSignalRef.current) {
+      lastHandledOpenSignalRef.current = externalOpenSaveSignal;
       setIsSaveModalOpen(true);
     }
   }, [externalOpenSaveSignal]);
