@@ -540,24 +540,28 @@
 
 .prompt-preview-bottom-actions {
   margin-top: 24px;
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: 10px;
 }
 
 .prompt-preview-save-button,
 .prompt-preview-library-button,
 .prompt-preview-copy-button {
-  width: 100%;
-  padding: 14px 24px;
+  width: auto;
+  padding: 12px 16px;
   border-radius: 12px;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-height: 46px;
 }
 
 .prompt-preview-save-button {
+  flex: 0 0 auto;
   background: rgba(20, 20, 26, 0.96);
   border: 1px solid rgba(110, 86, 249, 0.3);
   color: #f3efff;
@@ -572,6 +576,7 @@
 }
 
 .prompt-preview-library-button {
+  flex: 0 0 auto;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #d7def7;
@@ -585,6 +590,7 @@
 }
 
 .prompt-preview-copy-button {
+  flex: 1 1 220px;
   background: linear-gradient(135deg, rgba(110, 86, 249, 1), rgba(127, 103, 255, 1));
   border: 1px solid rgba(110, 86, 249, 0.78);
   color: white;
@@ -601,6 +607,22 @@
 .prompt-preview-library-button:active,
 .prompt-preview-copy-button:active {
   transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .prompt-preview-bottom-actions {
+    display: grid;
+  }
+
+  .prompt-preview-save-button,
+  .prompt-preview-library-button,
+  .prompt-preview-copy-button {
+    width: 100%;
+  }
+
+  .prompt-preview-copy-button {
+    flex: initial;
+  }
 }
 
 /* Sectioned display styles */
