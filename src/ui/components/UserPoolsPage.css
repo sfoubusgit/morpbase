@@ -431,6 +431,35 @@
   padding: 0 14px 14px 14px;
 }
 
+.user-pools-territory-distinction {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.user-pools-territory-distinction-card {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-pools-territory-distinction-card strong {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f3f4f6;
+}
+
+.user-pools-territory-distinction-card span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #c9d1ee;
+}
+
 .user-pools-territory-editor-block {
   display: grid;
   gap: 8px;

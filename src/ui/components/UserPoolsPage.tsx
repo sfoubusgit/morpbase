@@ -1888,7 +1888,17 @@ export function UserPoolsPage({
                 <summary>Compose Territory</summary>
                 <div className="user-pools-territory-section-body">
                   <div className="user-pools-helper">
-                    A Territory is a focused workflow space built from Pools. Pools provide reusable source material; Territories turn selected Pool sections into a tighter workflow space.
+                    Territories are not another kind of Pool.
+                  </div>
+                  <div className="user-pools-territory-distinction">
+                    <div className="user-pools-territory-distinction-card">
+                      <strong>Pool</strong>
+                      <span>Reusable source material.</span>
+                    </div>
+                    <div className="user-pools-territory-distinction-card">
+                      <strong>Territory</strong>
+                      <span>Focused workflow space built from selected pool sections.</span>
+                    </div>
                   </div>
                   <div className="user-pools-territory-form">
                     <div className="user-pools-territory-editor-block">

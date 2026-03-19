@@ -2758,8 +2758,8 @@ export function App() {
                       </div>
                       <div className="territory-sidebar-helper">
                         {activeTerritory
-                          ? 'A Territory is your focused workflow space built from Pools.'
-                          : 'Optional: use a Territory when you want a tighter workflow space built from Pools.'}
+                          ? 'Pool = reusable source. Territory = focused workflow space built from selected pool sections.'
+                          : 'Optional: Pool = reusable source. Territory = focused workflow space built from selected pool sections.'}
                       </div>
                     </div>
                   </div>
