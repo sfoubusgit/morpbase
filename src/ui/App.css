@@ -872,6 +872,20 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   color: #f3f4f6;
 }
 
+.territory-sidebar-helper {
+  margin-top: 8px;
+  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(229, 231, 235, 0.78);
+}
+
+.territory-sidebar-mode-copy {
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(209, 250, 229, 0.84);
+}
+
 .territory-sidebar-panel {
   background: rgba(16, 185, 129, 0.08);
   border-color: rgba(16, 185, 129, 0.18);

@@ -2669,15 +2669,20 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
-              <div className="builder-sidebar-panel territory-sidebar-panel">
-                <div className="builder-sidebar-panel-header">
-                  <div>
-                    <div className="builder-sidebar-panel-label">Territory</div>
-                    <div className="builder-sidebar-panel-title">
-                      {activeTerritory ? activeTerritory.name : 'No active Territory'}
+                <div className="builder-sidebar-panel territory-sidebar-panel">
+                  <div className="builder-sidebar-panel-header">
+                    <div>
+                      <div className="builder-sidebar-panel-label">Territory</div>
+                      <div className="builder-sidebar-panel-title">
+                        {activeTerritory ? activeTerritory.name : 'No active Territory'}
+                      </div>
+                      <div className="territory-sidebar-helper">
+                        {activeTerritory
+                          ? 'A Territory is your focused workflow space built from Pools.'
+                          : 'Optional: use a Territory when you want a tighter workflow space built from Pools.'}
+                      </div>
                     </div>
                   </div>
-                </div>
                 {activeTerritory ? (
                   <>
                     <div className="territory-sidebar-sources">
@@ -2702,6 +2707,11 @@ export function App() {
                         <option value="full">Full Builder</option>
                       </select>
                     </label>
+                    <div className="territory-sidebar-mode-copy">
+                      {territoryNavigationMode === 'biased'
+                        ? 'Builder stays focused on Territory-relevant areas.'
+                        : 'Builder shows all areas while keeping this Territory active.'}
+                    </div>
                     {(activeTerritory.description?.trim() || activeTerritoryMappings.length > 0) && (
                       <details className="territory-banner-details">
                         <summary>
@@ -2767,7 +2777,7 @@ export function App() {
                 ) : territories.length > 0 ? (
                   <div className="territory-reactivate-bar territory-reactivate-bar-sidebar">
                     <div className="territory-reactivate-copy">
-                      <span className="territory-reactivate-text">Activate a saved Territory without leaving Builder.</span>
+                      <span className="territory-reactivate-text">Activate a saved focused workflow space without leaving Builder.</span>
                     </div>
                     <div className="territory-reactivate-actions">
                       <select
@@ -2790,7 +2800,7 @@ export function App() {
                     </div>
                   </div>
                 ) : (
-                  <div className="territory-reactivate-text">Create a Territory in User Pools to use Builder focus mode.</div>
+                  <div className="territory-reactivate-text">Create a Territory in User Pools when you want a focused workflow space built from Pools.</div>
                 )}
               </div>
               <FloatingPromptFragments

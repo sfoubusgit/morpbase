@@ -1887,6 +1887,9 @@ export function UserPoolsPage({
               <details className="user-pools-territory-section" open>
                 <summary>Compose Territory</summary>
                 <div className="user-pools-territory-section-body">
+                  <div className="user-pools-helper">
+                    A Territory is a focused workflow space built from Pools. Pools provide reusable source material; Territories turn selected Pool sections into a tighter workflow space.
+                  </div>
                   <div className="user-pools-territory-form">
                     <div className="user-pools-territory-editor-block">
                       <div className="user-pools-subsection-header">
@@ -1909,6 +1912,9 @@ export function UserPoolsPage({
                       <div className="user-pools-subsection-header">
                         <h4>Sources</h4>
                         <span className="user-pools-subsection-meta">{territorySources.length}</span>
+                      </div>
+                      <div className="user-pools-helper">
+                        Build a reusable focused workflow space from selected Pool sections.
                       </div>
                       {sectionedPools.length === 0 && (
                         <div className="user-pools-empty">

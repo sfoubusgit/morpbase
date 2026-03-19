@@ -674,7 +674,7 @@ export function PromptPreview({
               )}
               {activeTerritoryName && territoryFocusMode && (
                 <span className="prompt-preview-workflow-chip">
-                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
+                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Focused Builder' : 'Whole Builder'}</strong>
                 </span>
               )}
             </div>
