@@ -1733,13 +1733,29 @@ export function App() {
   }, [activeIdpPool, applyIdpSetToSession]);
 
   useEffect(() => {
-    if (!activeTerritory || activeIdpPool) return;
+    if (!activeTerritory) return;
+
+    const activeTerritoryPoolIds = new Set(activeTerritory.sources.map(source => source.poolId));
+    if (activeIdpPool && activeTerritoryPoolIds.has(activeIdpPool.id)) {
+      return;
+    }
+
     const candidatePool = activeTerritory.sources
       .map(source => territoryPools.find(pool => pool.id === source.poolId))
-      .find((pool): pool is Pool => Boolean(pool?.idpSets && pool.idpSets.length > 0));
-    if (!candidatePool) return;
-    applyIdpSetToSession(candidatePool, candidatePool.idpSets?.[0]?.id ?? null);
-  }, [activeTerritory, activeIdpPool, applyIdpSetToSession, territoryPools]);
+      .find((pool): pool is Pool => Boolean(
+        pool && (
+          (pool.idpSets && pool.idpSets.length > 0)
+          || (pool.initiativePhrases ?? []).some(phrase => phrase.autoApplyOnActivate)
+        )
+      ));
+
+    if (!candidatePool) {
+      replaceIdentityBaselineForPool(null, null);
+      return;
+    }
+
+    replaceIdentityBaselineForPool(candidatePool, candidatePool.idpSets?.[0]?.id ?? null);
+  }, [activeTerritory, activeIdpPool, replaceIdentityBaselineForPool, territoryPools]);
 
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
@@ -1778,6 +1794,58 @@ export function App() {
       return next;
     });
   }, []);
+
+  const replaceIdentityBaselineForPool = useCallback((pool: Pool | null, setId?: string | null) => {
+    const autoInitiativeEntries = pool
+      ? (pool.initiativePhrases ?? [])
+          .filter(phrase => phrase.autoApplyOnActivate)
+          .map(phrase => ({
+            id: `pool_default_${pool.id}_${phrase.id}`,
+            text: phrase.text.trim(),
+            weight: 1.0,
+            sourceType: 'pool-default' as const,
+          }))
+          .filter(entry => entry.text)
+      : [];
+
+    const resolvedSet = pool?.idpSets?.find(set => set.id === setId)
+      ?? pool?.idpSets?.[0]
+      ?? null;
+
+    const idpEntries = pool && resolvedSet
+      ? resolvedSet.phrases
+          .map(phrase => ({
+            id: `pool_idp_${pool.id}_${resolvedSet.id}_${phrase.id}`,
+            text: phrase.text.trim(),
+            weight: 1.0,
+            sourceType: 'idp-set' as const,
+          }))
+          .filter(entry => entry.text)
+      : [];
+
+    setPoolPromptItems(prev => {
+      const preserved = prev.filter(item => item.sourceType !== 'pool-default' && item.sourceType !== 'idp-set');
+      return [...preserved, ...idpEntries, ...autoInitiativeEntries];
+    });
+
+    setPoolOutputOverrides(prev => {
+      const next = new Map(prev);
+      poolPromptItems.forEach(item => {
+        if (item.sourceType === 'pool-default' || item.sourceType === 'idp-set') {
+          next.delete(item.id);
+        }
+      });
+      return next;
+    });
+
+    if (pool && resolvedSet) {
+      setActiveIdpPool(pool);
+      setActiveIdpSetId(resolvedSet.id);
+    } else {
+      setActiveIdpPool(null);
+      setActiveIdpSetId(null);
+    }
+  }, [poolPromptItems]);
 
   const handleClearPrompt = useCallback(() => {
     const hasSelections = selections.size > 0;
