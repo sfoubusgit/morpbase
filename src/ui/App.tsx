@@ -717,8 +717,6 @@ export function App() {
     return getTerritoryBiasedAdjacentNodeId(currentNodeId, 'next') !== null;
   }, [currentNodeId, getTerritoryBiasedAdjacentNodeId, usableNodeIds]);
   
-  // Track if user has explicitly clicked Next to reach the end
-  // This ensures completion only happens after explicit Next click, not just from selections
   const [hasReachedEndViaNext, setHasReachedEndViaNext] = useState<boolean>(initialBuilderSession?.hasReachedEndViaNext ?? false);
 
   // UI State: Random Prompt Generator Modal
@@ -806,22 +804,9 @@ export function App() {
     });
   }, [questionNodes.length, currentNodeId, currentNode?.id, attributeDefinitions.length]);
   
-  // Check if interview is complete
-  // CRITICAL RULE: Completion ONLY happens after user explicitly clicks Next button
-  // Completion requires ALL of:
-  // 1. There's a current node
-  // 2. There's no next node (reached the end)
-  // 3. User has explicitly clicked Next to reach this end state (hasReachedEndViaNext)
-  // 4. User has made at least one selection
-  // 
-  // This ensures:
-  // - Completion NEVER happens just from making selections
-  // - Completion ONLY happens after explicit Next button click
-  // - Next button is ALWAYS required to proceed
   const isComplete = currentNode && 
                      isCurrentNodeUsable &&
                      !hasNextUsableNode &&
-                     hasReachedEndViaNext &&
                      selections.size > 0;
   
   // Get attribute definitions for current question
@@ -911,12 +896,10 @@ export function App() {
    * - Default weight of 1.0 is automatically set (GLOBAL RULE - NO EXCEPTIONS)
    * - Inline weight slider appears in AttributeSelector (GLOBAL RULE - NO EXCEPTIONS)
    * 
-   * Does NOT automatically navigate - user must click Next button
    */
   const handleAttributeSelect = useCallback((attributeId: string) => {
     console.log('[App] Attribute selected:', attributeId);
     console.log('[App] Current node ID:', currentNodeId);
-    console.log('[App] Will NOT navigate - user must click Next button');
     setSelections(prev => {
       const next = new Map(prev);
       next.set(attributeId, {
@@ -944,8 +927,6 @@ export function App() {
       }
       return next;
     });
-    
-    // EXPLICITLY DO NOT NAVIGATE - user must click Next button
   }, [currentNodeId]);
 
   /**
@@ -2740,11 +2721,6 @@ export function App() {
                   onToggleGlobalWeights={setWeightsEnabledGlobal}
                   selectionOutputOverrides={selectionOutputOverrides}
                   onSetSelectionOutputOverride={handleSetSelectionOutputOverride}
-                  onNavigateBack={handleNavigateBack}
-                  onNavigateNext={handleNavigateNext}
-                  onNavigateSkip={handleNavigateSkip}
-                  canGoBack={navigationHistory.length > 1}
-                  canGoNext={true}
                   sectionTitle={currentBuilderAreaLabel}
                   flowHint={currentBuilderFlowHint}
                   territoryContext={currentTerritoryContext}
@@ -3026,9 +3002,6 @@ export function App() {
 
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">Navigating the Interface</h3>
-                  <p>
-                    <strong>Next Button:</strong> Move through the Builder in order, starting with the main image definition and then moving into refinement.
-                  </p>
                   <p>
                     <strong>Category Sidebar:</strong> Jump directly to any category or subcategory by clicking on it in the left sidebar.
                     The sidebar is grouped into Define, Refine, and Finish so it is easier to see what matters first.

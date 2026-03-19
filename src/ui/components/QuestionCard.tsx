@@ -20,7 +20,6 @@ import { useEffect, useMemo, useState } from 'react';
 import './QuestionCard.css';
 import { AttributeSelector } from './AttributeSelector';
 import { ModifierControls } from './ModifierControls';
-import { NavigationButtons } from './NavigationButtons';
 
 // TODO: Import types when ready
 // import { InterviewNode } from '../types';
@@ -68,21 +67,6 @@ interface QuestionCardProps {
   /** Handler for output override changes */
   onSetSelectionOutputOverride?: (attributeId: string, value: string | null) => void;
   
-  /** Handler for back navigation */
-  onNavigateBack: () => void;
-  
-  /** Handler for next navigation */
-  onNavigateNext: () => void;
-  
-  /** Handler for skip navigation (optional) */
-  onNavigateSkip?: () => void;
-  
-  /** Whether back button should be enabled */
-  canGoBack: boolean;
-  
-  /** Whether next button should be enabled */
-  canGoNext: boolean;
-
   /** Territory context for the current Builder step */
   territoryContext?: {
     territoryName: string;
@@ -139,11 +123,6 @@ export function QuestionCard({
   onToggleGlobalWeights,
   selectionOutputOverrides,
   onSetSelectionOutputOverride,
-  onNavigateBack,
-  onNavigateNext,
-  onNavigateSkip,
-  canGoBack,
-  canGoNext,
   territoryContext = null,
   sectionTitle,
   flowHint,
@@ -414,18 +393,6 @@ export function QuestionCard({
           There are NO external, floating, or global slider controls.
           The inline weight slider in AttributeSelector is the ONLY weight control mechanism.
         */}
-      </div>
-      
-      <div className="question-card-navigation">
-        <NavigationButtons
-          canGoBack={canGoBack}
-          canGoNext={canGoNext}
-          currentStep={currentStep}
-          totalSteps={null}
-          onNavigateBack={onNavigateBack}
-          onNavigateNext={onNavigateNext}
-          onNavigateSkip={onNavigateSkip}
-        />
       </div>
     </div>
   );
