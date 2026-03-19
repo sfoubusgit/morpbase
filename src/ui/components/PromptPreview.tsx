@@ -32,6 +32,7 @@ export type PromptExportMode = 'structured' | 'clean' | 'structured_with_negativ
 interface PromptPreviewProps {
   prompt: any | null;
   onCopy?: () => void;
+  onSavePrompt?: () => void;
   customAdditions?: string[];
   positionedAdditions?: PromptAdditionEntry[];
   activeModeLabel?: string | null;
@@ -267,6 +268,7 @@ function formatStructuredPrompt(prompt: any, additionsText: string, positionedAd
 export function PromptPreview({
   prompt,
   onCopy,
+  onSavePrompt,
   customAdditions = [],
   positionedAdditions = [],
   activeModeLabel = null,
@@ -689,7 +691,16 @@ export function PromptPreview({
       </div>
 
       {(currentPositive || currentNegative) && !isEditMode && (
-        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+        <div className="prompt-preview-bottom-actions">
+          {onSavePrompt && (
+            <button
+              className="prompt-preview-save-button"
+              onClick={onSavePrompt}
+              type="button"
+            >
+              Save Prompt
+            </button>
+          )}
           <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
             {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}
           </button>

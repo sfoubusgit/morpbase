@@ -2669,15 +2669,6 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
-              <div className="builder-sidebar-quick-actions">
-                <button
-                  type="button"
-                  className="builder-sidebar-primary-action"
-                  onClick={() => setSavePromptOpenSignal(prev => prev + 1)}
-                >
-                  Save Prompt
-                </button>
-              </div>
               <div className="builder-sidebar-panel territory-sidebar-panel">
                 <div className="builder-sidebar-panel-header">
                   <div>
@@ -2811,6 +2802,7 @@ export function App() {
               />
               <PromptPreview 
                 prompt={prompt}
+                onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
                 activeModeLabel={activeBuilderModeConfig.label}

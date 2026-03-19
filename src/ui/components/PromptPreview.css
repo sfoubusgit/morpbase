@@ -497,19 +497,41 @@
   color: #B0B0C3;
 }
 
+.prompt-preview-bottom-actions {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
+}
+
+.prompt-preview-save-button,
 .prompt-preview-copy-button {
   width: 100%;
-  margin-top: 24px;
   padding: 14px 24px;
-  background: #6E56F9;
-  border: none;
   border-radius: 12px;
-  color: white;
   font-size: 15px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+.prompt-preview-save-button {
+  background: rgba(20, 20, 26, 0.95);
+  border: 1px solid rgba(110, 86, 249, 0.38);
+  color: #f4f7ff;
+}
+
+.prompt-preview-save-button:hover {
+  background: rgba(28, 28, 36, 0.98);
+  border-color: rgba(110, 86, 249, 0.65);
+  box-shadow: 0 4px 16px rgba(110, 86, 249, 0.2);
+  transform: translateY(-1px);
+}
+
+.prompt-preview-copy-button {
+  background: #6E56F9;
+  border: none;
+  color: white;
 }
 
 .prompt-preview-copy-button:hover {
@@ -518,6 +540,7 @@
   transform: translateY(-2px);
 }
 
+.prompt-preview-save-button:active,
 .prompt-preview-copy-button:active {
   transform: translateY(0);
 }
