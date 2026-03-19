@@ -2883,13 +2883,15 @@ export function App() {
                   <div className="territory-reactivate-text">Create a Territory in User Pools when you want a focused workflow space built from Pools.</div>
                 )}
               </div>
-              <FloatingPromptFragments
-                fragments={availablePromptFragments}
-                selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
-                onToggleFragment={handleTogglePromptFragment}
-                onAddCustomFragment={handleAddCustomPromptFragment}
-                onRemoveCustomFragment={handleRemoveCustomPromptFragment}
-              />
+              {!isSavedPromptsDrawerOpen && (
+                <FloatingPromptFragments
+                  fragments={availablePromptFragments}
+                  selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
+                  onToggleFragment={handleTogglePromptFragment}
+                  onAddCustomFragment={handleAddCustomPromptFragment}
+                  onRemoveCustomFragment={handleRemoveCustomPromptFragment}
+                />
+              )}
               <PromptPreview 
                 prompt={prompt}
                 onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
