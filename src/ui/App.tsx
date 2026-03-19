@@ -2809,32 +2809,6 @@ export function App() {
                 onAddCustomFragment={handleAddCustomPromptFragment}
                 onRemoveCustomFragment={handleRemoveCustomPromptFragment}
               />
-              <details className="builder-sidebar-panel builder-guidance-sidebar">
-                <summary>
-                  <span className="builder-guidance-heading">
-                    <span className="builder-guidance-title">Builder Guide</span>
-                    <span className="builder-guidance-summary">Choose left, build center, copy right</span>
-                  </span>
-                  <span className="builder-guidance-toggle" aria-hidden="true">Open</span>
-                </summary>
-                <div className="builder-guidance-body">
-                  <p className="builder-guidance-intro">
-                    Select prompt elements by category and MorpBase assembles the final prompt for you. The product is gradually aligning around shared creative layers like subjects, environment, lighting, mood, style, and effects.
-                  </p>
-                  <div className="builder-guidance-steps">
-                    <span className="builder-guidance-label">How it works:</span>
-                    <span>1. Choose from the left</span>
-                    <span>2. Build in the center</span>
-                    <span>3. Edit text or adjust weight on selected elements</span>
-                    <span>4. Copy on the right</span>
-                  </div>
-                  {activeTerritory && (
-                    <div className="builder-guidance-territory-note">
-                      Territory focus is active. In {territoryNavigationMode === 'biased' ? 'Territory-biased' : 'Full Builder'} mode, the sidebar {territoryNavigationMode === 'biased' ? 'is limited to Territory-mapped Builder areas.' : 'shows the full Builder while still highlighting Territory-relevant areas.'}
-                    </div>
-                  )}
-                </div>
-              </details>
               <PromptPreview 
                 prompt={prompt}
                 customAdditions={poolAdditionTexts}
