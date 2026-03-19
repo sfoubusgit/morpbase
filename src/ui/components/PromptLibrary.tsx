@@ -26,6 +26,7 @@ type PromptLibraryProps = {
   showLocalPrompts?: boolean;
   hideSaveBar?: boolean;
   externalOpenSaveSignal?: number;
+  renderLibraryShell?: boolean;
 };
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
@@ -112,6 +113,7 @@ export function PromptLibrary({
   showLocalPrompts = true,
   hideSaveBar = false,
   externalOpenSaveSignal = 0,
+  renderLibraryShell = true,
 }: PromptLibraryProps) {
   const initialKeepFieldsAfterSaving = (() => {
     try {
@@ -419,154 +421,158 @@ export function PromptLibrary({
   };
 
   return (
-    <div className="prompt-library">
-      <div className="prompt-library-header">
-        <h3>Saved Prompts</h3>
-        {manualUrl && (
-          <a
-            className="prompt-library-manual-link"
-            href={`${manualUrl}#prompt-library`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Learn more
-          </a>
-        )}
-        <span className="prompt-library-count">{prompts.length}</span>
-      </div>
-      {!hideSaveBar && (
-        <div className="prompt-library-save-bar">
-          <div className="prompt-library-save-copy">
-            Save the current prompt with a name, tags, and optional metadata.
+    <>
+      {renderLibraryShell && (
+        <div className="prompt-library">
+          <div className="prompt-library-header">
+            <h3>Saved Prompts</h3>
+            {manualUrl && (
+              <a
+                className="prompt-library-manual-link"
+                href={`${manualUrl}#prompt-library`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Learn more
+              </a>
+            )}
+            <span className="prompt-library-count">{prompts.length}</span>
           </div>
-          <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
-            Save Prompt
-          </button>
+          {!hideSaveBar && (
+            <div className="prompt-library-save-bar">
+              <div className="prompt-library-save-copy">
+                Save the current prompt with a name, tags, and optional metadata.
+              </div>
+              <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
+                Save Prompt
+              </button>
+            </div>
+          )}
+          <details className="prompt-library-io">
+            <summary>Import / Export</summary>
+            <textarea
+              rows={5}
+              placeholder="Prompts JSON import/export"
+              value={libraryJson}
+              onChange={event => setLibraryJson(event.target.value)}
+            />
+            <div className="prompt-library-actions">
+              <button type="button" onClick={handleExport}>
+                Export Prompts
+              </button>
+              <button type="button" onClick={handleImport}>
+                Import Prompts
+              </button>
+              <button type="button" onClick={handleDownload}>
+                Download Prompts
+              </button>
+            </div>
+          </details>
+          {error && <div className="prompt-library-error">{error}</div>}
+          {message && <div className="prompt-library-message">{message}</div>}
+          <div className="prompt-library-list">
+            {showLocalPrompts && (
+              <div className="prompt-library-section">
+                <div className="prompt-library-section-header">
+                  <div className="prompt-library-section-title">Local Prompts</div>
+                  {hiddenLocalPromptCount > 0 && (
+                    <button
+                      type="button"
+                      className="prompt-library-section-toggle"
+                      onClick={() => setShowAllLocalPrompts(prev => !prev)}
+                    >
+                      {showAllLocalPrompts
+                        ? 'Show recent only'
+                        : `Show ${hiddenLocalPromptCount} older`}
+                    </button>
+                  )}
+                </div>
+                {localPrompts.length === 0 ? (
+                  <div className="prompt-library-empty">No local prompts yet.</div>
+                ) : (
+                  visibleLocalPrompts.map(item => (
+                    <div key={item.id} className="prompt-library-item">
+                      <div className="prompt-library-item-main">
+                        <div className="prompt-library-item-title">{item.name}</div>
+                        <div className="prompt-library-item-text">{item.positive}</div>
+                        {(item.model || item.purpose || item.usedAt) && (
+                          <div className="prompt-library-item-meta">
+                            {item.model && <span>Model: {item.model}</span>}
+                            {item.purpose && <span>Purpose: {item.purpose}</span>}
+                            {item.usedAt && <span>Used: {item.usedAt}</span>}
+                          </div>
+                        )}
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                        )}
+                      </div>
+                      <div className="prompt-library-item-actions">
+                        <button type="button" onClick={() => handleCopy(item)}>
+                          Copy
+                        </button>
+                        <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
+                          Add to Prompt
+                        </button>
+                        <button type="button" onClick={() => handleSaveLocalToCloud(item)}>
+                          Save to Cloud
+                        </button>
+                        <button type="button" onClick={() => handleDeleteLocal(item.id)}>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+            {showCloudPrompts && (
+              <div className="prompt-library-section">
+                <div className="prompt-library-section-title">Cloud Prompts</div>
+                {!authUser ? (
+                  <div className="prompt-library-empty">Log in to access your cloud prompts.</div>
+                ) : !isPro ? (
+                  <div className="prompt-library-empty">Upgrade to Pro to unlock cloud prompts.</div>
+                ) : prompts.length === 0 ? (
+                  <div className="prompt-library-empty">No cloud prompts yet.</div>
+                ) : (
+                  prompts.map(item => (
+                    <div key={item.id} className="prompt-library-item">
+                      <div className="prompt-library-item-main">
+                        <div className="prompt-library-item-title">{item.name}</div>
+                        <div className="prompt-library-item-text">{item.positive}</div>
+                        {(item.model || item.purpose || item.usedAt) && (
+                          <div className="prompt-library-item-meta">
+                            {item.model && <span>Model: {item.model}</span>}
+                            {item.purpose && <span>Purpose: {item.purpose}</span>}
+                            {item.usedAt && <span>Used: {item.usedAt}</span>}
+                          </div>
+                        )}
+                        {item.tags && item.tags.length > 0 && (
+                          <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                        )}
+                      </div>
+                      <div className="prompt-library-item-actions">
+                        <button type="button" onClick={() => handleCopy(item)}>
+                          Copy
+                        </button>
+                        <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
+                          Add to Prompt
+                        </button>
+                        <button type="button" onClick={async () => {
+                          await deletePrompt(item.id);
+                          await refresh();
+                        }}>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
-      <details className="prompt-library-io">
-        <summary>Import / Export</summary>
-        <textarea
-          rows={5}
-          placeholder="Prompts JSON import/export"
-          value={libraryJson}
-          onChange={event => setLibraryJson(event.target.value)}
-        />
-        <div className="prompt-library-actions">
-          <button type="button" onClick={handleExport}>
-            Export Prompts
-          </button>
-          <button type="button" onClick={handleImport}>
-            Import Prompts
-          </button>
-          <button type="button" onClick={handleDownload}>
-            Download Prompts
-          </button>
-        </div>
-      </details>
-      {error && <div className="prompt-library-error">{error}</div>}
-      {message && <div className="prompt-library-message">{message}</div>}
-      <div className="prompt-library-list">
-        {showLocalPrompts && (
-          <div className="prompt-library-section">
-            <div className="prompt-library-section-header">
-              <div className="prompt-library-section-title">Local Prompts</div>
-              {hiddenLocalPromptCount > 0 && (
-                <button
-                  type="button"
-                  className="prompt-library-section-toggle"
-                  onClick={() => setShowAllLocalPrompts(prev => !prev)}
-                >
-                  {showAllLocalPrompts
-                    ? 'Show recent only'
-                    : `Show ${hiddenLocalPromptCount} older`}
-                </button>
-              )}
-            </div>
-            {localPrompts.length === 0 ? (
-              <div className="prompt-library-empty">No local prompts yet.</div>
-            ) : (
-              visibleLocalPrompts.map(item => (
-                <div key={item.id} className="prompt-library-item">
-                  <div className="prompt-library-item-main">
-                    <div className="prompt-library-item-title">{item.name}</div>
-                    <div className="prompt-library-item-text">{item.positive}</div>
-                    {(item.model || item.purpose || item.usedAt) && (
-                      <div className="prompt-library-item-meta">
-                        {item.model && <span>Model: {item.model}</span>}
-                        {item.purpose && <span>Purpose: {item.purpose}</span>}
-                        {item.usedAt && <span>Used: {item.usedAt}</span>}
-                      </div>
-                    )}
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
-                    )}
-                  </div>
-                  <div className="prompt-library-item-actions">
-                    <button type="button" onClick={() => handleCopy(item)}>
-                      Copy
-                    </button>
-                    <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
-                      Add to Prompt
-                    </button>
-                    <button type="button" onClick={() => handleSaveLocalToCloud(item)}>
-                      Save to Cloud
-                    </button>
-                    <button type="button" onClick={() => handleDeleteLocal(item.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-        {showCloudPrompts && (
-          <div className="prompt-library-section">
-            <div className="prompt-library-section-title">Cloud Prompts</div>
-            {!authUser ? (
-              <div className="prompt-library-empty">Log in to access your cloud prompts.</div>
-            ) : !isPro ? (
-              <div className="prompt-library-empty">Upgrade to Pro to unlock cloud prompts.</div>
-            ) : prompts.length === 0 ? (
-              <div className="prompt-library-empty">No cloud prompts yet.</div>
-            ) : (
-              prompts.map(item => (
-                <div key={item.id} className="prompt-library-item">
-                  <div className="prompt-library-item-main">
-                    <div className="prompt-library-item-title">{item.name}</div>
-                    <div className="prompt-library-item-text">{item.positive}</div>
-                    {(item.model || item.purpose || item.usedAt) && (
-                      <div className="prompt-library-item-meta">
-                        {item.model && <span>Model: {item.model}</span>}
-                        {item.purpose && <span>Purpose: {item.purpose}</span>}
-                        {item.usedAt && <span>Used: {item.usedAt}</span>}
-                      </div>
-                    )}
-                    {item.tags && item.tags.length > 0 && (
-                      <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
-                    )}
-                  </div>
-                  <div className="prompt-library-item-actions">
-                    <button type="button" onClick={() => handleCopy(item)}>
-                      Copy
-                    </button>
-                    <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
-                      Add to Prompt
-                    </button>
-                    <button type="button" onClick={async () => {
-                      await deletePrompt(item.id);
-                      await refresh();
-                    }}>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
       <Modal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
@@ -622,6 +628,6 @@ export function PromptLibrary({
           </div>
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

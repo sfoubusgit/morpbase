@@ -2894,10 +2894,7 @@ export function App() {
               )}
               <PromptPreview 
                 prompt={prompt}
-                onSavePrompt={() => {
-                  setIsSavedPromptsDrawerOpen(true);
-                  setSavePromptOpenSignal(prev => prev + 1);
-                }}
+                onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
                 onOpenSavedPrompts={() => setIsSavedPromptsDrawerOpen(true)}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
@@ -2914,6 +2911,22 @@ export function App() {
                 onClear={handleClearPrompt}
                 onUndoClear={handleUndoClearPrompt}
                 canUndoClear={Boolean(clearUndoState)}
+              />
+              <PromptLibrary
+                prompt={prompt}
+                customAdditions={poolAdditionTexts}
+                positionedAdditions={promptAdditionEntries}
+                editedPositive={editedPositiveOutput}
+                editedNegative={editedNegativeOutput}
+                onAddToPrompt={handleAddPoolItem}
+                authUser={authUser}
+                isPro={isPro}
+                manualUrl={manualUrl}
+                showCloudPrompts={false}
+                showLocalPrompts={false}
+                hideSaveBar={true}
+                externalOpenSaveSignal={savePromptOpenSignal}
+                renderLibraryShell={false}
               />
             </div>
 
@@ -2952,7 +2965,6 @@ export function App() {
                     showCloudPrompts={false}
                     showLocalPrompts={true}
                     hideSaveBar={true}
-                    externalOpenSaveSignal={savePromptOpenSignal}
                   />
                 </div>
               </div>
