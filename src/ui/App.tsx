@@ -390,6 +390,7 @@ export function App() {
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderTerritoryPickerId, setBuilderTerritoryPickerId] = useState<string>('');
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
+  const [isSavedPromptsDrawerOpen, setIsSavedPromptsDrawerOpen] = useState(false);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
   const lastTerritoryRepositionKeyRef = useRef<string>('');
@@ -2892,6 +2893,7 @@ export function App() {
               <PromptPreview 
                 prompt={prompt}
                 onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
+                onOpenSavedPrompts={() => setIsSavedPromptsDrawerOpen(true)}
                 customAdditions={poolAdditionTexts}
                 positionedAdditions={promptAdditionEntries}
                 activeModeLabel={activeBuilderModeConfig.label}
@@ -2908,22 +2910,48 @@ export function App() {
                 onUndoClear={handleUndoClearPrompt}
                 canUndoClear={Boolean(clearUndoState)}
               />
-              <PromptLibrary
-                prompt={prompt}
-                customAdditions={poolAdditionTexts}
-                positionedAdditions={promptAdditionEntries}
-                editedPositive={editedPositiveOutput}
-                editedNegative={editedNegativeOutput}
-                onAddToPrompt={handleAddPoolItem}
-                authUser={authUser}
-                isPro={isPro}
-                manualUrl={manualUrl}
-                showCloudPrompts={false}
-                showLocalPrompts={true}
-                hideSaveBar={true}
-                externalOpenSaveSignal={savePromptOpenSignal}
-              />
             </div>
+
+            {isSavedPromptsDrawerOpen && (
+              <div className="saved-prompts-drawer-shell" role="dialog" aria-modal="true" aria-label="Saved Prompts">
+                <button
+                  type="button"
+                  className="saved-prompts-drawer-backdrop"
+                  onClick={() => setIsSavedPromptsDrawerOpen(false)}
+                  aria-label="Close saved prompts"
+                />
+                <div className="saved-prompts-drawer">
+                  <div className="saved-prompts-drawer-header">
+                    <div>
+                      <div className="saved-prompts-drawer-label">Prompt Archive</div>
+                      <div className="saved-prompts-drawer-title">Saved Prompts</div>
+                    </div>
+                    <button
+                      type="button"
+                      className="saved-prompts-drawer-close"
+                      onClick={() => setIsSavedPromptsDrawerOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <PromptLibrary
+                    prompt={prompt}
+                    customAdditions={poolAdditionTexts}
+                    positionedAdditions={promptAdditionEntries}
+                    editedPositive={editedPositiveOutput}
+                    editedNegative={editedNegativeOutput}
+                    onAddToPrompt={handleAddPoolItem}
+                    authUser={authUser}
+                    isPro={isPro}
+                    manualUrl={manualUrl}
+                    showCloudPrompts={false}
+                    showLocalPrompts={true}
+                    hideSaveBar={true}
+                    externalOpenSaveSignal={savePromptOpenSignal}
+                  />
+                </div>
+              </div>
+            )}
             
             {/* Random Prompt Generator Modal */}
             <Modal

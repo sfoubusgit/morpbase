@@ -33,6 +33,7 @@ interface PromptPreviewProps {
   prompt: any | null;
   onCopy?: () => void;
   onSavePrompt?: () => void;
+  onOpenSavedPrompts?: () => void;
   customAdditions?: string[];
   positionedAdditions?: PromptAdditionEntry[];
   activeModeLabel?: string | null;
@@ -269,6 +270,7 @@ export function PromptPreview({
   prompt,
   onCopy,
   onSavePrompt,
+  onOpenSavedPrompts,
   customAdditions = [],
   positionedAdditions = [],
   activeModeLabel = null,
@@ -642,6 +644,15 @@ export function PromptPreview({
                 type="button"
               >
                 Save Prompt
+              </button>
+            )}
+            {onOpenSavedPrompts && (
+              <button
+                className="prompt-preview-library-button"
+                onClick={onOpenSavedPrompts}
+                type="button"
+              >
+                Open Saved Prompts
               </button>
             )}
             <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">

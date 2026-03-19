@@ -538,6 +538,7 @@
 }
 
 .prompt-preview-save-button,
+.prompt-preview-library-button,
 .prompt-preview-copy-button {
   width: 100%;
   padding: 14px 24px;
@@ -562,6 +563,19 @@
   transform: translateY(-1px);
 }
 
+.prompt-preview-library-button {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+}
+
+.prompt-preview-library-button:hover {
+  background: rgba(28, 28, 36, 0.98);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
 .prompt-preview-copy-button {
   background: #6E56F9;
   border: none;
@@ -575,6 +589,7 @@
 }
 
 .prompt-preview-save-button:active,
+.prompt-preview-library-button:active,
 .prompt-preview-copy-button:active {
   transform: translateY(0);
 }
