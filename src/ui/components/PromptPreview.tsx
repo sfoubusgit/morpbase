@@ -637,27 +637,31 @@ export function PromptPreview({
 
         {(currentPositive || currentNegative) && !isEditMode && (
           <div className="prompt-preview-bottom-actions">
-            {onSavePrompt && (
-              <button
-                className="prompt-preview-save-button"
-                onClick={onSavePrompt}
-                type="button"
-              >
-                Save Prompt
-              </button>
-            )}
-            {onOpenSavedPrompts && (
-              <button
-                className="prompt-preview-library-button"
-                onClick={onOpenSavedPrompts}
-                type="button"
-              >
-                Open Saved Prompts
-              </button>
-            )}
             <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
               {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}
             </button>
+            {(onSavePrompt || onOpenSavedPrompts) && (
+              <div className="prompt-preview-secondary-actions">
+                {onSavePrompt && (
+                  <button
+                    className="prompt-preview-save-button"
+                    onClick={onSavePrompt}
+                    type="button"
+                  >
+                    Save Prompt
+                  </button>
+                )}
+                {onOpenSavedPrompts && (
+                  <button
+                    className="prompt-preview-library-button"
+                    onClick={onOpenSavedPrompts}
+                    type="button"
+                  >
+                    Open Saved Prompts
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
