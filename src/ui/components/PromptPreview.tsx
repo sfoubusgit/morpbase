@@ -450,66 +450,6 @@ export function PromptPreview({
 
   return (
     <div className="prompt-preview-stack">
-      {hasWorkflowContext && (
-        <div className="prompt-workflow-panel">
-          <div className="prompt-workflow-panel-title">Workflow Context</div>
-          <div className="prompt-preview-workflow-block">
-            <div className="prompt-preview-workflow-title">Active Workflow</div>
-            <div className="prompt-preview-workflow-chips">
-              {activeModeLabel && (
-                <span className="prompt-preview-workflow-chip">
-                  Mode: <strong>{activeModeLabel}</strong>
-                </span>
-              )}
-              {activePoolNames.length > 0 && (
-                <span className="prompt-preview-workflow-chip">
-                  Pools: <strong>{activePoolNames.join(', ')}</strong>
-                </span>
-              )}
-              {activeTerritoryName && (
-                <span className="prompt-preview-workflow-chip">
-                  Territory: <strong>{activeTerritoryName}</strong>
-                </span>
-              )}
-              {activeTerritoryName && territoryFocusMode && (
-                <span className="prompt-preview-workflow-chip">
-                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
-                </span>
-              )}
-            </div>
-          </div>
-
-          {availableIdpSets.length > 0 && (
-            <div className="prompt-preview-idp-block">
-              <div className="prompt-preview-idp-header">
-                <div>
-                  <div className="prompt-preview-idp-title">Active IDP Set</div>
-                  <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
-                </div>
-                <select
-                  className="prompt-preview-idp-select"
-                  value={activeIdpSet?.id ?? ''}
-                  onChange={event => onSelectIdpSet?.(event.target.value)}
-                >
-                  {availableIdpSets.map(set => (
-                    <option key={set.id} value={set.id}>
-                      {set.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {activeIdpSet && (
-                <div className="prompt-preview-idp-phrases">
-                  {activeIdpSet.phrases.map(phrase => (
-                    <div key={phrase.id} className="prompt-preview-idp-phrase">{phrase.text}</div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="prompt-preview">
         <div className="prompt-preview-header">
           <div className="prompt-preview-heading">
@@ -710,6 +650,66 @@ export function PromptPreview({
           </div>
         )}
       </div>
+
+      {hasWorkflowContext && (
+        <div className="prompt-workflow-panel">
+          <div className="prompt-workflow-panel-title">Workflow Context</div>
+          <div className="prompt-preview-workflow-block">
+            <div className="prompt-preview-workflow-title">Active Workflow</div>
+            <div className="prompt-preview-workflow-chips">
+              {activeModeLabel && (
+                <span className="prompt-preview-workflow-chip">
+                  Mode: <strong>{activeModeLabel}</strong>
+                </span>
+              )}
+              {activePoolNames.length > 0 && (
+                <span className="prompt-preview-workflow-chip">
+                  Pools: <strong>{activePoolNames.join(', ')}</strong>
+                </span>
+              )}
+              {activeTerritoryName && (
+                <span className="prompt-preview-workflow-chip">
+                  Territory: <strong>{activeTerritoryName}</strong>
+                </span>
+              )}
+              {activeTerritoryName && territoryFocusMode && (
+                <span className="prompt-preview-workflow-chip">
+                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Territory-biased' : 'Whole Builder'}</strong>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {availableIdpSets.length > 0 && (
+            <div className="prompt-preview-idp-block">
+              <div className="prompt-preview-idp-header">
+                <div>
+                  <div className="prompt-preview-idp-title">Active IDP Set</div>
+                  <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
+                </div>
+                <select
+                  className="prompt-preview-idp-select"
+                  value={activeIdpSet?.id ?? ''}
+                  onChange={event => onSelectIdpSet?.(event.target.value)}
+                >
+                  {availableIdpSets.map(set => (
+                    <option key={set.id} value={set.id}>
+                      {set.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {activeIdpSet && (
+                <div className="prompt-preview-idp-phrases">
+                  {activeIdpSet.phrases.map(phrase => (
+                    <div key={phrase.id} className="prompt-preview-idp-phrase">{phrase.text}</div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
