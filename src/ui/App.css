@@ -276,20 +276,20 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   max-width: 1520px;
   margin: 0 auto;
   padding: 32px;
-  min-height: 0;
-  height: 100vh;
-  overflow: hidden;
+  min-height: calc(100vh - 72px);
+  height: auto;
+  overflow: visible;
 }
 
 .app-sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  position: sticky;
-  top: 32px;
-  align-self: start;
-  max-height: calc(100vh - 64px);
-  overflow-y: auto;
+  position: relative;
+  top: auto;
+  align-self: stretch;
+  max-height: none;
+  overflow: visible;
 }
 
 .builder-sidebar-quick-actions {
@@ -519,24 +519,6 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 .app-sidebar-actions .app-tutorial-launch-button {
   width: 100%;
   justify-content: center;
-}
-
-/* Scrollbar styling for sidebar */
-.app-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.app-sidebar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.app-sidebar::-webkit-scrollbar-thumb {
-  background: rgba(110, 86, 249, 0.3);
-  border-radius: 3px;
-}
-
-.app-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(110, 86, 249, 0.5);
 }
 
 .app-main {
