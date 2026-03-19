@@ -368,6 +368,24 @@
   gap: 6px;
 }
 
+.prompt-library-item-set-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #cbd5f5;
+  font-size: 11px;
+}
+
+.prompt-library-item-set-selector select {
+  min-width: 110px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 20, 26, 0.95);
+  color: #e5e7eb;
+  font-size: 11px;
+}
+
 .prompt-library-item-actions button {
   padding: 6px 10px;
   border-radius: 999px;

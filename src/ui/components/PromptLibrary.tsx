@@ -492,6 +492,17 @@ export function PromptLibrary({
     }
   };
 
+  const handleMovePromptToSet = async (promptId: string, setId: string) => {
+    setError(null);
+    try {
+      await assignPromptToSet(promptId, setId || null);
+      await refreshPromptSets();
+      setMessage(setId ? 'Prompt moved to set.' : 'Prompt removed from set.');
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to move prompt.');
+    }
+  };
+
   const handleExport = async () => {
     if (!authUser || !isPro) {
       setError('Upgrade to Pro to export prompts.');
@@ -758,6 +769,20 @@ export function PromptLibrary({
                         )}
                       </div>
                       <div className="prompt-library-item-actions">
+                        <label className="prompt-library-item-set-selector">
+                          <span>Set</span>
+                          <select
+                            value={promptSetAssignments[item.id] ?? ''}
+                            onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
+                          >
+                            <option value="">No set</option>
+                            {promptSetOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
                         <button type="button" onClick={() => handleCopy(item)}>
                           Copy
                         </button>
@@ -808,6 +833,20 @@ export function PromptLibrary({
                         )}
                       </div>
                       <div className="prompt-library-item-actions">
+                        <label className="prompt-library-item-set-selector">
+                          <span>Set</span>
+                          <select
+                            value={promptSetAssignments[item.id] ?? ''}
+                            onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
+                          >
+                            <option value="">No set</option>
+                            {promptSetOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
                         <button type="button" onClick={() => handleCopy(item)}>
                           Copy
                         </button>
