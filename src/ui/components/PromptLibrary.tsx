@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import type { PromptAdditionEntry, SavedPrompt } from '../../types';
 import {
   createPrompt,
@@ -30,6 +30,7 @@ type PromptLibraryProps = {
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
 const KEEP_SAVE_FIELDS_KEY = 'promptgen:keep_save_fields_after_saving';
+const SAVE_FORM_DRAFT_KEY = 'promptgen:save_prompt_form_draft';
 
 const loadLocalPrompts = (): SavedPrompt[] => {
   try {
@@ -110,6 +111,7 @@ export function PromptLibrary({
       return false;
     }
   });
+  const hydrateDraftRef = useRef(false);
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
@@ -141,12 +143,61 @@ export function PromptLibrary({
   }, [externalOpenSaveSignal]);
 
   useEffect(() => {
+    if (hydrateDraftRef.current || !keepFieldsAfterSaving) return;
+    hydrateDraftRef.current = true;
+    try {
+      const raw = window.localStorage.getItem(SAVE_FORM_DRAFT_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        name?: string;
+        tags?: string;
+        model?: string;
+        purpose?: string;
+        note?: string;
+      };
+      setName(parsed.name ?? '');
+      setTags(parsed.tags ?? '');
+      setModel(parsed.model ?? '');
+      setPurpose(parsed.purpose ?? '');
+      setNote(parsed.note ?? '');
+    } catch {
+      // ignore storage errors
+    }
+  }, [keepFieldsAfterSaving]);
+
+  useEffect(() => {
     try {
       window.localStorage.setItem(KEEP_SAVE_FIELDS_KEY, keepFieldsAfterSaving ? '1' : '0');
     } catch {
       // ignore storage errors
     }
   }, [keepFieldsAfterSaving]);
+
+  useEffect(() => {
+    if (!keepFieldsAfterSaving) {
+      try {
+        window.localStorage.removeItem(SAVE_FORM_DRAFT_KEY);
+      } catch {
+        // ignore storage errors
+      }
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(
+        SAVE_FORM_DRAFT_KEY,
+        JSON.stringify({
+          name,
+          tags,
+          model,
+          purpose,
+          note,
+        })
+      );
+    } catch {
+      // ignore storage errors
+    }
+  }, [keepFieldsAfterSaving, name, tags, model, purpose, note]);
 
   const parseTags = (raw: string) =>
     raw
@@ -160,6 +211,11 @@ export function PromptLibrary({
     setModel('');
     setPurpose('');
     setNote('');
+    try {
+      window.localStorage.removeItem(SAVE_FORM_DRAFT_KEY);
+    } catch {
+      // ignore storage errors
+    }
   };
 
   const handleSave = async () => {

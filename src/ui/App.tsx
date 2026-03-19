@@ -119,6 +119,61 @@ const BUILDER_CATEGORY_LABELS: Record<string, string> = {
   'anatomy-details': 'Anatomy Details',
 };
 
+const BUILDER_SESSION_STORAGE_KEY = 'morpbase:builder_session:v1';
+
+type BuilderSessionPromptAdditionItem = {
+  id: string;
+  text: string;
+  weight?: number;
+  sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
+};
+
+type BuilderSessionSnapshot = {
+  selections: AttributeSelection[];
+  modifiers: Modifier[];
+  weightsEnabledGlobal: boolean;
+  poolPromptItems: BuilderSessionPromptAdditionItem[];
+  poolOutputOverrides: Array<[string, string]>;
+  selectionOutputOverrides: Array<[string, string]>;
+  selectedPromptFragments: SelectedPromptFragment[];
+  editedPositiveOutput: string | null;
+  editedNegativeOutput: string | null;
+  exportMode: 'structured' | 'clean' | 'structured_with_negative';
+  currentNodeId: string;
+  navigationHistory: string[];
+  hasReachedEndViaNext: boolean;
+  activeIdpSetId: string | null;
+};
+
+function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(BUILDER_SESSION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<BuilderSessionSnapshot>;
+
+    return {
+      selections: Array.isArray(parsed.selections) ? parsed.selections : [],
+      modifiers: Array.isArray(parsed.modifiers) ? parsed.modifiers : [],
+      weightsEnabledGlobal: Boolean(parsed.weightsEnabledGlobal),
+      poolPromptItems: Array.isArray(parsed.poolPromptItems) ? parsed.poolPromptItems : [],
+      poolOutputOverrides: Array.isArray(parsed.poolOutputOverrides) ? parsed.poolOutputOverrides as Array<[string, string]> : [],
+      selectionOutputOverrides: Array.isArray(parsed.selectionOutputOverrides) ? parsed.selectionOutputOverrides as Array<[string, string]> : [],
+      selectedPromptFragments: Array.isArray(parsed.selectedPromptFragments) ? parsed.selectedPromptFragments : [],
+      editedPositiveOutput: typeof parsed.editedPositiveOutput === 'string' ? parsed.editedPositiveOutput : null,
+      editedNegativeOutput: typeof parsed.editedNegativeOutput === 'string' ? parsed.editedNegativeOutput : null,
+      exportMode: parsed.exportMode === 'structured' || parsed.exportMode === 'structured_with_negative' ? parsed.exportMode : 'clean',
+      currentNodeId: typeof parsed.currentNodeId === 'string' ? parsed.currentNodeId : '',
+      navigationHistory: Array.isArray(parsed.navigationHistory) ? parsed.navigationHistory.filter((entry): entry is string => typeof entry === 'string') : [],
+      hasReachedEndViaNext: Boolean(parsed.hasReachedEndViaNext),
+      activeIdpSetId: typeof parsed.activeIdpSetId === 'string' ? parsed.activeIdpSetId : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 const parseCreatorHash = (): { creatorId?: string | null; creatorName?: string | null } | null => {
   try {
     if (!window.location.hash.startsWith('#creator')) return null;
@@ -157,6 +212,7 @@ export function App() {
     sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
   };
   const CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY = 'morpbase:custom_global_phrases';
+  const initialBuilderSession = loadBuilderSessionSnapshot();
 
   const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
     try {
@@ -185,13 +241,17 @@ export function App() {
     }
   });
   // UI State: Selections
-  const [selections, setSelections] = useState<Map<string, AttributeSelection>>(new Map());
+  const [selections, setSelections] = useState<Map<string, AttributeSelection>>(
+    () => new Map((initialBuilderSession?.selections ?? []).map(selection => [selection.attributeId, selection]))
+  );
   
   // UI State: Modifiers
-  const [modifiers, setModifiers] = useState<Map<string, Modifier>>(new Map());
+  const [modifiers, setModifiers] = useState<Map<string, Modifier>>(
+    () => new Map((initialBuilderSession?.modifiers ?? []).map(modifier => [modifier.targetAttributeId, modifier]))
+  );
   
   // UI State: Global weight enabled/disabled
-  const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(false);
+  const [weightsEnabledGlobal, setWeightsEnabledGlobal] = useState<boolean>(initialBuilderSession?.weightsEnabledGlobal ?? false);
   const [activeBuilderMode, setActiveBuilderMode] = useState<BuilderModeId>(() => {
     try {
       const saved = window.localStorage.getItem('morpbase:builder_mode');
@@ -206,17 +266,21 @@ export function App() {
   const lastModeRepositionRef = useRef<BuilderModeId | null>(null);
   
   // UI State: User pool prompt additions
-  const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>([]);
+  const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>(initialBuilderSession?.poolPromptItems ?? []);
   const [activeIdpPool, setActiveIdpPool] = useState<Pool | null>(null);
-  const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(null);
-  const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(new Map());
+  const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(initialBuilderSession?.activeIdpSetId ?? null);
+  const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
+    () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
+  );
 
   // UI State: Freeform prompt text
-  const [exportMode, setExportMode] = useState<'structured' | 'clean' | 'structured_with_negative'>('clean');
-  const [editedPositiveOutput, setEditedPositiveOutput] = useState<string | null>(null);
-  const [editedNegativeOutput, setEditedNegativeOutput] = useState<string | null>(null);
-  const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(new Map());
-  const [selectedPromptFragments, setSelectedPromptFragments] = useState<SelectedPromptFragment[]>([]);
+  const [exportMode, setExportMode] = useState<'structured' | 'clean' | 'structured_with_negative'>(initialBuilderSession?.exportMode ?? 'clean');
+  const [editedPositiveOutput, setEditedPositiveOutput] = useState<string | null>(initialBuilderSession?.editedPositiveOutput ?? null);
+  const [editedNegativeOutput, setEditedNegativeOutput] = useState<string | null>(initialBuilderSession?.editedNegativeOutput ?? null);
+  const [selectionOutputOverrides, setSelectionOutputOverrides] = useState<Map<string, string>>(
+    () => new Map(initialBuilderSession?.selectionOutputOverrides ?? [])
+  );
+  const [selectedPromptFragments, setSelectedPromptFragments] = useState<SelectedPromptFragment[]>(initialBuilderSession?.selectedPromptFragments ?? []);
   const [customPromptFragments, setCustomPromptFragments] = useState<PromptFragmentDefinition[]>(() => {
     try {
       const raw = window.localStorage.getItem(CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY);
@@ -540,8 +604,8 @@ export function App() {
   }, [getAllSubcategoryNodeIds]);
 
   // UI State: Navigation
-  const [currentNodeId, setCurrentNodeId] = useState<string>('');
-  const [navigationHistory, setNavigationHistory] = useState<string[]>([]);
+  const [currentNodeId, setCurrentNodeId] = useState<string>(initialBuilderSession?.currentNodeId ?? '');
+  const [navigationHistory, setNavigationHistory] = useState<string[]>(initialBuilderSession?.navigationHistory ?? []);
 
   const effectiveAttributeDefinitions = attributeDefinitions;
   const effectiveDefinitionIds = useMemo(() => new Set(effectiveAttributeDefinitions.map(def => def.id)), [effectiveAttributeDefinitions]);
@@ -655,7 +719,7 @@ export function App() {
   
   // Track if user has explicitly clicked Next to reach the end
   // This ensures completion only happens after explicit Next click, not just from selections
-  const [hasReachedEndViaNext, setHasReachedEndViaNext] = useState<boolean>(false);
+  const [hasReachedEndViaNext, setHasReachedEndViaNext] = useState<boolean>(initialBuilderSession?.hasReachedEndViaNext ?? false);
 
   // UI State: Random Prompt Generator Modal
   const [isRandomPromptModalOpen, setIsRandomPromptModalOpen] = useState<boolean>(false);
@@ -1794,6 +1858,45 @@ export function App() {
       // Ignore persistence errors and keep the session usable.
     }
   }, [customPromptFragments]);
+
+  useEffect(() => {
+    try {
+      const snapshot: BuilderSessionSnapshot = {
+        selections: Array.from(selections.values()),
+        modifiers: Array.from(modifiers.values()),
+        weightsEnabledGlobal,
+        poolPromptItems,
+        poolOutputOverrides: Array.from(poolOutputOverrides.entries()),
+        selectionOutputOverrides: Array.from(selectionOutputOverrides.entries()),
+        selectedPromptFragments,
+        editedPositiveOutput,
+        editedNegativeOutput,
+        exportMode,
+        currentNodeId,
+        navigationHistory,
+        hasReachedEndViaNext,
+        activeIdpSetId,
+      };
+      window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
+    } catch {
+      // Ignore persistence errors and keep the session usable.
+    }
+  }, [
+    selections,
+    modifiers,
+    weightsEnabledGlobal,
+    poolPromptItems,
+    poolOutputOverrides,
+    selectionOutputOverrides,
+    selectedPromptFragments,
+    editedPositiveOutput,
+    editedNegativeOutput,
+    exportMode,
+    currentNodeId,
+    navigationHistory,
+    hasReachedEndViaNext,
+    activeIdpSetId,
+  ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
     setSelectedPromptFragments(prev => (
