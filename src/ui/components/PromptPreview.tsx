@@ -605,7 +605,7 @@ export function PromptPreview({
               <div className="prompt-preview-action-buttons">
                 <button
                   type="button"
-                  className="prompt-preview-action-button prompt-preview-action-button-primary"
+                  className="prompt-preview-action-button"
                   onClick={handleEnterEditMode}
                   disabled={!currentPositive && !currentNegative}
                 >
