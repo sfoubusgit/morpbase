@@ -340,6 +340,7 @@ export function PromptPreview({
   const currentPositive = editedPositive ?? generatedPositiveForMode;
   const currentNegative = editedNegative ?? generatedNegativeForMode;
   const shouldIncludeNegativeInCopy = exportMode === 'structured_with_negative';
+  const canCopyPrompt = Boolean(currentPositive || currentNegative);
   const sourceSignature = useMemo(
     () => JSON.stringify([displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]),
     [displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]
@@ -458,14 +459,26 @@ export function PromptPreview({
             <h3 className="prompt-preview-title">Prompt Preview</h3>
             <p className="prompt-preview-subtitle">Build first, then edit the final output if you want to refine it manually.</p>
           </div>
-          {prompt && 'tokenCount' in prompt && (
-            <div className="prompt-preview-metadata">
-              <span className="prompt-preview-token-count">
-                <span className="prompt-preview-token-count-value">{prompt.tokenCount}</span>
-                <span className="prompt-preview-token-limit">{' / 77'}</span>
-              </span>
-            </div>
-          )}
+          <div className="prompt-preview-header-actions">
+            {prompt && 'tokenCount' in prompt && (
+              <div className="prompt-preview-metadata">
+                <span className="prompt-preview-token-count">
+                  <span className="prompt-preview-token-count-value">{prompt.tokenCount}</span>
+                  <span className="prompt-preview-token-limit">{' / 77'}</span>
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              className="prompt-preview-copy-icon"
+              onClick={handleCopy}
+              disabled={!canCopyPrompt}
+              aria-label={shouldIncludeNegativeInCopy ? 'Copy prompt and negative prompt' : 'Copy prompt'}
+              title={shouldIncludeNegativeInCopy ? 'Copy prompt and negative prompt' : 'Copy prompt'}
+            >
+              ⧉
+            </button>
+          </div>
         </div>
 
         <div className="prompt-preview-export-note">
@@ -637,9 +650,6 @@ export function PromptPreview({
 
         {(currentPositive || currentNegative) && !isEditMode && (
           <div className="prompt-preview-bottom-actions">
-            <button className="prompt-preview-copy-button" onClick={handleCopy} type="button">
-              {shouldIncludeNegativeInCopy ? 'Copy Prompt + Negative' : 'Copy Prompt'}
-            </button>
             {(onSavePrompt || onOpenSavedPrompts) && (
               <div className="prompt-preview-secondary-actions">
                 {onSavePrompt && (

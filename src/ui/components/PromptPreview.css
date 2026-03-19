@@ -47,6 +47,12 @@
   margin-bottom: var(--spacing-4);
 }
 
+.prompt-preview-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .prompt-preview-heading {
   display: flex;
   flex-direction: column;
@@ -387,6 +393,34 @@
   font-family: 'Inter', sans-serif;
 }
 
+.prompt-preview-copy-icon {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(17, 18, 24, 0.96);
+  color: #e7ebf6;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.prompt-preview-copy-icon:hover:not(:disabled) {
+  background: rgba(24, 26, 34, 0.98);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.prompt-preview-copy-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .prompt-preview-token-count-value {
   color: #6E56F9;
   font-weight: 600;
@@ -589,19 +623,6 @@
   border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
   transform: translateY(-1px);
-}
-
-.prompt-preview-copy-button {
-  background: linear-gradient(135deg, rgba(110, 86, 249, 1), rgba(127, 103, 255, 1));
-  border: 1px solid rgba(110, 86, 249, 0.78);
-  color: white;
-  box-shadow: 0 12px 24px rgba(110, 86, 249, 0.26);
-}
-
-.prompt-preview-copy-button:hover {
-  background: linear-gradient(135deg, rgba(123, 101, 255, 1), rgba(140, 118, 255, 1));
-  box-shadow: 0 14px 28px rgba(110, 86, 249, 0.34);
-  transform: translateY(-2px);
 }
 
 .prompt-preview-save-button:active,
