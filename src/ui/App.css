@@ -527,7 +527,8 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   width: min(100%, 920px);
   justify-self: center;
   min-height: 0;
-  height: 100%;
+  height: auto;
+  align-self: start;
 }
 
 .working-set-banner {
