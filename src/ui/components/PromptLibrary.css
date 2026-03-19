@@ -77,6 +77,23 @@
   font-size: 13px;
 }
 
+.prompt-library-save-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #d7def7;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.prompt-library-save-toggle input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #6e56f9;
+}
+
 .prompt-library-save button {
   padding: 10px 12px;
   border-radius: 10px;

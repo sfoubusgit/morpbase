@@ -29,6 +29,7 @@ type PromptLibraryProps = {
 };
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
+const KEEP_SAVE_FIELDS_KEY = 'promptgen:keep_save_fields_after_saving';
 
 const loadLocalPrompts = (): SavedPrompt[] => {
   try {
@@ -102,6 +103,13 @@ export function PromptLibrary({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [keepFieldsAfterSaving, setKeepFieldsAfterSaving] = useState<boolean>(() => {
+    try {
+      return window.localStorage.getItem(KEEP_SAVE_FIELDS_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
@@ -132,11 +140,27 @@ export function PromptLibrary({
     }
   }, [externalOpenSaveSignal]);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(KEEP_SAVE_FIELDS_KEY, keepFieldsAfterSaving ? '1' : '0');
+    } catch {
+      // ignore storage errors
+    }
+  }, [keepFieldsAfterSaving]);
+
   const parseTags = (raw: string) =>
     raw
       .split(',')
       .map(tag => tag.trim())
       .filter(Boolean);
+
+  const resetSaveFields = () => {
+    setName('');
+    setTags('');
+    setModel('');
+    setPurpose('');
+    setNote('');
+  };
 
   const handleSave = async () => {
     if (!authUser || !isPro) {
@@ -155,11 +179,9 @@ export function PromptLibrary({
         purpose,
         note,
       });
-      setName('');
-      setTags('');
-      setModel('');
-      setPurpose('');
-      setNote('');
+      if (!keepFieldsAfterSaving) {
+        resetSaveFields();
+      }
       setIsSaveModalOpen(false);
       await refresh();
       void trackAnalyticsEvent({
@@ -210,11 +232,9 @@ export function PromptLibrary({
     const next = [nextPrompt, ...localPrompts];
     setLocalPrompts(next);
     saveLocalPrompts(next);
-    setName('');
-    setTags('');
-    setModel('');
-    setPurpose('');
-    setNote('');
+    if (!keepFieldsAfterSaving) {
+      resetSaveFields();
+    }
     setIsSaveModalOpen(false);
     void trackAnalyticsEvent({
       eventType: 'prompt_save',
@@ -511,6 +531,14 @@ export function PromptLibrary({
             value={note}
             onChange={event => setNote(event.target.value)}
           />
+          <label className="prompt-library-save-toggle">
+            <input
+              type="checkbox"
+              checked={keepFieldsAfterSaving}
+              onChange={event => setKeepFieldsAfterSaving(event.target.checked)}
+            />
+            <span>Keep fields after saving</span>
+          </label>
           <div className="prompt-library-save-actions">
             <button type="button" onClick={handleSaveLocal}>
               Save Locally
