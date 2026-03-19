@@ -911,6 +911,9 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 
 .builder-guidance-sidebar {
   margin-bottom: 0;
+  display: block;
+  padding: 0;
+  overflow: hidden;
 }
 
 .territory-banner-switch {
