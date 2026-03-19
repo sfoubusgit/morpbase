@@ -409,6 +409,18 @@
   transition: all 0.2s ease;
 }
 
+.prompt-preview-copy-icon-svg {
+  width: 17px;
+  height: 17px;
+  overflow: visible;
+}
+
+.prompt-preview-copy-icon-svg rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
 .prompt-preview-copy-icon:hover:not(:disabled) {
   background: rgba(24, 26, 34, 0.98);
   border-color: rgba(255, 255, 255, 0.18);

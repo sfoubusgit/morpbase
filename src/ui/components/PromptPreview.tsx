@@ -476,7 +476,15 @@ export function PromptPreview({
               aria-label={shouldIncludeNegativeInCopy ? 'Copy prompt and negative prompt' : 'Copy prompt'}
               title={shouldIncludeNegativeInCopy ? 'Copy prompt and negative prompt' : 'Copy prompt'}
             >
-              ⧉
+              <svg
+                className="prompt-preview-copy-icon-svg"
+                viewBox="0 0 20 20"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect x="7" y="4" width="9" height="9" rx="2.2" />
+                <rect x="4" y="7" width="9" height="9" rx="2.2" />
+              </svg>
             </button>
           </div>
         </div>
