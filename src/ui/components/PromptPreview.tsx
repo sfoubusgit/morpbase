@@ -57,6 +57,12 @@ interface ParsedFragment {
   weight: number | null;
 }
 
+interface StructuredPromptSection {
+  key: string;
+  label: string;
+  text: string;
+}
+
 type PromptSourceSummary = {
   id: string;
   label: string;
@@ -228,40 +234,67 @@ function renderHighlightedText(text: string, phrases: string[]) {
   });
 }
 
-function formatStructuredPrompt(prompt: any, additionsText: string, positionedAdditions: PromptAdditionEntry[]): string | null {
-  if (!prompt?.sections || Object.keys(prompt.sections).length === 0) {
+function buildStructuredSections(
+  prompt: any,
+  basePromptText: string,
+  additionsText: string,
+  positionedAdditions: PromptAdditionEntry[]
+): StructuredPromptSection[] {
+  const sections: StructuredPromptSection[] = [];
+
+  for (const sectionKey of SECTION_ORDER) {
+    const sectionContent = prompt?.sections?.[sectionKey];
+    if (!sectionContent || !sectionContent.trim()) continue;
+
+    sections.push({
+      key: sectionKey,
+      label: SECTION_HEADER_MAP[sectionKey],
+      text: sectionContent.trim(),
+    });
+  }
+
+  if (sections.length === 0 && basePromptText.trim()) {
+    sections.push({
+      key: 'prompt',
+      label: 'Prompt',
+      text: basePromptText.trim(),
+    });
+  }
+
+  const additionSections = composeStructuredAdditionSections(positionedAdditions);
+  additionSections.forEach((section, index) => {
+    sections.push({
+      key: `addition-${index}-${section.label}`,
+      label: section.label,
+      text: section.text,
+    });
+  });
+
+  if (additionSections.length === 0 && additionsText) {
+    sections.push({
+      key: 'custom',
+      label: 'Custom',
+      text: additionsText,
+    });
+  }
+
+  return sections;
+}
+
+function formatStructuredPrompt(sections: StructuredPromptSection[]): string | null {
+  if (sections.length === 0) {
     return null;
   }
 
   const lines: string[] = ['POSITIVE PROMPT:', ''];
 
-  for (const sectionKey of SECTION_ORDER) {
-    const sectionContent = prompt.sections[sectionKey];
-    if (sectionContent && sectionContent.trim()) {
-      const header = SECTION_HEADER_MAP[sectionKey];
-      lines.push(`${header}:`);
-      lines.push(sectionContent);
+  sections.forEach((section, index) => {
+    if (index > 0) {
       lines.push('');
     }
-  }
-
-  if (lines[lines.length - 1] === '') {
-    lines.pop();
-  }
-
-  const additionSections = composeStructuredAdditionSections(positionedAdditions);
-
-  additionSections.forEach(section => {
-    lines.push('');
     lines.push(`${section.label}:`);
     lines.push(section.text);
   });
-
-  if (additionSections.length === 0 && additionsText) {
-    lines.push('');
-    lines.push('Custom:');
-    lines.push(additionsText);
-  }
 
   return lines.join('\n');
 }
@@ -302,7 +335,7 @@ export function PromptPreview({
   const displayPositive = prompt && 'positiveTokens' in prompt ? prompt.positiveTokens : '';
   const displayNegative = prompt && 'negativeTokens' in prompt ? prompt.negativeTokens : '';
   const additionsText = customAdditions.filter(Boolean).join(', ');
-  const normalizedAdditions = positionedAdditions.length > 0
+  const normalizedAdditions: PromptAdditionEntry[] = positionedAdditions.length > 0
     ? positionedAdditions
     : customAdditions.filter(Boolean).map((text, index) => ({
         id: `legacy_addition_${index}`,
@@ -312,7 +345,11 @@ export function PromptPreview({
   const mergedPositive = composePromptWithAdditions(displayPositive, normalizedAdditions);
   const cleanedPositive = cleanPromptText(mergedPositive);
   const cleanedNegative = cleanPromptText(displayNegative);
-  const structuredPositive = formatStructuredPrompt(prompt, additionsText, normalizedAdditions) || mergedPositive;
+  const structuredSections = useMemo(
+    () => buildStructuredSections(prompt, displayPositive, additionsText, normalizedAdditions),
+    [prompt, displayPositive, additionsText, normalizedAdditions]
+  );
+  const structuredPositive = formatStructuredPrompt(structuredSections) || mergedPositive;
 
   const generatedPositiveForMode = exportMode === 'clean' ? cleanedPositive : structuredPositive;
   const generatedNegativeForMode = exportMode === 'clean' ? cleanedNegative : displayNegative;
@@ -448,7 +485,7 @@ export function PromptPreview({
     onCopy?.();
   };
 
-  const showStructuredSections = !hasEditedOutput && !isEditMode && exportMode !== 'clean' && prompt && 'sections' in prompt && prompt.sections && Object.keys(prompt.sections).length > 0;
+  const showStructuredSections = !hasEditedOutput && !isEditMode && exportMode !== 'clean' && structuredSections.length > 0;
   const hasWorkflowContext = Boolean(activeModeLabel || activePoolNames.length > 0 || activeIdpSet || activeTerritoryName);
 
   return (
@@ -564,22 +601,12 @@ export function PromptPreview({
             </div>
           ) : showStructuredSections ? (
             <div className="prompt-preview-sections">
-              {SECTION_ORDER.map(sectionKey => {
-                const sectionValue = prompt.sections?.[sectionKey as keyof typeof prompt.sections];
-                if (!sectionValue) return null;
-                return (
-                  <div key={sectionKey} className="prompt-preview-section">
-                    <label className="prompt-preview-section-label">{SECTION_HEADER_MAP[sectionKey]}:</label>
-                    <div className="prompt-preview-section-text">{sectionValue}</div>
-                  </div>
-                );
-              })}
-              {additionsText && (
-                <div className="prompt-preview-section">
-                  <label className="prompt-preview-section-label">Custom</label>
-                  <div className="prompt-preview-section-text">{additionsText}</div>
+              {structuredSections.map(section => (
+                <div key={section.key} className="prompt-preview-section">
+                  <label className="prompt-preview-section-label">{section.label}:</label>
+                  <div className="prompt-preview-section-text">{section.text}</div>
                 </div>
-              )}
+              ))}
             </div>
           ) : (
             <div className="prompt-preview-section">
