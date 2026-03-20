@@ -1,4 +1,4 @@
-import type { SavedPrompt, SavedPromptStore } from '../types';
+import type { SavedPrompt, SavedPromptCharacterLineage, SavedPromptStore } from '../types';
 import { supabase } from './supabaseClient';
 import { getProfile } from './authStore';
 
@@ -13,6 +13,47 @@ const requireProfileId = async (): Promise<string> => {
   return profile.id;
 };
 
+const toSavedPromptCharacterLineage = (row: any): SavedPromptCharacterLineage | undefined => {
+  const characterId = typeof row?.character_id === 'string'
+    ? normalizeText(row.character_id)
+    : '';
+  const nameSnapshot = typeof row?.character_name_snapshot === 'string'
+    ? normalizeText(row.character_name_snapshot)
+    : '';
+
+  if (!characterId || !nameSnapshot) {
+    return undefined;
+  }
+
+  return {
+    characterId,
+    nameSnapshot,
+  };
+};
+
+const toStoredCharacterLineage = (
+  lineage?: SavedPromptCharacterLineage
+): { character_id: string | null; character_name_snapshot: string | null } => {
+  const characterId = typeof lineage?.characterId === 'string'
+    ? normalizeText(lineage.characterId)
+    : '';
+  const nameSnapshot = typeof lineage?.nameSnapshot === 'string'
+    ? normalizeText(lineage.nameSnapshot)
+    : '';
+
+  if (!characterId || !nameSnapshot) {
+    return {
+      character_id: null,
+      character_name_snapshot: null,
+    };
+  }
+
+  return {
+    character_id: characterId,
+    character_name_snapshot: nameSnapshot,
+  };
+};
+
 const toSavedPrompt = (row: any): SavedPrompt => ({
   id: row.id,
   name: row.name,
@@ -23,6 +64,7 @@ const toSavedPrompt = (row: any): SavedPrompt => ({
   purpose: row.purpose ?? undefined,
   usedAt: row.used_at ?? undefined,
   note: row.note ?? undefined,
+  characterLineage: toSavedPromptCharacterLineage(row),
   createdAt: new Date(row.created_at).getTime(),
   updatedAt: new Date(row.updated_at).getTime(),
 });
@@ -48,6 +90,7 @@ export const createPrompt = async (input: {
   purpose?: string;
   usedAt?: string;
   note?: string;
+  characterLineage?: SavedPromptCharacterLineage;
 }): Promise<SavedPrompt> => {
   const name = normalizeText(input.name);
   const positive = normalizeText(input.positive);
@@ -68,6 +111,7 @@ export const createPrompt = async (input: {
     purpose: input.purpose ? normalizeText(input.purpose) : null,
     used_at: input.usedAt ? normalizeText(input.usedAt) : new Date().toISOString(),
     note: input.note ? normalizeText(input.note) : null,
+    ...toStoredCharacterLineage(input.characterLineage),
   };
   const { data, error } = await supabase
     .from('saved_prompts')
@@ -121,6 +165,7 @@ export const importPromptsPayload = async (payload: SavedPromptStore): Promise<S
       purpose: prompt.purpose ? normalizeText(prompt.purpose) : null,
       used_at: prompt.usedAt ? normalizeText(prompt.usedAt) : null,
       note: prompt.note ? normalizeText(prompt.note) : null,
+      ...toStoredCharacterLineage(prompt.characterLineage),
     }))
     .filter(prompt => !existingNames.has(prompt.name));
 

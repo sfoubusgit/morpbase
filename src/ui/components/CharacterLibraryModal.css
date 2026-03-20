@@ -145,12 +145,46 @@
   letter-spacing: 0.05em;
 }
 
+.character-library-warning-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #ffe2a8;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .character-library-card-summary,
 .character-library-details-summary {
   margin: 6px 0 0;
   color: #b9bfd0;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.character-library-card-warning,
+.character-library-warning-note,
+.character-editor-field-hint {
+  color: #f7d69c;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.character-library-card-warning,
+.character-library-warning-note {
+  margin: 0;
+}
+
+.character-library-warning-note {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.18);
 }
 
 .character-library-card-phrases,

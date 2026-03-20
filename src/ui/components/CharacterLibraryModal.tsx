@@ -117,6 +117,22 @@ const buildCharacterInput = (form: CharacterFormState): CharacterIdentityInput =
   },
 });
 
+const validateCharacterInput = (input: CharacterIdentityInput): string | null => {
+  if (!input.name.trim()) {
+    return 'Character name is required.';
+  }
+  if (input.identity.visualAnchors.length === 0) {
+    return 'Add at least one visual anchor to keep the character identity reusable.';
+  }
+  if (input.phraseBundle.core.length === 0) {
+    return 'Add at least one core identity phrase.';
+  }
+  return null;
+};
+
+const characterNeedsVisualAnchorRepair = (character: CharacterIdentity): boolean =>
+  character.identity.visualAnchors.length === 0;
+
 export function CharacterLibraryModal({
   isOpen,
   onClose,
@@ -213,6 +229,11 @@ export function CharacterLibraryModal({
       setError(null);
       setMessage(null);
       const payload = buildCharacterInput(form);
+      const validationError = validateCharacterInput(payload);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
 
       if (editingCharacterId) {
         const updated = await onUpdateCharacter(editingCharacterId, payload);
@@ -249,9 +270,9 @@ export function CharacterLibraryModal({
       <div className="character-library">
         <div className="character-library-intro">
           <div>
-            <div className="character-library-kicker">Reusable identity library</div>
+            <div className="character-library-kicker">Character identity lane</div>
             <p className="character-library-description">
-              Save character identities here, then apply one into the current workflow from Prompt Preview.
+              Create reusable character identities here, then apply one into the current workflow from Prompt Preview.
             </p>
           </div>
           <button
@@ -269,9 +290,9 @@ export function CharacterLibraryModal({
         <div className="character-library-layout">
           <section className="character-library-panel character-library-list-panel">
             <div className="character-library-panel-header">
-              <div className="character-library-panel-title">Saved Characters</div>
+              <div className="character-library-panel-title">Character Library</div>
               <div className="character-library-panel-subtitle">
-                {characters.length} character{characters.length === 1 ? '' : 's'}
+                {characters.length} reusable character{characters.length === 1 ? ' identity' : ' identities'}
               </div>
             </div>
 
@@ -280,12 +301,13 @@ export function CharacterLibraryModal({
             ) : characters.length === 0 ? (
               <div className="character-library-empty">
                 <strong>No characters yet.</strong>
-                <span>Create one to start testing recurring identity across workflows.</span>
+                <span>Create one to start building recurring character continuity across workflows.</span>
               </div>
             ) : (
               <div className="character-library-list">
                 {characters.map(character => {
                   const isActive = character.id === activeCharacterId;
+                  const needsVisualAnchorRepair = characterNeedsVisualAnchorRepair(character);
                   return (
                     <article
                       key={character.id}
@@ -295,11 +317,19 @@ export function CharacterLibraryModal({
                         <div>
                           <div className="character-library-card-title-row">
                             <h3 className="character-library-card-title">{character.name}</h3>
-                            {isActive && <span className="character-library-active-badge">Active</span>}
+                            {isActive && <span className="character-library-active-badge">In Workflow</span>}
+                            {needsVisualAnchorRepair && (
+                              <span className="character-library-warning-badge">Needs Anchor</span>
+                            )}
                           </div>
                           <p className="character-library-card-summary">
                             {character.summary || 'No summary yet.'}
                           </p>
+                          {needsVisualAnchorRepair && (
+                            <p className="character-library-card-warning">
+                              This legacy character needs at least one visual anchor before it can be saved again.
+                            </p>
+                          )}
                         </div>
                       </div>
                       {character.phraseBundle.core.length > 0 && (
@@ -318,7 +348,7 @@ export function CharacterLibraryModal({
                           onClick={() => handleUseCharacter(character.id)}
                           disabled={isActive}
                         >
-                          {isActive ? 'Active' : 'Use'}
+                          {isActive ? 'Active' : 'Apply'}
                         </button>
                         <button
                           type="button"
@@ -345,14 +375,14 @@ export function CharacterLibraryModal({
           <section className="character-library-panel character-library-editor-panel">
             <div className="character-library-panel-header">
               <div className="character-library-panel-title">
-                {editingCharacter ? `Editing ${editingCharacter.name}` : isCreating ? 'Create Character' : 'Character Details'}
+                {editingCharacter ? `Editing ${editingCharacter.name}` : isCreating ? 'Create Character' : 'Workflow Character'}
               </div>
               <div className="character-library-panel-subtitle">
                 {isEditorOpen
                   ? 'Keep this small and identity-focused.'
                   : activeCharacter
-                    ? 'The active workflow character appears here.'
-                    : 'Select or create a character to begin.'}
+                    ? 'The character identity currently applied to this workflow appears here.'
+                    : 'Select or create a character identity to begin.'}
               </div>
             </div>
 
@@ -430,6 +460,9 @@ export function CharacterLibraryModal({
                       onChange={event => handleFormChange('visualAnchors', event.target.value)}
                       placeholder={`violet eyes | luminous violet eyes\nsilver braid | long silver braid with beads`}
                     />
+                    <div className="character-editor-field-hint">
+                      Required. Add at least one visual anchor to keep this character identity reusable across workflows.
+                    </div>
                   </label>
                   <label className="character-editor-field character-editor-field-wide">
                     <span>Motifs</span>
@@ -452,7 +485,7 @@ export function CharacterLibraryModal({
                 </div>
 
                 <div className="character-editor-preview">
-                  <div className="character-editor-preview-title">Prompt Layer Preview</div>
+                  <div className="character-editor-preview-title">Workflow Phrase Preview</div>
                   {previewPhrases.length > 0 ? (
                     <div className="character-editor-preview-chips">
                       {previewPhrases.map((phrase, index) => (
@@ -463,7 +496,7 @@ export function CharacterLibraryModal({
                     </div>
                   ) : (
                     <div className="character-editor-preview-empty">
-                      Add at least one core identity phrase to make this character reusable in workflows.
+                      Add at least one core identity phrase to make this character reusable across workflows.
                     </div>
                   )}
                 </div>
@@ -478,7 +511,7 @@ export function CharacterLibraryModal({
                       ? 'Saving...'
                       : editingCharacterId
                         ? 'Save Changes'
-                        : 'Save and Use Character'}
+                        : 'Save and Apply'}
                   </button>
                   <button
                     type="button"
@@ -495,6 +528,11 @@ export function CharacterLibraryModal({
                 <div className="character-library-details-name">{activeCharacter.name}</div>
                 {activeCharacter.summary && (
                   <p className="character-library-details-summary">{activeCharacter.summary}</p>
+                )}
+                {characterNeedsVisualAnchorRepair(activeCharacter) && (
+                  <div className="character-library-warning-note">
+                    This legacy character is still usable, but it needs at least one visual anchor before it can be saved again.
+                  </div>
                 )}
                 <div className="character-library-details-grid">
                   {activeCharacter.identity.archetype && (
@@ -538,7 +576,7 @@ export function CharacterLibraryModal({
               </div>
             ) : (
               <div className="character-library-empty character-library-empty-detail">
-                <strong>No active character.</strong>
+                <strong>No active character identity.</strong>
                 <span>Choose an existing character or create one here, then apply it to the current workflow.</span>
               </div>
             )}

@@ -142,6 +142,32 @@ type BuilderSessionSnapshot = {
   activeCharacterId: string | null;
 };
 
+type CharacterPromptProjection = {
+  characterId: string;
+  displayName: string;
+  summary?: string;
+  corePhrases: string[];
+};
+
+function buildCharacterPromptProjection(
+  character: CharacterIdentity | null
+): CharacterPromptProjection | null {
+  if (!character) return null;
+
+  const displayName = character.name.trim() || character.name;
+  const summary = character.summary?.trim() || undefined;
+  const corePhrases = character.phraseBundle.core
+    .map(text => text.trim())
+    .filter(Boolean);
+
+  return {
+    characterId: character.id,
+    displayName,
+    summary,
+    corePhrases,
+  };
+}
+
 function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   if (typeof window === 'undefined') return null;
 
@@ -488,6 +514,12 @@ export function App() {
     () => characters.find(character => character.id === activeCharacterId) ?? null,
     [characters, activeCharacterId]
   );
+  const activeCharacterProjection = useMemo(
+    () => buildCharacterPromptProjection(activeCharacter),
+    [activeCharacter]
+  );
+  const activeCharacterDisplayName = activeCharacterProjection?.displayName ?? activeCharacter?.name ?? null;
+  const activeCharacterSummaryText = activeCharacterProjection?.summary ?? activeCharacter?.summary ?? null;
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
@@ -2031,16 +2063,16 @@ export function App() {
     [customPromptFragments]
   );
   const promptAdditionEntries = useMemo<PromptAdditionEntry[]>(() => {
-    const characterEntries: PromptAdditionEntry[] = activeCharacter
-      ? activeCharacter.phraseBundle.core
+    const characterEntries: PromptAdditionEntry[] = activeCharacterProjection
+      ? activeCharacterProjection.corePhrases
           .map((text, index) => ({
-            id: `character:${activeCharacter.id}:${index}`,
-            text: text.trim(),
+            id: `character:${activeCharacterProjection.characterId}:${index}`,
+            text,
             position: 'start' as const,
             section: 'Character',
             sourceType: 'character' as const,
           }))
-          .filter(entry => entry.text)
+          .filter(entry => Boolean(entry.text))
       : [];
 
     const fragmentEntries = selectedPromptFragments
@@ -2070,7 +2102,7 @@ export function App() {
     }));
 
     return [...characterEntries, ...poolEntries, ...fragmentEntries];
-  }, [activeCharacter, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
+  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -2677,13 +2709,11 @@ export function App() {
           positionedAdditions={promptAdditionEntries}
           editedPositive={editedPositiveOutput}
           editedNegative={editedNegativeOutput}
-          onEditedOutputChange={handleEditedOutputChange}
-          onClearPrompt={handleClearPrompt}
-          onUndoClearPrompt={handleUndoClearPrompt}
-          canUndoClearPrompt={Boolean(clearUndoState)}
           onAddToPrompt={handleAddPoolItem}
           authUser={authUser}
           isPro={isPro}
+          activeCharacterId={activeCharacterId}
+          activeCharacterName={activeCharacterDisplayName}
         />
       ) : (
         <>
@@ -3059,8 +3089,8 @@ export function App() {
                 activeTerritoryName={activeTerritory?.name ?? null}
                 territoryFocusMode={activeTerritory ? territoryNavigationMode : null}
                 activePoolNames={activeWorkflowPoolNames}
-                activeCharacterName={activeCharacter?.name ?? null}
-                activeCharacterSummary={activeCharacter?.summary ?? null}
+                activeCharacterName={activeCharacterDisplayName}
+                activeCharacterSummary={activeCharacterSummaryText}
                 onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
                 onRemoveCharacter={activeCharacter ? handleRemoveActiveCharacter : undefined}
                 availableIdpSets={activeIdpPool?.idpSets ?? []}
@@ -3089,6 +3119,8 @@ export function App() {
                 externalOpenSaveSignal={savePromptOpenSignal}
                 renderLibraryShell={false}
                 onPromptSaved={setTopToastMessage}
+                activeCharacterId={activeCharacterId}
+                activeCharacterName={activeCharacterDisplayName}
               />
             </div>
 
@@ -3128,6 +3160,8 @@ export function App() {
                     showLocalPrompts={true}
                     hideSaveBar={true}
                     onPromptSaved={setTopToastMessage}
+                    activeCharacterId={activeCharacterId}
+                    activeCharacterName={activeCharacterDisplayName}
                   />
                 </div>
               </div>

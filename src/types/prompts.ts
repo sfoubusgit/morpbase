@@ -1,3 +1,8 @@
+export type SavedPromptCharacterLineage = {
+  characterId: string;
+  nameSnapshot: string;
+};
+
 export type SavedPrompt = {
   id: string;
   name: string;
@@ -8,6 +13,7 @@ export type SavedPrompt = {
   purpose?: string;
   usedAt?: string;
   note?: string;
+  characterLineage?: SavedPromptCharacterLineage;
   createdAt: number;
   updatedAt: number;
 };

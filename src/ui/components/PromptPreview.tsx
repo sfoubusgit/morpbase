@@ -194,7 +194,7 @@ function getPromptSourceMeta(sourceType?: PromptAdditionEntry['sourceType']): Pr
     case 'character':
       return {
         id: 'character',
-        label: 'Character',
+        label: 'Character Identity',
       };
     default:
       return {
@@ -782,9 +782,9 @@ export function PromptPreview({
             <div className="prompt-preview-character-block">
               <div className="prompt-preview-character-header">
                 <div>
-                  <div className="prompt-preview-character-title">Character</div>
+                  <div className="prompt-preview-character-title">Character Identity</div>
                   <div className="prompt-preview-character-subtitle">
-                    Apply one reusable subject identity on top of the current workflow.
+                    Apply one reusable character identity on top of the current workflow.
                   </div>
                 </div>
                 <div className="prompt-preview-character-actions">
@@ -817,7 +817,7 @@ export function PromptPreview({
                 </div>
               ) : (
                 <div className="prompt-preview-character-empty">
-                  No active character yet.
+                  No active character identity yet.
                 </div>
               )}
             </div>

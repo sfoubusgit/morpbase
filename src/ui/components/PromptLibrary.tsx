@@ -1,5 +1,10 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import type { PromptAdditionEntry, PromptSet, SavedPrompt } from '../../types';
+import type {
+  PromptAdditionEntry,
+  PromptSet,
+  SavedPrompt,
+  SavedPromptCharacterLineage,
+} from '../../types';
 import {
   createPrompt,
   deletePrompt,
@@ -35,6 +40,8 @@ type PromptLibraryProps = {
   externalOpenSaveSignal?: number;
   renderLibraryShell?: boolean;
   onPromptSaved?: (message: string) => void;
+  activeCharacterId?: string | null;
+  activeCharacterName?: string | null;
 };
 
 const LOCAL_STORE_KEY = 'promptgen:local_prompts:v1';
@@ -125,6 +132,8 @@ export function PromptLibrary({
   externalOpenSaveSignal = 0,
   renderLibraryShell = true,
   onPromptSaved,
+  activeCharacterId = null,
+  activeCharacterName = null,
 }: PromptLibraryProps) {
   const initialKeepFieldsAfterSaving = (() => {
     try {
@@ -164,6 +173,17 @@ export function PromptLibrary({
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
     [prompt, customAdditions, positionedAdditions, editedPositive, editedNegative]
   );
+  const activeCharacterLineage = useMemo<SavedPromptCharacterLineage | undefined>(() => {
+    const characterId = activeCharacterId?.trim() ?? '';
+    const nameSnapshot = activeCharacterName?.trim() ?? '';
+    if (!characterId || !nameSnapshot) {
+      return undefined;
+    }
+    return {
+      characterId,
+      nameSnapshot,
+    };
+  }, [activeCharacterId, activeCharacterName]);
   const promptSetOptions = useMemo(
     () => promptSets.map(set => ({ value: set.id, label: set.name })),
     [promptSets]
@@ -319,6 +339,7 @@ export function PromptLibrary({
         model,
         purpose,
         note,
+        characterLineage: activeCharacterLineage,
       });
       await assignPromptToSet(savedPrompt.id, resolveSelectedPromptSetId());
       await refreshPromptSets();
@@ -370,6 +391,7 @@ export function PromptLibrary({
       purpose: purpose.trim() || undefined,
       usedAt: new Date(now).toISOString(),
       note: note.trim() || undefined,
+      characterLineage: activeCharacterLineage,
       createdAt: now,
       updatedAt: now,
     };
@@ -424,6 +446,7 @@ export function PromptLibrary({
         model: prompt.model,
         purpose: prompt.purpose,
         note: prompt.note,
+        characterLineage: prompt.characterLineage,
       });
       await assignPromptToSet(savedPrompt.id, promptSetAssignments[prompt.id] ?? null);
       await refresh();

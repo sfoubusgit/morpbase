@@ -12,6 +12,8 @@ type PromptsPageProps = {
   authUser?: { id: string } | null;
   isPro?: boolean;
   manualUrl?: string;
+  activeCharacterId?: string | null;
+  activeCharacterName?: string | null;
 };
 
 export function PromptsPage({
@@ -24,6 +26,8 @@ export function PromptsPage({
   authUser,
   isPro = false,
   manualUrl,
+  activeCharacterId = null,
+  activeCharacterName = null,
 }: PromptsPageProps) {
   return (
     <div className="prompts-page">
@@ -86,6 +90,8 @@ export function PromptsPage({
             authUser={authUser}
             isPro={isPro}
             manualUrl={manualUrl}
+            activeCharacterId={activeCharacterId}
+            activeCharacterName={activeCharacterName}
             showCloudPrompts
             showLocalPrompts={false}
           />

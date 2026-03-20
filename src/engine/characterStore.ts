@@ -249,6 +249,11 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
     throw new Error('Character name is required.');
   }
 
+  const identity = sanitizeFields(input.identity);
+  if (identity.visualAnchors.length === 0) {
+    throw new Error('At least one visual anchor is required.');
+  }
+
   const phraseBundle = sanitizePhraseBundle(input.phraseBundle);
   if (phraseBundle.core.length === 0) {
     throw new Error('At least one core identity phrase is required.');
@@ -257,7 +262,7 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
   return {
     name,
     summary: input.summary ? normalizeText(input.summary) || undefined : undefined,
-    identity: sanitizeFields(input.identity),
+    identity,
     phraseBundle,
   };
 };
