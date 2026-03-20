@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { CreatorStats, Pool, PoolHubEntry, WorkingSet, WorkingSetHubEntry, PublicProfile } from '../../types';
+import type { CreatorStats, Pool, PoolHubEntry, PublicProfile } from '../../types';
 import {
   addHubEntry,
   addHubComment,
@@ -17,27 +17,6 @@ import {
 } from '../../engine/poolHubStore';
 import { exportPoolPayload, importPoolPayload, listPools } from '../../engine/poolStore';
 import {
-  addWorkingSetHubComment,
-  addWorkingSetHubEntry,
-  deleteWorkingSetHubComment,
-  exportWorkingSetHubStore,
-  flagWorkingSetHubEntry,
-  getWorkingSetUserRating,
-  importWorkingSetHubStore,
-  listWorkingSetHubComments,
-  listWorkingSetHubEntries,
-  removeWorkingSetHubEntry,
-  resetWorkingSetHubStore,
-  setWorkingSetUserRating,
-  updateWorkingSetHubComment,
-} from '../../engine/workingSetHubStore';
-import {
-  exportWorkingSetPayload,
-  importWorkingSetPayload,
-  listWorkingSets,
-  setActiveWorkingSetId,
-} from '../../engine/workingSetStore';
-import {
   getMyPublicProfile,
   listPublicProfiles,
 } from '../../engine/profileStore';
@@ -48,22 +27,8 @@ import { Modal } from './Modal';
 import './PoolHubPage.css';
 
 type SortMode = 'trending' | 'newest' | 'top' | 'downloads';
-type HubMode = 'pools' | 'working-sets';
 
 type UploadFormState = {
-  creator: string;
-  title: string;
-  summary: string;
-  description: string;
-  tags: string;
-  category: string;
-  language: string;
-  license: string;
-  heroImageUrl: string;
-  jsonInput: string;
-};
-
-type WorkingSetUploadState = {
   creator: string;
   title: string;
   summary: string;
@@ -85,19 +50,6 @@ const DEFAULT_UPLOAD_STATE: UploadFormState = {
   description: '',
   tags: '',
   category: 'Photography',
-  language: 'en',
-  license: 'CC-BY',
-  heroImageUrl: '',
-  jsonInput: '',
-};
-
-const DEFAULT_WS_UPLOAD_STATE: WorkingSetUploadState = {
-  creator: '',
-  title: '',
-  summary: '',
-  description: '',
-  tags: '',
-  category: 'Concept',
   language: 'en',
   license: 'CC-BY',
   heroImageUrl: '',
@@ -216,61 +168,6 @@ const parsePoolPayload = (raw: string, fallbackName: string): Pool => {
   };
 };
 
-const parseWorkingSetPayload = (raw: string, fallbackName: string): WorkingSet => {
-  let parsed: any;
-  try {
-    parsed = JSON.parse(raw);
-  } catch (err) {
-    throw new Error('Invalid JSON.');
-  }
-
-  const candidate = parsed?.workingSet ?? parsed;
-  if (!candidate || typeof candidate !== 'object') {
-    throw new Error('Working Set JSON is invalid.');
-  }
-
-  const name = typeof candidate.name === 'string' && candidate.name.trim()
-    ? candidate.name.trim()
-    : fallbackName.trim();
-
-  if (!name) {
-    throw new Error('Working Set name is required.');
-  }
-
-  const buckets = candidate.categoryBuckets;
-  if (!buckets || typeof buckets !== 'object') {
-    throw new Error('Working Set JSON must include categoryBuckets.');
-  }
-
-  const now = Date.now();
-  const workingSetId = createId('hub_working_set');
-  const categoryBuckets: WorkingSet['categoryBuckets'] = {};
-  Object.entries(buckets).forEach(([categoryId, items]) => {
-    if (!Array.isArray(items)) return;
-    categoryBuckets[categoryId] = items
-      .map((item: any, index: number) => {
-        if (!item || typeof item.text !== 'string') return null;
-        const text = item.text.trim();
-        if (!text) return null;
-        return {
-          id: item.id && typeof item.id === 'string' ? item.id : `${workingSetId}_${categoryId}_${index + 1}`,
-          poolId: item.poolId && typeof item.poolId === 'string' ? item.poolId : `${workingSetId}_pool_${categoryId}`,
-          poolItemId: item.poolItemId && typeof item.poolItemId === 'string' ? item.poolItemId : `${workingSetId}_item_${index + 1}`,
-          text,
-          addedAt: typeof item.addedAt === 'number' ? item.addedAt : now,
-        };
-      })
-      .filter(Boolean) as WorkingSet['categoryBuckets'][string];
-  });
-
-  return {
-    id: workingSetId,
-    name,
-    createdAt: typeof candidate.createdAt === 'number' ? candidate.createdAt : now,
-    updatedAt: typeof candidate.updatedAt === 'number' ? candidate.updatedAt : now,
-    categoryBuckets,
-  };
-};
 
 const isOfficialPoolEntry = (entry: { creator?: string; creatorId?: string }) => {
   const creatorName = entry.creator?.trim().toLowerCase() ?? '';
@@ -301,11 +198,8 @@ export function PoolHubPage({
   manualUrl,
 }: PoolHubPageProps) {
   const canInteract = isLoggedIn && isPro;
-  const hubMode: HubMode = 'pools';
   const [entries, setEntries] = useState<PoolHubEntry[]>(() => listHubEntries());
-  const [workingSetEntries, setWorkingSetEntries] = useState<WorkingSetHubEntry[]>(() => listWorkingSetHubEntries());
   const [selectedId, setSelectedId] = useState<string>(entries[0]?.id ?? '');
-  const [selectedWorkingSetId, setSelectedWorkingSetId] = useState<string>(workingSetEntries[0]?.id ?? '');
   const [searchTerm, setSearchTerm] = useState('');
   const [tagFilter, setTagFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -316,31 +210,21 @@ export function PoolHubPage({
   const [addMessage, setAddMessage] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isWorkingSetUploadOpen, setIsWorkingSetUploadOpen] = useState(false);
   const [showMyUploads, setShowMyUploads] = useState(false);
   const [uploadState, setUploadState] = useState<UploadFormState>(DEFAULT_UPLOAD_STATE);
-  const [workingSetUploadState, setWorkingSetUploadState] = useState<WorkingSetUploadState>(DEFAULT_WS_UPLOAD_STATE);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [uploadPreview, setUploadPreview] = useState<Pool | null>(null);
-  const [workingSetUploadPreview, setWorkingSetUploadPreview] = useState<WorkingSet | null>(null);
   const [adminJson, setAdminJson] = useState('');
   const [adminMessage, setAdminMessage] = useState<string | null>(null);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [userPools, setUserPools] = useState<Pool[]>([]);
-  const [userWorkingSets, setUserWorkingSets] = useState<WorkingSet[]>([]);
   const [selectedUserPoolId, setSelectedUserPoolId] = useState<string>('');
-  const [selectedUserWorkingSetId, setSelectedUserWorkingSetId] = useState<string>('');
   const [userRating, setUserRatingState] = useState<number | null>(null);
-  const [workingSetUserRating, setWorkingSetUserRatingState] = useState<number | null>(null);
   const [comments, setComments] = useState(() =>
     entries[0]?.id ? listHubComments(entries[0].id) : []
   );
-  const [workingSetComments, setWorkingSetComments] = useState(() =>
-    workingSetEntries[0]?.id ? listWorkingSetHubComments(workingSetEntries[0].id) : []
-  );
   const [creatorStats, setCreatorStats] = useState({ uploads: 0, totalDownloads: 0, avgRating: 0, promptCount: 0, topTags: [] as string[] });
-  const [workingSetCreatorStats, setWorkingSetCreatorStats] = useState({ uploads: 0, totalDownloads: 0, avgRating: 0 });
   const [commentAuthor, setCommentAuthor] = useState('');
   const [commentBody, setCommentBody] = useState('');
   const [commentError, setCommentError] = useState<string | null>(null);
@@ -1043,9 +927,9 @@ export function PoolHubPage({
   }, [selectedEntry, selectedPoolItems.length, selectedPoolSectionCount, selectedPoolSections]);
 
   const detailIdpSets = useMemo(() => {
-    if (!selectedEntry || hubMode !== 'pools') return [];
+    if (!selectedEntry) return [];
     return (selectedEntry.payload as Pool).idpSets ?? [];
-  }, [selectedEntry, hubMode]);
+  }, [selectedEntry]);
 
   const previewSections = useMemo(() => {
     if (selectedPoolSectionCount > 0) {
@@ -1181,10 +1065,10 @@ export function PoolHubPage({
         <header className="pool-hub-header">
           <div className="pool-hub-hero">
             <div className="pool-hub-hero-main">
-              <div className="pool-hub-mode-label">Pool Library</div>
+              <div className="pool-hub-mode-label">Community Source Layer</div>
               <div>
                 <h2>Pool Hub</h2>
-                <p>Discover curated MorpBase libraries and community-made downloads in one place.</p>
+                <p>Discover official and community Pools, import the ones that help, and feed stronger Workflow Sources for Territories and Builder.</p>
               </div>
               <div className="pool-hub-hero-stats">
                 {hubOverviewStats.map(stat => (
@@ -1204,6 +1088,20 @@ export function PoolHubPage({
                 {isLoggedIn && !isPro && (
                   <div className="pool-hub-user-badge">Upgrade to Pro to upload, rate, or comment</div>
                 )}
+              </div>
+              <div className="pool-hub-hero-flow">
+                <div className="pool-hub-hero-flow-step">
+                  <strong>1. Discover here</strong>
+                  <span>Browse reusable source libraries from MorpBase and the community.</span>
+                </div>
+                <div className="pool-hub-hero-flow-step">
+                  <strong>2. Import to Workflow Sources</strong>
+                  <span>Bring useful Pools into your own reusable source layer.</span>
+                </div>
+                <div className="pool-hub-hero-flow-step">
+                  <strong>3. Use through Builder</strong>
+                  <span>Turn Pool sections into Territories or reuse them directly in your workflow.</span>
+                </div>
               </div>
             </div>
             <div className="pool-hub-hero-side">
@@ -1253,7 +1151,7 @@ export function PoolHubPage({
           <div className="pool-hub-toolbar-header">
             <div>
               <div className="pool-hub-section-title">Browse and filter</div>
-              <div className="pool-hub-muted">Search by theme, creator language, rating, category, and upload ownership.</div>
+              <div className="pool-hub-muted">Search by theme, creator language, rating, category, and upload ownership before importing Pools into Workflow Sources.</div>
             </div>
             <div className="pool-hub-toolbar-summary">
               <span>{filteredEntries.length} results</span>
@@ -1458,16 +1356,16 @@ export function PoolHubPage({
           {filteredEntries.length === 0 ? (
             <div className="pool-hub-empty">
               {showMyUploads
-                ? `No uploads yet. Upload a ${hubMode === 'working-sets' ? 'working set' : 'pool'} to see it here.`
-                : `No ${hubMode === 'working-sets' ? 'working sets' : 'pools'} match your filters.`}
+                ? 'No uploads yet. Upload a pool to see it here.'
+                : 'No pools match your filters.'}
             </div>
-          ) : hubMode === 'pools' ? (
+          ) : (
             <div className="pool-hub-source-sections">
               <div className="pool-hub-source-section">
                 <div className="pool-hub-source-section-header">
                   <div>
                     <div className="pool-hub-section-title">MorpBase Pools</div>
-                    <div className="pool-hub-muted">Official curated pools provided by MorpBase.</div>
+                    <div className="pool-hub-muted">Official source libraries provided by MorpBase for import into your Workflow Sources.</div>
                   </div>
                   <span className="pool-hub-source-count">{officialPoolEntries.length}</span>
                 </div>
@@ -1486,7 +1384,7 @@ export function PoolHubPage({
                 <div className="pool-hub-source-section-header">
                   <div>
                     <div className="pool-hub-section-title">Community Pools</div>
-                    <div className="pool-hub-muted">Downloadable pools uploaded by MorpBase users.</div>
+                    <div className="pool-hub-muted">Community-made source libraries you can import, adapt, and later use through Territories or Builder.</div>
                   </div>
                   <span className="pool-hub-source-count">{communityPoolEntries.length}</span>
                 </div>
@@ -1501,18 +1399,14 @@ export function PoolHubPage({
                 )}
               </div>
             </div>
-          ) : (
-            <div className="pool-hub-grid">
-              {filteredEntries.map(entry => renderHubCard(entry))}
-            </div>
           )}
         </section>
 
-        {false && (
+        {/* Legacy detail sidebar removed. Pool Hub now uses the modal detail surface only.
         <aside className="pool-hub-panel pool-hub-panel-detail">
           {!selectedEntry ? (
             <div className="pool-hub-empty">
-              Select a {hubMode === 'working-sets' ? 'working set' : 'pool'} to view details.
+              Select a pool to view details.
             </div>
           ) : (
             <>
@@ -1534,7 +1428,7 @@ export function PoolHubPage({
                   <button type="button" className="pool-hub-secondary" onClick={handleDownloadPool}>
                     Download JSON
                   </button>
-                  {hubMode === 'pools' && onGoToUserPools && (
+                  {onGoToUserPools && (
                     <button type="button" className="pool-hub-secondary" onClick={onGoToUserPools}>
                       View in User Pools
                     </button>
@@ -1549,7 +1443,7 @@ export function PoolHubPage({
               {addMessage && (
                 <div className="pool-hub-message">
                   <span>{addMessage}</span>
-                  {hubMode === 'pools' && onGoToUserPools && (
+                  {onGoToUserPools && (
                     <button
                       type="button"
                       className="pool-hub-message-link"
@@ -1585,9 +1479,9 @@ export function PoolHubPage({
                 <div className="pool-hub-creator-card">
                   <div className="pool-hub-creator-title">{resolveCreatorName(selectedEntry)}</div>
                   <div className="pool-hub-creator-meta">
-                    <span>{(hubMode === 'working-sets' ? workingSetCreatorStats : creatorStats).uploads} uploads</span>
-                    <span>{(hubMode === 'working-sets' ? workingSetCreatorStats : creatorStats).totalDownloads} downloads</span>
-                    <span>Avg {(hubMode === 'working-sets' ? workingSetCreatorStats : creatorStats).avgRating.toFixed(1)} rating</span>
+                    <span>{creatorStats.uploads} uploads</span>
+                    <span>{creatorStats.totalDownloads} downloads</span>
+                    <span>Avg {creatorStats.avgRating.toFixed(1)} rating</span>
                   </div>
                 </div>
               )}
@@ -1600,7 +1494,7 @@ export function PoolHubPage({
                 <div className="pool-hub-report-card">
                   <div className="pool-hub-section-title">Report</div>
                   <div className="pool-hub-muted">
-                    See something off? Flag this {hubMode === 'working-sets' ? 'working set' : 'pool'}.
+                    See something off? Flag this pool.
                   </div>
                   <input
                     type="text"
@@ -1609,7 +1503,7 @@ export function PoolHubPage({
                     placeholder="Reason (optional)"
                   />
                   <button type="button" className="pool-hub-secondary" onClick={handleReport}>
-                    {hubMode === 'working-sets' ? 'Report working set' : 'Report pool'}
+                    Report pool
                   </button>
                 </div>
               </div>
@@ -1621,8 +1515,7 @@ export function PoolHubPage({
                       key={star}
                       type="button"
                       className={`pool-hub-star ${
-                        (hubMode === 'working-sets' ? workingSetUserRating : userRating) &&
-                        (hubMode === 'working-sets' ? workingSetUserRating : userRating)! >= star
+                        userRating && userRating >= star
                           ? 'active'
                           : ''
                       }`}
@@ -1639,7 +1532,7 @@ export function PoolHubPage({
               </div>
               <div className="pool-hub-comments">
                 <div className="pool-hub-comments-header">
-                  Comments ({hubMode === 'working-sets' ? workingSetComments.length : comments.length})
+                  Comments ({comments.length})
                 </div>
                 <div className="pool-hub-comments-form">
                   <input
@@ -1685,10 +1578,10 @@ export function PoolHubPage({
                   )}
                 </div>
                 <div className="pool-hub-comments-list">
-                  {(hubMode === 'working-sets' ? workingSetComments : comments).length === 0 ? (
+                  {comments.length === 0 ? (
                     <div className="pool-hub-empty">No comments yet.</div>
                   ) : (
-                    (hubMode === 'working-sets' ? workingSetComments : comments).map(comment => (
+                    comments.map(comment => (
                       <div key={comment.id} className="pool-hub-comment">
                         <div className="pool-hub-comment-head">
                           <span className="pool-hub-comment-author">
@@ -1757,69 +1650,24 @@ export function PoolHubPage({
               <div className="pool-hub-detail-items">
                 <div className="pool-hub-detail-items-header">
                   <span>
-                    Items (
-                    {hubMode === 'working-sets'
-                      ? Object.values((selectedEntry.payload as WorkingSet).categoryBuckets ?? {}).reduce(
-                          (sum, list) => sum + list.length,
-                          0
-                        )
-                      : (selectedEntry.payload as Pool).items.length}
-                    )
+                    Items ({(selectedEntry.payload as Pool).items.length})
                   </span>
                 </div>
-                {hubMode === 'working-sets' ? (
-                  <div className="pool-hub-detail-items-grouped">
-                    {Object.entries((selectedEntry.payload as WorkingSet).categoryBuckets ?? {}).map(
-                      ([categoryId, items]) => {
-                        const groupKey = `sidebar-working-set:${selectedEntry.id}:${categoryId}`;
-                        const isExpanded = isItemGroupExpanded(groupKey);
-                        const shownItems = isExpanded ? items : items.slice(0, 4);
-                        return (
-                          <div key={categoryId} className="pool-hub-item-group">
-                            <div className="pool-hub-item-group-title">
-                              <div>
-                                {categoryId.replace(/-/g, ' ')}
-                                <span>{items.length}</span>
-                              </div>
-                              {items.length > 4 && (
-                                <button
-                                  type="button"
-                                  className="pool-hub-link"
-                                  onClick={() => toggleItemGroupExpanded(groupKey)}
-                                >
-                                  {isExpanded ? 'Show less' : 'Show all'}
-                                </button>
-                              )}
-                            </div>
-                            <div className="pool-hub-detail-items-list">
-                              {shownItems.map(item => (
-                                <div key={item.id} className="pool-hub-item">
-                                  <div className="pool-hub-item-text">{item.text}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                ) : (
-                  <div className="pool-hub-detail-items-list">
-                    {visibleItems.map(item => (
-                      <div key={item.id} className="pool-hub-item">
-                        <div className="pool-hub-item-text">{item.text}</div>
-                        {'tags' in item && item.tags && item.tags.length > 0 && (
-                          <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className="pool-hub-detail-items-list">
+                  {visibleItems.map(item => (
+                    <div key={item.id} className="pool-hub-item">
+                      <div className="pool-hub-item-text">{item.text}</div>
+                      {'tags' in item && item.tags && item.tags.length > 0 && (
+                        <div className="pool-hub-item-tags">{item.tags.join(', ')}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}
         </aside>
-        )}
+        */}
 
       </div>
 
@@ -2448,196 +2296,6 @@ export function PoolHubPage({
           {uploadError && <div className="pool-hub-error">{uploadError}</div>}
           <div className="pool-hub-upload-actions">
             <button type="button" className="pool-hub-secondary" onClick={() => setIsUploadOpen(false)}>
-              Cancel
-            </button>
-            <button type="button" className="pool-hub-primary" onClick={handleUpload}>
-              Upload to Hub
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={isWorkingSetUploadOpen}
-        onClose={() => setIsWorkingSetUploadOpen(false)}
-        title="Upload Working Set to Hub"
-        className="pool-hub-upload-modal"
-      >
-        <div className="pool-hub-upload-form">
-          <div className="pool-hub-upload-grid">
-            <label>
-              Creator
-              <input
-                type="text"
-                value={workingSetUploadState.creator}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, creator: event.target.value }))}
-                placeholder={creatorDisplayName || 'Studio Name'}
-              />
-              {myProfile?.displayName && (
-                <span className="pool-hub-muted">Using your public profile name.</span>
-              )}
-            </label>
-            <label>
-              Title
-              <input
-                type="text"
-                value={workingSetUploadState.title}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, title: event.target.value }))}
-                placeholder="Cinematic Portrait Set"
-              />
-            </label>
-            <label>
-              Summary
-              <input
-                type="text"
-                value={workingSetUploadState.summary}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, summary: event.target.value }))}
-                placeholder="Short one-liner"
-              />
-            </label>
-            <label>
-              Category
-              <input
-                type="text"
-                value={workingSetUploadState.category}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, category: event.target.value }))}
-                placeholder="Concept"
-              />
-            </label>
-            <label>
-              Language
-              <input
-                type="text"
-                value={workingSetUploadState.language}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, language: event.target.value }))}
-                placeholder="en"
-              />
-            </label>
-            <label>
-              License
-              <input
-                type="text"
-                value={workingSetUploadState.license}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, license: event.target.value }))}
-                placeholder="CC-BY"
-              />
-            </label>
-            <label>
-              Tags (comma)
-              <input
-                type="text"
-                value={workingSetUploadState.tags}
-                onChange={event => setWorkingSetUploadState(prev => ({ ...prev, tags: event.target.value }))}
-                placeholder="portrait, cinematic"
-              />
-            </label>
-          </div>
-          <label>
-            Description
-            <textarea
-              rows={4}
-              value={workingSetUploadState.description}
-              onChange={event => setWorkingSetUploadState(prev => ({ ...prev, description: event.target.value }))}
-              placeholder="Describe the working set and best use cases"
-            />
-          </label>
-          <label>
-            Hero Image URL (optional)
-            <input
-              type="text"
-              value={workingSetUploadState.heroImageUrl}
-              onChange={event => setWorkingSetUploadState(prev => ({ ...prev, heroImageUrl: event.target.value }))}
-              placeholder="https://..."
-            />
-          </label>
-          <label>
-            Upload Hero Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={event => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = () => {
-                  const result = typeof reader.result === 'string' ? reader.result : '';
-                  setWorkingSetUploadState(prev => ({ ...prev, heroImageUrl: result }));
-                };
-                reader.readAsDataURL(file);
-              }}
-            />
-          </label>
-          <label>
-            Working Set JSON
-            <textarea
-              rows={6}
-              value={workingSetUploadState.jsonInput}
-              onChange={event => {
-                const next = event.target.value;
-                setWorkingSetUploadState(prev => ({ ...prev, jsonInput: next }));
-                if (!next.trim()) {
-                  setWorkingSetUploadPreview(null);
-                  return;
-                }
-                try {
-                  const previewSet = parseWorkingSetPayload(next, workingSetUploadState.title);
-                  setWorkingSetUploadPreview(previewSet);
-                } catch {
-                  setWorkingSetUploadPreview(null);
-                }
-              }}
-              placeholder="Paste the exported working set JSON here"
-            />
-          </label>
-          {workingSetUploadPreview && (
-            <div className="pool-hub-upload-preview">
-              <div className="pool-hub-section-title">Preview</div>
-              <div className="pool-hub-muted">{workingSetUploadPreview.name}</div>
-              <div className="pool-hub-muted">
-                {Object.values(workingSetUploadPreview.categoryBuckets).reduce((sum, list) => sum + list.length, 0)} items
-              </div>
-            </div>
-          )}
-          <div className="pool-hub-upload-file">
-            <input
-              type="file"
-              accept="application/json"
-              onChange={event => handleUploadFile(event.target.files?.[0] ?? null)}
-            />
-            <span>Upload a .json file from disk.</span>
-          </div>
-          <div className="pool-hub-upload-import">
-            <label>
-              Import from Working Sets
-              <div className="pool-hub-upload-import-row">
-                <select
-                  value={selectedUserWorkingSetId}
-                  onChange={event => setSelectedUserWorkingSetId(event.target.value)}
-                >
-                  {userWorkingSets.length === 0 ? (
-                    <option value="">No working sets available</option>
-                  ) : (
-                    userWorkingSets.map(set => (
-                      <option key={set.id} value={set.id}>
-                        {set.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <button
-                  type="button"
-                  className="pool-hub-secondary"
-                  onClick={handleImportFromUserPools}
-                  disabled={userWorkingSets.length === 0}
-                >
-                  Load Working Set
-                </button>
-              </div>
-            </label>
-          </div>
-          {uploadError && <div className="pool-hub-error">{uploadError}</div>}
-          <div className="pool-hub-upload-actions">
-            <button type="button" className="pool-hub-secondary" onClick={() => setIsWorkingSetUploadOpen(false)}>
               Cancel
             </button>
             <button type="button" className="pool-hub-primary" onClick={handleUpload}>

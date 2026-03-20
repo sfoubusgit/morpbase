@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, Modifier, ModelProfile, Pool, PoolItem, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError, WorkingSet } from '../types';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, Modifier, ModelProfile, Pool, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
@@ -32,10 +32,10 @@ import { Modal } from './components/Modal';
 import { UserPoolsPage } from './components/UserPoolsPage';
 import { PoolHubPage } from './components/PoolHubPage';
 import { PromptLibrary } from './components/PromptLibrary';
+import { CharacterLibraryModal } from './components/CharacterLibraryModal';
 import { FloatingPromptFragments } from './components/FloatingPromptFragments';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
-import { WorkingSetsPage } from './components/WorkingSetsPage';
 import { PromptsPage } from './components/PromptsPage';
 import { LandingPage } from './components/LandingPage';
 import { AdminPage } from './components/AdminPage';
@@ -43,6 +43,12 @@ import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
+import {
+  createCharacter,
+  deleteCharacter as deleteStoredCharacter,
+  listCharacters,
+  updateCharacter,
+} from '../engine/characterStore';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -52,17 +58,6 @@ import {
   registerUser,
   updateUserName,
 } from '../engine/authStore';
-import {
-  addWorkingSetItem,
-  clearWorkingSetCategory,
-  createWorkingSet,
-  deleteWorkingSet,
-  getActiveWorkingSetId,
-  listWorkingSets,
-  removeWorkingSetItem,
-  setActiveWorkingSetId as persistActiveWorkingSetId,
-  updateWorkingSet,
-} from '../engine/workingSetStore';
 import { isCurrentUserAdmin } from '../engine/adminStore';
 import {
   trackAnalyticsEvent,
@@ -144,6 +139,7 @@ type BuilderSessionSnapshot = {
   navigationHistory: string[];
   hasReachedEndViaNext: boolean;
   activeIdpSetId: string | null;
+  activeCharacterId: string | null;
 };
 
 function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
@@ -169,6 +165,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       navigationHistory: Array.isArray(parsed.navigationHistory) ? parsed.navigationHistory.filter((entry): entry is string => typeof entry === 'string') : [],
       hasReachedEndViaNext: Boolean(parsed.hasReachedEndViaNext),
       activeIdpSetId: typeof parsed.activeIdpSetId === 'string' ? parsed.activeIdpSetId : null,
+      activeCharacterId: typeof parsed.activeCharacterId === 'string' ? parsed.activeCharacterId : null,
     };
   } catch {
     return null;
@@ -226,7 +223,7 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'working-sets' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
     try {
       if (parseCreatorHash()) return 'creator-profile';
       const saved = window.localStorage.getItem('promptgen:active_page');
@@ -235,7 +232,6 @@ export function App() {
       if (saved === 'pool-hub') return 'pool-hub';
       if (saved === 'my-profile') return 'my-profile';
       if (saved === 'creator-profile') return 'creator-profile';
-      if (saved === 'working-sets') return 'working-sets';
       if (saved === 'admin') return 'admin';
       return 'generator';
     } catch {
@@ -271,6 +267,7 @@ export function App() {
   const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>(initialBuilderSession?.poolPromptItems ?? []);
   const [activeIdpPool, setActiveIdpPool] = useState<Pool | null>(null);
   const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(initialBuilderSession?.activeIdpSetId ?? null);
+  const [activeCharacterId, setActiveCharacterId] = useState<string | null>(initialBuilderSession?.activeCharacterId ?? null);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
   );
@@ -308,6 +305,7 @@ export function App() {
     poolOutputOverrides: Map<string, string>;
     selectionOutputOverrides: Map<string, string>;
     selectedPromptFragments: SelectedPromptFragment[];
+    activeCharacterId: string | null;
   } | null>(null);
   
   // UI State: Model Profile
@@ -354,10 +352,10 @@ export function App() {
 6) Prompt Quality
 - Did outputs match intent? (Yes / Partially / No)
 - Where it fell short:
-- Any notable improvements when using Working Sets / User Pools:
+- Any notable improvements when using Territories / User Pools:
 
 7) Feature-Specific Feedback
-- Working Sets:
+- Territories:
 - Builder:
 - User Pools:
 - Random Prompt Generator:
@@ -381,19 +379,20 @@ export function App() {
   const [feedbackCopied, setFeedbackCopied] = useState(false);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [accountMessage, setAccountMessage] = useState<string | null>(null);
-  const [workingSets, setWorkingSets] = useState<WorkingSet[]>([]);
-  const [workingSetsLoading, setWorkingSetsLoading] = useState(false);
-  const [activeWorkingSetId, setActiveWorkingSet] = useState<string | null>(() => getActiveWorkingSetId());
   const [territories, setTerritories] = useState<Territory[]>([]);
   const [territoriesLoading, setTerritoriesLoading] = useState(false);
   const [territoryPools, setTerritoryPools] = useState<Pool[]>([]);
+  const [characters, setCharacters] = useState<CharacterIdentity[]>([]);
+  const [charactersLoading, setCharactersLoading] = useState(true);
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
   const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderTerritoryPickerId, setBuilderTerritoryPickerId] = useState<string>('');
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [isSavedPromptsDrawerOpen, setIsSavedPromptsDrawerOpen] = useState(false);
+  const [isCharacterLibraryOpen, setIsCharacterLibraryOpen] = useState(false);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
+  const [dismissedTerritoryRecommendation, setDismissedTerritoryRecommendation] = useState(false);
   const [topToastMessage, setTopToastMessage] = useState<string | null>(null);
   const [unavailableJumpNodeId, setUnavailableJumpNodeId] = useState<string | null>(null);
   const lastTerritoryRepositionKeyRef = useRef<string>('');
@@ -485,8 +484,12 @@ export function App() {
     return null;
   }, []);
 
-  
+  const activeCharacter = useMemo(
+    () => characters.find(character => character.id === activeCharacterId) ?? null,
+    [characters, activeCharacterId]
+  );
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
+  const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
     if (!activeTerritory) return [];
     const categoryIds = new Set<string>();
@@ -518,31 +521,12 @@ export function App() {
     }
   }, [activeTerritoryId, builderTerritoryPickerId, territories]);
 
-  const baseSetTemplate = useMemo<WorkingSet>(() => {
-    const categoryBuckets: WorkingSet['categoryBuckets'] = {};
+  useEffect(() => {
+    if (activeTerritoryId) {
+      setDismissedTerritoryRecommendation(false);
+    }
+  }, [activeTerritoryId]);
 
-    attributeDefinitions.forEach(definition => {
-      const bucket = categoryBuckets[definition.category] ?? [];
-      bucket.push({
-        id: definition.id,
-        poolId: 'base-set',
-        poolItemId: definition.id,
-        text: definition.baseText,
-        addedAt: 0,
-      });
-      categoryBuckets[definition.category] = bucket;
-    });
-
-    return {
-      id: '__base_set_template__',
-      name: 'Base Set',
-      categoryBuckets,
-      createdAt: 0,
-      updatedAt: 0,
-    };
-  }, [attributeDefinitions]);
-
-  
   // Helper: Get first subcategory node ID for a category, or the category root if no subcategories
   const getFirstSubcategoryNodeId = (categoryId: string, nodes: QuestionNode[]): string | null => {
     const categoryItems = CATEGORY_MAP[categoryId];
@@ -1259,18 +1243,6 @@ export function App() {
     }
   };
 
-  const refreshWorkingSets = useCallback(async () => {
-    setWorkingSetsLoading(true);
-    try {
-      const next = await listWorkingSets();
-      setWorkingSets(next);
-    } catch {
-      setWorkingSets([]);
-    } finally {
-      setWorkingSetsLoading(false);
-    }
-  }, []);
-
   const refreshTerritories = useCallback(async () => {
     setTerritoriesLoading(true);
     try {
@@ -1292,12 +1264,71 @@ export function App() {
     }
   }, []);
 
-  const handleSetActiveWorkingSet = (id: string | null) => {
-    setUnavailableJumpNodeId(null);
-    setHasReachedEndViaNext(false);
-    setActiveWorkingSet(id);
-    persistActiveWorkingSetId(id);
-  };
+  const refreshCharacters = useCallback(async () => {
+    setCharactersLoading(true);
+    try {
+      const next = await listCharacters();
+      setCharacters(next);
+      setActiveCharacterId(prev => (
+        prev && !next.some(character => character.id === prev)
+          ? null
+          : prev
+      ));
+    } catch {
+      setCharacters([]);
+      setActiveCharacterId(null);
+    } finally {
+      setCharactersLoading(false);
+    }
+  }, []);
+
+  const handleCreateCharacter = useCallback(async (input: CharacterIdentityInput) => {
+    const created = await createCharacter(input);
+    await refreshCharacters();
+    return created;
+  }, [refreshCharacters]);
+
+  const handleUpdateCharacter = useCallback(async (id: string, input: CharacterIdentityInput) => {
+    const updated = await updateCharacter(id, input);
+    await refreshCharacters();
+    return updated;
+  }, [refreshCharacters]);
+
+  const handleDeleteCharacter = useCallback(async (id: string) => {
+    const deletedCharacter = characters.find(character => character.id === id) ?? null;
+    await deleteStoredCharacter(id);
+    await refreshCharacters();
+    if (activeCharacterId === id) {
+      setActiveCharacterId(null);
+      if (deletedCharacter) {
+        setBuilderNotice(`Removed "${deletedCharacter.name}" from the current workflow because it was deleted.`);
+      }
+    }
+  }, [activeCharacterId, characters, refreshCharacters]);
+
+  const handleSelectCharacter = useCallback((id: string) => {
+    const nextCharacter = characters.find(character => character.id === id);
+    setActiveCharacterId(id);
+    if (nextCharacter) {
+      setBuilderNotice(`Active character changed to "${nextCharacter.name}".`);
+    }
+  }, [characters]);
+
+  const handleRemoveActiveCharacter = useCallback(() => {
+    if (!activeCharacterId) {
+      return;
+    }
+
+    const activeCharacter = characters.find(character => character.id === activeCharacterId) ?? null;
+    setActiveCharacterId(null);
+    if (activeCharacter) {
+      setBuilderNotice(`Removed "${activeCharacter.name}" from the current workflow.`);
+    }
+  }, [activeCharacterId, characters]);
+
+  useEffect(() => {
+    void refreshCharacters();
+  }, [refreshCharacters]);
 
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);
@@ -1376,6 +1407,11 @@ export function App() {
     setActivePage('user-pools');
   };
 
+  const handleOpenTerritoryWorkspaceSources = useCallback(() => {
+    setTerritoryEditTargetId(null);
+    setActivePage('user-pools');
+  }, []);
+
   const handleCreateTerritory = async (
     name: string,
     description: string,
@@ -1409,50 +1445,6 @@ export function App() {
     if (activeTerritoryId === id) {
       handleSetActiveTerritory(null);
     }
-  };
-
-  const handleCreateWorkingSet = async (
-    name: string,
-    payload?: Partial<Omit<WorkingSet, 'id' | 'name' | 'createdAt' | 'updatedAt'>>
-  ) => {
-    try {
-      const created = await createWorkingSet(name, payload);
-      await refreshWorkingSets();
-      setActiveWorkingSet(created.id);
-      return created;
-    } catch {
-      return null;
-    }
-  };
-
-  const handleRenameWorkingSet = async (id: string, name: string) => {
-    await updateWorkingSet(id, { name });
-    await refreshWorkingSets();
-  };
-
-  const handleDeleteWorkingSet = async (id: string) => {
-    await deleteWorkingSet(id);
-    await refreshWorkingSets();
-    setActiveWorkingSet(getActiveWorkingSetId());
-  };
-
-  const handleAddWorkingSetItem = async (setId: string, categoryId: string, poolId: string, item: PoolItem) => {
-    await addWorkingSetItem(setId, categoryId, {
-      poolId,
-      poolItemId: item.id,
-      text: item.text,
-    });
-    await refreshWorkingSets();
-  };
-
-  const handleRemoveWorkingSetItem = async (setId: string, categoryId: string, itemId: string) => {
-    await removeWorkingSetItem(setId, categoryId, itemId);
-    await refreshWorkingSets();
-  };
-
-  const handleClearWorkingSetCategory = async (setId: string, categoryId: string) => {
-    await clearWorkingSetCategory(setId, categoryId);
-    await refreshWorkingSets();
   };
 
   const handleRemoveActiveTerritorySource = async (sourceId: string) => {
@@ -1881,6 +1873,7 @@ export function App() {
       poolOutputOverrides: new Map(poolOutputOverrides),
       selectionOutputOverrides: new Map(selectionOutputOverrides),
       selectedPromptFragments: [...selectedPromptFragments],
+      activeCharacterId,
     });
     setSelections(new Map());
     setModifiers(new Map());
@@ -1899,7 +1892,7 @@ export function App() {
     });
     setSelectionOutputOverrides(new Map());
     setSelectedPromptFragments([]);
-  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments]);
+  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments, activeCharacterId]);
 
   const handleUndoClearPrompt = useCallback(() => {
     if (!clearUndoState) return;
@@ -1909,6 +1902,7 @@ export function App() {
     setPoolOutputOverrides(new Map(clearUndoState.poolOutputOverrides));
     setSelectionOutputOverrides(new Map(clearUndoState.selectionOutputOverrides));
     setSelectedPromptFragments([...clearUndoState.selectedPromptFragments]);
+    setActiveCharacterId(clearUndoState.activeCharacterId);
     setClearUndoState(null);
   }, [clearUndoState]);
 
@@ -1945,6 +1939,7 @@ export function App() {
         navigationHistory,
         hasReachedEndViaNext,
         activeIdpSetId,
+        activeCharacterId,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -1965,6 +1960,7 @@ export function App() {
     navigationHistory,
     hasReachedEndViaNext,
     activeIdpSetId,
+    activeCharacterId,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -2035,6 +2031,18 @@ export function App() {
     [customPromptFragments]
   );
   const promptAdditionEntries = useMemo<PromptAdditionEntry[]>(() => {
+    const characterEntries: PromptAdditionEntry[] = activeCharacter
+      ? activeCharacter.phraseBundle.core
+          .map((text, index) => ({
+            id: `character:${activeCharacter.id}:${index}`,
+            text: text.trim(),
+            position: 'start' as const,
+            section: 'Character',
+            sourceType: 'character' as const,
+          }))
+          .filter(entry => entry.text)
+      : [];
+
     const fragmentEntries = selectedPromptFragments
       .map(fragment => {
         const definition = availablePromptFragments.find(item => item.id === fragment.id);
@@ -2061,8 +2069,8 @@ export function App() {
       sourceType: item.sourceType ?? 'pool',
     }));
 
-    return [...poolEntries, ...fragmentEntries];
-  }, [availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
+    return [...characterEntries, ...poolEntries, ...fragmentEntries];
+  }, [activeCharacter, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -2403,16 +2411,6 @@ export function App() {
   };
 
   useEffect(() => {
-    if (activePage === 'working-sets' || activePage === 'generator') {
-      if (authUser) {
-        refreshWorkingSets();
-        setActiveWorkingSet(getActiveWorkingSetId());
-      } else {
-        setWorkingSets([]);
-        setActiveWorkingSet(null);
-        setWorkingSetsLoading(false);
-      }
-    }
     if (activePage === 'user-pools' || activePage === 'generator') {
       if (authUser) {
         refreshTerritories();
@@ -2425,7 +2423,7 @@ export function App() {
         setTerritoriesLoading(false);
       }
     }
-  }, [activePage, authUser, refreshTerritories, refreshTerritoryPools, refreshWorkingSets]);
+  }, [activePage, authUser, refreshTerritories, refreshTerritoryPools]);
 
   useEffect(() => {
     let isActive = true;
@@ -2461,16 +2459,6 @@ export function App() {
       setActivePage('generator');
     }
   }, [activePage, isAdmin]);
-
-  useEffect(() => {
-    if (authUser) {
-      refreshWorkingSets();
-    } else {
-      setWorkingSets([]);
-      setActiveWorkingSet(null);
-      setWorkingSetsLoading(false);
-    }
-  }, [authUser, refreshWorkingSets]);
 
   useEffect(() => {
     if (authUser) {
@@ -2562,71 +2550,60 @@ export function App() {
           >
             Feedback
           </button>
-          <button
-            type="button"
-            className={`app-page-toggle-action-button ${activePage === 'working-sets' ? 'active' : ''}`}
-            onClick={() => setActivePage('working-sets')}
-          >
-            Legacy Sets
-          </button>
         </div>
-        <div className="app-page-toggle-group" role="tablist" aria-label="App mode">
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'generator' ? 'active' : ''}`}
-            onClick={() => setActivePage('generator')}
-            role="tab"
-            aria-selected={activePage === 'generator'}
-          >
-            Builder
-          </button>
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'prompts' ? 'active' : ''}`}
-            onClick={() => setActivePage('prompts')}
-            role="tab"
-            aria-selected={activePage === 'prompts'}
-          >
-            Prompts
-          </button>
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'user-pools' ? 'active' : ''}`}
-            onClick={() => setActivePage('user-pools')}
-            role="tab"
-            aria-selected={activePage === 'user-pools'}
-          >
-            User Pools
-          </button>
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'my-profile' ? 'active' : ''}`}
-            onClick={() => setActivePage('my-profile')}
-            role="tab"
-            aria-selected={activePage === 'my-profile'}
-          >
-            My Profile
-          </button>
-          <button
-            type="button"
-            className={`app-page-toggle-btn ${activePage === 'pool-hub' ? 'active' : ''}`}
-            onClick={() => setActivePage('pool-hub')}
-            role="tab"
-            aria-selected={activePage === 'pool-hub'}
-          >
-            Pool Hub
-          </button>
-          {isAdmin && (
+        <div className="app-page-toggle-nav" aria-label="App sections">
+          <div className="app-page-toggle-cluster app-page-toggle-cluster-primary">
+            <span className="app-page-toggle-section-label">Main Workspace</span>
             <button
               type="button"
-              className={`app-page-toggle-btn ${activePage === 'admin' ? 'active' : ''}`}
-              onClick={() => setActivePage('admin')}
-              role="tab"
-              aria-selected={activePage === 'admin'}
+              className={`app-page-toggle-btn app-page-toggle-btn-primary ${activePage === 'generator' ? 'active' : ''}`}
+              onClick={() => setActivePage('generator')}
             >
-              Admin
+              Builder
             </button>
-          )}
+          </div>
+          <div className="app-page-toggle-cluster">
+            <span className="app-page-toggle-section-label">Support Tools</span>
+            <div className="app-page-toggle-group">
+              <button
+                type="button"
+                className={`app-page-toggle-btn ${activePage === 'prompts' ? 'active' : ''}`}
+                onClick={() => setActivePage('prompts')}
+              >
+                Saved Prompts
+              </button>
+              <button
+                type="button"
+                className={`app-page-toggle-btn ${activePage === 'user-pools' ? 'active' : ''}`}
+                onClick={() => setActivePage('user-pools')}
+              >
+                Workflow Sources
+              </button>
+              <button
+                type="button"
+                className={`app-page-toggle-btn ${activePage === 'pool-hub' ? 'active' : ''}`}
+                onClick={() => setActivePage('pool-hub')}
+              >
+                Community Pools
+              </button>
+              <button
+                type="button"
+                className={`app-page-toggle-btn ${activePage === 'my-profile' ? 'active' : ''}`}
+                onClick={() => setActivePage('my-profile')}
+              >
+                Profile
+              </button>
+              {isAdmin && (
+                <button
+                  type="button"
+                  className={`app-page-toggle-btn ${activePage === 'admin' ? 'active' : ''}`}
+                  onClick={() => setActivePage('admin')}
+                >
+                  Admin
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       {activePage === 'admin' ? (
@@ -2708,25 +2685,6 @@ export function App() {
           authUser={authUser}
           isPro={isPro}
         />
-      ) : activePage === 'working-sets' ? (
-        <WorkingSetsPage
-          manualUrl={manualUrl}
-          workingSets={workingSets}
-          baseSetTemplate={baseSetTemplate}
-          workingSetsLoading={workingSetsLoading}
-          activeWorkingSetId={activeWorkingSetId}
-          categoryOrder={CATEGORY_ORDER}
-          onCreateWorkingSet={handleCreateWorkingSet}
-          onRenameWorkingSet={handleRenameWorkingSet}
-          onDeleteWorkingSet={handleDeleteWorkingSet}
-          onSetActiveWorkingSet={handleSetActiveWorkingSet}
-          onAddWorkingSetItem={handleAddWorkingSetItem}
-          onRemoveWorkingSetItem={handleRemoveWorkingSetItem}
-          onClearWorkingSetCategory={handleClearWorkingSetCategory}
-          authReady={authReady}
-          authUser={authUser}
-          isPro={isPro}
-        />
       ) : (
         <>
         {topToastMessage && (
@@ -2761,6 +2719,80 @@ export function App() {
                   <button type="button" onClick={() => setBuilderNotice(null)}>
                     Dismiss
                   </button>
+                </div>
+              )}
+              {!isComplete && !activeTerritory && !dismissedTerritoryRecommendation && (
+                <div className="builder-territory-recommendation">
+                  <div className="builder-territory-recommendation-header">
+                    <div>
+                      <div className="builder-territory-recommendation-label">Recommended Workflow Context</div>
+                      <div className="builder-territory-recommendation-title">
+                        Use a Territory when you want Builder to stay inside a stronger workflow lane
+                      </div>
+                      <div className="builder-territory-recommendation-copy">
+                        Builder stays fully usable in open workspace mode, but Territories give it
+                        a focused context built from selected Pool sections.
+                      </div>
+                    </div>
+                  </div>
+                  {territories.length > 0 ? (
+                    <div className="builder-territory-recommendation-controls">
+                      <label className="builder-territory-recommendation-picker">
+                        <span>Saved Territory</span>
+                        <select
+                          value={builderTerritoryPickerId}
+                          onChange={event => setBuilderTerritoryPickerId(event.target.value)}
+                        >
+                          {territories.map(territory => (
+                            <option key={territory.id} value={territory.id}>
+                              {territory.name}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <div className="builder-territory-recommendation-actions">
+                        <button
+                          type="button"
+                          className="builder-territory-recommendation-primary"
+                          onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
+                          disabled={!builderTerritoryPickerId}
+                        >
+                          Choose Territory
+                        </button>
+                        <button
+                          type="button"
+                          className="builder-territory-recommendation-secondary"
+                          onClick={handleOpenTerritoryWorkspaceSources}
+                        >
+                          {canManageTerritories ? 'Create Territory' : authUser ? 'Unlock Territories' : 'Log in for Territories'}
+                        </button>
+                        <button
+                          type="button"
+                          className="builder-territory-recommendation-tertiary"
+                          onClick={() => setDismissedTerritoryRecommendation(true)}
+                        >
+                          Continue in Open Workspace
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="builder-territory-recommendation-actions">
+                      <button
+                        type="button"
+                        className="builder-territory-recommendation-primary"
+                        onClick={handleOpenTerritoryWorkspaceSources}
+                      >
+                        {canManageTerritories ? 'Create Territory' : authUser ? 'Unlock Territories' : 'Log in for Territories'}
+                      </button>
+                      <button
+                        type="button"
+                        className="builder-territory-recommendation-tertiary"
+                        onClick={() => setDismissedTerritoryRecommendation(true)}
+                      >
+                        Continue in Open Workspace
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
               {isComplete ? (
@@ -2846,17 +2878,45 @@ export function App() {
               )}
             </div>
             <div className="app-sidebar">
+                <div className="builder-sidebar-panel workspace-sidebar-panel">
+                  <div className="builder-sidebar-panel-header">
+                    <div>
+                      <div className="builder-sidebar-panel-label">Builder Workspace</div>
+                      <div className="builder-sidebar-panel-title">{currentBuilderAreaLabel}</div>
+                      <div className="builder-sidebar-helper">
+                        Builder is the main workspace for shaping the live prompt workflow.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="builder-sidebar-metrics">
+                    <div className="builder-sidebar-metric">
+                      <span className="builder-sidebar-metric-label">Workflow Mode</span>
+                      <span className="builder-sidebar-metric-value">{activeBuilderModeConfig.label}</span>
+                    </div>
+                    <div className="builder-sidebar-metric">
+                      <span className="builder-sidebar-metric-label">Current Area</span>
+                      <span className="builder-sidebar-metric-value">{currentBuilderAreaLabel}</span>
+                    </div>
+                    <div className="builder-sidebar-metric">
+                      <span className="builder-sidebar-metric-label">Territory Status</span>
+                      <span className="builder-sidebar-metric-value">
+                        {activeTerritory ? activeTerritory.name : 'Open workspace'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="builder-sidebar-flow-note">{currentBuilderFlowHint}</div>
+                </div>
                 <div className="builder-sidebar-panel territory-sidebar-panel">
                   <div className="builder-sidebar-panel-header">
                     <div>
-                      <div className="builder-sidebar-panel-label">Territory</div>
+                      <div className="builder-sidebar-panel-label">Territory Context</div>
                       <div className="builder-sidebar-panel-title">
                         {activeTerritory ? activeTerritory.name : 'No active Territory'}
                       </div>
                       <div className="territory-sidebar-helper">
                         {activeTerritory
-                          ? 'Pool = reusable source. Territory = focused workflow space built from selected pool sections.'
-                          : 'Optional: Pool = reusable source. Territory = focused workflow space built from selected pool sections.'}
+                          ? 'This Territory is shaping Builder with a focused workflow space built from selected Pool sections.'
+                          : 'Optional but recommended when you want Builder to stay inside a focused workflow space built from selected Pool sections.'}
                       </div>
                     </div>
                   </div>
@@ -2943,7 +3003,7 @@ export function App() {
                       <button type="button" onClick={() => activeTerritory && handleOpenTerritoryEditor(activeTerritory.id)}>
                         Edit Territory
                       </button>
-                      <button type="button" onClick={() => setActivePage('user-pools')}>
+                      <button type="button" onClick={handleOpenTerritoryWorkspaceSources}>
                         Manage Territories
                       </button>
                       <button type="button" onClick={() => handleSetActiveTerritory(null)}>
@@ -2954,7 +3014,7 @@ export function App() {
                 ) : territories.length > 0 ? (
                   <div className="territory-reactivate-bar territory-reactivate-bar-sidebar">
                     <div className="territory-reactivate-copy">
-                      <span className="territory-reactivate-text">Activate a saved focused workflow space without leaving Builder.</span>
+                      <span className="territory-reactivate-text">Activate a saved Territory when you want Builder to move inside a focused workflow space.</span>
                     </div>
                     <div className="territory-reactivate-actions">
                       <select
@@ -2999,6 +3059,10 @@ export function App() {
                 activeTerritoryName={activeTerritory?.name ?? null}
                 territoryFocusMode={activeTerritory ? territoryNavigationMode : null}
                 activePoolNames={activeWorkflowPoolNames}
+                activeCharacterName={activeCharacter?.name ?? null}
+                activeCharacterSummary={activeCharacter?.summary ?? null}
+                onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
+                onRemoveCharacter={activeCharacter ? handleRemoveActiveCharacter : undefined}
                 availableIdpSets={activeIdpPool?.idpSets ?? []}
                 activeIdpSetId={activeIdpSetId}
                 onSelectIdpSet={handleSelectActiveIdpSet}
@@ -3112,18 +3176,18 @@ export function App() {
             <Modal
               isOpen={isAppTutorialOpen}
               onClose={() => setIsAppTutorialOpen(false)}
-              title="How to Use the Prompt Builder"
+              title="How to Use the Builder Workspace"
             >
               <div className="app-tutorial-body">
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">What is This Tool?</h3>
                   <p>
-                    This tool helps you build high-quality text prompts for image generation models such as Stable Diffusion.
-                    Instead of writing a long, complex prompt from scratch, you answer a series of focused questions
-                    about your image in three stages: define the main idea, refine the look, and finish the result only if needed.
+                    MorpBase gives you a Builder workspace for authoring prompt workflows for image generation models such as Stable Diffusion.
+                    Instead of rewriting one long prompt from scratch every time, you move through focused workflow areas
+                    that help define the main idea, refine the look, and finish the result only when extra polish is needed.
                   </p>
                   <p>
-                    Want the full guide? Open the manual section on the Builder.
+                    Want the full guide? Open the manual section for the Builder workspace.
                     {' '}
                     <a href={manualLink('builder')} target="_blank" rel="noreferrer">
                       Deep dive in the manual
@@ -3135,24 +3199,25 @@ export function App() {
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">How It Works</h3>
                   <p>
-                    Start by defining the image with the core pillars: who or what is in the scene, where it exists, and what visual language it should follow.
-                    Then refine the look with lighting, camera framing, and actions. Finish with extra polish only when you need it.
+                    Start by shaping the workflow through the core areas: who or what is in the scene, where it exists, and what visual language it should follow.
+                    Then refine the result with lighting, camera framing, actions, and other details. Finish with extra polish only when you need it.
                   </p>
                   <p>
-                    Each answer you choose adds structured pieces to your final prompt, and the prompt preview on the right updates as you go,
-                    so you can see exactly what will be sent to the model.
+                    Each answer you choose adds structured pieces to the active prompt workflow, and Prompt Preview on the right updates as you go
+                    so you can see exactly what the workspace is producing.
                   </p>
                 </section>
 
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">Navigating the Interface</h3>
                   <p>
-                    <strong>Category Sidebar:</strong> Jump directly to any category or subcategory by clicking on it in the left sidebar.
+                    <strong>Builder Sidebar:</strong> Jump directly to any workflow area or subcategory from the left side.
                     The sidebar is grouped into Define, Refine, and Finish so it is easier to see what matters first.
                     Finish is intentionally optional and is mainly for extra polish, atmosphere, and final treatment.
                   </p>
                   <p>
-                    <strong>Prompt Preview:</strong> Watch your prompt build in real-time on the right side as you make selections.
+                    <strong>Prompt Preview:</strong> Use the right side as your live output companion. It shows the current workflow result,
+                    plus any active Territory context, Character overlay, or identity baseline layered onto it.
                   </p>
                 </section>
 
@@ -3160,21 +3225,21 @@ export function App() {
                   <h3 className="app-tutorial-heading">Building Your Prompt</h3>
                   <p>
                     Start by selecting attributes from the current question. You can select multiple options, and each selection
-                    contributes to your final prompt. You can refine or remove choices at any time by navigating back to previous
-                    questions or using the sidebar.
+                    contributes to the live workflow output. You can refine or remove choices at any time by navigating back to previous
+                    questions or by jumping between workflow areas in the sidebar.
                   </p>
                   <p>
-                    When you're happy with the result, copy the prompt text from the preview panel and paste it into your
-                    image-generation interface (like Stable Diffusion, Midjourney, or similar tools).
+                    When you want stronger focus, activate a Territory so Builder stays inside a more specific workflow space.
+                    When you are happy with the result, save it or copy the prompt text from Prompt Preview into your image-generation interface.
                   </p>
                 </section>
 
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">Using the Random Prompt Generator</h3>
                   <p>
-                    If you want quick inspiration instead of manually answering questions, use the <strong>Random Prompt Generator</strong>
+                    If you want quick inspiration instead of manually shaping the workflow, use the <strong>Random Prompt Generator</strong>
                     button in the bottom-right corner. This opens a separate tool that creates prompts automatically based on
-                    randomly selected attributes from categories you choose.
+                    randomly selected attributes from the Builder areas you choose.
                   </p>
                   <p>
                     This is perfect for exploring new ideas, getting inspiration, or quickly generating variations to see what works best.
@@ -3190,15 +3255,26 @@ export function App() {
                 <section className="app-tutorial-section">
                   <h3 className="app-tutorial-heading">Tips for Best Results</h3>
                   <ul className="app-tutorial-list">
-                    <li>Be specific with your selections—more detail often leads to better results</li>
-                    <li>Use the sidebar to jump between categories and refine your choices</li>
-                    <li>Check the prompt preview regularly to see how your selections combine</li>
+                    <li>Be specific with your selections - more detail often leads to better results</li>
+                    <li>Use the sidebar to move between workflow areas and refine your choices</li>
+                    <li>Check Prompt Preview regularly to see how your selections and context layers combine</li>
                     <li>Experiment with different combinations to find what works best for your needs</li>
-                    <li>Use the Random Generator to discover new prompt styles you might not have considered</li>
+                    <li>Use the Random Generator to discover new workflow directions you might not have considered</li>
                   </ul>
                 </section>
               </div>
             </Modal>
+            <CharacterLibraryModal
+              isOpen={isCharacterLibraryOpen}
+              onClose={() => setIsCharacterLibraryOpen(false)}
+              characters={characters}
+              activeCharacterId={activeCharacterId}
+              isLoading={charactersLoading}
+              onSelectCharacter={handleSelectCharacter}
+              onCreateCharacter={handleCreateCharacter}
+              onUpdateCharacter={handleUpdateCharacter}
+              onDeleteCharacter={handleDeleteCharacter}
+            />
           </div>
         </div>
         </>

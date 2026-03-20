@@ -236,14 +236,18 @@ export function CategorySidebar({
       <div className="category-sidebar-content">
         <div className="category-sidebar-list">
           <div className="category-sidebar-title-wrapper">
-            <h3 className="category-sidebar-title">Builder Flow</h3>
+            <h3 className="category-sidebar-title">Builder Workspace</h3>
+            <div className="category-sidebar-subtitle">
+              Move through the workflow areas that shape the live prompt.
+            </div>
           </div>
           <div className="category-sidebar-hint">
-            <strong>{modeLabel}</strong>{' '}
+            <strong>{modeLabel}</strong> is currently guiding Builder.
+            {' '}
             {modeDescription}
           </div>
           <label className="category-sidebar-hint category-sidebar-mode-select">
-            <span>Workflow Mode</span>
+            <span>Switch Workflow Mode</span>
             <select
               value={modeId}
               onChange={event => onModeChange(event.target.value as BuilderModeId)}
@@ -257,10 +261,11 @@ export function CategorySidebar({
           </label>
           {activeTerritoryName && (
             <div className="category-sidebar-hint category-sidebar-hint-territory">
+              <strong>Territory Context:</strong>{' '}
               <strong>{activeTerritoryName}</strong>{' '}
               {territoryScopedView
-                ? 'is limiting the sidebar to the Builder areas mapped to this Territory. In this mode, Next jumps between mapped Builder areas.'
-                : 'is highlighting the Builder areas most relevant to this Territory.'}
+                ? 'is focusing this sidebar on the Builder areas mapped to that workflow space. In this mode, Next jumps between mapped Builder areas.'
+                : 'is highlighting the Builder areas most relevant to that workflow space.'}
             </div>
           )}
           {stageDefinitions.map(stage => {

@@ -92,6 +92,32 @@
   gap: 8px;
 }
 
+.pool-hub-hero-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pool-hub-hero-flow-step {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pool-hub-hero-flow-step strong {
+  font-size: 12px;
+  color: #fbfcff;
+}
+
+.pool-hub-hero-flow-step span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #d4daf3;
+}
+
 .pool-hub-header h2 {
   margin: 0 0 6px 0;
   font-size: 30px;
@@ -1634,6 +1660,10 @@
   }
 
   .pool-hub-hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .pool-hub-hero-flow {
     grid-template-columns: 1fr;
   }
 }

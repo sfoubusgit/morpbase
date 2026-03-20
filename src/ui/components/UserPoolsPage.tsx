@@ -1216,8 +1216,8 @@ export function UserPoolsPage({
     <div className="user-pools-page">
       <header className="user-pools-header">
         <div>
-          <h2>User Pools</h2>
-          <p>Save prompt fragments you want to reuse later and add them to prompts when needed.</p>
+          <h2>Workflow Sources</h2>
+          <p>Build Pools as reusable source libraries, then compose Territories from selected Pool sections to shape Builder.</p>
         </div>
         {manualUrl && (
           <a
@@ -1226,14 +1226,28 @@ export function UserPoolsPage({
             target="_blank"
             rel="noreferrer"
           >
-            See the full User Pools guide
+            See the Workflow Sources guide
           </a>
         )}
       </header>
 
       <div className="user-pools-guide">
         <div>
-          <strong>Quick start:</strong> Create a folder, add a pool, then build it with reusable items grouped into shared sections.
+          <strong>Quick start:</strong> Build Pools first. Then use shared Pool sections to compose Territories that can be activated in Builder.
+        </div>
+        <div className="user-pools-guide-relationship">
+          <div className="user-pools-guide-relationship-card">
+            <strong>Pool</strong>
+            <span>Reusable source material that stays in your library.</span>
+          </div>
+          <div className="user-pools-guide-relationship-card">
+            <strong>Territory</strong>
+            <span>Focused workflow context built from selected Pool sections.</span>
+          </div>
+          <div className="user-pools-guide-relationship-card">
+            <strong>Builder</strong>
+            <span>The main workspace where those workflow contexts are activated and used.</span>
+          </div>
         </div>
         <div className="user-pools-section-legend">
           {POOL_SECTION_OPTIONS.map(section => (
@@ -1257,6 +1271,9 @@ export function UserPoolsPage({
             <button type="button" onClick={() => setIsRandomizerOpen(true)} disabled={poolsLoading || !!gateMessage}>
               Randomize
             </button>
+          </div>
+          <div className="user-pools-panel-intro">
+            Pools are reusable source libraries. Add and organize source material here before turning selected sections into Territories.
           </div>
           {!gateMessage && (
             <>
@@ -1873,7 +1890,7 @@ export function UserPoolsPage({
             </div>
             <div className="user-pools-territory-overview">
               <div className="user-pools-helper">
-                Compose a creative territory from selected pool sections, then open it in Builder.
+                Turn selected Pool sections into focused Builder contexts, then activate them when you want stronger workflow focus.
               </div>
               <div className="user-pools-territory-stat-row">
                 <div className="user-pools-territory-stat">
@@ -1887,7 +1904,7 @@ export function UserPoolsPage({
               </div>
               {activeTerritoryId && (
                 <div className="user-pools-territory-active-summary">
-                  Active Territory:{' '}
+                  Active in Builder:{' '}
                   <strong>{territories.find(territory => territory.id === activeTerritoryId)?.name ?? 'Unknown'}</strong>
                 </div>
               )}
@@ -1933,7 +1950,7 @@ export function UserPoolsPage({
                         <span className="user-pools-subsection-meta">{territorySources.length}</span>
                       </div>
                       <div className="user-pools-helper">
-                        Build a reusable focused workflow space from selected Pool sections.
+                        Choose which Pool sections should define this reusable Builder context.
                       </div>
                       {sectionedPools.length === 0 && (
                         <div className="user-pools-empty">
@@ -2098,7 +2115,7 @@ export function UserPoolsPage({
               <span className="user-pools-subsection-meta">{territories.length}</span>
             </div>
             <div className="user-pools-helper">
-              Use, revisit, and manage your finished Territory setups here.
+              Saved workflow contexts built from your Pools. Activate them in Builder when you want a tighter lane.
             </div>
             <div className="user-pools-territory-list">
               {territories.length === 0 ? (
@@ -2138,7 +2155,7 @@ export function UserPoolsPage({
                       </div>
                       <div className="user-pools-row-actions">
                         <button type="button" onClick={() => onUseTerritoryInBuilder?.(territory.id)}>
-                          Use in Builder
+                          Activate in Builder
                         </button>
                         <button type="button" onClick={() => handleEditTerritory(territory)}>
                           Edit

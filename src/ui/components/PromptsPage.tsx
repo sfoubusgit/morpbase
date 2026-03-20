@@ -29,8 +29,8 @@ export function PromptsPage({
     <div className="prompts-page">
       <header className="prompts-header">
         <div>
-          <h2>Prompts</h2>
-          <p>Save finished prompts and return to them later.</p>
+          <h2>Prompt Archive</h2>
+          <p>Save, organize, and reuse the Builder outputs worth keeping.</p>
         </div>
         {manualUrl && (
           <a
@@ -39,7 +39,7 @@ export function PromptsPage({
             target="_blank"
             rel="noreferrer"
           >
-            Prompt Library manual
+            Prompt Archive manual
           </a>
         )}
       </header>
@@ -48,8 +48,32 @@ export function PromptsPage({
         <section className="prompts-panel prompts-panel-main">
           <div className="prompts-library-card prompts-library-card-simple">
             <div className="prompts-library-intro prompts-library-intro-simple">
-              <h3>Saved Prompt Library</h3>
-              <p>Keep finished prompts organized, searchable, and easy to reuse without leaving MorpBase.</p>
+              <div className="prompts-library-eyebrow">Downstream from Builder</div>
+              <h3>Keep the workflow outputs that deserve to stick</h3>
+              <p>
+                Builder is where prompt workflows are authored. This archive is where the finished
+                results get saved, filtered, grouped into Prompt Sets, and reused later.
+              </p>
+            </div>
+            <div className="prompts-library-relationship">
+              <div className="prompts-library-relationship-item">
+                <div className="prompts-library-relationship-label">1. Shape in Builder</div>
+                <div className="prompts-library-relationship-text">
+                  Build and refine the live prompt workflow.
+                </div>
+              </div>
+              <div className="prompts-library-relationship-item">
+                <div className="prompts-library-relationship-label">2. Review in Prompt Preview</div>
+                <div className="prompts-library-relationship-text">
+                  Check the current output and decide what is worth keeping.
+                </div>
+              </div>
+              <div className="prompts-library-relationship-item">
+                <div className="prompts-library-relationship-label">3. Save into the Archive</div>
+                <div className="prompts-library-relationship-text">
+                  Organize proven outputs so they are easy to find and reuse.
+                </div>
+              </div>
             </div>
           </div>
           <PromptLibrary

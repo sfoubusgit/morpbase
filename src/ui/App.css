@@ -92,8 +92,7 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 .app-page-toggle,
 .interview-layout,
 .user-pools-page,
-.pool-hub-page,
-.working-sets-page {
+.pool-hub-page {
   position: relative;
   z-index: 1;
 }
@@ -215,16 +214,42 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   gap: 6px;
   flex-wrap: wrap;
   flex: 0 1 auto;
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: fit-content;
   max-width: none;
   min-width: auto;
-  margin-left: auto;
+  margin-left: 0;
   padding: 4px;
   border-radius: 999px;
   background: rgba(22, 22, 28, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.app-page-toggle-nav {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.app-page-toggle-cluster {
+  display: grid;
+  gap: 6px;
+}
+
+.app-page-toggle-cluster-primary {
+  min-width: 0;
+}
+
+.app-page-toggle-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(229, 231, 235, 0.56);
+  padding-left: 6px;
 }
 
 .app-page-toggle-action-button {
@@ -264,6 +289,13 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   transition: all 0.2s ease;
 }
 
+.app-page-toggle-btn-primary {
+  padding: 10px 20px;
+  background: rgba(22, 22, 28, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
 .app-page-toggle-btn.active {
   background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(123, 101, 255, 0.9));
   border-color: rgba(110, 86, 249, 0.6);
@@ -287,9 +319,17 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   }
 
   .app-page-toggle-left,
-  .app-page-toggle-group {
+  .app-page-toggle-nav {
     width: 100%;
     flex-basis: auto;
+  }
+
+  .app-page-toggle-nav {
+    margin-left: 0;
+  }
+
+  .app-page-toggle-cluster {
+    width: 100%;
   }
 
   .app-page-toggle-group {
@@ -521,6 +561,117 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   border: 1px solid rgba(96, 165, 250, 0.28);
   color: #dbeafe;
   font-size: 13px;
+}
+
+.builder-territory-recommendation {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 16px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(37, 99, 235, 0.1));
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  color: #e5f3ff;
+}
+
+.builder-territory-recommendation-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.builder-territory-recommendation-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bbf7d0;
+}
+
+.builder-territory-recommendation-title {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #f8fbff;
+}
+
+.builder-territory-recommendation-copy {
+  margin-top: 8px;
+  max-width: 720px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #d9ecff;
+}
+
+.builder-territory-recommendation-controls {
+  display: grid;
+  gap: 12px;
+}
+
+.builder-territory-recommendation-picker {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  color: #d9ecff;
+}
+
+.builder-territory-recommendation-picker span {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #bbf7d0;
+}
+
+.builder-territory-recommendation-picker select {
+  max-width: 360px;
+  background: rgba(11, 17, 27, 0.9);
+  border: 1px solid rgba(147, 197, 253, 0.22);
+  color: #ffffff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.builder-territory-recommendation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.builder-territory-recommendation-primary,
+.builder-territory-recommendation-secondary,
+.builder-territory-recommendation-tertiary {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.builder-territory-recommendation-primary {
+  background: rgba(14, 116, 144, 0.9);
+  border: 1px solid rgba(103, 232, 249, 0.35);
+  color: #f0fdfa;
+}
+
+.builder-territory-recommendation-secondary {
+  background: rgba(20, 20, 26, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.builder-territory-recommendation-tertiary {
+  background: transparent;
+  border: 1px dashed rgba(191, 219, 254, 0.32);
+  color: #dbeafe;
+}
+
+.builder-territory-recommendation-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .builder-notice button,
@@ -950,6 +1101,11 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   gap: 12px;
 }
 
+.workspace-sidebar-panel {
+  background: rgba(96, 165, 250, 0.08);
+  border-color: rgba(96, 165, 250, 0.18);
+}
+
 .builder-sidebar-panel-header {
   display: flex;
   align-items: flex-start;
@@ -969,6 +1125,51 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   font-size: 15px;
   font-weight: 700;
   color: #f3f4f6;
+}
+
+.builder-sidebar-helper {
+  margin-top: 8px;
+  max-width: 320px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(229, 231, 235, 0.82);
+}
+
+.builder-sidebar-metrics {
+  display: grid;
+  gap: 10px;
+}
+
+.builder-sidebar-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(8, 10, 18, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.builder-sidebar-metric-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #bfdbfe;
+}
+
+.builder-sidebar-metric-value {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #ffffff;
+  text-align: right;
+}
+
+.builder-sidebar-flow-note {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #dbeafe;
 }
 
 .territory-sidebar-helper {
@@ -1339,6 +1540,18 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
 }
 
 @media (max-width: 800px) {
+  .builder-territory-recommendation-actions {
+    flex-direction: column;
+  }
+
+  .builder-territory-recommendation-primary,
+  .builder-territory-recommendation-secondary,
+  .builder-territory-recommendation-tertiary,
+  .builder-territory-recommendation-picker select {
+    width: 100%;
+    max-width: none;
+  }
+
   .app-footer-content {
     flex-direction: column;
     align-items: flex-start;

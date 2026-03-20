@@ -92,6 +92,12 @@
   gap: 16px;
 }
 
+.landing-pipeline-note {
+  font-size: 13px;
+  color: #aab4d8;
+  max-width: 760px;
+}
+
 .landing-node {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);

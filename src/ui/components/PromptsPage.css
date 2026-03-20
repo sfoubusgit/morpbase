@@ -69,6 +69,14 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.prompts-library-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a5b4fc;
+}
+
 .prompts-library-intro h3 {
   margin: 0;
   font-size: 16px;
@@ -79,6 +87,33 @@
   margin: 0;
   color: #9ca3af;
   font-size: 12px;
+}
+
+.prompts-library-relationship {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.prompts-library-relationship-item {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(15, 16, 23, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: grid;
+  gap: 6px;
+}
+
+.prompts-library-relationship-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #eff6ff;
+}
+
+.prompts-library-relationship-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b6c0d9;
 }
 
 @media (max-width: 1200px) {
@@ -100,5 +135,9 @@
 
   .prompts-library-intro p {
     max-width: none;
+  }
+
+  .prompts-library-relationship {
+    grid-template-columns: 1fr;
   }
 }

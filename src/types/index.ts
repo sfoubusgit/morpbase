@@ -12,6 +12,7 @@ export * from './pools';
 export * from './poolHub';
 export * from './prompts';
 export * from './promptAdditions';
+export * from './characters';
 export * from './builderModes';
 export * from './workingSets';
 export * from './workingSetHub';

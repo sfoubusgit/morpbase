@@ -42,6 +42,33 @@
   margin-bottom: 16px;
 }
 
+.user-pools-guide-relationship {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.user-pools-guide-relationship-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(12, 14, 22, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.user-pools-guide-relationship-card strong {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.user-pools-guide-relationship-card span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #c7d2fe;
+}
+
 .user-pools-section-legend {
   display: flex;
   flex-wrap: wrap;
@@ -147,6 +174,10 @@
   .user-pools-panel-saved-territories {
     grid-column: auto;
   }
+
+  .user-pools-guide-relationship {
+    grid-template-columns: 1fr;
+  }
 }
 
 .user-pools-panel-header {
@@ -210,6 +241,16 @@
 .user-pools-empty {
   color: #9fa0b8;
   font-size: 13px;
+}
+
+.user-pools-panel-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #b7bfd8;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(15, 16, 23, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .user-pools-helper {

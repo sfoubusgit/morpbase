@@ -40,6 +40,10 @@ interface PromptPreviewProps {
   activeTerritoryName?: string | null;
   territoryFocusMode?: 'biased' | 'full' | null;
   activePoolNames?: string[];
+  activeCharacterName?: string | null;
+  activeCharacterSummary?: string | null;
+  onChooseCharacter?: () => void;
+  onRemoveCharacter?: () => void;
   availableIdpSets?: PoolIdpSet[];
   activeIdpSetId?: string | null;
   onSelectIdpSet?: (setId: string) => void;
@@ -310,6 +314,10 @@ export function PromptPreview({
   activeTerritoryName = null,
   territoryFocusMode = null,
   activePoolNames = [],
+  activeCharacterName = null,
+  activeCharacterSummary = null,
+  onChooseCharacter,
+  onRemoveCharacter,
   availableIdpSets = [],
   activeIdpSetId = null,
   onSelectIdpSet,
@@ -486,7 +494,17 @@ export function PromptPreview({
   };
 
   const showStructuredSections = !hasEditedOutput && !isEditMode && exportMode !== 'clean' && structuredSections.length > 0;
-  const hasWorkflowContext = Boolean(activeModeLabel || activePoolNames.length > 0 || activeIdpSet || activeTerritoryName);
+  const hasWorkflowContext = Boolean(
+    activeModeLabel
+    || activePoolNames.length > 0
+    || activeCharacterName
+    || activeIdpSet
+    || activeTerritoryName
+    || onChooseCharacter
+  );
+  const territoryFocusLabel = territoryFocusMode === 'biased'
+    ? 'Focused Builder'
+    : 'Whole Builder';
 
   return (
     <div className="prompt-preview-stack">
@@ -713,39 +731,104 @@ export function PromptPreview({
 
       {hasWorkflowContext && (
         <div className="prompt-workflow-panel">
-          <div className="prompt-workflow-panel-title">Workflow Context</div>
+          <div className="prompt-workflow-panel-title">Builder Workflow</div>
           <div className="prompt-preview-workflow-block">
-            <div className="prompt-preview-workflow-title">Active Workflow</div>
-            <div className="prompt-preview-workflow-chips">
-              {activeModeLabel && (
+            <div className="prompt-preview-workflow-title">Workspace</div>
+            <div className="prompt-preview-workflow-summary">
+              Builder is the main workspace for shaping the current prompt workflow.
+            </div>
+            {activeModeLabel && (
+              <div className="prompt-preview-workflow-chips">
                 <span className="prompt-preview-workflow-chip">
                   Mode: <strong>{activeModeLabel}</strong>
                 </span>
-              )}
-              {activePoolNames.length > 0 && (
-                <span className="prompt-preview-workflow-chip">
-                  Pools: <strong>{activePoolNames.join(', ')}</strong>
-                </span>
-              )}
-              {activeTerritoryName && (
-                <span className="prompt-preview-workflow-chip">
-                  Territory: <strong>{activeTerritoryName}</strong>
-                </span>
-              )}
-              {activeTerritoryName && territoryFocusMode && (
-                <span className="prompt-preview-workflow-chip">
-                  Focus: <strong>{territoryFocusMode === 'biased' ? 'Focused Builder' : 'Whole Builder'}</strong>
-                </span>
+              </div>
+            )}
+          </div>
+
+          {(activeTerritoryName || activePoolNames.length > 0) && (
+            <div className="prompt-preview-workflow-block">
+              <div className="prompt-preview-workflow-title">Context Layers</div>
+              <div className="prompt-preview-workflow-rows">
+                {activeTerritoryName && (
+                  <div className="prompt-preview-workflow-row">
+                    <span className="prompt-preview-workflow-row-label">Territory Context</span>
+                    <span className="prompt-preview-workflow-row-value">{activeTerritoryName}</span>
+                  </div>
+                )}
+                {activeTerritoryName && territoryFocusMode && (
+                  <div className="prompt-preview-workflow-row">
+                    <span className="prompt-preview-workflow-row-label">Builder Focus</span>
+                    <span className="prompt-preview-workflow-row-value">{territoryFocusLabel}</span>
+                  </div>
+                )}
+                {activePoolNames.length > 0 && (
+                  <div className="prompt-preview-workflow-row">
+                    <span className="prompt-preview-workflow-row-label">Source Pools</span>
+                    <span className="prompt-preview-workflow-row-value">{activePoolNames.join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {(activeTerritoryName || activePoolNames.length > 0) && (
+            <div className="prompt-preview-workflow-note">
+              Territories shape the workflow. Pools supply the reusable source material behind it.
+            </div>
+          )}
+
+          {(onChooseCharacter || activeCharacterName) && (
+            <div className="prompt-preview-character-block">
+              <div className="prompt-preview-character-header">
+                <div>
+                  <div className="prompt-preview-character-title">Character</div>
+                  <div className="prompt-preview-character-subtitle">
+                    Apply one reusable subject identity on top of the current workflow.
+                  </div>
+                </div>
+                <div className="prompt-preview-character-actions">
+                  {onChooseCharacter && (
+                    <button
+                      type="button"
+                      className="prompt-preview-character-button"
+                      onClick={onChooseCharacter}
+                    >
+                      {activeCharacterName ? 'Change' : 'Choose Character'}
+                    </button>
+                  )}
+                  {activeCharacterName && onRemoveCharacter && (
+                    <button
+                      type="button"
+                      className="prompt-preview-character-button prompt-preview-character-button-danger"
+                      onClick={onRemoveCharacter}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </div>
+              {activeCharacterName ? (
+                <div className="prompt-preview-character-body">
+                  <div className="prompt-preview-character-name">{activeCharacterName}</div>
+                  {activeCharacterSummary && (
+                    <div className="prompt-preview-character-summary">{activeCharacterSummary}</div>
+                  )}
+                </div>
+              ) : (
+                <div className="prompt-preview-character-empty">
+                  No active character yet.
+                </div>
               )}
             </div>
-          </div>
+          )}
 
           {availableIdpSets.length > 0 && (
             <div className="prompt-preview-idp-block">
               <div className="prompt-preview-idp-header">
                 <div>
-                  <div className="prompt-preview-idp-title">Active IDP Set</div>
-                  <div className="prompt-preview-idp-subtitle">Choose the current identity baseline for this workflow family.</div>
+                  <div className="prompt-preview-idp-title">Identity Baseline</div>
+                  <div className="prompt-preview-idp-subtitle">Choose the current reusable baseline layered onto this workflow.</div>
                 </div>
                 <select
                   className="prompt-preview-idp-select"
