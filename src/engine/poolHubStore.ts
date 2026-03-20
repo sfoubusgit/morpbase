@@ -25,7 +25,8 @@ type PoolHubStore = {
 };
 
 const isOfficialEntry = (entry: PoolHubEntry) =>
-  OFFICIAL_CREATOR_NAMES.has(entry.creator?.trim().toLowerCase() ?? '');
+  entry.creatorId === 'morpbase-official'
+  || OFFICIAL_CREATOR_NAMES.has(entry.creator?.trim().toLowerCase() ?? '');
 
 const sanitizeEntries = (entries: PoolHubEntry[]) => entries.filter(isOfficialEntry);
 
