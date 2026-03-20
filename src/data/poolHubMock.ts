@@ -334,7 +334,7 @@ export const poolHubMock: PoolHubEntry[] = [
     category: 'Portraiture',
     languages: ['en'],
     license: 'CC-BY',
-    heroImageUrl: null,
+    heroImageUrl: '/gothic_hero_image_secondary_pool_1.png',
     ratingAvg: 0,
     ratingCount: 0,
     downloads: 0,
