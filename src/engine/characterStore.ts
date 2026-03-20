@@ -1,4 +1,5 @@
 import type {
+  CharacterAvatar,
   CharacterIdentity,
   CharacterIdentityFields,
   CharacterIdentityInput,
@@ -11,6 +12,7 @@ import type {
 
 const CHARACTER_STORE_KEY = 'promptgen:characters:v1';
 const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
+const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -71,6 +73,57 @@ const sanitizeStringArray = (value: unknown): string[] => {
   return value
     .map(item => (typeof item === 'string' ? normalizeText(item) : ''))
     .filter(Boolean);
+};
+
+const estimateDataUrlBytes = (dataUrl: string): number => {
+  const marker = 'base64,';
+  const index = dataUrl.indexOf(marker);
+  if (index === -1) return dataUrl.length;
+  const base64 = dataUrl.slice(index + marker.length);
+  return Math.ceil((base64.length * 3) / 4);
+};
+
+const sanitizeAvatarMimeType = (value: unknown): CharacterAvatar['mimeType'] | undefined => {
+  switch (value) {
+    case 'image/jpeg':
+    case 'image/png':
+    case 'image/webp':
+      return value;
+    default:
+      return undefined;
+  }
+};
+
+const sanitizeAvatar = (value: unknown): CharacterAvatar | undefined => {
+  if (!isRecord(value)) return undefined;
+
+  const mimeType = sanitizeAvatarMimeType(value.mimeType);
+  const dataUrl = typeof value.dataUrl === 'string' ? value.dataUrl.trim() : '';
+  const width = typeof value.width === 'number' && Number.isFinite(value.width)
+    ? Math.max(1, Math.round(value.width))
+    : 0;
+  const height = typeof value.height === 'number' && Number.isFinite(value.height)
+    ? Math.max(1, Math.round(value.height))
+    : 0;
+
+  if (!mimeType || !dataUrl || width === 0 || height === 0) {
+    return undefined;
+  }
+
+  if (!dataUrl.startsWith(`data:${mimeType};base64,`)) {
+    return undefined;
+  }
+
+  if (estimateDataUrlBytes(dataUrl) > CHARACTER_AVATAR_MAX_BYTES) {
+    return undefined;
+  }
+
+  return {
+    dataUrl,
+    mimeType,
+    width,
+    height,
+  };
 };
 
 const sanitizeAnchorKind = (value: unknown): CharacterVisualAnchorKind | undefined => {
@@ -198,6 +251,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     id,
     name,
     summary: typeof value.summary === 'string' ? normalizeText(value.summary) || undefined : undefined,
+    avatar: sanitizeAvatar(value.avatar),
     identity: sanitizeFields(value.identity),
     phraseBundle,
     createdAt,
@@ -262,6 +316,7 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
   return {
     name,
     summary: input.summary ? normalizeText(input.summary) || undefined : undefined,
+    avatar: sanitizeAvatar(input.avatar),
     identity,
     phraseBundle,
   };
@@ -293,6 +348,7 @@ export async function createCharacter(input: CharacterIdentityInput): Promise<Ch
     id: createId('character'),
     name: sanitized.name,
     summary: sanitized.summary,
+    avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
     createdAt: now,
@@ -324,6 +380,7 @@ export async function updateCharacter(
     ...existing,
     name: sanitized.name,
     summary: sanitized.summary,
+    avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
     updatedAt: Date.now(),

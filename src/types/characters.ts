@@ -25,6 +25,13 @@ export type CharacterPhraseBundle = {
   optional?: string[];
 };
 
+export type CharacterAvatar = {
+  dataUrl: string;
+  mimeType: 'image/jpeg' | 'image/png' | 'image/webp';
+  width: number;
+  height: number;
+};
+
 export type CharacterIdentityFields = {
   archetype?: string;
   role?: string;
@@ -39,6 +46,7 @@ export type CharacterIdentity = {
   id: string;
   name: string;
   summary?: string;
+  avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
   createdAt: number;
@@ -48,6 +56,7 @@ export type CharacterIdentity = {
 export type CharacterIdentityInput = {
   name: string;
   summary?: string;
+  avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
 };
