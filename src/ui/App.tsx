@@ -33,6 +33,7 @@ import { UserPoolsPage } from './components/UserPoolsPage';
 import { PoolHubPage } from './components/PoolHubPage';
 import { PromptLibrary } from './components/PromptLibrary';
 import { CharacterLibraryModal } from './components/CharacterLibraryModal';
+import { IdentitySystemsPage } from './components/IdentitySystemsPage';
 import { FloatingPromptFragments } from './components/FloatingPromptFragments';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
@@ -249,10 +250,11 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
     try {
       if (parseCreatorHash()) return 'creator-profile';
       const saved = window.localStorage.getItem('promptgen:active_page');
+      if (saved === 'identity-systems') return 'identity-systems';
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
       if (saved === 'pool-hub') return 'pool-hub';
@@ -2595,6 +2597,18 @@ export function App() {
             </button>
           </div>
           <div className="app-page-toggle-cluster">
+            <span className="app-page-toggle-section-label">Identity Realm</span>
+            <div className="app-page-toggle-group">
+              <button
+                type="button"
+                className={`app-page-toggle-btn ${activePage === 'identity-systems' ? 'active' : ''}`}
+                onClick={() => setActivePage('identity-systems')}
+              >
+                Identity Systems
+              </button>
+            </div>
+          </div>
+          <div className="app-page-toggle-cluster">
             <span className="app-page-toggle-section-label">Support Tools</span>
             <div className="app-page-toggle-group">
               <button
@@ -2640,6 +2654,18 @@ export function App() {
       </div>
       {activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />
+      ) : activePage === 'identity-systems' ? (
+        <IdentitySystemsPage
+          characters={characters}
+          activeCharacterId={activeCharacterId}
+          isLoading={charactersLoading}
+          onSelectCharacter={handleSelectCharacter}
+          onCreateCharacter={handleCreateCharacter}
+          onUpdateCharacter={handleUpdateCharacter}
+          onDeleteCharacter={handleDeleteCharacter}
+          onGoToBuilder={() => setActivePage('generator')}
+          onGoToPrompts={() => setActivePage('prompts')}
+        />
       ) : activePage === 'user-pools' ? (
         <UserPoolsPage
           manualUrl={manualUrl}
