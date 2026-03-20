@@ -125,6 +125,7 @@ type BuilderSessionPromptAdditionItem = {
   id: string;
   text: string;
   weight?: number;
+  section?: string;
   sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
 };
 
@@ -209,6 +210,7 @@ export function App() {
     id: string;
     text: string;
     weight?: number;
+    section?: string;
     sourceType?: 'pool' | 'territory' | 'pool-default' | 'idp-set';
   };
   const CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY = 'morpbase:custom_global_phrases';
@@ -1601,26 +1603,31 @@ export function App() {
     setSelections(newSelections);
   }, []);
 
-  const handleAddPoolItem = useCallback((text: string) => {
+  const handleAddPoolItem = useCallback((text: string, section?: string) => {
     if (!text.trim()) return;
     const id = `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-    setPoolPromptItems(prev => [...prev, { id, text: text.trim(), weight: 1.0, sourceType: 'pool' }]);
+    setPoolPromptItems(prev => [...prev, { id, text: text.trim(), weight: 1.0, section, sourceType: 'pool' }]);
   }, []);
 
-  const handleAppendPoolItem = useCallback((text: string, targetId?: string) => {
+  const handleAppendPoolItem = useCallback((text: string, targetId?: string, section?: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
     setPoolPromptItems(prev => {
       if (prev.length === 0) {
         const id = `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
-        return [...prev, { id, text: trimmed, weight: 1.0, sourceType: 'pool' }];
+        return [...prev, { id, text: trimmed, weight: 1.0, section, sourceType: 'pool' }];
       }
       const next = [...prev];
       let targetIndex = targetId ? next.findIndex(item => item.id === targetId) : next.length - 1;
       if (targetIndex === -1) targetIndex = next.length - 1;
       const target = next[targetIndex];
+      const mergedSection =
+        target.section && section && target.section !== section
+          ? undefined
+          : target.section ?? section;
       const override = poolOutputOverrides.get(target.id);
       if (override) {
+        next[targetIndex] = { ...target, section: mergedSection };
         setPoolOutputOverrides(prevOverrides => {
           const updated = new Map(prevOverrides);
           updated.set(target.id, `${override} ${trimmed}`);
@@ -1628,18 +1635,18 @@ export function App() {
         });
         return next;
       }
-      next[targetIndex] = { ...target, text: `${target.text} ${trimmed}` };
+      next[targetIndex] = { ...target, text: `${target.text} ${trimmed}`, section: mergedSection };
       return next;
     });
   }, [poolOutputOverrides]);
 
-  const handleRandomizePoolItems = useCallback((items: string[]) => {
+  const handleRandomizePoolItems = useCallback((items: Array<{ text: string; section?: string }>) => {
     const next = items
-      .filter(Boolean)
-      .map(text => ({
+      .map(item => ({
         id: `pool_add_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        text: text.trim(),
+        text: item.text.trim(),
         weight: 1.0,
+        section: item.section,
         sourceType: 'pool' as const,
       }))
       .filter(item => item.text);
@@ -1746,13 +1753,14 @@ export function App() {
   const handleToggleTerritoryItem = useCallback((item: {
     id: string;
     text: string;
+    section?: string;
   }) => {
     setPoolPromptItems(prev => {
       const exists = prev.some(entry => entry.id === item.id);
       if (exists) {
         return prev.filter(entry => entry.id !== item.id);
       }
-      return [...prev, { id: item.id, text: item.text.trim(), weight: 1.0, sourceType: 'territory' }];
+      return [...prev, { id: item.id, text: item.text.trim(), weight: 1.0, section: item.section, sourceType: 'territory' }];
     });
     setPoolOutputOverrides(prev => {
       const next = new Map(prev);
@@ -2019,8 +2027,8 @@ export function App() {
   }, [poolOutputOverrides, weightsEnabledGlobal]);
 
   const poolAdditionTexts = poolPromptItems.map(formatPromptAdditionText);
-  const poolAdditionItems = poolPromptItems.map((item, index) => {
-    return { id: item.id, text: formatPromptAdditionText(item) };
+  const poolAdditionItems = poolPromptItems.map(item => {
+    return { id: item.id, text: formatPromptAdditionText(item), section: item.section };
   });
   const availablePromptFragments = useMemo(
     () => [...PROMPT_FRAGMENT_DEFINITIONS, ...customPromptFragments],
@@ -2049,6 +2057,7 @@ export function App() {
           : item.sourceType === 'pool-default'
             ? 'start'
             : 'end',
+      section: item.section,
       sourceType: item.sourceType ?? 'pool',
     }));
 
@@ -2813,7 +2822,11 @@ export function App() {
                   onToggleTerritoryItem={itemId => {
                     const territoryItem = currentTerritoryItems.find(item => item.id === itemId);
                     if (!territoryItem) return;
-                    handleToggleTerritoryItem({ id: territoryItem.id, text: territoryItem.outputText ?? territoryItem.text });
+                    handleToggleTerritoryItem({
+                      id: territoryItem.id,
+                      text: territoryItem.outputText ?? territoryItem.text,
+                      section: territoryItem.section,
+                    });
                   }}
                   onSetTerritoryItemOutputOverride={handleSetPoolOutputOverride}
                   onSetTerritoryItemWeight={handleSetPromptAdditionWeight}

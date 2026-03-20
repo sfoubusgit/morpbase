@@ -23,17 +23,17 @@ import { Modal } from './Modal';
 import './UserPoolsPage.css';
 
 type UserPoolsPageProps = {
-  onAddToPrompt?: (text: string) => void;
-  onAppendToPrompt?: (text: string, targetId?: string) => void;
+  onAddToPrompt?: (text: string, section?: string) => void;
+  onAppendToPrompt?: (text: string, targetId?: string, section?: string) => void;
   onApplyPoolInitiativePhrases?: (phrases: Array<{ id: string; text: string }>, pool: Pool) => void;
-  onRandomizePoolItems?: (items: string[]) => void;
+  onRandomizePoolItems?: (items: Array<{ text: string; section?: string }>) => void;
   prompt?: any | null;
   customAdditions?: string[];
   positionedAdditions?: PromptAdditionEntry[];
   editedPositive?: string | null;
   editedNegative?: string | null;
   onEditedOutputChange?: (positive: string | null, negative: string | null) => void;
-  additionItems?: Array<{ id: string; text: string }>;
+  additionItems?: Array<{ id: string; text: string; section?: string }>;
   onClearPrompt?: () => void;
   onUndoClearPrompt?: () => void;
   canUndoClearPrompt?: boolean;
@@ -70,6 +70,7 @@ export function UserPoolsPage({
   onApplyPoolInitiativePhrases,
   onRandomizePoolItems,
   customAdditions = [],
+  positionedAdditions = [],
   additionItems = [],
   authUser,
   authReady = false,
@@ -849,7 +850,8 @@ export function UserPoolsPage({
   const handleSaveAddEditItem = () => {
     const trimmed = editingAddItemText.trim();
     if (!trimmed) return;
-    onAddToPrompt?.(trimmed);
+    const sourceSection = activePool?.items.find(item => item.id === editingAddItemId)?.section;
+    onAddToPrompt?.(trimmed, sourceSection);
     setEditingAddItemId(null);
     setEditingAddItemText('');
   };
@@ -858,7 +860,8 @@ export function UserPoolsPage({
     const trimmed = editingAddItemText.trim();
     if (!trimmed) return;
     const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
-    onAppendToPrompt?.(trimmed, targetId);
+    const sourceSection = activePool?.items.find(item => item.id === editingAddItemId)?.section;
+    onAppendToPrompt?.(trimmed, targetId, sourceSection);
     setEditingAddItemId(null);
     setEditingAddItemText('');
   };
@@ -1015,7 +1018,7 @@ export function UserPoolsPage({
     const filterTags = parseRandomizerTags().map(tag => tag.toLowerCase());
     const hasTagFilter = filterTags.length > 0 && randomizerTagMode !== 'any';
     const usedItemIds = new Set<string>();
-    const output: string[] = [];
+    const output: Array<{ text: string; section?: string }> = [];
 
     const matchesTags = (item: PoolItem) => {
       const tags = item.tags || [];
@@ -1068,7 +1071,7 @@ export function UserPoolsPage({
         takeFrom(fallback);
       }
 
-      selection.forEach(item => output.push(item.text));
+      selection.forEach(item => output.push({ text: item.text, section: item.section }));
     });
 
     if (output.length === 0) {
@@ -1076,8 +1079,14 @@ export function UserPoolsPage({
       return;
     }
 
+    const existingItems = additionItems.length > 0
+      ? additionItems.map(item => ({ text: item.text, section: item.section }))
+      : positionedAdditions.length > 0
+        ? positionedAdditions.map(item => ({ text: item.text, section: item.section }))
+        : customAdditions.map(text => ({ text }));
+
     const nextItems =
-      randomizerAppendMode === 'append' ? [...customAdditions, ...output] : output;
+      randomizerAppendMode === 'append' ? [...existingItems, ...output] : output;
     onRandomizePoolItems(nextItems);
     setIsRandomizerOpen(false);
   };
@@ -1166,14 +1175,14 @@ export function UserPoolsPage({
           </>
         ) : (
           <>
-            <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+            <button type="button" onClick={() => onAddToPrompt?.(item.text, item.section)}>
               Add to Prompt
             </button>
             <button
               type="button"
               onClick={() => {
                 const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
-                onAppendToPrompt?.(item.text, targetId);
+                onAppendToPrompt?.(item.text, targetId, item.section);
               }}
             >
               Append
@@ -1521,14 +1530,14 @@ export function UserPoolsPage({
                               {item.note && <div className="user-pools-item-note">{item.note}</div>}
                             </div>
                             <div className="user-pools-item-actions">
-                              <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+                              <button type="button" onClick={() => onAddToPrompt?.(item.text, item.section)}>
                                 Add to Prompt
                               </button>
                               <button
                                 type="button"
                                 onClick={() => {
                                   const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
-                                  onAppendToPrompt?.(item.text, targetId);
+                                  onAppendToPrompt?.(item.text, targetId, item.section);
                                 }}
                               >
                                 Append
@@ -1551,14 +1560,14 @@ export function UserPoolsPage({
                         {item.note && <div className="user-pools-item-note">{item.note}</div>}
                       </div>
                       <div className="user-pools-item-actions">
-                        <button type="button" onClick={() => onAddToPrompt?.(item.text)}>
+                        <button type="button" onClick={() => onAddToPrompt?.(item.text, item.section)}>
                           Add to Prompt
                         </button>
                         <button
                           type="button"
                           onClick={() => {
                             const targetId = appendTargetId === 'last' ? undefined : appendTargetId;
-                            onAppendToPrompt?.(item.text, targetId);
+                            onAppendToPrompt?.(item.text, targetId, item.section);
                           }}
                         >
                           Append

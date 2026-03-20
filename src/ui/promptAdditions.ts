@@ -1,4 +1,4 @@
-import type { PromptAdditionEntry, PromptAdditionPosition } from '../types';
+import { POOL_SECTION_OPTIONS, type PromptAdditionEntry, type PromptAdditionPosition, type PoolSection } from '../types';
 
 const POSITION_ORDER: PromptAdditionPosition[] = ['start', 'middle', 'end'];
 
@@ -27,15 +27,42 @@ export const composePromptWithAdditions = (baseText: string, entries: PromptAddi
 };
 
 export const composeStructuredAdditionSections = (entries: PromptAdditionEntry[]) => {
-  const grouped = splitPromptAdditions(entries);
-  return POSITION_ORDER
-    .map(position => {
-      const texts = grouped[position];
-      if (texts.length === 0) return null;
-      return {
-        label: position === 'start' ? 'Start Fragments' : position === 'middle' ? 'Middle Fragments' : 'End Fragments',
-        text: texts.join(', '),
-      };
-    })
-    .filter(Boolean) as Array<{ label: string; text: string }>;
+  const groupedBySection = new Map<string, string[]>();
+  const unsectioned: string[] = [];
+
+  entries.forEach(entry => {
+    const text = entry.text.trim();
+    if (!text) return;
+
+    const section = entry.section?.trim();
+    if (!section) {
+      unsectioned.push(text);
+      return;
+    }
+
+    const existing = groupedBySection.get(section) ?? [];
+    existing.push(text);
+    groupedBySection.set(section, existing);
+  });
+
+  const orderedSections = [
+    ...POOL_SECTION_OPTIONS.filter(section => groupedBySection.has(section)),
+    ...Array.from(groupedBySection.keys()).filter(
+      section => !POOL_SECTION_OPTIONS.includes(section as PoolSection)
+    ),
+  ];
+
+  const sections = orderedSections.map(section => ({
+    label: section,
+    text: groupedBySection.get(section)!.join(', '),
+  }));
+
+  if (unsectioned.length > 0) {
+    sections.push({
+      label: 'Additional Fragments',
+      text: unsectioned.join(', '),
+    });
+  }
+
+  return sections;
 };
