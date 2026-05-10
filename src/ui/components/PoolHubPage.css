@@ -1,5 +1,7 @@
 .pool-hub-page {
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 24px 32px 32px 32px;
   color: #ffffff;
   background:
@@ -12,13 +14,13 @@
   align-items: center;
   justify-content: center;
   width: fit-content;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 12px;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #e5e7eb;
+  border: 1px solid var(--border-medium);
+  color: var(--text-primary);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -38,10 +40,10 @@
   grid-template-columns: minmax(0, 1.5fr) auto;
   gap: 20px;
   padding: 22px 24px;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   background:
     linear-gradient(135deg, rgba(110, 86, 249, 0.16), rgba(15, 23, 42, 0.92) 46%, rgba(16, 185, 129, 0.08));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 24px 50px rgba(7, 11, 23, 0.28);
 }
 
@@ -60,9 +62,9 @@
   display: grid;
   gap: 4px;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-hero-stat strong {
@@ -102,9 +104,9 @@
   display: grid;
   gap: 4px;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-hero-flow-step strong {
@@ -135,8 +137,8 @@
   font-size: 12px;
   color: #d7d8ff;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-pill);
   padding: 7px 12px;
   background: rgba(255, 255, 255, 0.04);
 }
@@ -151,19 +153,19 @@
   align-items: center;
   gap: 6px;
   padding: 4px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(22, 22, 28, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-mode-toggle button {
   background: transparent;
   border: 1px solid transparent;
   color: rgba(229, 231, 235, 0.8);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 14px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -176,10 +178,10 @@
 
 .pool-hub-user-badge {
   font-size: 11px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
 }
 
@@ -193,10 +195,10 @@
   background: rgba(110, 86, 249, 0.2);
   border: 1px solid rgba(110, 86, 249, 0.42);
   color: #ebe7ff;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 10px 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-primary:disabled,
@@ -213,12 +215,12 @@
 
 .pool-hub-secondary {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   color: #fff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-secondary:hover {
@@ -229,10 +231,10 @@
   background: rgba(248, 113, 113, 0.15);
   border: 1px solid rgba(248, 113, 113, 0.45);
   color: #fecaca;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-danger:hover {
@@ -248,8 +250,8 @@
 .pool-hub-toolbar input,
 .pool-hub-toolbar select {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -259,9 +261,9 @@
   display: grid;
   gap: 12px;
   padding: 16px 18px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: rgba(15, 18, 28, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 18px 40px rgba(7, 11, 23, 0.18);
 }
 
@@ -281,12 +283,12 @@
 .pool-hub-toolbar-summary span {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   font-size: 11px;
   color: #d9def8;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-support-grid {
@@ -299,8 +301,8 @@
   display: grid;
   margin-bottom: 0;
   background: rgba(15, 18, 28, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   box-shadow: 0 18px 40px rgba(7, 11, 23, 0.16);
 }
@@ -311,8 +313,8 @@
   align-items: center;
   gap: 12px;
   background: rgba(15, 18, 28, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 18px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   margin-bottom: 0;
   box-shadow: 0 18px 40px rgba(7, 11, 23, 0.16);
@@ -325,8 +327,8 @@
 
 .pool-hub-profile-title {
   font-size: 13px;
-  font-weight: 600;
-  color: #f3f4f6;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
 }
 
 .pool-hub-profile-subtitle {
@@ -338,7 +340,7 @@
 
 .pool-hub-profile-hint {
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-profile-actions {
@@ -349,14 +351,14 @@
 
 .pool-hub-profile-name {
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-creator-search label {
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-creator-search-head {
@@ -369,8 +371,8 @@
 
 .pool-hub-creator-search input {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -390,11 +392,11 @@
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.025)),
     rgba(18, 18, 29, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 12px;
   cursor: pointer;
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .pool-hub-creator-result-top {
@@ -419,7 +421,7 @@
 
 .pool-hub-creator-result-title {
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #f3f2ff;
 }
 
@@ -433,7 +435,7 @@
 .pool-hub-creator-result-count {
   white-space: nowrap;
   padding: 0.36rem 0.6rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(237, 235, 255, 0.82);
   font-size: 0.8rem;
@@ -442,9 +444,9 @@
 .pool-hub-creator-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
 }
 
 .pool-hub-creator-avatar-fallback {
@@ -453,11 +455,11 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, rgba(143, 130, 255, 0.3), rgba(107, 255, 184, 0.28));
   color: #fff;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .pool-hub-creator-result-bio {
@@ -486,7 +488,7 @@
 
 .pool-hub-creator-result-tags span {
   padding: 0.34rem 0.58rem;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.06);
   color: rgba(237, 235, 255, 0.8);
   font-size: 0.78rem;
@@ -500,7 +502,7 @@
 .pool-hub-link-button {
   background: transparent;
   border: none;
-  color: #cbd5f5;
+  color: var(--text-accent);
   cursor: pointer;
   font-size: 11px;
   padding: 0;
@@ -512,10 +514,10 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   white-space: nowrap;
 }
@@ -525,10 +527,10 @@
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   white-space: nowrap;
 }
@@ -577,7 +579,7 @@
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.07);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
@@ -594,7 +596,7 @@
   list-style: none;
   padding: 14px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #e3e8ff;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -630,7 +632,7 @@
   display: grid;
   gap: 10px;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: linear-gradient(180deg, rgba(244, 114, 182, 0.09), rgba(168, 85, 247, 0.06));
   border: 1px solid rgba(244, 114, 182, 0.14);
 }
@@ -645,13 +647,13 @@
 
 .pool-hub-idp-set-title {
   font-size: 13px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #ffe7f5;
 }
 
 .pool-hub-idp-set-meta {
   font-size: 10px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #f9a8d4;
@@ -664,7 +666,7 @@
 
 .pool-hub-idp-set-phrase {
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(8, 10, 18, 0.34);
   border: 1px solid rgba(244, 114, 182, 0.08);
   color: #f6ebf3;
@@ -694,8 +696,8 @@
 
 .pool-hub-panel {
   background: rgba(15, 18, 28, 0.86);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-subtle);
   padding: 18px;
   display: flex;
   flex-direction: column;
@@ -720,7 +722,7 @@
   display: grid;
   gap: 12px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -738,17 +740,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(110, 86, 249, 0.16);
   border: 1px solid rgba(110, 86, 249, 0.3);
   color: #e1dcff;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .pool-hub-source-empty {
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.03);
   border: 1px dashed rgba(255, 255, 255, 0.08);
 }
@@ -760,7 +762,7 @@
   width: 100%;
   max-width: 340px;
   padding: 12px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
     rgba(18, 21, 32, 0.96);
@@ -783,7 +785,7 @@
 }
 
 .pool-hub-card-hero {
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background:
     radial-gradient(circle at top left, rgba(255, 255, 255, 0.16), transparent 36%),
     linear-gradient(135deg, rgba(110, 86, 249, 0.48), rgba(16, 185, 129, 0.18));
@@ -817,15 +819,15 @@
 .pool-hub-card-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 5px 9px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #edf2ff;
   background: rgba(9, 13, 22, 0.56);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
 }
 
 .pool-hub-card-badge-official {
@@ -848,17 +850,17 @@
 .pool-hub-card-stat {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 5px 9px;
   font-size: 11px;
   color: #f5f7ff;
   background: rgba(9, 13, 22, 0.62);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
 }
 
 .pool-hub-card-hero-title {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: -0.02em;
   color: #fbfcff;
   text-shadow: 0 1px 10px rgba(6, 8, 16, 0.35);
@@ -882,7 +884,7 @@
 
 .pool-hub-card-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-card-summary {
@@ -893,7 +895,7 @@
 
 .pool-hub-card-creator {
   font-size: 11px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -904,7 +906,7 @@
   color: #fde68a;
   background: rgba(250, 204, 21, 0.12);
   border: 1px solid rgba(250, 204, 21, 0.35);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 8px;
 }
 
@@ -913,7 +915,7 @@
   color: #bbf7d0;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.35);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 2px 8px;
 }
 
@@ -922,7 +924,7 @@
   flex-wrap: wrap;
   gap: 8px;
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-card-tags {
@@ -933,23 +935,23 @@
 
 .pool-hub-card-tags span {
   background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   padding: 4px 9px;
   font-size: 10px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-detail-title-block {
   display: grid;
   gap: 12px;
   padding: 18px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background:
     radial-gradient(circle at top left, rgba(110, 86, 249, 0.16), transparent 36%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
     rgba(16, 19, 31, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-detail-actions {
@@ -962,7 +964,7 @@
   font-size: 30px;
   line-height: 1.05;
   letter-spacing: -0.03em;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
 }
 
 .pool-hub-detail-title-row {
@@ -982,10 +984,10 @@
 .pool-hub-detail-role-badge {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 7px 11px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #fde7f3;
@@ -1015,15 +1017,15 @@
 .pool-hub-detail-chip {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.03em;
   text-transform: uppercase;
   color: #dfe3ff;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-detail-chip-stat {
@@ -1044,20 +1046,20 @@
   flex-wrap: wrap;
   gap: 8px;
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-detail-description {
   margin: 0;
   font-size: 13px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   line-height: 1.6;
 }
 
 .pool-hub-detail-preview-card {
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
   background:
     radial-gradient(circle at top left, rgba(110, 86, 249, 0.12), transparent 34%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
@@ -1103,12 +1105,12 @@
 .pool-hub-detail-preview-counts span {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 10px;
   font-size: 11px;
   color: #e6ebff;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-detail-preview-grid {
@@ -1121,14 +1123,14 @@
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .pool-hub-detail-preview-label {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #f2f4ff;
@@ -1149,14 +1151,14 @@
   display: grid;
   gap: 6px;
   padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .pool-hub-creator-title {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-detail-creator-card {
@@ -1174,7 +1176,7 @@
   gap: 10px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-detail-split {
@@ -1188,15 +1190,15 @@
   display: grid;
   gap: 6px;
   padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .pool-hub-report-card input {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 6px 8px;
   font-size: 12px;
@@ -1208,13 +1210,13 @@
 
 .pool-hub-section-title {
   font-size: 12px;
-  color: #cbd5f5;
-  font-weight: 600;
+  color: var(--text-accent);
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-muted {
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 @media (max-width: 960px) {
@@ -1239,14 +1241,14 @@
   display: grid;
   gap: 6px;
   padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .pool-hub-rating-label {
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-rating-stars {
@@ -1256,8 +1258,8 @@
 
 .pool-hub-star {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #9fa0b8;
+  border: 1px solid var(--border-medium);
+  color: var(--text-tertiary);
   border-radius: 8px;
   padding: 4px 8px;
   cursor: pointer;
@@ -1272,15 +1274,15 @@
 
 .pool-hub-rating-meta {
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-comments {
   display: grid;
   gap: 10px;
   padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.02);
 }
 
@@ -1293,7 +1295,7 @@
 
 .pool-hub-comments-title {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: #eef2ff;
 }
 
@@ -1308,14 +1310,14 @@
   display: grid;
   gap: 10px;
   padding: 14px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.025);
 }
 
 .pool-hub-comments-composer-title {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #dfe4ff;
@@ -1329,8 +1331,8 @@
 .pool-hub-comments-form input,
 .pool-hub-comments-form textarea {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -1349,8 +1351,8 @@
 
 .pool-hub-comment {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 10px;
   display: grid;
   gap: 8px;
@@ -1360,25 +1362,25 @@
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-comment-author {
-  font-weight: 600;
-  color: #e5e7eb;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
 }
 
 .pool-hub-comment-body {
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-detail-items {
   display: grid;
   gap: 8px;
   padding: 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.025);
 }
 
@@ -1387,7 +1389,7 @@
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-detail-items-list {
@@ -1405,8 +1407,8 @@
 
 .pool-hub-item-group {
   background: rgba(20, 20, 28, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 12px;
 }
 
@@ -1416,37 +1418,37 @@
   justify-content: space-between;
   text-transform: capitalize;
   font-size: 13px;
-  color: #cbd5f5;
+  color: var(--text-accent);
   margin-bottom: 10px;
 }
 
 .pool-hub-item-group-title span {
   font-size: 11px;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-item {
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
   padding: 8px;
 }
 
 .pool-hub-item-text {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .pool-hub-item-tags {
   font-size: 10px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
   margin-top: 4px;
 }
 
 .pool-hub-link {
   background: transparent;
   border: none;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
   cursor: pointer;
   font-size: 11px;
   text-decoration: underline;
@@ -1461,7 +1463,7 @@
   gap: 10px;
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
 }
 
@@ -1470,14 +1472,14 @@
   color: #fde68a;
   background: rgba(250, 204, 21, 0.1);
   border: 1px solid rgba(250, 204, 21, 0.3);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   margin-bottom: 10px;
 }
 
 .pool-hub-auth-hint {
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-message-link {
@@ -1497,7 +1499,7 @@
 
 .pool-hub-empty {
   font-size: 12px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-panel-header h3 {
@@ -1524,14 +1526,14 @@
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-upload-form input,
 .pool-hub-upload-form textarea {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -1542,7 +1544,7 @@
   align-items: center;
   gap: 10px;
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .pool-hub-upload-import {
@@ -1559,8 +1561,8 @@
 
 .pool-hub-upload-import select {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -1568,7 +1570,7 @@
 
 .pool-hub-upload-visibility-note {
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(118, 255, 201, 0.08);
   border: 1px solid rgba(118, 255, 201, 0.14);
   color: #cfeee3;
@@ -1586,8 +1588,8 @@
   display: grid;
   gap: 4px;
   padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -1604,14 +1606,14 @@
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-profile-form input,
 .pool-hub-profile-form textarea {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -1619,8 +1621,8 @@
 
 .pool-hub-admin {
   margin-top: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.02);
 }
@@ -1628,7 +1630,7 @@
 .pool-hub-admin summary {
   cursor: pointer;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .pool-hub-admin-body {
@@ -1639,8 +1641,8 @@
 
 .pool-hub-admin-body textarea {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;

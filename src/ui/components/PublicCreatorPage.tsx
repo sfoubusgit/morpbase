@@ -227,7 +227,7 @@ export function PublicCreatorPage({
             </div>
           )}
           <div className="public-creator-identity">
-            <div className="public-creator-eyebrow">Public Creator Page</div>
+            <div className="public-creator-eyebrow">Community Presence</div>
             <h1>{displayName}</h1>
             {profile?.bio ? (
               <p>{profile.bio}</p>
@@ -279,7 +279,7 @@ export function PublicCreatorPage({
       <div className="public-creator-layout">
         <section className="public-creator-section public-creator-section-overview">
           <div className="public-creator-section-head">
-            <h2>Profile State</h2>
+            <h2>Community Presence</h2>
             <p>{profileStateSummary}</p>
           </div>
           <div className="public-creator-state-grid">
@@ -299,18 +299,18 @@ export function PublicCreatorPage({
 
         <section className="public-creator-section">
           <div className="public-creator-section-head">
-            <h2>Public Pools</h2>
+            <h2>Shared Pools</h2>
             <p>
               {creatorId && profile && !profile.showPublicPools
-                ? 'This creator keeps shared pools private on their public page.'
-                : 'Pools this creator has made publicly visible through MorpBase.'}
+                ? 'This creator keeps shared pools private on their community surface.'
+                : 'Pools this creator has chosen to share through MorpBase.'}
             </p>
           </div>
           {visiblePools.length === 0 ? (
             <div className="public-creator-empty">
               {creatorId && profile && !profile.showPublicPools
-                ? 'No public pools are visible.'
-                : 'No public pools yet.'}
+                ? 'No shared pools are visible.'
+                : 'No shared pools yet.'}
             </div>
           ) : (
             <div className="public-creator-pool-grid">
@@ -339,21 +339,21 @@ export function PublicCreatorPage({
 
         <section className="public-creator-section">
           <div className="public-creator-section-head">
-            <h2>Public Prompts</h2>
+            <h2>Shared Prompts</h2>
             <p>
               {profile?.showPublicPrompts
-                ? 'Prompt work this creator has chosen to expose publicly.'
-                : 'This creator keeps prompts private on their public page.'}
+                ? 'Prompt work this creator has chosen to share through MorpBase.'
+                : 'This creator keeps prompt work private on their community surface.'}
             </p>
           </div>
           {!profile?.showPublicPrompts ? (
-            <div className="public-creator-empty">No public prompts are visible.</div>
+            <div className="public-creator-empty">No shared prompts are visible.</div>
           ) : loadingPrompts ? (
-            <div className="public-creator-empty">Loading public prompts...</div>
+            <div className="public-creator-empty">Loading shared prompts...</div>
           ) : promptsError ? (
             <div className="public-creator-callout public-creator-error">{promptsError}</div>
           ) : publicPrompts.length === 0 ? (
-            <div className="public-creator-empty">No public prompts yet.</div>
+            <div className="public-creator-empty">No shared prompts yet.</div>
           ) : (
             <div className="public-creator-prompt-list">
               {publicPrompts.map(prompt => (

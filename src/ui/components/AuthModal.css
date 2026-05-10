@@ -1,15 +1,15 @@
 .auth-modal {
   display: grid;
   gap: 12px;
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .auth-toggle {
   display: inline-flex;
   gap: 6px;
   background: rgba(22, 22, 28, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
   padding: 4px;
 }
 
@@ -17,16 +17,16 @@
   background: transparent;
   border: 1px solid transparent;
   color: rgba(229, 231, 235, 0.8);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 14px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
 .auth-toggle button.active {
   background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(123, 101, 255, 0.9));
-  border-color: rgba(110, 86, 249, 0.6);
+  border-color: var(--border-accent-strong);
   color: #fff;
 }
 
@@ -34,13 +34,13 @@
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: #cbd5f5;
+  color: var(--text-accent);
 }
 
 .auth-field input {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
   color: #fff;
   padding: 8px 10px;
   font-size: 12px;
@@ -53,28 +53,28 @@
 }
 
 .auth-primary {
-  background: rgba(110, 86, 249, 0.18);
-  border: 1px solid rgba(110, 86, 249, 0.35);
+  background: var(--accent-primary-bg);
+  border: 1px solid var(--border-accent);
   color: #e1dcff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .auth-primary:hover {
   background: rgba(110, 86, 249, 0.32);
-  border-color: rgba(110, 86, 249, 0.6);
+  border-color: var(--border-accent-strong);
 }
 
 .auth-secondary {
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   color: #fff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .auth-secondary:hover {
@@ -83,7 +83,7 @@
 
 .auth-hint {
   font-size: 11px;
-  color: #9fa0b8;
+  color: var(--text-tertiary);
 }
 
 .auth-error {

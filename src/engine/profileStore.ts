@@ -9,6 +9,7 @@ const toPublicProfile = (row: any): PublicProfile => ({
   bio: row.bio ?? null,
   avatarUrl: row.avatar_url ?? null,
   avatarStoragePath: row.avatar_storage_path ?? null,
+  coverImageUrl: row.cover_image_url ?? null,
   links: row.links ?? null,
   tags: row.tags ?? null,
   showPublicPrompts: row.show_public_prompts ?? null,
@@ -84,6 +85,7 @@ export const upsertMyPublicProfile = async (input: {
   bio?: string | null;
   avatarUrl?: string | null;
   avatarStoragePath?: string | null;
+  coverImageUrl?: string | null;
   links?: Record<string, string> | null;
   tags?: string[] | null;
   showPublicPrompts?: boolean | null;
@@ -99,6 +101,7 @@ export const upsertMyPublicProfile = async (input: {
     bio: input.bio?.trim() || null,
     avatar_url: input.avatarUrl?.trim() || null,
     avatar_storage_path: input.avatarStoragePath?.trim() || null,
+    cover_image_url: input.coverImageUrl?.trim() || null,
     links: input.links ?? null,
     tags: input.tags ?? null,
     show_public_prompts: input.showPublicPrompts ?? null,

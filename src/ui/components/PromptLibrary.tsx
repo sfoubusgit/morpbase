@@ -360,8 +360,8 @@ export function PromptLibrary({
           hasPurpose: Boolean(purpose.trim()),
         },
       });
-      setMessage('Saved to cloud.');
-      onPromptSaved?.('Prompt saved to the cloud.');
+      setMessage('Kept in cloud memory.');
+      onPromptSaved?.('Prompt kept in cloud memory.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }
@@ -417,8 +417,8 @@ export function PromptLibrary({
         hasPurpose: Boolean(purpose.trim()),
       },
     });
-    setMessage('Saved locally.');
-    onPromptSaved?.('Prompt saved locally.');
+    setMessage('Kept in local memory.');
+    onPromptSaved?.('Prompt kept in local memory.');
   };
 
   const handleDeleteLocal = (promptId: string) => {
@@ -464,8 +464,8 @@ export function PromptLibrary({
           hasPurpose: Boolean(prompt.purpose?.trim()),
         },
       });
-      setMessage('Saved to cloud.');
-      onPromptSaved?.('Prompt saved to the cloud.');
+      setMessage('Moved into cloud memory.');
+      onPromptSaved?.('Prompt moved into cloud memory.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save prompt.');
     }
@@ -525,7 +525,7 @@ export function PromptLibrary({
     try {
       await assignPromptToSet(promptId, setId || null);
       await refreshPromptSets();
-      setMessage(setId ? 'Prompt moved to set.' : 'Prompt removed from set.');
+      setMessage(setId ? 'Kept work moved to set.' : 'Kept work removed from set.');
     } catch (err: any) {
       setError(err?.message ?? 'Failed to move prompt.');
     }
@@ -592,34 +592,22 @@ export function PromptLibrary({
     navigator.clipboard.writeText(full).catch(() => {
       // ignore
     });
-    setMessage('Copied prompt.');
+    setMessage('Copied kept work.');
   };
 
   return (
     <>
       {renderLibraryShell && (
         <div className="prompt-library">
-          <div className="prompt-library-header">
-            <h3>Saved Prompts</h3>
-            {manualUrl && (
-              <a
-                className="prompt-library-manual-link"
-                href={`${manualUrl}#prompt-library`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Learn more
-              </a>
-            )}
-            <span className="prompt-library-count">{prompts.length}</span>
-          </div>
+
+          {/* ── 1. Save action + Import/Export ── */}
           {!hideSaveBar && (
             <div className="prompt-library-save-bar">
               <div className="prompt-library-save-copy">
-                Save the current prompt with a name, tags, and optional metadata.
+                Keep the current prompt in Memory with a name, tags, and optional metadata.
               </div>
-              <button type="button" className="prompt-library-save-open" onClick={() => setIsSaveModalOpen(true)}>
-                Save Prompt
+              <button type="button" className="prompt-library-save-open" onClick={() => { setError(null); setMessage(null); setIsSaveModalOpen(true); }}>
+                Keep in Memory
               </button>
             </div>
           )}
@@ -627,323 +615,312 @@ export function PromptLibrary({
             <summary>Import / Export</summary>
             <textarea
               rows={5}
-              placeholder="Prompts JSON import/export"
+              placeholder="Paste exported prompts JSON here to import, or export below."
               value={libraryJson}
               onChange={event => setLibraryJson(event.target.value)}
             />
             <div className="prompt-library-actions">
-              <button type="button" onClick={handleExport}>
-                Export Prompts
-              </button>
-              <button type="button" onClick={handleImport}>
-                Import Prompts
-              </button>
-              <button type="button" onClick={handleDownload}>
-                Download Prompts
-              </button>
+              <button type="button" onClick={handleExport}>Export</button>
+              <button type="button" onClick={handleImport}>Import</button>
+              <button type="button" onClick={handleDownload}>Download JSON</button>
             </div>
           </details>
+
+          {/* ── 2. Feedback ── */}
           {error && <div className="prompt-library-error">{error}</div>}
           {message && <div className="prompt-library-message">{message}</div>}
-          <div className="prompt-library-set-panel">
-            <div className="prompt-library-section-header">
-              <div className="prompt-library-section-title">Prompt Sets</div>
-              {canUsePromptSets && (
-                <button
-                  type="button"
-                  className="prompt-library-section-toggle"
-                  onClick={() => {
-                    setIsCreatingPromptSetInline(prev => !prev);
-                    setNewPromptSetMessage(null);
-                  }}
-                >
-                  {isCreatingPromptSetInline ? 'Cancel' : 'Create set'}
-                </button>
-              )}
-            </div>
-            {canUsePromptSets && isCreatingPromptSetInline && (
-              <div className="prompt-library-set-create">
-                <input
-                  type="text"
-                  placeholder="Prompt Set name"
-                  value={newPromptSetName}
-                  onChange={event => setNewPromptSetName(event.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Description (optional)"
-                  value={newPromptSetDescription}
-                  onChange={event => setNewPromptSetDescription(event.target.value)}
-                />
-                <div className="prompt-library-set-create-actions">
-                  <button type="button" onClick={handleCreatePromptSetInline}>
-                    Create Prompt Set
-                  </button>
-                </div>
-              </div>
-            )}
-            {newPromptSetMessage && <div className="prompt-library-message">{newPromptSetMessage}</div>}
-            {!canUsePromptSets ? (
-              <div className="prompt-library-empty">Log in to access your Prompt Sets.</div>
-            ) : promptSets.length === 0 ? (
-              <div className="prompt-library-empty">No Prompt Sets yet.</div>
-            ) : (
-              <div className="prompt-library-set-list">
-                {promptSets.map(set => (
-                  <div key={set.id} className="prompt-library-set-item">
-                    {editingPromptSetId === set.id ? (
-                      <>
-                        <input
-                          type="text"
-                          value={editingPromptSetName}
-                          onChange={event => setEditingPromptSetName(event.target.value)}
-                        />
-                        <div className="prompt-library-set-item-actions">
-                          <button type="button" onClick={() => handleRenamePromptSet(set.id)}>
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingPromptSetId(null);
-                              setEditingPromptSetName('');
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="prompt-library-set-item-main">
-                          <div className="prompt-library-set-item-title">{set.name}</div>
-                          {set.description && (
-                            <div className="prompt-library-set-item-description">{set.description}</div>
-                          )}
-                        </div>
-                        <div className="prompt-library-set-item-actions">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingPromptSetId(set.id);
-                              setEditingPromptSetName(set.name);
-                            }}
-                          >
-                            Rename
-                          </button>
-                          <button type="button" onClick={() => void handleDeletePromptSet(set.id)}>
-                            Delete
-                          </button>
-                        </div>
-                      </>
+
+          {/* ── 3. Two-column body: list + sets sidebar ── */}
+          <div className="prompt-library-body">
+
+            {/* Main: prompt list */}
+            <div className="prompt-library-main">
+              {showLocalPrompts && (
+                <div className="prompt-library-section">
+                  <div className="prompt-library-section-header">
+                    <div className="prompt-library-section-title">Local Memory</div>
+                    {hiddenLocalPromptCount > 0 && (
+                      <button
+                        type="button"
+                        className="prompt-library-section-toggle"
+                        onClick={() => setShowAllLocalPrompts(prev => !prev)}
+                      >
+                        {showAllLocalPrompts ? 'Show recent only' : `Show ${hiddenLocalPromptCount} older`}
+                      </button>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-          {canUsePromptSets && (
-            <div className="prompt-library-filter-row">
-              <label className="prompt-library-filter">
-                <span>Filter by Set</span>
-                <select
-                value={activePromptSetFilter}
-                onChange={event => setActivePromptSetFilter(event.target.value)}
-              >
-                <option value="all">All prompts</option>
-                <option value="unassigned">Unassigned</option>
-                {promptSetOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  {filteredLocalPrompts.length === 0 ? (
+                    <div className="prompt-library-empty">No kept work lives here yet.</div>
+                  ) : (
+                    filteredLocalPrompts.map(item => (
+                      <div key={item.id} className="prompt-library-item">
+                        <div className="prompt-library-item-main">
+                          <div className="prompt-library-item-title">{item.name}</div>
+                          {getAssignedPromptSet(item.id) && (
+                            <div className="prompt-library-item-set-chip">
+                              {getAssignedPromptSet(item.id)?.name}
+                            </div>
+                          )}
+                          <div className="prompt-library-item-text">{item.positive}</div>
+                          {(item.model || item.purpose || item.usedAt) && (
+                            <div className="prompt-library-item-meta">
+                              {item.model && <span>Model: {item.model}</span>}
+                              {item.purpose && <span>Purpose: {item.purpose}</span>}
+                              {item.usedAt && <span>Used: {item.usedAt}</span>}
+                            </div>
+                          )}
+                          {item.tags && item.tags.length > 0 && (
+                            <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                          )}
+                        </div>
+                        <div className="prompt-library-item-actions">
+                          {canUsePromptSets && (
+                            <label className="prompt-library-item-set-selector">
+                              <span>Set</span>
+                              <select
+                                value={promptSetAssignments[item.id] ?? ''}
+                                onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
+                              >
+                                <option value="">No set</option>
+                                {promptSetOptions.map(option => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            </label>
+                          )}
+                          <button type="button" onClick={() => handleCopy(item)}>Copy</button>
+                          <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>Return to Workspace</button>
+                          <button type="button" onClick={() => handleSaveLocalToCloud(item)}>Move to Cloud</button>
+                          <button type="button" onClick={() => handleDeleteLocal(item.id)}>Delete</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              {showCloudPrompts && (
+                <div className="prompt-library-section">
+                  <div className="prompt-library-section-header">
+                    <div className="prompt-library-section-title">Cloud Memory</div>
+                    {prompts.length > 0 && (
+                      <span className="prompt-library-count">{prompts.length}</span>
+                    )}
+                  </div>
+                  {!authUser ? (
+                    <div className="prompt-library-empty">Log in to access your cloud memory.</div>
+                  ) : !isPro ? (
+                    <div className="prompt-library-empty">Upgrade to Pro to unlock cloud memory.</div>
+                  ) : filteredCloudPrompts.length === 0 ? (
+                    <div className="prompt-library-empty">No kept work lives in cloud memory yet.</div>
+                  ) : (
+                    filteredCloudPrompts.map(item => (
+                      <div key={item.id} className="prompt-library-item">
+                        <div className="prompt-library-item-main">
+                          <div className="prompt-library-item-title">{item.name}</div>
+                          {getAssignedPromptSet(item.id) && (
+                            <div className="prompt-library-item-set-chip">
+                              {getAssignedPromptSet(item.id)?.name}
+                            </div>
+                          )}
+                          <div className="prompt-library-item-text">{item.positive}</div>
+                          {(item.model || item.purpose || item.usedAt) && (
+                            <div className="prompt-library-item-meta">
+                              {item.model && <span>Model: {item.model}</span>}
+                              {item.purpose && <span>Purpose: {item.purpose}</span>}
+                              {item.usedAt && <span>Used: {item.usedAt}</span>}
+                            </div>
+                          )}
+                          {item.tags && item.tags.length > 0 && (
+                            <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
+                          )}
+                        </div>
+                        <div className="prompt-library-item-actions">
+                          {canUsePromptSets && (
+                            <label className="prompt-library-item-set-selector">
+                              <span>Set</span>
+                              <select
+                                value={promptSetAssignments[item.id] ?? ''}
+                                onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
+                              >
+                                <option value="">No set</option>
+                                {promptSetOptions.map(option => (
+                                  <option key={option.value} value={option.value}>{option.label}</option>
+                                ))}
+                              </select>
+                            </label>
+                          )}
+                          <button type="button" onClick={() => handleCopy(item)}>Copy</button>
+                          <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>Return to Workspace</button>
+                          <button type="button" onClick={async () => {
+                            await deletePrompt(item.id);
+                            await assignPromptToSet(item.id, null);
+                            await refresh();
+                            await refreshPromptSets();
+                          }}>Delete</button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
-          )}
-          <div className="prompt-library-list">
-            {showLocalPrompts && (
-              <div className="prompt-library-section">
-                <div className="prompt-library-section-header">
-                  <div className="prompt-library-section-title">Local Prompts</div>
-                  {hiddenLocalPromptCount > 0 && (
+
+            {/* Sidebar: Prompt Sets + filter */}
+            {canUsePromptSets && (
+              <aside className="prompt-library-sets-aside">
+                <div className="prompt-library-sets-module">
+
+                  {/* Header */}
+                  <div className="prompt-library-sets-head">
+                    <span className="prompt-library-sets-kicker">Prompt Sets</span>
                     <button
                       type="button"
                       className="prompt-library-section-toggle"
-                      onClick={() => setShowAllLocalPrompts(prev => !prev)}
+                      onClick={() => { setIsCreatingPromptSetInline(prev => !prev); setNewPromptSetMessage(null); }}
                     >
-                      {showAllLocalPrompts
-                        ? 'Show recent only'
-                        : `Show ${hiddenLocalPromptCount} older`}
+                      {isCreatingPromptSetInline ? 'Cancel' : 'New set'}
                     </button>
+                  </div>
+
+                  {/* Filter — sits right under the header */}
+                  {promptSets.length > 0 && (
+                    <div className="prompt-library-sets-filter">
+                      <select
+                        value={activePromptSetFilter}
+                        onChange={event => setActivePromptSetFilter(event.target.value)}
+                      >
+                        <option value="all">All prompts</option>
+                        <option value="unassigned">Unassigned</option>
+                        {promptSetOptions.map(option => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Inline create form */}
+                  {isCreatingPromptSetInline && (
+                    <div className="prompt-library-set-create">
+                      <input
+                        type="text"
+                        placeholder="Set name"
+                        value={newPromptSetName}
+                        onChange={event => setNewPromptSetName(event.target.value)}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Description (optional)"
+                        value={newPromptSetDescription}
+                        onChange={event => setNewPromptSetDescription(event.target.value)}
+                      />
+                      <div className="prompt-library-set-create-actions">
+                        <button type="button" onClick={handleCreatePromptSetInline}>Create</button>
+                      </div>
+                    </div>
+                  )}
+                  {newPromptSetMessage && <div className="prompt-library-message">{newPromptSetMessage}</div>}
+
+                  {/* Set list */}
+                  {promptSets.length === 0 ? (
+                    <div className="prompt-library-empty">No sets yet — create one to organize.</div>
+                  ) : (
+                    <div className="prompt-library-set-list">
+                      {promptSets.map(set => (
+                        <div key={set.id} className="prompt-library-set-item">
+                          {editingPromptSetId === set.id ? (
+                            <>
+                              <input
+                                type="text"
+                                value={editingPromptSetName}
+                                onChange={event => setEditingPromptSetName(event.target.value)}
+                              />
+                              <div className="prompt-library-set-item-actions">
+                                <button type="button" onClick={() => handleRenamePromptSet(set.id)}>Save</button>
+                                <button type="button" onClick={() => { setEditingPromptSetId(null); setEditingPromptSetName(''); }}>Cancel</button>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div
+                                className={`prompt-library-set-item-main${activePromptSetFilter === set.id ? ' active' : ''}`}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => setActivePromptSetFilter(activePromptSetFilter === set.id ? 'all' : set.id)}
+                                onKeyDown={e => e.key === 'Enter' && setActivePromptSetFilter(activePromptSetFilter === set.id ? 'all' : set.id)}
+                              >
+                                <div className="prompt-library-set-item-title">{set.name}</div>
+                                {set.description && (
+                                  <div className="prompt-library-set-item-description">{set.description}</div>
+                                )}
+                              </div>
+                              <div className="prompt-library-set-item-actions">
+                                <button type="button" onClick={() => { setEditingPromptSetId(set.id); setEditingPromptSetName(set.name); }}>Rename</button>
+                                <button type="button" onClick={() => void handleDeletePromptSet(set.id)}>Delete</button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
-                {filteredLocalPrompts.length === 0 ? (
-                  <div className="prompt-library-empty">No local prompts yet.</div>
-                ) : (
-                  filteredLocalPrompts.map(item => (
-                    <div key={item.id} className="prompt-library-item">
-                      <div className="prompt-library-item-main">
-                        <div className="prompt-library-item-title">{item.name}</div>
-                        {getAssignedPromptSet(item.id) && (
-                          <div className="prompt-library-item-set-chip">
-                            {getAssignedPromptSet(item.id)?.name}
-                          </div>
-                        )}
-                        <div className="prompt-library-item-text">{item.positive}</div>
-                        {(item.model || item.purpose || item.usedAt) && (
-                          <div className="prompt-library-item-meta">
-                            {item.model && <span>Model: {item.model}</span>}
-                            {item.purpose && <span>Purpose: {item.purpose}</span>}
-                            {item.usedAt && <span>Used: {item.usedAt}</span>}
-                          </div>
-                        )}
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
-                        )}
-                      </div>
-                      <div className="prompt-library-item-actions">
-                        {canUsePromptSets && (
-                          <label className="prompt-library-item-set-selector">
-                            <span>Set</span>
-                            <select
-                              value={promptSetAssignments[item.id] ?? ''}
-                              onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
-                            >
-                              <option value="">No set</option>
-                              {promptSetOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        )}
-                        <button type="button" onClick={() => handleCopy(item)}>
-                          Copy
-                        </button>
-                        <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
-                          Add to Prompt
-                        </button>
-                        <button type="button" onClick={() => handleSaveLocalToCloud(item)}>
-                          Save to Cloud
-                        </button>
-                        <button type="button" onClick={() => handleDeleteLocal(item.id)}>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+              </aside>
             )}
-            {showCloudPrompts && (
-              <div className="prompt-library-section">
-                <div className="prompt-library-section-title">Cloud Prompts</div>
-                {!authUser ? (
-                  <div className="prompt-library-empty">Log in to access your cloud prompts.</div>
-                ) : !isPro ? (
-                  <div className="prompt-library-empty">Upgrade to Pro to unlock cloud prompts.</div>
-                ) : filteredCloudPrompts.length === 0 ? (
-                  <div className="prompt-library-empty">No cloud prompts yet.</div>
-                ) : (
-                  filteredCloudPrompts.map(item => (
-                    <div key={item.id} className="prompt-library-item">
-                      <div className="prompt-library-item-main">
-                        <div className="prompt-library-item-title">{item.name}</div>
-                        {getAssignedPromptSet(item.id) && (
-                          <div className="prompt-library-item-set-chip">
-                            {getAssignedPromptSet(item.id)?.name}
-                          </div>
-                        )}
-                        <div className="prompt-library-item-text">{item.positive}</div>
-                        {(item.model || item.purpose || item.usedAt) && (
-                          <div className="prompt-library-item-meta">
-                            {item.model && <span>Model: {item.model}</span>}
-                            {item.purpose && <span>Purpose: {item.purpose}</span>}
-                            {item.usedAt && <span>Used: {item.usedAt}</span>}
-                          </div>
-                        )}
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="prompt-library-item-tags">{item.tags.join(', ')}</div>
-                        )}
-                      </div>
-                      <div className="prompt-library-item-actions">
-                        {canUsePromptSets && (
-                          <label className="prompt-library-item-set-selector">
-                            <span>Set</span>
-                            <select
-                              value={promptSetAssignments[item.id] ?? ''}
-                              onChange={event => void handleMovePromptToSet(item.id, event.target.value)}
-                            >
-                              <option value="">No set</option>
-                              {promptSetOptions.map(option => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        )}
-                        <button type="button" onClick={() => handleCopy(item)}>
-                          Copy
-                        </button>
-                        <button type="button" onClick={() => onAddToPrompt?.(item.positive)}>
-                          Add to Prompt
-                        </button>
-                        <button type="button" onClick={async () => {
-                          await deletePrompt(item.id);
-                          await assignPromptToSet(item.id, null);
-                          await refresh();
-                          await refreshPromptSets();
-                        }}>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
+
           </div>
+
         </div>
       )}
       <Modal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
-        title="Save Prompt"
+        title="Keep in Memory"
         className="prompt-library-save-modal"
       >
         <div className="prompt-library-save">
-          <input
-            type="text"
-            placeholder="Prompt name"
-            value={name}
-            onChange={event => setName(event.target.value)}
-          />
+          {error && <div className="prompt-library-error">{error}</div>}
+          {message && <div className="prompt-library-message">{message}</div>}
+
+          <div className="prompt-library-save-field">
+            <label className="prompt-library-save-label" htmlFor="pls-name">Name</label>
+            <input
+              id="pls-name"
+              type="text"
+              className="prompt-library-save-input"
+              placeholder="e.g. Cinematic portrait, low light"
+              value={name}
+              onChange={event => setName(event.target.value)}
+            />
+          </div>
+
           {canUsePromptSets ? (
             <>
-              <select
-                value={selectedPromptSetId}
-                onChange={event => {
-                  const value = event.target.value;
-                  setSelectedPromptSetId(value);
-                  setNewPromptSetMessage(null);
-                  if (value === CREATE_NEW_PROMPT_SET_VALUE) {
-                    setIsCreatingPromptSetInline(true);
-                  } else {
-                    setIsCreatingPromptSetInline(false);
-                  }
-                }}
-              >
-                <option value="">No Prompt Set</option>
-                {promptSetOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-                <option value={CREATE_NEW_PROMPT_SET_VALUE}>Create new set</option>
-              </select>
+              <div className="prompt-library-save-field">
+                <label className="prompt-library-save-label" htmlFor="pls-set">Prompt Set</label>
+                <select
+                  id="pls-set"
+                  className="prompt-library-save-input"
+                  value={selectedPromptSetId}
+                  onChange={event => {
+                    const value = event.target.value;
+                    setSelectedPromptSetId(value);
+                    setNewPromptSetMessage(null);
+                    if (value === CREATE_NEW_PROMPT_SET_VALUE) {
+                      setIsCreatingPromptSetInline(true);
+                    } else {
+                      setIsCreatingPromptSetInline(false);
+                    }
+                  }}
+                >
+                  <option value="">No Prompt Set</option>
+                  {promptSetOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                  <option value={CREATE_NEW_PROMPT_SET_VALUE}>+ Create new set</option>
+                </select>
+              </div>
               {isCreatingPromptSetInline && (
                 <div className="prompt-library-set-create prompt-library-set-create-inline">
                   <input
@@ -976,32 +953,59 @@ export function PromptLibrary({
               )}
             </>
           ) : (
-            <div className="prompt-library-empty">Log in to organize prompts with Prompt Sets.</div>
+            <div className="prompt-library-empty">Log in to organize kept work into Prompt Sets.</div>
           )}
-          <input
-            type="text"
-            placeholder="Tags (comma)"
-            value={tags}
-            onChange={event => setTags(event.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Model (free text)"
-            value={model}
-            onChange={event => setModel(event.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Purpose (free text)"
-            value={purpose}
-            onChange={event => setPurpose(event.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="Note (optional)"
-            value={note}
-            onChange={event => setNote(event.target.value)}
-          />
+
+          <div className="prompt-library-save-row">
+            <div className="prompt-library-save-field">
+              <label className="prompt-library-save-label" htmlFor="pls-tags">Tags</label>
+              <input
+                id="pls-tags"
+                type="text"
+                className="prompt-library-save-input"
+                placeholder="cinematic, portrait, fantasy"
+                value={tags}
+                onChange={event => setTags(event.target.value)}
+              />
+            </div>
+            <div className="prompt-library-save-field">
+              <label className="prompt-library-save-label" htmlFor="pls-model">Model</label>
+              <input
+                id="pls-model"
+                type="text"
+                className="prompt-library-save-input"
+                placeholder="SDXL, Flux, Midjourney…"
+                value={model}
+                onChange={event => setModel(event.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="prompt-library-save-row">
+            <div className="prompt-library-save-field">
+              <label className="prompt-library-save-label" htmlFor="pls-purpose">Purpose</label>
+              <input
+                id="pls-purpose"
+                type="text"
+                className="prompt-library-save-input"
+                placeholder="Reference, test, final…"
+                value={purpose}
+                onChange={event => setPurpose(event.target.value)}
+              />
+            </div>
+            <div className="prompt-library-save-field">
+              <label className="prompt-library-save-label" htmlFor="pls-note">Note</label>
+              <input
+                id="pls-note"
+                type="text"
+                className="prompt-library-save-input"
+                placeholder="Optional"
+                value={note}
+                onChange={event => setNote(event.target.value)}
+              />
+            </div>
+          </div>
+
           <label className="prompt-library-save-toggle">
             <input
               type="checkbox"
@@ -1012,10 +1016,10 @@ export function PromptLibrary({
           </label>
           <div className="prompt-library-save-actions">
             <button type="button" onClick={handleSaveLocal}>
-              Save Locally
+              Keep Locally
             </button>
             <button type="button" onClick={handleSave}>
-              Save to Cloud
+              Keep in Cloud
             </button>
           </div>
         </div>

@@ -46,6 +46,7 @@ export type CharacterIdentity = {
   id: string;
   name: string;
   summary?: string;
+  coverImageUrl?: string | null;
   avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
@@ -56,6 +57,7 @@ export type CharacterIdentity = {
 export type CharacterIdentityInput = {
   name: string;
   summary?: string;
+  coverImageUrl?: string | null;
   avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;

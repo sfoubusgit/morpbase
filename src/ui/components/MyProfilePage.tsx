@@ -31,17 +31,24 @@ const parseProfileLinks = (raw: string) => {
   return Object.keys(links).length > 0 ? links : null;
 };
 
+const TOGGLE_FIELDS = [
+  { key: 'showPublicPrompts'   as const, title: 'Show public prompts',      desc: 'Allow visitors to browse your saved public prompts on your creator page.' },
+  { key: 'discoverableInSearch'as const, title: 'Appear in creator search', desc: 'Let MorpBase include you in creator discovery results.' },
+  { key: 'showLinksPublicly'   as const, title: 'Show links publicly',      desc: 'Display your external links on your public creator page.' },
+];
+
 export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: MyProfilePageProps) {
-  const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [profile, setProfile]           = useState<PublicProfile | null>(null);
+  const [loading, setLoading]           = useState(true);
+  const [saving, setSaving]             = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage]           = useState<string | null>(null);
+  const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({
     displayName: '',
     bio: '',
     avatarUrl: '',
+    coverImageUrl: '',
     tags: '',
     links: '',
     showPublicPrompts: false,
@@ -52,15 +59,11 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
 
   useEffect(() => {
     let isActive = true;
-
     if (!isLoggedIn) {
       setProfile(null);
       setLoading(false);
-      return () => {
-        isActive = false;
-      };
+      return () => { isActive = false; };
     }
-
     const loadProfile = async () => {
       setLoading(true);
       setError(null);
@@ -69,35 +72,29 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
         if (!isActive) return;
         setProfile(nextProfile);
         setForm({
-          displayName: nextProfile?.displayName ?? userName ?? '',
-          bio: nextProfile?.bio ?? '',
-          avatarUrl: nextProfile?.avatarUrl ?? '',
-          tags: nextProfile?.tags?.join(', ') ?? '',
-          links: profileLinksToText(nextProfile?.links),
-          showPublicPrompts: Boolean(nextProfile?.showPublicPrompts),
-          showPublicPools: Boolean(nextProfile?.showPublicPools),
+          displayName:          nextProfile?.displayName ?? userName ?? '',
+          bio:                  nextProfile?.bio ?? '',
+          avatarUrl:            nextProfile?.avatarUrl ?? '',
+          coverImageUrl:        nextProfile?.coverImageUrl ?? '',
+          tags:                 nextProfile?.tags?.join(', ') ?? '',
+          links:                profileLinksToText(nextProfile?.links),
+          showPublicPrompts:    Boolean(nextProfile?.showPublicPrompts),
+          showPublicPools:      Boolean(nextProfile?.showPublicPools),
           discoverableInSearch: nextProfile?.discoverableInSearch ?? true,
-          showLinksPublicly: nextProfile?.showLinksPublicly ?? true,
+          showLinksPublicly:    nextProfile?.showLinksPublicly ?? true,
         });
       } catch (err: any) {
-        if (isActive) {
-          setError(err?.message ?? 'Failed to load your public profile.');
-        }
+        if (isActive) setError(err?.message ?? 'Failed to load your public profile.');
       } finally {
-        if (isActive) {
-          setLoading(false);
-        }
+        if (isActive) setLoading(false);
       }
     };
-
     void loadProfile();
-    return () => {
-      isActive = false;
-    };
+    return () => { isActive = false; };
   }, [isLoggedIn, userName]);
 
   const previewTags = useMemo(
-    () => form.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+    () => form.tags.split(',').map(t => t.trim()).filter(Boolean),
     [form.tags]
   );
 
@@ -109,43 +106,38 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
 
   const completionItems = useMemo(() => ([
     { label: 'Display name', done: form.displayName.trim().length > 0 },
-    { label: 'Bio', done: form.bio.trim().length > 0 },
-    { label: 'Avatar', done: form.avatarUrl.trim().length > 0 },
-    { label: 'Tags', done: previewTags.length > 0 },
-    { label: 'Public visibility', done: form.showPublicPrompts || form.showPublicPools },
+    { label: 'Bio',          done: form.bio.trim().length > 0 },
+    { label: 'Avatar',       done: form.avatarUrl.trim().length > 0 },
+    { label: 'Tags',         done: previewTags.length > 0 },
+    { label: 'Visibility',   done: form.discoverableInSearch || form.showPublicPrompts },
   ]), [form, previewTags.length]);
 
-  const completionCount = completionItems.filter(item => item.done).length;
+  const completionCount = completionItems.filter(i => i.done).length;
+  const completionPct   = (completionCount / completionItems.length) * 100;
+  const displayName     = form.displayName.trim() || userName || 'Unnamed Creator';
+  const avatarInitial   = displayName.charAt(0).toUpperCase();
 
   const handleSave = async () => {
-    if (!isLoggedIn) {
-      setError('Log in to manage your public profile.');
-      onRequestLogin?.();
-      return;
-    }
-
-    const displayName = form.displayName.trim();
-    if (!displayName) {
-      setError('Display name is required.');
-      return;
-    }
-
+    if (!isLoggedIn) { setError('Log in to manage your public profile.'); onRequestLogin?.(); return; }
+    const dn = form.displayName.trim();
+    if (!dn) { setError('Display name is required.'); return; }
     setSaving(true);
     setError(null);
     setMessage(null);
     try {
-      const tags = form.tags.split(',').map(tag => tag.trim()).filter(Boolean);
+      const tags  = form.tags.split(',').map(t => t.trim()).filter(Boolean);
       const links = parseProfileLinks(form.links);
       const saved = await upsertMyPublicProfile({
-        displayName,
-        bio: form.bio.trim() || null,
-        avatarUrl: form.avatarUrl.trim() || null,
-        tags: tags.length > 0 ? tags : null,
+        displayName: dn,
+        bio:         form.bio.trim() || null,
+        avatarUrl:   form.avatarUrl.trim() || null,
+        coverImageUrl: form.coverImageUrl.trim() || null,
+        tags:        tags.length > 0 ? tags : null,
         links,
-        showPublicPrompts: form.showPublicPrompts,
-        showPublicPools: form.showPublicPools,
+        showPublicPrompts:    form.showPublicPrompts,
+        showPublicPools:      form.showPublicPools,
         discoverableInSearch: form.discoverableInSearch,
-        showLinksPublicly: form.showLinksPublicly,
+        showLinksPublicly:    form.showLinksPublicly,
       });
       setProfile(saved);
       setMessage('Profile saved.');
@@ -158,15 +150,8 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
 
   const handleAvatarFile = async (file: File | null) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('Avatar upload must be an image file.');
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Avatar image must be 2 MB or smaller.');
-      return;
-    }
-
+    if (!file.type.startsWith('image/'))       { setError('Avatar must be an image file.'); return; }
+    if (file.size > 2 * 1024 * 1024)          { setError('Avatar must be 2 MB or smaller.'); return; }
     setUploadingAvatar(true);
     setError(null);
     try {
@@ -174,274 +159,336 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
         const reader = new FileReader();
         reader.onload = () => {
           const result = typeof reader.result === 'string' ? reader.result : '';
-          if (!result) {
-            reject(new Error('Failed to read avatar image.'));
-            return;
-          }
+          if (!result) { reject(new Error('Failed to read image.')); return; }
           resolve(result);
         };
-        reader.onerror = () => reject(new Error('Failed to read avatar image.'));
+        reader.onerror = () => reject(new Error('Failed to read image.'));
         reader.readAsDataURL(file);
       });
-
       setForm(prev => ({ ...prev, avatarUrl: dataUrl }));
-      setMessage('Avatar image ready. Save profile to publish it.');
+      setMessage('Avatar ready — save to apply.');
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to prepare avatar image.');
+      setError(err?.message ?? 'Failed to prepare avatar.');
     } finally {
       setUploadingAvatar(false);
     }
   };
 
+  // ── Logged-out ─────────────────────────────────────────────────────────────
   if (!isLoggedIn) {
     return (
-      <div className="my-profile-page">
-        <div className="my-profile-hero">
-          <div>
-            <div className="my-profile-eyebrow">Creator Identity</div>
-            <h1>My Profile</h1>
-            <p>Set up the public creator identity that appears with your shared prompts and pools.</p>
-          </div>
-        </div>
-        <div className="my-profile-empty">
-          <h2>Log in to create your profile</h2>
-          <p>Your public profile powers creator attribution, discovery visibility, and public creator pages.</p>
-          <button type="button" onClick={onRequestLogin}>Log In</button>
+      <div className="profile-page">
+        <div className="profile-gate">
+          <div className="profile-eyebrow">Creator Identity</div>
+          <h1 className="profile-gate-title">Your creator space.</h1>
+          <p className="profile-gate-sub">
+            Build the public identity that appears on your creator page, with your shared prompts, and across the Community.
+          </p>
+          <button type="button" className="profile-primary-btn" onClick={onRequestLogin}>
+            Log in to get started
+          </button>
         </div>
       </div>
     );
   }
 
+  // ── Loading ────────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <div className="profile-loading">Loading your profile…</div>
+      </div>
+    );
+  }
+
+  // ── Main ───────────────────────────────────────────────────────────────────
   return (
-    <div className="my-profile-page">
-      <div className="my-profile-hero">
-        <div>
-          <div className="my-profile-eyebrow">Creator Identity</div>
-          <h1>My Profile</h1>
-          <p>Manage the public identity MorpBase uses for your creator presence, discovery, and shared work.</p>
+    <div className="profile-page">
+
+      {/* Hero */}
+      <div className="profile-hero">
+        <div className="profile-hero-identity">
+          {form.avatarUrl.trim() ? (
+            <img src={form.avatarUrl.trim()} alt={displayName} className="profile-hero-avatar" />
+          ) : (
+            <div className="profile-hero-avatar profile-hero-avatar-fallback">{avatarInitial}</div>
+          )}
+          <div className="profile-hero-text">
+            <div className="profile-eyebrow">Creator Identity</div>
+            <h1 className="profile-hero-name">{displayName}</h1>
+            {form.bio.trim() && <p className="profile-hero-bio">{form.bio.trim()}</p>}
+          </div>
         </div>
-        <div className="my-profile-completion">
-          <span>{completionCount}/{completionItems.length} complete</span>
-          <div className="my-profile-completion-bar">
-            <span style={{ width: `${(completionCount / completionItems.length) * 100}%` }} />
+        <div className="profile-hero-strength">
+          <div className="profile-strength-label">{completionCount} of {completionItems.length} complete</div>
+          <div className="profile-strength-bar">
+            <div className="profile-strength-fill" style={{ width: `${completionPct}%` }} />
+          </div>
+          <div className="profile-strength-dots">
+            {completionItems.map(item => (
+              <span key={item.label} className={`profile-strength-dot${item.done ? ' done' : ''}`} title={item.label} />
+            ))}
           </div>
         </div>
       </div>
 
-      <div className="my-profile-layout">
-        <div className="my-profile-editor">
-          <section className="my-profile-section">
-            <div className="my-profile-section-head">
-              <h2>Identity</h2>
-              <p>This is what people will recognize when they view your public creator page.</p>
+      {/* Body */}
+      <div className="profile-layout">
+
+        {/* ── Left: editor ── */}
+        <div className="profile-editor">
+
+          {/* Identity */}
+          <div className="profile-panel">
+            <div className="profile-panel-head">
+              <span className="profile-panel-kicker">Identity</span>
+              <p>How you appear on your creator page and across Community.</p>
             </div>
-            <label>
-              Display name
+
+            <div className="profile-avatar-row">
+              <label className="profile-avatar-tile" htmlFor="profile-avatar-file">
+                {form.avatarUrl.trim() ? (
+                  <img src={form.avatarUrl.trim()} alt={displayName} className="profile-avatar-img" />
+                ) : (
+                  <div className="profile-avatar-fallback">{avatarInitial}</div>
+                )}
+                <div className="profile-avatar-overlay">
+                  <span>{uploadingAvatar ? '…' : '↑'}</span>
+                </div>
+              </label>
               <input
-                type="text"
-                value={form.displayName}
-                onChange={event => setForm(prev => ({ ...prev, displayName: event.target.value }))}
-                placeholder="Studio or creator name"
-              />
-            </label>
-            <label>
-              Bio
-              <textarea
-                rows={4}
-                value={form.bio}
-                onChange={event => setForm(prev => ({ ...prev, bio: event.target.value }))}
-                placeholder="What kind of prompts, pools, or creative worlds do you make?"
-              />
-            </label>
-            <label>
-              Avatar URL
-              <input
-                type="text"
-                value={form.avatarUrl}
-                onChange={event => setForm(prev => ({ ...prev, avatarUrl: event.target.value }))}
-                placeholder="https://..."
-              />
-              <span className="my-profile-field-hint">Paste an image URL or upload a local image below.</span>
-            </label>
-            <label>
-              Upload avatar
-              <input
+                id="profile-avatar-file"
                 type="file"
                 accept="image/*"
-                onChange={event => void handleAvatarFile(event.target.files?.[0] ?? null)}
+                className="profile-avatar-input"
+                onChange={e => void handleAvatarFile(e.target.files?.[0] ?? null)}
               />
-              <span className="my-profile-field-hint">
-                {uploadingAvatar
-                  ? 'Preparing avatar image...'
-                  : 'First-pass upload stores the image inside your profile data until a full media pipeline is added.'}
-              </span>
-            </label>
-            {form.avatarUrl && (
-              <div className="my-profile-avatar-actions">
-                <button
-                  type="button"
-                  className="my-profile-secondary-button"
-                  onClick={() => setForm(prev => ({ ...prev, avatarUrl: '' }))}
-                >
-                  Remove avatar
-                </button>
+              <div className="profile-avatar-meta">
+                <div className="profile-field">
+                  <label className="profile-field-label" htmlFor="profile-avatar-url">Avatar link</label>
+                  <input
+                    id="profile-avatar-url"
+                    type="text"
+                    className="profile-field-input"
+                    placeholder="https://…"
+                    value={form.avatarUrl}
+                    onChange={e => setForm(prev => ({ ...prev, avatarUrl: e.target.value }))}
+                  />
+                </div>
+                {form.avatarUrl && (
+                  <button
+                    type="button"
+                    className="profile-link-btn"
+                    onClick={() => setForm(prev => ({ ...prev, avatarUrl: '' }))}
+                  >
+                    Remove avatar
+                  </button>
+                )}
               </div>
-            )}
-          </section>
-
-          <section className="my-profile-section">
-            <div className="my-profile-section-head">
-              <h2>Links and Tags</h2>
-              <p>Help people understand your style and connect to your external work.</p>
             </div>
-            <label>
-              Tags
+
+            <div className="profile-field">
+              <label className="profile-field-label" htmlFor="profile-cover-url">Cover image link</label>
               <input
+                id="profile-cover-url"
                 type="text"
-                value={form.tags}
-                onChange={event => setForm(prev => ({ ...prev, tags: event.target.value }))}
-                placeholder="cinematic, portrait, fantasy"
+                className="profile-field-input"
+                placeholder="https://… (appears as card background in Community)"
+                value={form.coverImageUrl}
+                onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value }))}
               />
-            </label>
-            <label>
-              Links
-              <textarea
-                rows={4}
-                value={form.links}
-                onChange={event => setForm(prev => ({ ...prev, links: event.target.value }))}
-                placeholder={'Portfolio: https://...\nTwitter: https://...'}
-              />
-              <span className="my-profile-field-hint">Use one link per line as `Label: URL`.</span>
-            </label>
-          </section>
-
-          <section className="my-profile-section">
-            <div className="my-profile-section-head">
-              <h2>Visibility</h2>
-              <p>Choose what MorpBase exposes publicly through your creator identity.</p>
+              {form.coverImageUrl.trim() && (
+                <div className="profile-cover-preview">
+                  <img src={form.coverImageUrl.trim()} alt="Cover preview" className="profile-cover-img" />
+                </div>
+              )}
             </div>
-            <label className="my-profile-toggle">
+
+            <div className="profile-field">
+              <label className="profile-field-label" htmlFor="profile-display-name">Display Name</label>
               <input
-                type="checkbox"
-                checked={form.showPublicPrompts}
-                onChange={event => setForm(prev => ({ ...prev, showPublicPrompts: event.target.checked }))}
+                id="profile-display-name"
+                type="text"
+                className="profile-field-input"
+                placeholder="Studio or creator name"
+                value={form.displayName}
+                onChange={e => setForm(prev => ({ ...prev, displayName: e.target.value }))}
               />
-              <span>
-                <strong>Show public prompts</strong>
-                <small>Allow visitors to view prompts you publish publicly.</small>
-              </span>
-            </label>
-            <label className="my-profile-toggle">
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-field-label" htmlFor="profile-bio">Bio</label>
+              <textarea
+                id="profile-bio"
+                className="profile-field-input"
+                rows={4}
+                placeholder="What kind of prompts, identities, or creative styles do you build?"
+                value={form.bio}
+                onChange={e => setForm(prev => ({ ...prev, bio: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          {/* Discovery */}
+          <div className="profile-panel">
+            <div className="profile-panel-head">
+              <span className="profile-panel-kicker">Discovery</span>
+              <p>Help people understand your style and find your work.</p>
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-field-label" htmlFor="profile-tags">Tags</label>
               <input
-                type="checkbox"
-                checked={form.showPublicPools}
-                onChange={event => setForm(prev => ({ ...prev, showPublicPools: event.target.checked }))}
+                id="profile-tags"
+                type="text"
+                className="profile-field-input"
+                placeholder="cinematic, portrait, fantasy"
+                value={form.tags}
+                onChange={e => setForm(prev => ({ ...prev, tags: e.target.value }))}
               />
-              <span>
-                <strong>Show public pools</strong>
-                <small>Display your Pool Hub uploads on your public creator page. Turning this off keeps uploads in Pool Hub, but hides them from your profile page.</small>
-              </span>
-            </label>
-            <label className="my-profile-toggle">
-              <input
-                type="checkbox"
-                checked={form.discoverableInSearch}
-                onChange={event => setForm(prev => ({ ...prev, discoverableInSearch: event.target.checked }))}
+              {previewTags.length > 0 && (
+                <div className="profile-tag-chips">
+                  {previewTags.map(tag => <span key={tag} className="profile-tag-chip">{tag}</span>)}
+                </div>
+              )}
+            </div>
+
+            <div className="profile-field">
+              <label className="profile-field-label" htmlFor="profile-links">Links</label>
+              <textarea
+                id="profile-links"
+                className="profile-field-input"
+                rows={4}
+                placeholder={'Portfolio: https://...\nTwitter: https://...'}
+                value={form.links}
+                onChange={e => setForm(prev => ({ ...prev, links: e.target.value }))}
               />
-              <span>
-                <strong>Appear in creator search</strong>
-                <small>Let MorpBase include your public profile in creator discovery results.</small>
-              </span>
-            </label>
-            <label className="my-profile-toggle">
-              <input
-                type="checkbox"
-                checked={form.showLinksPublicly}
-                onChange={event => setForm(prev => ({ ...prev, showLinksPublicly: event.target.checked }))}
-              />
-              <span>
-                <strong>Show links publicly</strong>
-                <small>Display your external links on your public profile.</small>
-              </span>
-            </label>
-          </section>
+              <span className="profile-field-hint">One per line — Label: URL</span>
+            </div>
+          </div>
+
+          {/* Visibility */}
+          <div className="profile-panel">
+            <div className="profile-panel-head">
+              <span className="profile-panel-kicker">Visibility</span>
+              <p>Control what visitors can see on your public creator page.</p>
+            </div>
+            <div className="profile-toggle-list">
+              {TOGGLE_FIELDS.map(({ key, title, desc }) => (
+                <label key={key} className="profile-toggle-row">
+                  <input
+                    type="checkbox"
+                    className="profile-toggle-input"
+                    checked={form[key]}
+                    onChange={e => setForm(prev => ({ ...prev, [key]: e.target.checked }))}
+                  />
+                  <div className="profile-toggle-text">
+                    <strong>{title}</strong>
+                    <span>{desc}</span>
+                  </div>
+                  <div className={`profile-toggle-track${form[key] ? ' on' : ''}`}>
+                    <div className="profile-toggle-thumb" />
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
 
           {(error || message) && (
-            <div className="my-profile-feedback">
-              {error && <div className="my-profile-error">{error}</div>}
-              {message && <div className="my-profile-message">{message}</div>}
+            <div className="profile-feedback">
+              {error   && <div className="profile-error">{error}</div>}
+              {message && <div className="profile-message">{message}</div>}
             </div>
           )}
 
-          <div className="my-profile-actions">
-            <button type="button" onClick={handleSave} disabled={saving || loading}>
-              {saving ? 'Saving...' : 'Save Profile'}
+          <div className="profile-actions">
+            <button
+              type="button"
+              className="profile-primary-btn"
+              onClick={() => void handleSave()}
+              disabled={saving}
+            >
+              {saving ? 'Saving…' : 'Save Profile'}
             </button>
           </div>
         </div>
 
-        <aside className="my-profile-preview">
-          <div className="my-profile-preview-card">
-            <div className="my-profile-preview-label">Public Preview</div>
-            <div className="my-profile-preview-header">
-              {form.avatarUrl.trim() ? (
-                <img src={form.avatarUrl.trim()} alt={form.displayName || 'Profile avatar'} className="my-profile-preview-avatar" />
+        {/* ── Right: sidebar ── */}
+        <aside className="profile-sidebar">
+
+          {/* Preview card */}
+          <div className="profile-panel profile-preview-panel">
+            <span className="profile-panel-kicker">Public Preview</span>
+            <div className="profile-preview-card">
+              <div className="profile-preview-header">
+                {form.avatarUrl.trim() ? (
+                  <img src={form.avatarUrl.trim()} alt={displayName} className="profile-preview-avatar" />
+                ) : (
+                  <div className="profile-preview-avatar profile-preview-avatar-fallback">{avatarInitial}</div>
+                )}
+                <div className="profile-preview-identity">
+                  <div className="profile-preview-name">{displayName}</div>
+                  {form.discoverableInSearch && <span className="profile-preview-badge">Discoverable</span>}
+                </div>
+              </div>
+
+              {form.bio.trim() ? (
+                <p className="profile-preview-bio">{form.bio.trim()}</p>
               ) : (
-                <div className="my-profile-preview-avatar my-profile-preview-avatar-fallback">
-                  {(form.displayName.trim() || userName || 'M').charAt(0).toUpperCase()}
+                <p className="profile-preview-bio profile-preview-bio-empty">No bio added yet.</p>
+              )}
+
+              {previewTags.length > 0 && (
+                <div className="profile-preview-chips">
+                  {previewTags.slice(0, 6).map(tag => (
+                    <span key={tag} className="profile-preview-chip">{tag}</span>
+                  ))}
                 </div>
               )}
-              <div>
-                <div className="my-profile-preview-name">{form.displayName.trim() || userName || 'Unnamed creator'}</div>
-                <div className="my-profile-preview-subtitle">
-                  {form.discoverableInSearch ? 'Discoverable in creator search' : 'Hidden from creator search'}
+
+              {previewLinks.length > 0 && (
+                <div className="profile-preview-chips">
+                  {previewLinks.map(([label]) => (
+                    <span key={label} className="profile-preview-chip profile-preview-chip-link">{label}</span>
+                  ))}
                 </div>
+              )}
+
+              <div className="profile-preview-footer">
+                <span className={`profile-preview-status${form.showPublicPrompts ? ' on' : ''}`}>
+                  {form.showPublicPrompts ? 'Prompts visible' : 'Prompts hidden'}
+                </span>
+                <span className={`profile-preview-status${form.discoverableInSearch ? ' on' : ''}`}>
+                  {form.discoverableInSearch ? 'Discoverable' : 'Not discoverable'}
+                </span>
               </div>
-            </div>
-            {form.bio.trim() ? (
-              <p className="my-profile-preview-bio">{form.bio.trim()}</p>
-            ) : (
-              <p className="my-profile-preview-bio my-profile-preview-bio-empty">Add a short bio so people understand what you create.</p>
-            )}
-            {previewTags.length > 0 && (
-              <div className="my-profile-preview-tags">
-                {previewTags.slice(0, 6).map(tag => (
-                  <span key={tag}>{tag}</span>
-                ))}
-              </div>
-            )}
-            {previewLinks.length > 0 && (
-              <div className="my-profile-preview-links">
-                {previewLinks.map(([label]) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </div>
-            )}
-            <div className="my-profile-preview-visibility">
-              <span>{form.showPublicPrompts ? 'Public prompts on' : 'Prompts private'}</span>
-              <span>{form.showPublicPools ? 'Public pools on' : 'Pools private'}</span>
-            </div>
-            <div className="my-profile-preview-note">
-              {form.showPublicPools
-                ? 'Your Pool Hub uploads can appear on your public creator page.'
-                : 'Your Pool Hub uploads stay available in the hub, but your public creator page will hide them.'}
             </div>
           </div>
 
-          <div className="my-profile-checklist">
-            <div className="my-profile-preview-label">Completion</div>
-            {completionItems.map(item => (
-              <div key={item.label} className={`my-profile-checklist-item ${item.done ? 'done' : ''}`}>
-                <span>{item.done ? 'Done' : 'Open'}</span>
-                <span>{item.label}</span>
-              </div>
-            ))}
+          {/* Profile strength */}
+          <div className="profile-panel profile-checklist-panel">
+            <span className="profile-panel-kicker">Profile Strength</span>
+            <div className="profile-checklist-bar">
+              <div className="profile-checklist-fill" style={{ width: `${completionPct}%` }} />
+            </div>
+            <div className="profile-checklist">
+              {completionItems.map(item => (
+                <div key={item.label} className={`profile-check-item${item.done ? ' done' : ''}`}>
+                  <span className="profile-check-icon">{item.done ? '✓' : '○'}</span>
+                  <span className="profile-check-label">{item.label}</span>
+                </div>
+              ))}
+            </div>
             {profile?.updatedAt && (
-              <div className="my-profile-last-saved">
-                Last saved {new Date(profile.updatedAt).toLocaleString()}
+              <div className="profile-last-saved">
+                Saved {new Date(profile.updatedAt).toLocaleString(undefined, {
+                  month: 'short', day: 'numeric',
+                  hour: '2-digit', minute: '2-digit',
+                })}
               </div>
             )}
           </div>
+
         </aside>
       </div>
     </div>

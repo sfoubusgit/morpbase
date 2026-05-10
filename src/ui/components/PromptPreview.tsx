@@ -42,8 +42,36 @@ interface PromptPreviewProps {
   activePoolNames?: string[];
   activeCharacterName?: string | null;
   activeCharacterSummary?: string | null;
+  activeOutfitName?: string | null;
+  characterInPrompt?: boolean;
   onChooseCharacter?: () => void;
+  onChooseWardrobe?: () => void;
+  activeStyleName?: string | null;
+  onChooseStyle?: () => void;
+  activeLightingName?: string | null;
+  onChooseLighting?: () => void;
+  activeCompositionName?: string | null;
+  onChooseComposition?: () => void;
+  activeMoodName?: string | null;
+  onChooseMood?: () => void;
+  onAddCharacterToPrompt?: () => void;
   onRemoveCharacter?: () => void;
+  poseFraming?: string | null;
+  poseOrientation?: string | null;
+  poseEnergy?: string | null;
+  poseGaze?: string | null;
+  onPoseChange?: (dimension: 'framing' | 'orientation' | 'energy' | 'gaze', value: string | null) => void;
+  activeEnvironmentName?: string | null;
+  activeEnvironmentSummary?: string | null;
+  environmentInPrompt?: boolean;
+  onChooseEnvironment?: () => void;
+  onAddEnvironmentToPrompt?: () => void;
+  onRemoveEnvironment?: () => void;
+  envTime?: string | null;
+  envWeather?: string | null;
+  envScale?: string | null;
+  envCondition?: string | null;
+  onEnvironmentLightChange?: (dimension: 'time' | 'weather' | 'scale' | 'condition', value: string | null) => void;
   availableIdpSets?: PoolIdpSet[];
   activeIdpSetId?: string | null;
   onSelectIdpSet?: (setId: string) => void;
@@ -160,10 +188,6 @@ function cleanPromptText(text: string): string {
   return order.map(key => formatFragment(deduped.get(key)!)).join(', ');
 }
 
-function joinNonEmpty(parts: string[], separator: string): string {
-  return parts.map(part => part.trim()).filter(Boolean).join(separator);
-}
-
 function getPromptSourceMeta(sourceType?: PromptAdditionEntry['sourceType']): PromptSourceSummary {
   switch (sourceType) {
     case 'idp-set':
@@ -196,6 +220,21 @@ function getPromptSourceMeta(sourceType?: PromptAdditionEntry['sourceType']): Pr
         id: 'character',
         label: 'Character Identity',
       };
+    case 'environment':
+      return {
+        id: 'environment',
+        label: 'Environment Identity',
+      };
+    case 'outfit':
+      return { id: 'outfit', label: 'Wardrobe' };
+    case 'style':
+      return { id: 'style', label: 'Style' };
+    case 'lighting':
+      return { id: 'lighting', label: 'Lighting' };
+    case 'composition':
+      return { id: 'composition', label: 'Composition' };
+    case 'mood':
+      return { id: 'mood', label: 'Mood' };
     default:
       return {
         id: 'other',
@@ -316,8 +355,36 @@ export function PromptPreview({
   activePoolNames = [],
   activeCharacterName = null,
   activeCharacterSummary = null,
+  activeOutfitName = null,
+  characterInPrompt = false,
   onChooseCharacter,
+  onChooseWardrobe,
+  activeStyleName = null,
+  onChooseStyle,
+  activeLightingName = null,
+  onChooseLighting,
+  activeCompositionName = null,
+  onChooseComposition,
+  activeMoodName = null,
+  onChooseMood,
+  onAddCharacterToPrompt,
   onRemoveCharacter,
+  poseFraming = null,
+  poseOrientation = null,
+  poseEnergy = null,
+  poseGaze = null,
+  onPoseChange,
+  activeEnvironmentName = null,
+  activeEnvironmentSummary = null,
+  environmentInPrompt = false,
+  onChooseEnvironment,
+  onAddEnvironmentToPrompt,
+  onRemoveEnvironment,
+  envTime = null,
+  envWeather = null,
+  envScale = null,
+  envCondition = null,
+  onEnvironmentLightChange,
   availableIdpSets = [],
   activeIdpSetId = null,
   onSelectIdpSet,
@@ -350,12 +417,14 @@ export function PromptPreview({
         text,
         position: 'end' as const,
       }));
-  const mergedPositive = composePromptWithAdditions(displayPositive, normalizedAdditions);
+  // editedPositive overrides the base text (attribute selections); additions always compose on top
+  const baseText = editedPositive ?? displayPositive;
+  const mergedPositive = composePromptWithAdditions(baseText, normalizedAdditions);
   const cleanedPositive = cleanPromptText(mergedPositive);
   const cleanedNegative = cleanPromptText(displayNegative);
   const structuredSections = useMemo(
-    () => buildStructuredSections(prompt, displayPositive, additionsText, normalizedAdditions),
-    [prompt, displayPositive, additionsText, normalizedAdditions]
+    () => buildStructuredSections(prompt, baseText, additionsText, normalizedAdditions),
+    [prompt, baseText, additionsText, normalizedAdditions]
   );
   const structuredPositive = formatStructuredPrompt(structuredSections) || mergedPositive;
 
@@ -382,13 +451,14 @@ export function PromptPreview({
       .map(entry => entry.text);
   }, [highlightedSourceId, normalizedAdditions]);
   const hasEditedOutput = editedPositive !== null || editedNegative !== null;
-  const currentPositive = editedPositive ?? generatedPositiveForMode;
+  const currentPositive = generatedPositiveForMode;
   const currentNegative = editedNegative ?? generatedNegativeForMode;
   const shouldIncludeNegativeInCopy = exportMode === 'structured_with_negative';
   const canCopyPrompt = Boolean(currentPositive || currentNegative);
+  // Only wipe manual edits when the base prompt itself changes, not when additions (character, pools) change
   const sourceSignature = useMemo(
-    () => JSON.stringify([displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]),
-    [displayPositive, displayNegative, normalizedAdditions, exportMode, structuredPositive, cleanedPositive, cleanedNegative]
+    () => JSON.stringify([displayPositive, displayNegative, exportMode]),
+    [displayPositive, displayNegative, exportMode]
   );
   const previousSourceSignature = useRef(sourceSignature);
 
@@ -426,8 +496,8 @@ export function PromptPreview({
       positive: editedPositive,
       negative: editedNegative,
     });
-    setDraftPositive(currentPositive);
-    setDraftNegative(currentNegative);
+    setDraftPositive(editedPositive ?? displayPositive);
+    setDraftNegative(editedNegative ?? displayNegative);
     setEditNotice(null);
     setIsEditMode(true);
   };
@@ -497,11 +567,10 @@ export function PromptPreview({
   const hasWorkflowContext = Boolean(
     activeModeLabel
     || activePoolNames.length > 0
-    || activeCharacterName
     || activeIdpSet
     || activeTerritoryName
-    || onChooseCharacter
   );
+  const hasIdentityContext = Boolean(onChooseCharacter || onChooseEnvironment);
   const territoryFocusLabel = territoryFocusMode === 'biased'
     ? 'Focused Builder'
     : 'Whole Builder';
@@ -711,7 +780,7 @@ export function PromptPreview({
                     onClick={onSavePrompt}
                     type="button"
                   >
-                    Save Prompt
+                    Keep to Memory
                   </button>
                 )}
                 {onOpenSavedPrompts && (
@@ -720,7 +789,7 @@ export function PromptPreview({
                     onClick={onOpenSavedPrompts}
                     type="button"
                   >
-                    Open Saved Prompts
+                    Open Memory
                   </button>
                 )}
               </div>
@@ -729,13 +798,255 @@ export function PromptPreview({
         )}
       </div>
 
+      {hasIdentityContext && (
+        <div className="prompt-identity-panel">
+          <div className="prompt-identity-panel-header">
+            <span className="prompt-identity-panel-title">Identities</span>
+            <span className="prompt-identity-panel-caption">Phrases inject into the prompt when active.</span>
+          </div>
+          <div className="prompt-identity-slots">
+
+            {/* Character slot */}
+            {onChooseCharacter && (
+              <div className={`prompt-identity-slot prompt-identity-slot-character${characterInPrompt ? ' prompt-identity-slot-active' : ''}`}>
+                <div className="prompt-identity-slot-row">
+                  <div className="prompt-identity-slot-info">
+                    <div className="prompt-identity-slot-type">Character</div>
+                    <div className={`prompt-identity-slot-name${!activeCharacterName ? ' prompt-identity-slot-name-empty' : ''}`}>
+                      {activeCharacterName ?? 'None'}
+                    </div>
+                    {activeCharacterName && (
+                      <div className="prompt-identity-slot-status">
+                        {characterInPrompt ? 'Active — phrases in prompt' : 'Selected — not in prompt yet'}
+                        {activeOutfitName && <span className="prompt-identity-outfit-name"> · {activeOutfitName}</span>}
+                      </div>
+                    )}
+                  </div>
+                  <div className="prompt-identity-slot-actions">
+                    {activeCharacterName ? (
+                      <>
+                        {onAddCharacterToPrompt && (
+                          <button type="button" className="prompt-identity-action prompt-identity-action-add" onClick={onAddCharacterToPrompt}>
+                            Add
+                          </button>
+                        )}
+                        {characterInPrompt && (
+                          <span className="prompt-identity-active-badge">Active</span>
+                        )}
+                        {characterInPrompt && onChooseWardrobe && (
+                          <button type="button" className="prompt-identity-action prompt-identity-action-secondary" onClick={onChooseWardrobe}>
+                            Wardrobe
+                          </button>
+                        )}
+                        {onRemoveCharacter && (
+                          <button type="button" className="prompt-identity-action prompt-identity-action-remove" onClick={onRemoveCharacter}>
+                            Remove
+                          </button>
+                        )}
+                        <button type="button" className="prompt-identity-action prompt-identity-action-secondary" onClick={onChooseCharacter}>
+                          Change
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" className="prompt-identity-action prompt-identity-action-choose" onClick={onChooseCharacter}>
+                        Choose
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {characterInPrompt && onPoseChange && (
+                  <div className="prompt-identity-controls">
+                    {([
+                      { key: 'framing' as const, label: 'Framing', current: poseFraming, options: [
+                        { value: 'portrait', label: 'Portrait' },
+                        { value: 'half-body shot', label: 'Half-body' },
+                        { value: 'full body', label: 'Full body' },
+                        { value: 'wide environmental shot', label: 'Wide' },
+                      ]},
+                      { key: 'orientation' as const, label: 'Orientation', current: poseOrientation, options: [
+                        { value: 'facing viewer', label: 'Facing viewer' },
+                        { value: 'three-quarter view', label: 'Three-quarter' },
+                        { value: 'profile view', label: 'Profile' },
+                        { value: 'facing away', label: 'Facing away' },
+                      ]},
+                      { key: 'energy' as const, label: 'Energy', current: poseEnergy, options: [
+                        { value: 'standing still', label: 'Still' },
+                        { value: 'casual relaxed pose', label: 'Casual' },
+                        { value: 'mid-movement', label: 'Active' },
+                        { value: 'dynamic pose', label: 'Dynamic' },
+                      ]},
+                      { key: 'gaze' as const, label: 'Gaze', current: poseGaze, options: [
+                        { value: 'direct gaze', label: 'Direct' },
+                        { value: 'looking off-frame', label: 'Off-frame' },
+                        { value: 'eyes downcast', label: 'Downward' },
+                        { value: 'eyes closed', label: 'Closed' },
+                      ]},
+                    ]).map(({ key, label, current, options }) => (
+                      <div key={key} className="prompt-identity-control-row">
+                        <div className="prompt-identity-control-label">{label}</div>
+                        <div className="prompt-identity-control-options">
+                          {options.map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`prompt-identity-control-option${current === opt.value ? ' prompt-identity-control-option-active' : ''}`}
+                              onClick={() => onPoseChange(key, current === opt.value ? null : opt.value)}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Environment slot */}
+            {onChooseEnvironment && (
+              <div className={`prompt-identity-slot prompt-identity-slot-environment${environmentInPrompt ? ' prompt-identity-slot-active' : ''}`}>
+                <div className="prompt-identity-slot-row">
+                  <div className="prompt-identity-slot-info">
+                    <div className="prompt-identity-slot-type">Environment</div>
+                    <div className={`prompt-identity-slot-name${!activeEnvironmentName ? ' prompt-identity-slot-name-empty' : ''}`}>
+                      {activeEnvironmentName ?? 'None'}
+                    </div>
+                    {activeEnvironmentName && (
+                      <div className="prompt-identity-slot-status">
+                        {environmentInPrompt ? 'Active — phrases in prompt' : 'Selected — not in prompt yet'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="prompt-identity-slot-actions">
+                    {activeEnvironmentName ? (
+                      <>
+                        {onAddEnvironmentToPrompt && (
+                          <button type="button" className="prompt-identity-action prompt-identity-action-add" onClick={onAddEnvironmentToPrompt}>
+                            Add
+                          </button>
+                        )}
+                        {environmentInPrompt && (
+                          <span className="prompt-identity-active-badge">Active</span>
+                        )}
+                        {onRemoveEnvironment && (
+                          <button type="button" className="prompt-identity-action prompt-identity-action-remove" onClick={onRemoveEnvironment}>
+                            Remove
+                          </button>
+                        )}
+                        <button type="button" className="prompt-identity-action prompt-identity-action-secondary" onClick={onChooseEnvironment}>
+                          Change
+                        </button>
+                      </>
+                    ) : (
+                      <button type="button" className="prompt-identity-action prompt-identity-action-choose" onClick={onChooseEnvironment}>
+                        Choose
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {environmentInPrompt && onEnvironmentLightChange && (
+                  <div className="prompt-identity-controls">
+                    {([
+                      { key: 'time' as const, label: 'Time', current: envTime, options: [
+                        { value: 'golden hour', label: 'Golden hour' },
+                        { value: 'midday sun', label: 'Midday' },
+                        { value: 'blue hour dusk', label: 'Dusk' },
+                        { value: 'deep night', label: 'Night' },
+                      ]},
+                      { key: 'weather' as const, label: 'Weather', current: envWeather, options: [
+                        { value: 'clear sky', label: 'Clear' },
+                        { value: 'overcast', label: 'Overcast' },
+                        { value: 'light rain', label: 'Rain' },
+                        { value: 'heavy fog', label: 'Fog' },
+                      ]},
+                      { key: 'scale' as const, label: 'Scale', current: envScale, options: [
+                        { value: 'intimate close quarters', label: 'Intimate' },
+                        { value: 'room-scale interior', label: 'Room' },
+                        { value: 'open courtyard', label: 'Courtyard' },
+                        { value: 'vast open landscape', label: 'Vast' },
+                      ]},
+                      { key: 'condition' as const, label: 'Condition', current: envCondition, options: [
+                        { value: 'pristine', label: 'Pristine' },
+                        { value: 'worn and aged', label: 'Aged' },
+                        { value: 'ruined', label: 'Ruined' },
+                        { value: 'overgrown', label: 'Overgrown' },
+                      ]},
+                    ]).map(({ key, label, current, options }) => (
+                      <div key={key} className="prompt-identity-control-row">
+                        <div className="prompt-identity-control-label">{label}</div>
+                        <div className="prompt-identity-control-options">
+                          {options.map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`prompt-identity-control-option${current === opt.value ? ' prompt-identity-control-option-active' : ''}`}
+                              onClick={() => onEnvironmentLightChange(key, current === opt.value ? null : opt.value)}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Aesthetic lane slots */}
+            {(onChooseStyle || onChooseLighting || onChooseComposition || onChooseMood) && (
+              <div className="prompt-lane-slots">
+                {onChooseStyle && (
+                  <div className={`prompt-lane-slot prompt-lane-slot-style${activeStyleName ? ' prompt-lane-slot-active' : ''}`}>
+                    <div className="prompt-lane-slot-label">Style</div>
+                    <div className="prompt-lane-slot-name">{activeStyleName ?? 'None'}</div>
+                    <button type="button" className="prompt-lane-slot-action" onClick={onChooseStyle}>
+                      {activeStyleName ? 'Change' : 'Choose'}
+                    </button>
+                  </div>
+                )}
+                {onChooseLighting && (
+                  <div className={`prompt-lane-slot prompt-lane-slot-lighting${activeLightingName ? ' prompt-lane-slot-active' : ''}`}>
+                    <div className="prompt-lane-slot-label">Lighting</div>
+                    <div className="prompt-lane-slot-name">{activeLightingName ?? 'None'}</div>
+                    <button type="button" className="prompt-lane-slot-action" onClick={onChooseLighting}>
+                      {activeLightingName ? 'Change' : 'Choose'}
+                    </button>
+                  </div>
+                )}
+                {onChooseComposition && (
+                  <div className={`prompt-lane-slot prompt-lane-slot-composition${activeCompositionName ? ' prompt-lane-slot-active' : ''}`}>
+                    <div className="prompt-lane-slot-label">Composition</div>
+                    <div className="prompt-lane-slot-name">{activeCompositionName ?? 'None'}</div>
+                    <button type="button" className="prompt-lane-slot-action" onClick={onChooseComposition}>
+                      {activeCompositionName ? 'Change' : 'Choose'}
+                    </button>
+                  </div>
+                )}
+                {onChooseMood && (
+                  <div className={`prompt-lane-slot prompt-lane-slot-mood${activeMoodName ? ' prompt-lane-slot-active' : ''}`}>
+                    <div className="prompt-lane-slot-label">Mood</div>
+                    <div className="prompt-lane-slot-name">{activeMoodName ?? 'None'}</div>
+                    <button type="button" className="prompt-lane-slot-action" onClick={onChooseMood}>
+                      {activeMoodName ? 'Change' : 'Choose'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
+
       {hasWorkflowContext && (
         <div className="prompt-workflow-panel">
-          <div className="prompt-workflow-panel-title">Builder Workflow</div>
+          <div className="prompt-workflow-panel-title">Workspace Loop</div>
           <div className="prompt-preview-workflow-block">
             <div className="prompt-preview-workflow-title">Workspace</div>
             <div className="prompt-preview-workflow-summary">
-              Builder is the main workspace for shaping the current prompt workflow.
+              Workspace is the main place where the current prompt workflow takes shape.
             </div>
             {activeModeLabel && (
               <div className="prompt-preview-workflow-chips">
@@ -758,7 +1069,7 @@ export function PromptPreview({
                 )}
                 {activeTerritoryName && territoryFocusMode && (
                   <div className="prompt-preview-workflow-row">
-                    <span className="prompt-preview-workflow-row-label">Builder Focus</span>
+                    <span className="prompt-preview-workflow-row-label">Workspace Focus</span>
                     <span className="prompt-preview-workflow-row-value">{territoryFocusLabel}</span>
                   </div>
                 )}
@@ -775,51 +1086,6 @@ export function PromptPreview({
           {(activeTerritoryName || activePoolNames.length > 0) && (
             <div className="prompt-preview-workflow-note">
               Territories shape the workflow. Pools supply the reusable source material behind it.
-            </div>
-          )}
-
-          {(onChooseCharacter || activeCharacterName) && (
-            <div className="prompt-preview-character-block">
-              <div className="prompt-preview-character-header">
-                <div>
-                  <div className="prompt-preview-character-title">Character Identity</div>
-                  <div className="prompt-preview-character-subtitle">
-                    Apply one reusable character identity on top of the current workflow.
-                  </div>
-                </div>
-                <div className="prompt-preview-character-actions">
-                  {onChooseCharacter && (
-                    <button
-                      type="button"
-                      className="prompt-preview-character-button"
-                      onClick={onChooseCharacter}
-                    >
-                      {activeCharacterName ? 'Change' : 'Choose Character'}
-                    </button>
-                  )}
-                  {activeCharacterName && onRemoveCharacter && (
-                    <button
-                      type="button"
-                      className="prompt-preview-character-button prompt-preview-character-button-danger"
-                      onClick={onRemoveCharacter}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              </div>
-              {activeCharacterName ? (
-                <div className="prompt-preview-character-body">
-                  <div className="prompt-preview-character-name">{activeCharacterName}</div>
-                  {activeCharacterSummary && (
-                    <div className="prompt-preview-character-summary">{activeCharacterSummary}</div>
-                  )}
-                </div>
-              ) : (
-                <div className="prompt-preview-character-empty">
-                  No active character identity yet.
-                </div>
-              )}
             </div>
           )}
 

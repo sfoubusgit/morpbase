@@ -12,6 +12,7 @@ import type {
 
 const CHARACTER_STORE_KEY = 'promptgen:characters:v1';
 const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
+const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v2';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -251,6 +252,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     id,
     name,
     summary: typeof value.summary === 'string' ? normalizeText(value.summary) || undefined : undefined,
+    coverImageUrl: typeof value.coverImageUrl === 'string' ? value.coverImageUrl.trim() || undefined : undefined,
     avatar: sanitizeAvatar(value.avatar),
     identity: sanitizeFields(value.identity),
     phraseBundle,
@@ -258,6 +260,107 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     updatedAt,
   };
 };
+
+const SEED_TS = 1746748800000;
+const SEED_TS_2 = 1746835200000;
+
+const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_lyra_voss',
+    name: 'Lyra Voss',
+    summary: 'A pale cartographer with white voluminous hair, amber spectacles, and an ink-stained left hand.',
+    identity: {
+      archetype: 'scholar',
+      presentation: 'nude',
+      ageImpression: 'adult',
+      visualAnchors: [
+        { id: 'anchor_lv_1', label: 'Silhouette', kind: 'silhouette', text: 'tall slender figure, very wide perfect hips, mildly athletic build' },
+        { id: 'anchor_lv_2', label: 'Chest', kind: 'other', text: 'very huge low-hanging teardrop-shaped breasts, extremely large areolas' },
+        { id: 'anchor_lv_3', label: 'Hair', kind: 'hair', text: 'white voluminous hair' },
+        { id: 'anchor_lv_4', label: 'Eyes', kind: 'eyes', text: 'black eyes' },
+        { id: 'anchor_lv_5', label: 'Face', kind: 'face', text: 'angular features, pale complexion' },
+        { id: 'anchor_lv_6', label: 'Spectacles', kind: 'accessory', text: 'round amber spectacles' },
+        { id: 'anchor_lv_7', label: 'Ink Hand', kind: 'other', text: 'left hand stained dark with cartographer\'s ink' },
+      ],
+      motifs: [
+        { id: 'motif_lv_1', label: 'Cartographer', text: 'ink-stained hands, maps, scholarly precision' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tall slender nude woman',
+        'very huge low-hanging teardrop-shaped breasts, extremely large areolas',
+        'very wide perfect hips, mildly athletic build',
+        'white voluminous hair, black eyes, round amber spectacles',
+        'angular features, pale complexion',
+        'left hand stained dark with cartographer\'s ink',
+      ],
+    },
+    createdAt: SEED_TS,
+    updatedAt: SEED_TS,
+  },
+  {
+    id: 'character_seed_mira_duskhollow',
+    name: 'Mira Duskhollow',
+    summary: 'A warm-skinned alchemist with curvy build, coily black hair, and burn-marked forearms.',
+    identity: {
+      archetype: 'alchemist',
+      presentation: 'nude',
+      ageImpression: 'young adult',
+      visualAnchors: [
+        { id: 'anchor_md_1', label: 'Silhouette', kind: 'silhouette', text: 'medium height, full curvy build, soft rounded belly, strong forearms' },
+        { id: 'anchor_md_2', label: 'Skin', kind: 'other', text: 'warm brown skin, small burn marks on forearms and hands' },
+        { id: 'anchor_md_3', label: 'Hair', kind: 'hair', text: 'tight coily black hair worn loose, voluminous' },
+        { id: 'anchor_md_4', label: 'Eyes', kind: 'eyes', text: 'dark brown eyes, direct gaze' },
+        { id: 'anchor_md_5', label: 'Face', kind: 'face', text: 'full lips, broad nose, soft rounded features' },
+      ],
+      motifs: [
+        { id: 'motif_md_1', label: 'Alchemy', text: 'burn marks, reagent stains, hands that have worked with fire' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'young woman with warm brown skin, full curvy build',
+        'soft rounded belly, strong forearms with small burn marks',
+        'tight coily black hair worn loose and voluminous',
+        'dark brown eyes, full lips, broad nose, soft rounded features',
+      ],
+    },
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'character_seed_vesper',
+    name: 'Vesper',
+    summary: 'A pale oracle — ageless, extremely slender, with floor-length silver-white hair and unsettling stillness.',
+    identity: {
+      archetype: 'oracle',
+      presentation: 'nude',
+      ageImpression: 'ageless adult',
+      visualAnchors: [
+        { id: 'anchor_vs_1', label: 'Silhouette', kind: 'silhouette', text: 'tall, extremely slender, almost no body fat, prominent sharp clavicles' },
+        { id: 'anchor_vs_2', label: 'Skin', kind: 'other', text: 'very pale skin, almost translucent quality' },
+        { id: 'anchor_vs_3', label: 'Hair', kind: 'hair', text: 'extremely long straight silver-white hair falling past the waist' },
+        { id: 'anchor_vs_4', label: 'Eyes', kind: 'eyes', text: 'pale grey eyes, unsettling stillness' },
+        { id: 'anchor_vs_5', label: 'Face', kind: 'face', text: 'sharp angular face, high cheekbones, thin lips' },
+      ],
+      motifs: [
+        { id: 'motif_vs_1', label: 'Oracle', text: 'stillness, silver-white, ageless presence, cold clarity' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tall extremely slender woman, almost no body fat',
+        'very pale skin with a translucent quality, prominent sharp clavicles',
+        'extremely long straight silver-white hair falling past the waist',
+        'pale grey eyes, sharp angular face, high cheekbones, thin lips',
+        'ageless stillness, cold and composed presence',
+      ],
+    },
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+];
 
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
@@ -280,11 +383,11 @@ const readCharacters = (): CharacterIdentity[] => {
     );
 
     if (parsed.length > 0 || rawCharacters.length === 0) {
-      return parsed;
+      return maybeApplySeed(parsed);
     }
   }
 
-  return [];
+  return maybeApplySeed([]);
 };
 
 const writeCharacters = (characters: CharacterIdentity[]) => {
@@ -295,6 +398,17 @@ const writeCharacters = (characters: CharacterIdentity[]) => {
 
   writeStorageItem(CHARACTER_STORE_KEY, payload);
   writeStorageItem(CHARACTER_STORE_BACKUP_KEY, payload);
+};
+
+const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] => {
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY) !== null) return characters;
+  writeStorageItem(CHARACTER_SEED_FLAG_KEY, true);
+  const existingIds = new Set(characters.map(c => c.id));
+  const toAdd = DEFAULT_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+  if (toAdd.length === 0) return characters;
+  const merged = sortCharacters([...characters, ...toAdd]);
+  writeCharacters(merged);
+  return merged;
 };
 
 const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput => {
@@ -316,6 +430,7 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
   return {
     name,
     summary: input.summary ? normalizeText(input.summary) || undefined : undefined,
+    coverImageUrl: input.coverImageUrl?.trim() || undefined,
     avatar: sanitizeAvatar(input.avatar),
     identity,
     phraseBundle,
@@ -348,6 +463,7 @@ export async function createCharacter(input: CharacterIdentityInput): Promise<Ch
     id: createId('character'),
     name: sanitized.name,
     summary: sanitized.summary,
+    coverImageUrl: sanitized.coverImageUrl,
     avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
@@ -380,6 +496,7 @@ export async function updateCharacter(
     ...existing,
     name: sanitized.name,
     summary: sanitized.summary,
+    coverImageUrl: sanitized.coverImageUrl,
     avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,

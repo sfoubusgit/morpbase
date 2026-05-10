@@ -1065,10 +1065,10 @@ export function PoolHubPage({
         <header className="pool-hub-header">
           <div className="pool-hub-hero">
             <div className="pool-hub-hero-main">
-              <div className="pool-hub-mode-label">Community Source Layer</div>
+              <div className="pool-hub-mode-label">Community realm</div>
               <div>
-                <h2>Pool Hub</h2>
-                <p>Discover official and community Pools, import the ones that help, and feed stronger Workflow Sources for Territories and Builder.</p>
+                <h2>Community</h2>
+                <p>Discover shared source libraries, bring useful ones into your own workflow, and let Community feed stronger work back into Workspace.</p>
               </div>
               <div className="pool-hub-hero-stats">
                 {hubOverviewStats.map(stat => (
@@ -1082,7 +1082,7 @@ export function PoolHubPage({
                 {isLoggedIn && userName ? (
                   <div className="pool-hub-user-badge">Logged in as {userName}</div>
                 ) : (
-                  <div className="pool-hub-user-badge">Browse mode</div>
+                  <div className="pool-hub-user-badge">Community browse mode</div>
                 )}
                 <div className="pool-hub-user-badge pool-hub-preview-badge">Preview</div>
                 {isLoggedIn && !isPro && (
@@ -1091,15 +1091,15 @@ export function PoolHubPage({
               </div>
               <div className="pool-hub-hero-flow">
                 <div className="pool-hub-hero-flow-step">
-                  <strong>1. Discover here</strong>
+                  <strong>1. Discover shared work</strong>
                   <span>Browse reusable source libraries from MorpBase and the community.</span>
                 </div>
                 <div className="pool-hub-hero-flow-step">
-                  <strong>2. Import to Workflow Sources</strong>
+                  <strong>2. Bring inward</strong>
                   <span>Bring useful Pools into your own reusable source layer.</span>
                 </div>
                 <div className="pool-hub-hero-flow-step">
-                  <strong>3. Use through Builder</strong>
+                  <strong>3. Return to Workspace</strong>
                   <span>Turn Pool sections into Territories or reuse them directly in your workflow.</span>
                 </div>
               </div>
@@ -1112,7 +1112,7 @@ export function PoolHubPage({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  Community manual
+                  Community guide
                 </a>
               )}
               <button
@@ -1383,14 +1383,14 @@ export function PoolHubPage({
               <div className="pool-hub-source-section">
                 <div className="pool-hub-source-section-header">
                   <div>
-                    <div className="pool-hub-section-title">Community Pools</div>
-                    <div className="pool-hub-muted">Community-made source libraries you can import, adapt, and later use through Territories or Builder.</div>
+                    <div className="pool-hub-section-title">Shared Pools</div>
+                    <div className="pool-hub-muted">Community-made source libraries you can import, adapt, and later use through Territories or Workspace.</div>
                   </div>
                   <span className="pool-hub-source-count">{communityPoolEntries.length}</span>
                 </div>
                 {communityPoolEntries.length === 0 ? (
                   <div className="pool-hub-empty pool-hub-source-empty">
-                    No community pools match your current filters.
+                    No shared pools match your current filters.
                   </div>
                 ) : (
                   <div className="pool-hub-grid">

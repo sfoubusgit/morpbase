@@ -19,7 +19,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 11px 13px;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(140, 159, 255, 0.3);
   background:
     linear-gradient(135deg, rgba(20, 26, 45, 0.98), rgba(32, 18, 54, 0.98)),
@@ -58,7 +58,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: linear-gradient(135deg, rgba(134, 92, 255, 0.34), rgba(77, 214, 255, 0.24));
   border: 1px solid rgba(183, 198, 255, 0.24);
   color: #ffffff;
@@ -72,7 +72,7 @@
   flex: 1;
   min-width: 0;
   font-size: 11px;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1.15;
@@ -90,12 +90,12 @@
 .floating-prompt-fragments-trigger-count {
   min-width: 22px;
   padding: 3px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(154, 138, 255, 0.26);
   border: 1px solid rgba(154, 138, 255, 0.42);
   color: #ffffff;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .floating-prompt-fragments-trigger-hint {
@@ -109,7 +109,7 @@
   width: min(320px, calc(100vw - 36px));
   max-height: min(360px, calc(100vh - 36px));
   overflow: auto;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(110, 86, 249, 0.22);
   background: linear-gradient(180deg, rgba(18, 18, 28, 0.98), rgba(11, 12, 20, 0.98));
   box-shadow: 0 20px 42px rgba(0, 0, 0, 0.42);
@@ -129,32 +129,32 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .floating-prompt-fragments-title {
   margin-top: 4px;
   font-size: 15px;
-  font-weight: 700;
-  color: #f3f4f6;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
 }
 
 .floating-prompt-fragments-close {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   background: rgba(20, 20, 26, 0.9);
   color: #f4f7ff;
   padding: 6px 10px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .floating-prompt-fragments-copy {
-  color: var(--text-secondary, #a8adb7);
-  font-size: 0.92rem;
+  color: var(--text-secondary);
+  font-size: 15px;
   line-height: 1.45;
 }
 
@@ -162,17 +162,17 @@
   display: grid;
   gap: 10px;
   padding: 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-subtle);
 }
 
 .floating-prompt-fragments-custom-label {
   font-size: 11px;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #d7def7;
+  color: var(--text-accent);
 }
 
 .floating-prompt-fragments-custom-input-row {
@@ -186,9 +186,9 @@
   min-width: 0;
   box-sizing: border-box;
   background: rgba(12, 12, 18, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-medium);
   color: #f4f7ff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 13px;
 }
@@ -197,10 +197,10 @@
   border: 1px solid rgba(110, 86, 249, 0.4);
   background: rgba(110, 86, 249, 0.18);
   color: #ffffff;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 0 12px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   cursor: pointer;
 }
 
@@ -227,13 +227,13 @@
 }
 
 .floating-prompt-fragments-custom-remove {
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--border-medium);
   background: rgba(20, 20, 26, 0.82);
   color: #d6dbea;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
@@ -242,17 +242,17 @@
 .floating-prompt-fragments-library {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 9px;
 }
 
 .floating-prompt-fragments-chip {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-medium);
   background: rgba(255, 255, 255, 0.03);
   color: inherit;
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  padding: 7px 13px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .floating-prompt-fragments-chip.selected {

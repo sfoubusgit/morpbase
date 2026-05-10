@@ -5,6 +5,7 @@ export type PublicProfile = {
   bio?: string | null;
   avatarUrl?: string | null;
   avatarStoragePath?: string | null;
+  coverImageUrl?: string | null;
   links?: Record<string, string> | null;
   tags?: string[] | null;
   showPublicPrompts?: boolean | null;

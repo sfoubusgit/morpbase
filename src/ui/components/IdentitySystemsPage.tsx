@@ -1,25 +1,27 @@
 import { useMemo } from 'react';
-import type { CharacterIdentity, CharacterIdentityInput } from '../../types';
-import { CharacterLibrarySurface } from './CharacterLibrarySurface';
+import type { CharacterIdentity, CompositionFrame, EnvironmentIdentity, LightingSetup, MoodPreset, OutfitIdentity, StylePreset } from '../../types';
 import './IdentitySystemsPage.css';
 
 type IdentitySystemsPageProps = {
   characters: CharacterIdentity[];
   activeCharacterId: string | null;
-  isLoading?: boolean;
-  onSelectCharacter: (characterId: string) => void;
-  onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
-  onUpdateCharacter: (characterId: string, input: CharacterIdentityInput) => Promise<CharacterIdentity>;
-  onDeleteCharacter: (characterId: string) => Promise<void>;
+  environments: EnvironmentIdentity[];
+  activeEnvironmentId: string | null;
+  outfits: OutfitIdentity[];
+  activeOutfitId: string | null;
+  stylePresets: StylePreset[];
+  activeStyleId: string | null;
+  lightingSetups: LightingSetup[];
+  activeLightingId: string | null;
+  compositionFrames: CompositionFrame[];
+  activeCompositionId: string | null;
+  moodPresets: MoodPreset[];
+  activeMoodId: string | null;
   onGoToBuilder?: () => void;
   onGoToPrompts?: () => void;
 };
 
 const UPCOMING_LANES = [
-  {
-    title: 'Outfit Identity',
-    description: 'Reusable clothing and wearable continuity that can travel across many workflows without living inside one Character.',
-  },
   {
     title: 'Prop / Artifact Identity',
     description: 'Recurring objects, relics, or signature items that deserve their own continuity outside ordinary workflow sources.',
@@ -33,32 +35,59 @@ const UPCOMING_LANES = [
 export function IdentitySystemsPage({
   characters,
   activeCharacterId,
-  isLoading = false,
-  onSelectCharacter,
-  onCreateCharacter,
-  onUpdateCharacter,
-  onDeleteCharacter,
+  environments,
+  activeEnvironmentId,
+  outfits,
+  activeOutfitId,
+  stylePresets,
+  activeStyleId,
+  lightingSetups,
+  activeLightingId,
+  compositionFrames,
+  activeCompositionId,
+  moodPresets,
+  activeMoodId,
   onGoToBuilder,
   onGoToPrompts,
 }: IdentitySystemsPageProps) {
   const activeCharacter = useMemo(
-    () => characters.find(character => character.id === activeCharacterId) ?? null,
+    () => characters.find(c => c.id === activeCharacterId) ?? null,
     [characters, activeCharacterId]
   );
-  const legacyCharacterCount = useMemo(
-    () => characters.filter(character => character.identity.visualAnchors.length === 0).length,
-    [characters]
+  const activeEnvironment = useMemo(
+    () => environments.find(e => e.id === activeEnvironmentId) ?? null,
+    [environments, activeEnvironmentId]
+  );
+  const activeOutfit = useMemo(
+    () => outfits.find(o => o.id === activeOutfitId) ?? null,
+    [outfits, activeOutfitId]
+  );
+  const activeStyle = useMemo(
+    () => stylePresets.find(s => s.id === activeStyleId) ?? null,
+    [stylePresets, activeStyleId]
+  );
+  const activeLighting = useMemo(
+    () => lightingSetups.find(l => l.id === activeLightingId) ?? null,
+    [lightingSetups, activeLightingId]
+  );
+  const activeComposition = useMemo(
+    () => compositionFrames.find(c => c.id === activeCompositionId) ?? null,
+    [compositionFrames, activeCompositionId]
+  );
+  const activeMood = useMemo(
+    () => moodPresets.find(m => m.id === activeMoodId) ?? null,
+    [moodPresets, activeMoodId]
   );
 
   return (
     <div className="identity-systems-page">
       <header className="identity-systems-header">
         <div>
-          <div className="identity-systems-eyebrow">Reusable continuity realm</div>
-          <h2>Identity Systems</h2>
+          <div className="identity-systems-eyebrow">Continuity realm</div>
+          <h2>Continuity</h2>
           <p>
-            Identity Systems is where reusable continuity entities live in MorpBase. Builder applies them,
-            Prompt Preview activates them, and saved prompts remember when they were present.
+            Continuity is where reusable recurring entities live in MorpBase. Workspace applies them,
+            Prompt Preview activates them, and Memory remembers when they were present.
           </p>
         </div>
         <div className="identity-systems-header-actions">
@@ -68,7 +97,7 @@ export function IdentitySystemsPage({
               className="identity-systems-primary-action"
               onClick={onGoToBuilder}
             >
-              Open Builder
+              Open Workspace
             </button>
           )}
           {onGoToPrompts && (
@@ -77,7 +106,7 @@ export function IdentitySystemsPage({
               className="identity-systems-secondary-action"
               onClick={onGoToPrompts}
             >
-              Open Prompt Archive
+              Open Memory
             </button>
           )}
         </div>
@@ -86,10 +115,10 @@ export function IdentitySystemsPage({
       <section className="identity-systems-overview">
         <article className="identity-systems-overview-card identity-systems-overview-card-live">
           <div className="identity-systems-overview-label">Live Today</div>
-          <h3>Character Identity is the first live lane</h3>
+          <h3>Seven live lanes</h3>
           <p>
-            Character Identity is now a real reusable continuity lane. You can create, edit, apply,
-            switch, and archive Character-linked outputs without pretending the whole future realm is finished.
+            Character, Environment, Wardrobe, Style, Lighting, Composition, and Mood are all live reusable continuity lanes.
+            Each can be created, edited, and activated from Workspace.
           </p>
           <div className="identity-systems-metrics">
             <div className="identity-systems-metric">
@@ -97,31 +126,75 @@ export function IdentitySystemsPage({
               <span className="identity-systems-metric-label">Characters</span>
             </div>
             <div className="identity-systems-metric">
-              <span className="identity-systems-metric-value">{activeCharacter ? activeCharacter.name : 'None'}</span>
-              <span className="identity-systems-metric-label">Active in Builder</span>
+              <span className="identity-systems-metric-value">{activeCharacter?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active character</span>
             </div>
             <div className="identity-systems-metric">
-              <span className="identity-systems-metric-value">{legacyCharacterCount}</span>
-              <span className="identity-systems-metric-label">Legacy repairs</span>
+              <span className="identity-systems-metric-value">{environments.length}</span>
+              <span className="identity-systems-metric-label">Environments</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeEnvironment?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active environment</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{outfits.length}</span>
+              <span className="identity-systems-metric-label">Outfits</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeOutfit?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active outfit</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{stylePresets.length}</span>
+              <span className="identity-systems-metric-label">Style presets</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeStyle?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active style</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{lightingSetups.length}</span>
+              <span className="identity-systems-metric-label">Lighting setups</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeLighting?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active lighting</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{compositionFrames.length}</span>
+              <span className="identity-systems-metric-label">Composition frames</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeComposition?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active composition</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{moodPresets.length}</span>
+              <span className="identity-systems-metric-label">Mood presets</span>
+            </div>
+            <div className="identity-systems-metric">
+              <span className="identity-systems-metric-value">{activeMood?.name ?? 'None'}</span>
+              <span className="identity-systems-metric-label">Active mood</span>
             </div>
           </div>
         </article>
 
         <article className="identity-systems-overview-card">
           <div className="identity-systems-overview-label">System Relationship</div>
-          <h3>Builder applies. The realm owns identity.</h3>
+          <h3>Workspace applies. This realm owns identity.</h3>
           <p>
-            Identity Systems stays outside ordinary Builder content. Builder holds live activation state,
-            while the realm owns reusable entity life, editing, and continuity structure.
+            Continuity stays outside ordinary Workspace content. Workspace holds live activation state,
+            while this realm owns reusable entity structure, editing, and continuity life.
           </p>
         </article>
 
         <article className="identity-systems-overview-card">
           <div className="identity-systems-overview-label">What Comes Next</div>
-          <h3>The realm is bigger than Character</h3>
+          <h3>The realm grows as the system proves itself</h3>
           <p>
-            Character Identity is only the first proving lane. The page below also marks the next likely lanes
-            so the realm already reads as a continuity system, not just one isolated feature.
+            Seven lanes are live. Each new lane that proves its value opens the next.
+            The grid below marks the next likely additions so the realm already reads as a system.
           </p>
         </article>
       </section>
@@ -137,9 +210,37 @@ export function IdentitySystemsPage({
           <article className="identity-systems-lane-card identity-systems-lane-card-live">
             <div className="identity-systems-lane-state">Live Lane</div>
             <div className="identity-systems-lane-title">Character Identity</div>
-            <p>
-              Reusable recurring subject identity with workflow application, archive lineage, and a dedicated lane surface.
-            </p>
+            <p>Reusable recurring subject identity with workflow application and a dedicated lane surface.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Environment Identity</div>
+            <p>Reusable named scenes with core phrases and a light layer. Injects into the prompt from Workspace.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Wardrobe Identity</div>
+            <p>Global reusable outfit library. One outfit active at a time — its phrases append alongside the active character.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Style Identity</div>
+            <p>Art medium and rendering aesthetic. One preset active at a time — its phrases inject at the end of every prompt.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Lighting Identity</div>
+            <p>Named lighting setups. One active at a time — defines light source, shadow character, and mood register.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Composition Identity</div>
+            <p>Shot framing and camera angle. One frame active at a time — controls how the subject fills the image.</p>
+          </article>
+          <article className="identity-systems-lane-card identity-systems-lane-card-live">
+            <div className="identity-systems-lane-state">Live Lane</div>
+            <div className="identity-systems-lane-title">Mood Identity</div>
+            <p>Emotional register and atmosphere. One preset active at a time — sets the feeling the image should carry.</p>
           </article>
           {UPCOMING_LANES.map(lane => (
             <article key={lane.title} className="identity-systems-lane-card">
@@ -149,24 +250,6 @@ export function IdentitySystemsPage({
             </article>
           ))}
         </div>
-      </section>
-
-      <section className="identity-systems-live-lane">
-        <div className="identity-systems-section-heading">
-          <div>
-            <div className="identity-systems-section-label">Live Lane Surface</div>
-            <h3>Character Identity</h3>
-          </div>
-        </div>
-        <CharacterLibrarySurface
-          characters={characters}
-          activeCharacterId={activeCharacterId}
-          isLoading={isLoading}
-          onSelectCharacter={onSelectCharacter}
-          onCreateCharacter={onCreateCharacter}
-          onUpdateCharacter={onUpdateCharacter}
-          onDeleteCharacter={onDeleteCharacter}
-        />
       </section>
     </div>
   );

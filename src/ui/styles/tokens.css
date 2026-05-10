@@ -1,25 +1,38 @@
 /**
  * Design Tokens as CSS Variables
- * 
- * Global design system tokens for the Stable Diffusion Prompt Builder.
- * All values match the approved design language.
+ *
+ * Single source of truth for all visual values in MorpBase.
+ * Every component CSS file should reference these variables rather than hardcoding values.
  */
 
 :root {
-  /* Colors - Background */
+  /* ── Surfaces ── */
+  --surface-0: #0a0b12;                        /* page / app background */
+  --surface-1: #111217;                         /* deepest cards, inputs */
+  --surface-2: #1a1a1f;                         /* standard card */
+  --surface-3: #25252a;                         /* elevated card, modal sidebar */
+  --surface-overlay: rgba(14, 15, 20, 0.82);   /* semi-transparent card over gradient bg */
+
+  /* Legacy aliases kept for backward-compat with Modal.css */
   --background-base: #0F0F12;
   --background-surface: #1A1A1F;
+  --background-surface-2: #25252A;
   --background-surface-alt: #222228;
 
-  /* Colors - Text */
+  /* ── Text ── */
   --text-primary: #ffffff;
-  --text-secondary: #B0B0C3;
+  --text-secondary: #b0b0c3;    /* muted labels, descriptions */
+  --text-tertiary: #9ca3af;     /* dimmer meta, section labels */
+  --text-accent: #dbe2ff;       /* eyebrows, kickers, field labels */
   --text-muted: rgba(255, 255, 255, 0.3);
 
-  /* Colors - Accent (Purple) */
-  --accent-primary: #6E56F9;
-  --accent-primary-hover: #7B65FF;
-  --accent-primary-active: #5D47E8;
+  /* ── Accent — Purple ── */
+  --accent-primary: #6e56f9;
+  --accent-primary-hover: #7b65ff;
+  --accent-primary-active: #5d47e8;
+  --accent-primary-bg: rgba(110, 86, 249, 0.12);
+  --accent-primary-bg-strong: rgba(110, 86, 249, 0.22);
+  /* Numeric opacity aliases used by existing code */
   --accent-primary-rgba-02: rgba(110, 86, 249, 0.2);
   --accent-primary-rgba-03: rgba(110, 86, 249, 0.3);
   --accent-primary-rgba-05: rgba(110, 86, 249, 0.5);
@@ -27,11 +40,21 @@
   --accent-primary-rgba-15: rgba(110, 86, 249, 0.15);
   --accent-primary-rgba-25: rgba(110, 86, 249, 0.25);
 
-  /* Colors - Border */
-  --border-subtle: rgba(255, 255, 255, 0.04);
+  /* ── Accent — Green (territory / environment) ── */
+  --accent-green: #10b981;
+  --accent-green-bg: rgba(16, 185, 129, 0.12);
+  --accent-green-border: rgba(16, 185, 129, 0.24);
+
+  /* ── Borders ── */
+  --border-hairline: rgba(255, 255, 255, 0.04);  /* faintest separator */
+  --border-subtle: rgba(255, 255, 255, 0.07);     /* standard card border */
+  --border-medium: rgba(255, 255, 255, 0.12);     /* inputs, stronger separators */
+  --border-accent: rgba(110, 86, 249, 0.35);      /* accent-tinted border */
+  --border-accent-strong: rgba(110, 86, 249, 0.6);/* primary button border */
+  /* Legacy alias */
   --border-strong: rgba(255, 255, 255, 0.1);
 
-  /* Colors - Semantic */
+  /* ── Semantic ── */
   --error-base: #ff6b6b;
   --error-rgba-15: rgba(255, 77, 77, 0.15);
   --error-rgba-25: rgba(255, 77, 77, 0.25);
@@ -39,11 +62,12 @@
   --warning-base: #d4a85a;
   --success-base: #6a9f7a;
 
-  /* Typography - Font Families */
+  /* ── Typography — Families ── */
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", "Consolas", monospace;
 
-  /* Typography - Font Sizes */
+  /* ── Typography — Sizes ── */
+  --font-size-2xs: 10px;
   --font-size-xs: 11px;
   --font-size-sm: 13px;
   --font-size-md: 15px;
@@ -51,18 +75,20 @@
   --font-size-xl: 22px;
   --font-size-2xl: 28px;
 
-  /* Typography - Font Weights */
+  /* ── Typography — Weights ── */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 
-  /* Typography - Line Heights */
+  /* ── Typography — Line Heights ── */
   --line-height-tight: 1.4;
   --line-height-normal: 1.5;
-  --line-height-relaxed: 1.75;
+  --line-height-relaxed: 1.65;
+  --line-height-loose: 1.75;
 
-  /* Spacing */
+  /* ── Spacing ── */
   --spacing-1: 4px;
   --spacing-2: 8px;
   --spacing-3: 12px;
@@ -72,21 +98,32 @@
   --spacing-7: 48px;
   --spacing-8: 64px;
 
-  /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  /* ── Page layout ── */
+  --page-padding-x: 32px;
+  --page-padding-y: 24px;
+  --section-gap: 24px;
+  --card-padding: 18px;
 
-  /* Border Widths */
+  /* ── Border Radius ── */
+  --radius-xs: 6px;    /* tiny badges, small controls */
+  --radius-sm: 10px;   /* inputs, small buttons */
+  --radius-md: 14px;   /* standard cards */
+  --radius-lg: 18px;   /* section cards, large panels */
+  --radius-xl: 22px;   /* page heroes, large modals */
+  --radius-pill: 999px;/* pills and chips */
+  /* Legacy aliases used by existing code */
+  --radius-sm-legacy: 8px;
+  --radius-md-legacy: 12px;
+  --radius-lg-legacy: 20px;
+
+  /* ── Border Widths ── */
   --border-width-hairline: 1px;
   --border-width-thin: 2px;
 
-  /* Motion - Durations */
+  /* ── Motion ── */
   --motion-fast: 150ms;
   --motion-normal: 250ms;
   --motion-slow: 400ms;
-
-  /* Motion - Easing Curves */
   --motion-ease: cubic-bezier(0.4, 0.0, 0.2, 1);
   --motion-ease-in: cubic-bezier(0.4, 0.0, 1, 1);
   --motion-ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);

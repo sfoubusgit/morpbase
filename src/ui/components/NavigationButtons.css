@@ -1,7 +1,5 @@
 /**
  * NavigationButtons Component Styles
- * 
- * Matches the old NavigationButtons design
  */
 
 .navigation-buttons {
@@ -9,30 +7,30 @@
   gap: 12px;
   margin-top: 32px;
   padding-top: 32px;
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid var(--border-hairline);
 }
 
 .nav-button {
   flex: 1;
   padding: 14px 24px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 15px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-primary);
   cursor: pointer;
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-hairline);
 }
 
 .nav-button-back {
   background: rgba(255, 255, 255, 0.03);
-  color: #B0B0C3;
+  color: var(--text-secondary);
 }
 
 .nav-button-back:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  border-color: var(--border-medium);
+  color: var(--text-primary);
 }
 
 .nav-button-back:disabled {
@@ -41,14 +39,14 @@
 }
 
 .nav-button-next {
-  background: #6E56F9;
-  color: white;
-  border-color: #6E56F9;
+  background: var(--accent-primary);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
 }
 
 .nav-button-next:hover:not(:disabled) {
-  background: #7B65FF;
-  border-color: #7B65FF;
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary-hover);
   box-shadow: 0 4px 16px rgba(110, 86, 249, 0.4);
   transform: translateY(-2px);
 }
@@ -60,18 +58,17 @@
 
 .nav-button-skip {
   background: rgba(255, 255, 255, 0.05);
-  color: #B0B0C3;
-  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
 }
 
 .nav-button-skip:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.15);
-  color: white;
+  color: var(--text-primary);
   transform: translateY(-2px);
 }
 
 .nav-button:active {
   transform: translateY(0);
 }
-

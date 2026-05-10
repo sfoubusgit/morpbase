@@ -1,28 +1,28 @@
 .prompt-fragments-panel {
   display: grid;
-  gap: 0.9rem;
+  gap: 14px;
 }
 
 .prompt-fragments-copy {
-  color: var(--text-secondary, #a8adb7);
-  font-size: 0.92rem;
+  color: var(--text-secondary);
+  font-size: 15px;
   line-height: 1.45;
 }
 
 .prompt-fragments-library {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.55rem;
+  gap: 9px;
 }
 
 .prompt-fragments-chip {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-medium);
   background: rgba(255, 255, 255, 0.03);
   color: inherit;
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
+  border-radius: var(--radius-pill);
+  padding: 7px 13px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .prompt-fragments-chip.selected {

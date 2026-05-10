@@ -1,8 +1,5 @@
 /**
  * AttributeSelector Component Styles
- *
- * Uses the same richer card language as Territory items so Builder
- * options feel like one coherent system across both modes.
  */
 
 .attribute-selector {
@@ -13,12 +10,12 @@
   width: 100%;
   padding: 14px 16px;
   background: rgba(10, 14, 16, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
-  color: white;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-size: 14px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-primary);
   cursor: pointer;
   transition: all 0.24s ease;
   text-align: left;
@@ -30,12 +27,12 @@
 
 .attribute-item:hover {
   background: rgba(16, 22, 26, 0.6);
-  border-color: rgba(110, 86, 249, 0.3);
+  border-color: var(--accent-primary-rgba-03);
   box-shadow: 0 8px 18px rgba(110, 86, 249, 0.15);
 }
 
 .attribute-item.selected {
-  background: rgba(110, 86, 249, 0.1);
+  background: var(--accent-primary-rgba-10);
   border-color: rgba(110, 86, 249, 0.45);
   box-shadow: 0 0 0 1px rgba(110, 86, 249, 0.16);
 }
@@ -74,8 +71,8 @@
 }
 
 .attribute-inline-weight-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   color: rgba(233, 221, 255, 0.84);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -86,23 +83,23 @@
   background: rgba(110, 86, 249, 0.14);
   color: #efe9ff;
   padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
 }
 
 .attribute-inline-actions button:hover {
-  background: rgba(110, 86, 249, 0.22);
+  background: var(--accent-primary-bg-strong);
 }
 
 .attribute-label {
   font-size: 14px;
-  font-weight: 600;
-  line-height: 1.5;
-  color: #ffffff;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  color: var(--text-primary);
 }
 
 .attribute-description {
@@ -111,51 +108,17 @@
   margin-top: 4px;
 }
 
-.attribute-weight-toggle {
-  display: none;
-}
-
-.attribute-weight-checkbox {
-  display: none;
-}
-
-.attribute-weight-toggle-label {
-  display: none;
-}
-
-.attribute-weight-slider {
-  display: none;
-}
-
-.attribute-weight-slider::-webkit-slider-thumb {
-  display: none;
-}
-
-.attribute-weight-slider::-webkit-slider-thumb:hover {
-  display: none;
-}
-
-.attribute-weight-slider::-moz-range-thumb {
-  display: none;
-}
-
-.attribute-weight-slider::-moz-range-thumb:hover {
-  display: none;
-}
-
-.attribute-weight-slider::-webkit-slider-runnable-track {
-  display: none;
-}
-
-.attribute-weight-slider::-moz-range-track {
-  display: none;
-}
+/* Weight controls — hidden in current UI but kept for compatibility */
+.attribute-weight-toggle,
+.attribute-weight-checkbox,
+.attribute-weight-toggle-label,
+.attribute-weight-slider { display: none; }
 
 .attribute-weight-value {
   font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-  font-family: 'Inter', sans-serif;
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
   min-width: 32px;
   text-align: center;
 }
@@ -163,10 +126,10 @@
 .attribute-weight-button {
   min-width: 28px;
   height: 28px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(20, 20, 26, 0.95);
-  color: #FFFFFF;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-medium);
+  background: var(--surface-1);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
@@ -179,12 +142,12 @@
 .attribute-weight-disabled {
   margin-top: 6px;
   font-size: 12px;
-  color: #B0B0C3;
+  color: var(--text-secondary);
 }
 
 .attribute-output-editor {
   padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border-hairline);
   cursor: default;
 }
 
@@ -196,25 +159,25 @@
 }
 
 .attribute-output-label {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
   color: rgba(233, 221, 255, 0.84);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
 .attribute-output-badge {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: #efe9ff;
   border: 1px solid rgba(110, 86, 249, 0.36);
   background: rgba(110, 86, 249, 0.14);
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .attribute-output-text {
   font-size: 14px;
-  color: #E6E6F0;
+  color: #e6e6f0;
   margin-bottom: 8px;
 }
 
@@ -222,10 +185,10 @@
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-medium);
   background: rgba(255, 255, 255, 0.06);
-  color: #FFFFFF;
+  color: var(--text-primary);
   font-size: 14px;
   margin-bottom: 8px;
 }
@@ -237,11 +200,11 @@
 }
 
 .attribute-output-actions button {
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(20, 20, 26, 0.95);
-  color: #FFFFFF;
+  border: 1px solid var(--border-medium);
+  background: var(--surface-1);
+  color: var(--text-primary);
   padding: 6px 10px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   font-size: 12px;
   cursor: pointer;
 }

@@ -18,18 +18,14 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .modal-content {
-  background: var(--background-surface, #1A1A1F);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.04));
-  border-radius: var(--radius-lg, 16px);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   max-width: 90vw;
   max-height: 90vh;
@@ -53,7 +49,7 @@
 
 .modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.04));
+  border-bottom: 1px solid var(--border-hairline);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -62,30 +58,30 @@
 }
 
 .modal-title {
-  font-size: var(--font-size-lg, 18px);
-  font-weight: 600;
-  color: var(--text-primary, #FFFFFF);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 .modal-close-button {
   background: transparent;
   border: none;
-  color: var(--text-secondary, #B0B0C3);
+  color: var(--text-secondary);
   cursor: pointer;
   padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm, 4px);
-  transition: all 0.2s ease;
+  border-radius: var(--radius-xs);
+  transition: all var(--motion-fast) ease;
   flex-shrink: 0;
 }
 
 .modal-close-button:hover {
-  background: var(--background-surface-2, #25252A);
-  color: var(--text-primary, #FFFFFF);
+  background: var(--surface-3);
+  color: var(--text-primary);
 }
 
 .modal-close-button:focus-visible {
@@ -115,21 +111,21 @@
 }
 
 .app-tutorial-heading {
-  font-size: var(--font-size-lg, 18px);
-  font-weight: 600;
-  color: var(--text-primary, #FFFFFF);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   margin: 0 0 12px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .app-tutorial-body p {
-  font-size: var(--font-size-sm, 14px);
-  line-height: 1.7;
-  color: var(--text-secondary, #B0B0C3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-secondary);
   margin: 0 0 16px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 .app-tutorial-body p:last-child {
@@ -137,17 +133,17 @@
 }
 
 .app-tutorial-body p strong {
-  color: var(--text-primary, #FFFFFF);
-  font-weight: 600;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 .app-tutorial-list {
-  font-size: var(--font-size-sm, 14px);
-  line-height: 1.8;
-  color: var(--text-secondary, #B0B0C3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-loose);
+  color: var(--text-secondary);
   margin: 0;
   padding-left: 24px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 .app-tutorial-list li {
@@ -158,23 +154,11 @@
   margin-bottom: 0;
 }
 
-/* Scrollbar styling for modal body */
-.modal-body::-webkit-scrollbar {
-  width: 8px;
-}
-
-.modal-body::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.modal-body::-webkit-scrollbar-thumb {
-  background: rgba(110, 86, 249, 0.3);
-  border-radius: 4px;
-}
-
-.modal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(110, 86, 249, 0.5);
-}
+/* Scrollbar */
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); }
+.modal-body::-webkit-scrollbar-thumb { background: var(--accent-primary-rgba-03); border-radius: 3px; }
+.modal-body::-webkit-scrollbar-thumb:hover { background: var(--accent-primary-rgba-05); }
 
 /* Large modal variant for Random Prompt Generator */
 .modal-content.random-prompt-modal {
@@ -208,8 +192,8 @@
 /* Random Prompt Generator Description */
 .random-prompt-description {
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.04));
-  background: var(--background-surface-2, #25252A);
+  border-bottom: 1px solid var(--border-hairline);
+  background: var(--surface-3);
   flex-shrink: 0;
 }
 
@@ -218,19 +202,19 @@
 }
 
 .random-prompt-description-title {
-  font-size: var(--font-size-md, 16px);
-  font-weight: 600;
-  color: var(--text-primary, #FFFFFF);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   margin: 0 0 12px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 .random-prompt-description-text {
-  font-size: var(--font-size-sm, 14px);
-  line-height: 1.6;
-  color: var(--text-secondary, #B0B0C3);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  color: var(--text-secondary);
   margin: 0 0 12px 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-primary);
 }
 
 .random-prompt-description-text:last-child {
@@ -238,8 +222,8 @@
 }
 
 .random-prompt-description-text strong {
-  color: var(--text-primary, #FFFFFF);
-  font-weight: 600;
+  color: var(--text-primary);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Hide Random Prompt Generator header in modal since modal has its own header */
@@ -256,4 +240,3 @@
   border: none;
   box-shadow: none;
 }
-

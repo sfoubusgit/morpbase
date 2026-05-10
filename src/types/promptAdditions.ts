@@ -5,7 +5,7 @@ export type PromptAdditionEntry = {
   text: string;
   position: PromptAdditionPosition;
   section?: string;
-  sourceType?: 'pool' | 'territory' | 'fragment' | 'pool-default' | 'idp-set' | 'character';
+  sourceType?: 'pool' | 'territory' | 'fragment' | 'pool-default' | 'idp-set' | 'character' | 'environment' | 'outfit' | 'object' | 'style' | 'lighting' | 'composition' | 'mood';
 };
 
 export type SelectedPromptFragment = {

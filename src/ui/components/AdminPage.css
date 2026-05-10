@@ -1,6 +1,6 @@
 .admin-page {
-  padding: 32px;
-  color: #f3f4f6;
+  padding: var(--page-padding-y) var(--page-padding-x);
+  color: var(--text-primary);
 }
 
 .admin-page-header {
@@ -18,12 +18,12 @@
 
 .admin-page-header p {
   margin: 0;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   font-size: 14px;
 }
 
 .admin-page-admin-name {
-  color: #cbd5f5;
+  color: var(--text-accent);
   font-size: 13px;
 }
 
@@ -35,9 +35,9 @@
 }
 
 .admin-summary-card {
-  background: rgba(14, 15, 21, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -46,7 +46,7 @@
 
 .admin-summary-card span {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -64,12 +64,12 @@
 
 .admin-actions button,
 .admin-detail-actions button {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-medium);
   background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(123, 101, 255, 0.9));
   color: #fff;
   padding: 10px 14px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 
@@ -81,20 +81,20 @@
 
 .admin-actions .admin-secondary {
   background: rgba(20, 20, 28, 0.95);
-  color: #e5e7eb;
+  color: var(--text-primary);
 }
 
 .admin-message,
 .admin-error {
   margin-bottom: 16px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 13px;
 }
 
 .admin-message {
-  background: rgba(79, 70, 229, 0.15);
-  border: 1px solid rgba(110, 86, 249, 0.4);
+  background: var(--accent-primary-bg);
+  border: 1px solid var(--border-accent);
 }
 
 .admin-error {
@@ -109,9 +109,9 @@
 }
 
 .admin-panel {
-  background: rgba(14, 15, 21, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 16px;
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
   padding: 16px;
   min-height: 420px;
 }
@@ -131,10 +131,10 @@
 
 .admin-panel-header input {
   background: rgba(20, 20, 26, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
   padding: 8px 10px;
-  color: #e5e7eb;
-  border-radius: 10px;
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
 }
 
 .admin-user-list {
@@ -146,8 +146,8 @@
 .admin-user-row {
   text-align: left;
   background: rgba(20, 20, 28, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
   padding: 12px;
   cursor: pointer;
   color: inherit;
@@ -162,14 +162,14 @@
 }
 
 .admin-user-name {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: 4px;
 }
 
 .admin-user-email,
 .admin-user-meta {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-tertiary);
 }
 
 .admin-user-meta {
@@ -199,7 +199,7 @@
 
 .admin-detail-grid span {
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -215,7 +215,7 @@
 }
 
 .admin-empty {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   font-size: 14px;
 }
 
@@ -227,7 +227,7 @@
 }
 
 .admin-analytics-meta {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   font-size: 13px;
 }
 
@@ -258,13 +258,13 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(20, 20, 28, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
 }
 
 .admin-analytics-page-row span {
-  color: #e5e7eb;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -274,9 +274,9 @@
 
 .admin-analytics-event-card {
   padding: 14px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgba(20, 20, 28, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -291,13 +291,13 @@
 
 .admin-analytics-event-type {
   color: #ffffff;
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .admin-analytics-event-meta,
 .admin-analytics-event-time,
 .admin-analytics-event-details {
-  color: #9ca3af;
+  color: var(--text-tertiary);
   font-size: 12px;
 }
 
@@ -310,9 +310,9 @@
 .admin-analytics-event-payload {
   margin: 0;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgba(11, 13, 20, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
   color: #cbd5e1;
   font-size: 12px;
   overflow-x: auto;

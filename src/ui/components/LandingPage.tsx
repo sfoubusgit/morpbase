@@ -12,13 +12,13 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
         <span className="landing-eyebrow">MorpBase</span>
         <h1>A prompt workflow studio for image generation.</h1>
         <p>
-          MorpBase gives you one Builder workspace for shaping a live prompt workflow. Use
+          MorpBase gives you one Workspace for shaping a live prompt workflow. Use
           Territories when you want a stronger workflow focus, keep reusable source material in
-          Pools, and save useful outputs when the workflow lands where you want it.
+          Pools, and move useful outputs into Memory when the workflow lands where you want it.
         </p>
         <div className="landing-cta">
           <button type="button" className="landing-primary" onClick={onEnter}>
-            Open Builder Workspace
+            Open Workspace
           </button>
           {manualUrl && (
             <a
@@ -41,7 +41,7 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
         <div className="landing-pipeline-title">How the workspace is structured</div>
         <div className="landing-pipeline-track">
           <div className="landing-node">
-            <div className="landing-node-label">Builder Workspace</div>
+            <div className="landing-node-label">Workspace</div>
             <p>Author the live prompt workflow, move through the workflow areas, and shape the result step by step.</p>
           </div>
           <div className="landing-node">
@@ -79,9 +79,9 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
 
       <section className="landing-community">
         <div>
-          <h2>Community tools when you want them</h2>
+          <h2>Community when you want it</h2>
           <p>
-            The Pool Hub is a community library for reusable pools. Import what helps, publish what
+            Community is where reusable public pools and creator presence can circulate. Import what helps, publish what
             works, and keep your own workflow flexible.
           </p>
         </div>
@@ -101,7 +101,7 @@ export function LandingPage({ onEnter, manualUrl }: LandingPageProps) {
           <p>Open Builder, shape the workflow, and save the outputs that are worth keeping.</p>
         </div>
         <button type="button" className="landing-primary" onClick={onEnter}>
-          Open Builder Workspace
+          Open Workspace
         </button>
       </footer>
     </div>
