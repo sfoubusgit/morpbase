@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient';
 
 export type AuthUser = {
   id: string;
+  authUid: string;
   name: string;
   email: string;
 };
@@ -13,8 +14,9 @@ type ProfileRow = {
   display_name: string;
 };
 
-const toAuthUser = (profile: ProfileRow): AuthUser => ({
+const toAuthUser = (profile: ProfileRow, authUid: string): AuthUser => ({
   id: profile.id,
+  authUid,
   name: profile.display_name,
   email: profile.email,
 });
@@ -90,7 +92,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
 
   if (existing) {
     await ensurePublicProfile(existing as ProfileRow);
-    return toAuthUser(existing as ProfileRow);
+    return toAuthUser(existing as ProfileRow, user.id);
   }
 
   const displayName =
@@ -110,7 +112,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
 
   if (insertError) throw insertError;
   await ensurePublicProfile(inserted as ProfileRow);
-  return toAuthUser(inserted as ProfileRow);
+  return toAuthUser(inserted as ProfileRow, user.id);
 };
 
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
@@ -179,7 +181,7 @@ export const updateUserName = async (name: string): Promise<AuthUser> => {
     .select('id, auth_user_id, email, display_name')
     .single();
   if (error) throw error;
-  return toAuthUser(data as ProfileRow);
+  return toAuthUser(data as ProfileRow, user.id);
 };
 
 export const changeUserPassword = async (currentPassword: string, nextPassword: string): Promise<void> => {

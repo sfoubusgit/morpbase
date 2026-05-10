@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, Modifier, ModelProfile, Pool, Prompt, PromptAdditionEntry, SelectedPromptFragment, Territory, TerritorySourceInput, ValidationError } from '../types';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, SelectedPromptFragment, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
@@ -29,11 +29,12 @@ import { ErrorDisplay } from './components/ErrorDisplay';
 import { CategorySidebar } from './components/CategorySidebar';
 import { RandomPromptGenerator } from './components/RandomPromptGenerator';
 import { Modal } from './components/Modal';
-import { UserPoolsPage } from './components/UserPoolsPage';
-import { PoolHubPage } from './components/PoolHubPage';
+import { WorldsPage } from './components/WorldsPage';
+import { CommunityPage } from './components/CommunityPage';
 import { PromptLibrary } from './components/PromptLibrary';
 import { CharacterLibraryModal } from './components/CharacterLibraryModal';
-import { IdentitySystemsPage } from './components/IdentitySystemsPage';
+import { EnvironmentLibraryModal } from './components/EnvironmentLibraryModal';
+import { LexiconPage } from './components/LexiconPage';
 import { FloatingPromptFragments } from './components/FloatingPromptFragments';
 import { AuthModal } from './components/AuthModal';
 import { AccountModal } from './components/AccountModal';
@@ -50,6 +51,56 @@ import {
   listCharacters,
   updateCharacter,
 } from '../engine/characterStore';
+import {
+  createEnvironment,
+  deleteEnvironment as deleteStoredEnvironment,
+  listEnvironments,
+  updateEnvironment,
+} from '../engine/environmentStore';
+import {
+  createOutfit,
+  deleteOutfit as deleteStoredOutfit,
+  listOutfits,
+  updateOutfit,
+} from '../engine/wardrobeStore';
+import {
+  createStylePreset,
+  deleteStylePreset as deleteStoredStylePreset,
+  listStylePresets,
+  updateStylePreset,
+} from '../engine/styleStore';
+import {
+  createLightingSetup,
+  deleteLightingSetup as deleteStoredLightingSetup,
+  listLightingSetups,
+  updateLightingSetup,
+} from '../engine/lightingStore';
+import {
+  createCompositionFrame,
+  deleteCompositionFrame as deleteStoredCompositionFrame,
+  listCompositionFrames,
+  updateCompositionFrame,
+} from '../engine/compositionStore';
+import {
+  createMoodPreset,
+  deleteMoodPreset as deleteStoredMoodPreset,
+  listMoodPresets,
+  updateMoodPreset,
+} from '../engine/moodStore';
+import {
+  createNegativePreset,
+  deleteNegativePreset as deleteStoredNegativePreset,
+  listNegativePresets,
+  updateNegativePreset,
+} from '../engine/negativeStore';
+import { WardrobeModal } from './components/WardrobeModal';
+import { WorkspacePage } from './components/WorkspacePage';
+import { StyleModal } from './components/StyleModal';
+import { LightingModal } from './components/LightingModal';
+import { CompositionModal } from './components/CompositionModal';
+import { MoodModal } from './components/MoodModal';
+import { NegativeModal } from './components/NegativeModal';
+import { WorldModal } from './components/WorldModal';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -74,6 +125,8 @@ import {
   updateTerritory,
 } from '../engine/territoryStore';
 import { listPools } from '../engine/poolStore';
+import { listObjects, type ObjectIdentity } from '../engine/objectStore';
+import { ObjectLibraryModal } from './components/ObjectLibraryModal';
 
 /**
  * Default model profile for Stable Diffusion
@@ -139,8 +192,28 @@ type BuilderSessionSnapshot = {
   currentNodeId: string;
   navigationHistory: string[];
   hasReachedEndViaNext: boolean;
+  activeChipTexts: string[];
   activeIdpSetId: string | null;
   activeCharacterId: string | null;
+  activeOutfitId: string | null;
+  activeStyleId: string | null;
+  activeLightingId: string | null;
+  activeCompositionId: string | null;
+  activeMoodId: string | null;
+  activeNegativeIds: string[];
+  activeObjectIds: string[];
+  activeWorld: { id: string; name: string; phrases: string[] } | null;
+  characterInPrompt: boolean;
+  poseFraming: string | null;
+  poseOrientation: string | null;
+  poseEnergy: string | null;
+  poseGaze: string | null;
+  activeEnvironmentId: string | null;
+  environmentInPrompt: boolean;
+  envTime: string | null;
+  envWeather: string | null;
+  envScale: string | null;
+  envCondition: string | null;
 };
 
 type CharacterPromptProjection = {
@@ -191,8 +264,34 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       currentNodeId: typeof parsed.currentNodeId === 'string' ? parsed.currentNodeId : '',
       navigationHistory: Array.isArray(parsed.navigationHistory) ? parsed.navigationHistory.filter((entry): entry is string => typeof entry === 'string') : [],
       hasReachedEndViaNext: Boolean(parsed.hasReachedEndViaNext),
+      activeChipTexts: Array.isArray(parsed.activeChipTexts) ? (parsed.activeChipTexts as unknown[]).filter((t): t is string => typeof t === 'string') : [],
       activeIdpSetId: typeof parsed.activeIdpSetId === 'string' ? parsed.activeIdpSetId : null,
       activeCharacterId: typeof parsed.activeCharacterId === 'string' ? parsed.activeCharacterId : null,
+      activeOutfitId: typeof parsed.activeOutfitId === 'string' ? parsed.activeOutfitId : null,
+      activeStyleId: typeof parsed.activeStyleId === 'string' ? parsed.activeStyleId : null,
+      activeLightingId: typeof parsed.activeLightingId === 'string' ? parsed.activeLightingId : null,
+      activeCompositionId: typeof parsed.activeCompositionId === 'string' ? parsed.activeCompositionId : null,
+      activeMoodId: typeof parsed.activeMoodId === 'string' ? parsed.activeMoodId : null,
+      activeNegativeIds: Array.isArray(parsed.activeNegativeIds)
+        ? (parsed.activeNegativeIds as unknown[]).filter((x): x is string => typeof x === 'string')
+        : typeof (parsed as any).activeNegativeId === 'string' ? [(parsed as any).activeNegativeId] : [],
+      activeObjectIds: Array.isArray(parsed.activeObjectIds)
+        ? (parsed.activeObjectIds as unknown[]).filter((x): x is string => typeof x === 'string')
+        : [],
+      activeWorld: parsed.activeWorld && typeof parsed.activeWorld === 'object' && typeof (parsed.activeWorld as any).id === 'string'
+        ? parsed.activeWorld as { id: string; name: string; phrases: string[] }
+        : null,
+      characterInPrompt: Boolean(parsed.characterInPrompt),
+      poseFraming: typeof parsed.poseFraming === 'string' ? parsed.poseFraming : null,
+      poseOrientation: typeof parsed.poseOrientation === 'string' ? parsed.poseOrientation : null,
+      poseEnergy: typeof parsed.poseEnergy === 'string' ? parsed.poseEnergy : null,
+      poseGaze: typeof parsed.poseGaze === 'string' ? parsed.poseGaze : null,
+      activeEnvironmentId: typeof parsed.activeEnvironmentId === 'string' ? parsed.activeEnvironmentId : null,
+      environmentInPrompt: Boolean(parsed.environmentInPrompt),
+      envTime: typeof parsed.envTime === 'string' ? parsed.envTime : null,
+      envWeather: typeof parsed.envWeather === 'string' ? parsed.envWeather : null,
+      envScale: typeof parsed.envScale === 'string' ? parsed.envScale : null,
+      envCondition: typeof parsed.envCondition === 'string' ? parsed.envCondition : null,
     };
   } catch {
     return null;
@@ -293,9 +392,52 @@ export function App() {
   
   // UI State: User pool prompt additions
   const [poolPromptItems, setPoolPromptItems] = useState<PromptAdditionItem[]>(initialBuilderSession?.poolPromptItems ?? []);
+  const [activeChipTexts, setActiveChipTexts] = useState<string[]>(initialBuilderSession?.activeChipTexts ?? []);
+
+  const handleChipToggle = (text: string) => {
+    setActiveChipTexts(prev =>
+      prev.includes(text) ? prev.filter(t => t !== text) : [...prev, text]
+    );
+  };
   const [activeIdpPool, setActiveIdpPool] = useState<Pool | null>(null);
   const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(initialBuilderSession?.activeIdpSetId ?? null);
   const [activeCharacterId, setActiveCharacterId] = useState<string | null>(initialBuilderSession?.activeCharacterId ?? null);
+  const [activeOutfitId, setActiveOutfitId] = useState<string | null>(initialBuilderSession?.activeOutfitId ?? null);
+  const [outfits, setOutfits] = useState<OutfitIdentity[]>([]);
+  const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
+  const [activeStyleId, setActiveStyleId] = useState<string | null>(initialBuilderSession?.activeStyleId ?? null);
+  const [stylePresets, setStylePresets] = useState<StylePreset[]>([]);
+  const [isStyleOpen, setIsStyleOpen] = useState(false);
+  const [activeLightingId, setActiveLightingId] = useState<string | null>(initialBuilderSession?.activeLightingId ?? null);
+  const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
+  const [isLightingOpen, setIsLightingOpen] = useState(false);
+  const [activeCompositionId, setActiveCompositionId] = useState<string | null>(initialBuilderSession?.activeCompositionId ?? null);
+  const [compositionFrames, setCompositionFrames] = useState<CompositionFrame[]>([]);
+  const [isCompositionOpen, setIsCompositionOpen] = useState(false);
+  const [activeMoodId, setActiveMoodId] = useState<string | null>(initialBuilderSession?.activeMoodId ?? null);
+  const [moodPresets, setMoodPresets] = useState<MoodPreset[]>([]);
+  const [isMoodOpen, setIsMoodOpen] = useState(false);
+  const [activeNegativeIds, setActiveNegativeIds] = useState<string[]>(initialBuilderSession?.activeNegativeIds ?? []);
+  const [negativePresets, setNegativePresets] = useState<NegativePreset[]>([]);
+  const [isNegativeOpen, setIsNegativeOpen] = useState(false);
+  const [activeObjectIds, setActiveObjectIds] = useState<string[]>(initialBuilderSession?.activeObjectIds ?? []);
+  const [objects, setObjects] = useState<ObjectIdentity[]>([]);
+  const [isObjectOpen, setIsObjectOpen] = useState(false);
+  const [activeWorld, setActiveWorld] = useState<{ id: string; name: string; phrases: string[] } | null>(initialBuilderSession?.activeWorld ?? null);
+  const [isWorldOpen, setIsWorldOpen] = useState(false);
+  const [characterInPrompt, setCharacterInPrompt] = useState<boolean>(initialBuilderSession?.characterInPrompt ?? false);
+  const [poseFraming, setPoseFraming] = useState<string | null>(initialBuilderSession?.poseFraming ?? null);
+  const [poseOrientation, setPoseOrientation] = useState<string | null>(initialBuilderSession?.poseOrientation ?? null);
+  const [poseEnergy, setPoseEnergy] = useState<string | null>(initialBuilderSession?.poseEnergy ?? null);
+  const [poseGaze, setPoseGaze] = useState<string | null>(initialBuilderSession?.poseGaze ?? null);
+  const [environments, setEnvironments] = useState<EnvironmentIdentity[]>([]);
+  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string | null>(initialBuilderSession?.activeEnvironmentId ?? null);
+  const [environmentInPrompt, setEnvironmentInPrompt] = useState<boolean>(initialBuilderSession?.environmentInPrompt ?? false);
+  const [envTime, setEnvTime] = useState<string | null>(initialBuilderSession?.envTime ?? null);
+  const [envWeather, setEnvWeather] = useState<string | null>(initialBuilderSession?.envWeather ?? null);
+  const [envScale, setEnvScale] = useState<string | null>(initialBuilderSession?.envScale ?? null);
+  const [envCondition, setEnvCondition] = useState<string | null>(initialBuilderSession?.envCondition ?? null);
+  const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
   );
@@ -334,6 +476,22 @@ export function App() {
     selectionOutputOverrides: Map<string, string>;
     selectedPromptFragments: SelectedPromptFragment[];
     activeCharacterId: string | null;
+    activeOutfitId: string | null;
+    activeStyleId: string | null;
+    activeLightingId: string | null;
+    activeCompositionId: string | null;
+    activeMoodId: string | null;
+    characterInPrompt: boolean;
+    poseFraming: string | null;
+    poseOrientation: string | null;
+    poseEnergy: string | null;
+    poseGaze: string | null;
+    activeEnvironmentId: string | null;
+    environmentInPrompt: boolean;
+    envTime: string | null;
+    envWeather: string | null;
+    envScale: string | null;
+    envCondition: string | null;
   } | null>(null);
   
   // UI State: Model Profile
@@ -428,17 +586,6 @@ export function App() {
     creatorId?: string | null;
     creatorName?: string | null;
   } | null>(() => parseCreatorHash());
-  const handleOpenCreatorProfilePage = useCallback((input: {
-    creatorId?: string | null;
-    creatorName?: string | null;
-  }) => {
-    setSelectedCreatorProfileTarget({
-      creatorId: input.creatorId ?? null,
-      creatorName: input.creatorName ?? null,
-    });
-    setActivePage('creator-profile');
-  }, []);
-
   // UI State: Engine Result
   const [engineResult, setEngineResult] = useState<Prompt | ValidationError | null>(null);
   
@@ -517,11 +664,21 @@ export function App() {
     [characters, activeCharacterId]
   );
   const activeCharacterProjection = useMemo(
-    () => buildCharacterPromptProjection(activeCharacter),
-    [activeCharacter]
+    () => characterInPrompt ? buildCharacterPromptProjection(activeCharacter) : null,
+    [characterInPrompt, activeCharacter]
   );
   const activeCharacterDisplayName = activeCharacterProjection?.displayName ?? activeCharacter?.name ?? null;
-  const activeCharacterSummaryText = activeCharacterProjection?.summary ?? activeCharacter?.summary ?? null;
+  const activeEnvironment = useMemo(
+    () => environments.find(e => e.id === activeEnvironmentId) ?? null,
+    [environments, activeEnvironmentId]
+  );
+  const activeEnvironmentProjection = useMemo(() => {
+    if (!environmentInPrompt || !activeEnvironment) return null;
+    return {
+      environmentId: activeEnvironment.id,
+      corePhrases: activeEnvironment.phraseBundle.core.filter(Boolean),
+    };
+  }, [environmentInPrompt, activeEnvironment]);
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
@@ -1316,6 +1473,30 @@ export function App() {
     }
   }, []);
 
+  const refreshEnvironments = useCallback(async () => {
+    try {
+      const next = await listEnvironments();
+      setEnvironments(next);
+      setActiveEnvironmentId(prev => (
+        prev && !next.some(e => e.id === prev) ? null : prev
+      ));
+    } catch {
+      setEnvironments([]);
+    }
+  }, []);
+
+  const refreshOutfits = useCallback(async () => {
+    try {
+      const next = await listOutfits();
+      setOutfits(next);
+      setActiveOutfitId(prev => (
+        prev && !next.some(o => o.id === prev) ? null : prev
+      ));
+    } catch {
+      setOutfits([]);
+    }
+  }, []);
+
   const handleCreateCharacter = useCallback(async (input: CharacterIdentityInput) => {
     const created = await createCharacter(input);
     await refreshCharacters();
@@ -1334,6 +1515,11 @@ export function App() {
     await refreshCharacters();
     if (activeCharacterId === id) {
       setActiveCharacterId(null);
+      setCharacterInPrompt(false);
+      setPoseFraming(null);
+      setPoseOrientation(null);
+      setPoseEnergy(null);
+      setPoseGaze(null);
       if (deletedCharacter) {
         setBuilderNotice(`Removed "${deletedCharacter.name}" from the current workflow because it was deleted.`);
       }
@@ -1343,26 +1529,356 @@ export function App() {
   const handleSelectCharacter = useCallback((id: string) => {
     const nextCharacter = characters.find(character => character.id === id);
     setActiveCharacterId(id);
+    setCharacterInPrompt(true);
+    setPoseFraming(null);
+    setPoseOrientation(null);
+    setPoseEnergy(null);
+    setPoseGaze(null);
     if (nextCharacter) {
-      setBuilderNotice(`Active character changed to "${nextCharacter.name}".`);
+      setBuilderNotice(`"${nextCharacter.name}" activated.`);
     }
   }, [characters]);
 
-  const handleRemoveActiveCharacter = useCallback(() => {
-    if (!activeCharacterId) {
-      return;
-    }
-
-    const activeCharacter = characters.find(character => character.id === activeCharacterId) ?? null;
+  const handleDeactivateCharacter = useCallback(() => {
+    const character = characters.find(c => c.id === activeCharacterId) ?? null;
     setActiveCharacterId(null);
-    if (activeCharacter) {
-      setBuilderNotice(`Removed "${activeCharacter.name}" from the current workflow.`);
+    setCharacterInPrompt(false);
+    setPoseFraming(null);
+    setPoseOrientation(null);
+    setPoseEnergy(null);
+    setPoseGaze(null);
+    if (character) {
+      setBuilderNotice(`"${character.name}" deactivated.`);
     }
   }, [activeCharacterId, characters]);
+
+  const handlePoseChange = useCallback((dimension: 'framing' | 'orientation' | 'energy' | 'gaze', value: string | null) => {
+    switch (dimension) {
+      case 'framing': setPoseFraming(value); break;
+      case 'orientation': setPoseOrientation(value); break;
+      case 'energy': setPoseEnergy(value); break;
+      case 'gaze': setPoseGaze(value); break;
+    }
+  }, []);
+
+
+  const handleCreateEnvironment = useCallback(async (input: EnvironmentIdentityInput) => {
+    const created = await createEnvironment(input);
+    await refreshEnvironments();
+    return created;
+  }, [refreshEnvironments]);
+
+  const handleUpdateEnvironment = useCallback(async (id: string, input: EnvironmentIdentityInput) => {
+    const updated = await updateEnvironment(id, input);
+    await refreshEnvironments();
+    return updated;
+  }, [refreshEnvironments]);
+
+  const handleDeleteEnvironment = useCallback(async (id: string) => {
+    const deletedEnv = environments.find(e => e.id === id) ?? null;
+    await deleteStoredEnvironment(id);
+    await refreshEnvironments();
+    if (activeEnvironmentId === id) {
+      setActiveEnvironmentId(null);
+      setEnvironmentInPrompt(false);
+      setEnvTime(null);
+      setEnvWeather(null);
+      setEnvScale(null);
+      setEnvCondition(null);
+      if (deletedEnv) {
+        setBuilderNotice(`Removed "${deletedEnv.name}" from the current workflow because it was deleted.`);
+      }
+    }
+  }, [activeEnvironmentId, environments, refreshEnvironments]);
+
+  const handleSelectEnvironment = useCallback((id: string) => {
+    const next = environments.find(e => e.id === id);
+    setActiveEnvironmentId(id);
+    setEnvironmentInPrompt(false);
+    setEnvTime(null);
+    setEnvWeather(null);
+    setEnvScale(null);
+    setEnvCondition(null);
+    if (next) {
+      setBuilderNotice(`"${next.name}" selected — press Add to inject into the prompt.`);
+    }
+  }, [environments]);
+
+  const handleAddEnvironmentToPrompt = useCallback(() => {
+    if (!activeEnvironmentId) return;
+    setEnvironmentInPrompt(true);
+    const env = environments.find(e => e.id === activeEnvironmentId);
+    if (env) {
+      setBuilderNotice(`"${env.name}" phrases added to the prompt.`);
+    }
+  }, [activeEnvironmentId, environments]);
+
+  const handleRemoveActiveEnvironment = useCallback(() => {
+    if (!activeEnvironmentId) return;
+    const env = environments.find(e => e.id === activeEnvironmentId) ?? null;
+    setEnvironmentInPrompt(false);
+    setEnvTime(null);
+    setEnvWeather(null);
+    setEnvScale(null);
+    setEnvCondition(null);
+    if (env) {
+      setBuilderNotice(`Removed "${env.name}" phrases from the prompt.`);
+    }
+  }, [activeEnvironmentId, environments]);
+
+  const handleEnvironmentLightChange = useCallback((dimension: 'time' | 'weather' | 'scale' | 'condition', value: string | null) => {
+    switch (dimension) {
+      case 'time': setEnvTime(value); break;
+      case 'weather': setEnvWeather(value); break;
+      case 'scale': setEnvScale(value); break;
+      case 'condition': setEnvCondition(value); break;
+    }
+  }, []);
+
+  const handleCreateOutfit = useCallback(async (input: OutfitIdentityInput) => {
+    const created = await createOutfit(input);
+    await refreshOutfits();
+    return created;
+  }, [refreshOutfits]);
+
+  const handleUpdateOutfit = useCallback(async (id: string, input: OutfitIdentityInput) => {
+    const updated = await updateOutfit(id, input);
+    await refreshOutfits();
+    return updated;
+  }, [refreshOutfits]);
+
+  const handleDeleteOutfit = useCallback(async (id: string) => {
+    await deleteStoredOutfit(id);
+    await refreshOutfits();
+    if (activeOutfitId === id) {
+      setActiveOutfitId(null);
+    }
+  }, [activeOutfitId, refreshOutfits]);
+
+  const handleSelectOutfit = useCallback((id: string | null) => {
+    setActiveOutfitId(id);
+  }, []);
+
+  const refreshStylePresets = useCallback(async () => {
+    try {
+      const next = await listStylePresets();
+      setStylePresets(next);
+      setActiveStyleId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+    } catch {
+      setStylePresets([]);
+    }
+  }, []);
+
+  const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
+    const created = await createStylePreset(input);
+    await refreshStylePresets();
+    return created;
+  }, [refreshStylePresets]);
+
+  const handleUpdateStylePreset = useCallback(async (id: string, input: StylePresetInput) => {
+    const updated = await updateStylePreset(id, input);
+    await refreshStylePresets();
+    return updated;
+  }, [refreshStylePresets]);
+
+  const handleDeleteStylePreset = useCallback(async (id: string) => {
+    await deleteStoredStylePreset(id);
+    await refreshStylePresets();
+    if (activeStyleId === id) setActiveStyleId(null);
+  }, [activeStyleId, refreshStylePresets]);
+
+  const handleSelectStylePreset = useCallback((id: string | null) => {
+    setActiveStyleId(id);
+  }, []);
+
+  const refreshLightingSetups = useCallback(async () => {
+    try {
+      const next = await listLightingSetups();
+      setLightingSetups(next);
+      setActiveLightingId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+    } catch {
+      setLightingSetups([]);
+    }
+  }, []);
+
+  const handleCreateLightingSetup = useCallback(async (input: LightingSetupInput) => {
+    const created = await createLightingSetup(input);
+    await refreshLightingSetups();
+    return created;
+  }, [refreshLightingSetups]);
+
+  const handleUpdateLightingSetup = useCallback(async (id: string, input: LightingSetupInput) => {
+    const updated = await updateLightingSetup(id, input);
+    await refreshLightingSetups();
+    return updated;
+  }, [refreshLightingSetups]);
+
+  const handleDeleteLightingSetup = useCallback(async (id: string) => {
+    await deleteStoredLightingSetup(id);
+    await refreshLightingSetups();
+    if (activeLightingId === id) setActiveLightingId(null);
+  }, [activeLightingId, refreshLightingSetups]);
+
+  const handleSelectLightingSetup = useCallback((id: string | null) => {
+    setActiveLightingId(id);
+  }, []);
+
+  const refreshCompositionFrames = useCallback(async () => {
+    try {
+      const next = await listCompositionFrames();
+      setCompositionFrames(next);
+      setActiveCompositionId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+    } catch {
+      setCompositionFrames([]);
+    }
+  }, []);
+
+  const handleCreateCompositionFrame = useCallback(async (input: CompositionFrameInput) => {
+    const created = await createCompositionFrame(input);
+    await refreshCompositionFrames();
+    return created;
+  }, [refreshCompositionFrames]);
+
+  const handleUpdateCompositionFrame = useCallback(async (id: string, input: CompositionFrameInput) => {
+    const updated = await updateCompositionFrame(id, input);
+    await refreshCompositionFrames();
+    return updated;
+  }, [refreshCompositionFrames]);
+
+  const handleDeleteCompositionFrame = useCallback(async (id: string) => {
+    await deleteStoredCompositionFrame(id);
+    await refreshCompositionFrames();
+    if (activeCompositionId === id) setActiveCompositionId(null);
+  }, [activeCompositionId, refreshCompositionFrames]);
+
+  const handleSelectCompositionFrame = useCallback((id: string | null) => {
+    setActiveCompositionId(id);
+  }, []);
+
+  const refreshMoodPresets = useCallback(async () => {
+    try {
+      const next = await listMoodPresets();
+      setMoodPresets(next);
+      setActiveMoodId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+    } catch {
+      setMoodPresets([]);
+    }
+  }, []);
+
+  const handleCreateMoodPreset = useCallback(async (input: MoodPresetInput) => {
+    const created = await createMoodPreset(input);
+    await refreshMoodPresets();
+    return created;
+  }, [refreshMoodPresets]);
+
+  const handleUpdateMoodPreset = useCallback(async (id: string, input: MoodPresetInput) => {
+    const updated = await updateMoodPreset(id, input);
+    await refreshMoodPresets();
+    return updated;
+  }, [refreshMoodPresets]);
+
+  const handleDeleteMoodPreset = useCallback(async (id: string) => {
+    await deleteStoredMoodPreset(id);
+    await refreshMoodPresets();
+    if (activeMoodId === id) setActiveMoodId(null);
+  }, [activeMoodId, refreshMoodPresets]);
+
+  const handleSelectMoodPreset = useCallback((id: string | null) => {
+    setActiveMoodId(id);
+  }, []);
+
+  const refreshNegativePresets = useCallback(async () => {
+    try {
+      const next = await listNegativePresets();
+      setNegativePresets(next);
+    } catch {
+      setNegativePresets([]);
+    }
+  }, []);
+
+  const handleCreateNegativePreset = useCallback(async (input: NegativePresetInput) => {
+    const created = await createNegativePreset(input);
+    await refreshNegativePresets();
+    return created;
+  }, [refreshNegativePresets]);
+
+  const handleUpdateNegativePreset = useCallback(async (id: string, input: NegativePresetInput) => {
+    const updated = await updateNegativePreset(id, input);
+    await refreshNegativePresets();
+    return updated;
+  }, [refreshNegativePresets]);
+
+  const handleDeleteNegativePreset = useCallback(async (id: string) => {
+    await deleteStoredNegativePreset(id);
+    await refreshNegativePresets();
+    setActiveNegativeIds(prev => prev.filter(eid => eid !== id));
+  }, [refreshNegativePresets]);
+
+  const handleAddNegativePreset = useCallback((id: string) => {
+    setActiveNegativeIds(prev => prev.includes(id) ? prev : [...prev, id]);
+  }, []);
+
+  const handleRemoveNegativePreset = useCallback((id: string) => {
+    setActiveNegativeIds(prev => prev.filter(eid => eid !== id));
+  }, []);
+
+  const handleAddObject = useCallback((id: string) => {
+    setActiveObjectIds(prev => prev.includes(id) ? prev : [...prev, id]);
+    setObjects(listObjects());
+  }, []);
+
+  const handleRemoveObject = useCallback((id: string) => {
+    setActiveObjectIds(prev => prev.filter(eid => eid !== id));
+  }, []);
+
+  useEffect(() => {
+    setObjects(listObjects());
+  }, []);
 
   useEffect(() => {
     void refreshCharacters();
   }, [refreshCharacters]);
+
+  useEffect(() => {
+    void refreshEnvironments();
+  }, [refreshEnvironments]);
+
+  useEffect(() => {
+    void refreshOutfits();
+  }, [refreshOutfits]);
+
+  useEffect(() => {
+    void refreshStylePresets();
+  }, [refreshStylePresets]);
+
+  useEffect(() => {
+    void refreshLightingSetups();
+  }, [refreshLightingSetups]);
+
+  useEffect(() => {
+    void refreshCompositionFrames();
+  }, [refreshCompositionFrames]);
+
+  useEffect(() => {
+    void refreshMoodPresets();
+  }, [refreshMoodPresets]);
+
+  useEffect(() => {
+    void refreshNegativePresets();
+  }, [refreshNegativePresets]);
+
+  const handleCommunityIdentityAdded = useCallback(async () => {
+    await Promise.all([
+      refreshCharacters(),
+      refreshEnvironments(),
+      refreshOutfits(),
+      refreshStylePresets(),
+      refreshLightingSetups(),
+      refreshCompositionFrames(),
+      refreshMoodPresets(),
+      refreshNegativePresets(),
+    ]);
+  }, [refreshCharacters, refreshEnvironments, refreshOutfits, refreshStylePresets, refreshLightingSetups, refreshCompositionFrames, refreshMoodPresets, refreshNegativePresets]);
 
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);
@@ -1897,7 +2413,8 @@ export function App() {
     const hasModifiers = modifiers.size > 0;
     const hasPoolItems = poolPromptItems.length > 0;
     const hasPromptFragments = selectedPromptFragments.length > 0;
-    if (!hasSelections && !hasModifiers && !hasPoolItems && !hasPromptFragments) {
+    const hasCharacter = activeCharacterId !== null || characterInPrompt;
+    if (!hasSelections && !hasModifiers && !hasPoolItems && !hasPromptFragments && !hasCharacter) {
       return;
     }
     setClearUndoState({
@@ -1908,6 +2425,22 @@ export function App() {
       selectionOutputOverrides: new Map(selectionOutputOverrides),
       selectedPromptFragments: [...selectedPromptFragments],
       activeCharacterId,
+      activeOutfitId,
+      activeStyleId,
+      activeLightingId,
+      activeCompositionId,
+      activeMoodId,
+      characterInPrompt,
+      poseFraming,
+      poseOrientation,
+      poseEnergy,
+      poseGaze,
+      activeEnvironmentId,
+      environmentInPrompt,
+      envTime,
+      envWeather,
+      envScale,
+      envCondition,
     });
     setSelections(new Map());
     setModifiers(new Map());
@@ -1926,7 +2459,19 @@ export function App() {
     });
     setSelectionOutputOverrides(new Map());
     setSelectedPromptFragments([]);
-  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments, activeCharacterId]);
+    setActiveCharacterId(null);
+    setCharacterInPrompt(false);
+    setPoseFraming(null);
+    setPoseOrientation(null);
+    setPoseEnergy(null);
+    setPoseGaze(null);
+    setActiveEnvironmentId(null);
+    setEnvironmentInPrompt(false);
+    setEnvTime(null);
+    setEnvWeather(null);
+    setEnvScale(null);
+    setEnvCondition(null);
+  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments, activeCharacterId, characterInPrompt, activeEnvironmentId, environmentInPrompt]);
 
   const handleUndoClearPrompt = useCallback(() => {
     if (!clearUndoState) return;
@@ -1937,6 +2482,22 @@ export function App() {
     setSelectionOutputOverrides(new Map(clearUndoState.selectionOutputOverrides));
     setSelectedPromptFragments([...clearUndoState.selectedPromptFragments]);
     setActiveCharacterId(clearUndoState.activeCharacterId);
+    setActiveOutfitId(clearUndoState.activeOutfitId);
+    setActiveStyleId(clearUndoState.activeStyleId);
+    setActiveLightingId(clearUndoState.activeLightingId);
+    setActiveCompositionId(clearUndoState.activeCompositionId);
+    setActiveMoodId(clearUndoState.activeMoodId);
+    setCharacterInPrompt(clearUndoState.characterInPrompt);
+    setPoseFraming(clearUndoState.poseFraming);
+    setPoseOrientation(clearUndoState.poseOrientation);
+    setPoseEnergy(clearUndoState.poseEnergy);
+    setPoseGaze(clearUndoState.poseGaze);
+    setActiveEnvironmentId(clearUndoState.activeEnvironmentId);
+    setEnvironmentInPrompt(clearUndoState.environmentInPrompt);
+    setEnvTime(clearUndoState.envTime);
+    setEnvWeather(clearUndoState.envWeather);
+    setEnvScale(clearUndoState.envScale);
+    setEnvCondition(clearUndoState.envCondition);
     setClearUndoState(null);
   }, [clearUndoState]);
 
@@ -1972,8 +2533,28 @@ export function App() {
         currentNodeId,
         navigationHistory,
         hasReachedEndViaNext,
+        activeChipTexts,
         activeIdpSetId,
         activeCharacterId,
+        activeOutfitId,
+        activeStyleId,
+        activeLightingId,
+        activeCompositionId,
+        activeMoodId,
+        activeNegativeIds,
+        activeObjectIds,
+        activeWorld,
+        characterInPrompt,
+        poseFraming,
+        poseOrientation,
+        poseEnergy,
+        poseGaze,
+        activeEnvironmentId,
+        environmentInPrompt,
+        envTime,
+        envWeather,
+        envScale,
+        envCondition,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -1993,8 +2574,27 @@ export function App() {
     currentNodeId,
     navigationHistory,
     hasReachedEndViaNext,
+    activeChipTexts,
     activeIdpSetId,
     activeCharacterId,
+    activeOutfitId,
+    activeStyleId,
+    activeLightingId,
+    activeCompositionId,
+    activeMoodId,
+    activeNegativeIds,
+    activeObjectIds,
+    characterInPrompt,
+    poseFraming,
+    poseOrientation,
+    poseEnergy,
+    poseGaze,
+    activeEnvironmentId,
+    environmentInPrompt,
+    envTime,
+    envWeather,
+    envScale,
+    envCondition,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -2103,8 +2703,141 @@ export function App() {
       sourceType: item.sourceType ?? 'pool',
     }));
 
-    return [...characterEntries, ...poolEntries, ...fragmentEntries];
-  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText]);
+    const posePhrases = [poseFraming, poseOrientation, poseEnergy, poseGaze].filter(Boolean) as string[];
+    const poseEntries: PromptAdditionEntry[] = posePhrases.length > 0 && activeCharacterProjection
+      ? [{
+          id: `character:${activeCharacterProjection.characterId}:pose`,
+          text: posePhrases.join(', '),
+          position: 'start' as const,
+          section: 'Character',
+          sourceType: 'character' as const,
+        }]
+      : [];
+
+    const environmentEntries: PromptAdditionEntry[] = activeEnvironmentProjection
+      ? activeEnvironmentProjection.corePhrases
+          .map((text, index) => ({
+            id: `environment:${activeEnvironmentProjection.environmentId}:${index}`,
+            text,
+            position: 'end' as const,
+            section: 'Environment',
+            sourceType: 'environment' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const lightPhrases = [envTime, envWeather, envScale, envCondition].filter(Boolean) as string[];
+    const lightEntries: PromptAdditionEntry[] = lightPhrases.length > 0 && activeEnvironmentProjection
+      ? [{
+          id: `environment:${activeEnvironmentProjection.environmentId}:light`,
+          text: lightPhrases.join(', '),
+          position: 'end' as const,
+          section: 'Environment',
+          sourceType: 'environment' as const,
+        }]
+      : [];
+
+    const activeOutfit = activeOutfitId ? outfits.find(o => o.id === activeOutfitId) ?? null : null;
+    const outfitEntries: PromptAdditionEntry[] = activeOutfit
+      ? activeOutfit.phrases
+          .map((text, index) => ({
+            id: `outfit:${activeOutfit.id}:${index}`,
+            text,
+            position: 'start' as const,
+            section: 'Wardrobe',
+            sourceType: 'outfit' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const activeStyle = activeStyleId ? stylePresets.find(s => s.id === activeStyleId) ?? null : null;
+    const styleEntries: PromptAdditionEntry[] = activeStyle
+      ? activeStyle.phrases
+          .map((text, index) => ({
+            id: `style:${activeStyle.id}:${index}`,
+            text,
+            position: 'end' as const,
+            section: 'Style',
+            sourceType: 'style' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const activeLighting = activeLightingId ? lightingSetups.find(l => l.id === activeLightingId) ?? null : null;
+    const lightingEntries: PromptAdditionEntry[] = activeLighting
+      ? activeLighting.phrases
+          .map((text, index) => ({
+            id: `lighting:${activeLighting.id}:${index}`,
+            text,
+            position: 'end' as const,
+            section: 'Lighting',
+            sourceType: 'lighting' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const activeComposition = activeCompositionId ? compositionFrames.find(c => c.id === activeCompositionId) ?? null : null;
+    const compositionEntries: PromptAdditionEntry[] = activeComposition
+      ? activeComposition.phrases
+          .map((text, index) => ({
+            id: `composition:${activeComposition.id}:${index}`,
+            text,
+            position: 'end' as const,
+            section: 'Composition',
+            sourceType: 'composition' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const activeMood = activeMoodId ? moodPresets.find(m => m.id === activeMoodId) ?? null : null;
+    const moodEntries: PromptAdditionEntry[] = activeMood
+      ? activeMood.phrases
+          .map((text, index) => ({
+            id: `mood:${activeMood.id}:${index}`,
+            text,
+            position: 'end' as const,
+            section: 'Mood',
+            sourceType: 'mood' as const,
+          }))
+          .filter(entry => Boolean(entry.text))
+      : [];
+
+    const objectEntries: PromptAdditionEntry[] = activeObjectIds.flatMap(id => {
+      const obj = objects.find(o => o.id === id);
+      return obj ? obj.phrases.map((text, index) => ({
+        id: `object:${obj.id}:${index}`,
+        text,
+        position: 'start' as const,
+        section: 'Object',
+        sourceType: 'object' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
+
+    return [...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
+  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentProjection, envTime, envWeather, envScale, envCondition, activeOutfitId, outfits, activeObjectIds, objects, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeCompositionId, compositionFrames, activeMoodId, moodPresets]);
+
+  const workspacePrompt = useMemo(() => {
+    const startParts = promptAdditionEntries
+      .filter(e => e.position === 'start')
+      .map(e => e.text)
+      .filter(Boolean);
+    const endParts = promptAdditionEntries
+      .filter(e => e.position === 'end')
+      .map(e => e.text)
+      .filter(Boolean);
+    const subject = activeChipTexts.join(', ');
+    return [...startParts, ...(subject ? [subject] : []), ...endParts]
+      .filter(Boolean)
+      .join(', ');
+  }, [promptAdditionEntries, activeChipTexts]);
+
+  const workspaceNegativePrompt = useMemo(() => {
+    const phrases = activeNegativeIds.flatMap(id => {
+      const preset = negativePresets.find(n => n.id === id);
+      return preset ? preset.phrases.filter(Boolean) : [];
+    });
+    return phrases.join(', ');
+  }, [activeNegativeIds, negativePresets]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -2587,50 +3320,49 @@ export function App() {
         </div>
         <div className="app-page-toggle-nav" aria-label="App sections">
           <div className="app-page-toggle-cluster app-page-toggle-cluster-primary">
-            <span className="app-page-toggle-section-label">Main Workspace</span>
+            <span className="app-page-toggle-section-label">Core Realm</span>
             <button
               type="button"
               className={`app-page-toggle-btn app-page-toggle-btn-primary ${activePage === 'generator' ? 'active' : ''}`}
               onClick={() => setActivePage('generator')}
             >
-              Builder
+              Workspace
             </button>
           </div>
           <div className="app-page-toggle-cluster">
-            <span className="app-page-toggle-section-label">Identity Realm</span>
             <div className="app-page-toggle-group">
               <button
                 type="button"
                 className={`app-page-toggle-btn ${activePage === 'identity-systems' ? 'active' : ''}`}
                 onClick={() => setActivePage('identity-systems')}
               >
-                Identity Systems
+                Lexicon
               </button>
             </div>
           </div>
           <div className="app-page-toggle-cluster">
-            <span className="app-page-toggle-section-label">Support Tools</span>
+            <span className="app-page-toggle-section-label">Support Realms</span>
             <div className="app-page-toggle-group">
               <button
                 type="button"
                 className={`app-page-toggle-btn ${activePage === 'prompts' ? 'active' : ''}`}
                 onClick={() => setActivePage('prompts')}
               >
-                Saved Prompts
+                Memory
               </button>
               <button
                 type="button"
                 className={`app-page-toggle-btn ${activePage === 'user-pools' ? 'active' : ''}`}
                 onClick={() => setActivePage('user-pools')}
               >
-                Workflow Sources
+                Auras
               </button>
               <button
                 type="button"
                 className={`app-page-toggle-btn ${activePage === 'pool-hub' ? 'active' : ''}`}
                 onClick={() => setActivePage('pool-hub')}
               >
-                Community Pools
+                Community
               </button>
               <button
                 type="button"
@@ -2655,51 +3387,14 @@ export function App() {
       {activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />
       ) : activePage === 'identity-systems' ? (
-        <IdentitySystemsPage
-          characters={characters}
-          activeCharacterId={activeCharacterId}
-          isLoading={charactersLoading}
-          onSelectCharacter={handleSelectCharacter}
-          onCreateCharacter={handleCreateCharacter}
-          onUpdateCharacter={handleUpdateCharacter}
-          onDeleteCharacter={handleDeleteCharacter}
-          onGoToBuilder={() => setActivePage('generator')}
-          onGoToPrompts={() => setActivePage('prompts')}
-        />
+        <LexiconPage />
       ) : activePage === 'user-pools' ? (
-        <UserPoolsPage
-          manualUrl={manualUrl}
-          onAddToPrompt={handleAddPoolItem}
-          onAppendToPrompt={handleAppendPoolItem}
-          onApplyPoolInitiativePhrases={handleApplyPoolInitiativePhrases}
-          onRandomizePoolItems={handleRandomizePoolItems}
-          prompt={prompt}
-          customAdditions={poolAdditionTexts}
-          positionedAdditions={promptAdditionEntries}
-          editedPositive={editedPositiveOutput}
-          editedNegative={editedNegativeOutput}
-          onEditedOutputChange={handleEditedOutputChange}
-          additionItems={poolAdditionItems}
-          onClearPrompt={handleClearPrompt}
-          onUndoClearPrompt={handleUndoClearPrompt}
-          canUndoClearPrompt={Boolean(clearUndoState)}
-          authUser={authUser}
-          authReady={authReady}
-          isPro={isPro}
-          territories={territories}
-          territoriesLoading={territoriesLoading}
-          activeTerritoryId={activeTerritoryId}
-          territoryEditTargetId={territoryEditTargetId}
-          onCreateTerritory={handleCreateTerritory}
-          onUpdateTerritory={handleUpdateTerritory}
-          onDeleteTerritory={handleDeleteTerritory}
-          onUseTerritoryInBuilder={handleUseTerritoryInBuilder}
-          onDeactivateTerritory={() => handleSetActiveTerritory(null)}
-          onTerritoryEditTargetHandled={() => setTerritoryEditTargetId(null)}
+        <WorldsPage
+          isLoggedIn={true}
         />
       ) : activePage === 'my-profile' ? (
         <MyProfilePage
-          isLoggedIn={authReady && Boolean(authUser)}
+          isLoggedIn={true}
           userName={authUser?.name ?? null}
           onRequestLogin={handleOpenAuth}
         />
@@ -2716,16 +3411,11 @@ export function App() {
           }}
         />
       ) : activePage === 'pool-hub' ? (
-        <PoolHubPage
-          manualUrl={manualUrl}
-          onGoToUserPools={() => setActivePage('user-pools')}
-          onGoToProfile={() => setActivePage('my-profile')}
-          onOpenCreatorProfile={handleOpenCreatorProfilePage}
-          isLoggedIn={authReady && Boolean(authUser)}
-          onRequestLogin={handleOpenAuth}
-          userName={authUser?.name ?? null}
+        <CommunityPage
           userId={authUser?.id ?? null}
-          isPro={isPro}
+          authUid={authUser?.authUid ?? null}
+          userName={authUser?.name ?? null}
+          onIdentityAdded={handleCommunityIdentityAdded}
         />
       ) : activePage === 'prompts' ? (
         <PromptsPage
@@ -2740,608 +3430,149 @@ export function App() {
           isPro={isPro}
           activeCharacterId={activeCharacterId}
           activeCharacterName={activeCharacterDisplayName}
+          externalOpenSaveSignal={savePromptOpenSignal}
         />
       ) : (
-        <>
-        {topToastMessage && (
-          <div className="top-toast" role="status" aria-live="polite">
-            {topToastMessage}
-          </div>
-        )}
-        <div className="interview-layout">
-              <CategorySidebar
-                categoryMap={CATEGORY_MAP}
-                currentNodeId={currentNodeId}
-                selections={selectionsMap}
-                onJumpToCategory={handleJumpToCategory}
-                onOpenRandom={() => setIsRandomPromptModalOpen(true)}
-                onOpenTutorial={() => setIsAppTutorialOpen(true)}
-                activeTerritoryName={activeTerritory?.name ?? null}
-                highlightedCategoryIds={activeTerritoryCategoryIds}
-                territoryFocusMode={territoryNavigationMode}
-                modeLabel={activeBuilderModeConfig.label}
-                modeDescription={activeBuilderModeConfig.description}
-                modeId={activeBuilderMode}
-                modeOptions={builderModeOptions}
-                onModeChange={handleChangeBuilderMode}
-                stageDefinitions={activeStageDefinitions}
-                suggestedCategoryId={suggestedBuilderCategoryId}
-              />
-          <div className="interview-container">
-            <div className="app-main">
-              {builderNotice && (
-                <div className="builder-notice">
-                  <span>{builderNotice}</span>
-                  <button type="button" onClick={() => setBuilderNotice(null)}>
-                    Dismiss
-                  </button>
-                </div>
-              )}
-              {!isComplete && !activeTerritory && !dismissedTerritoryRecommendation && (
-                <div className="builder-territory-recommendation">
-                  <div className="builder-territory-recommendation-header">
-                    <div>
-                      <div className="builder-territory-recommendation-label">Recommended Workflow Context</div>
-                      <div className="builder-territory-recommendation-title">
-                        Use a Territory when you want Builder to stay inside a stronger workflow lane
-                      </div>
-                      <div className="builder-territory-recommendation-copy">
-                        Builder stays fully usable in open workspace mode, but Territories give it
-                        a focused context built from selected Pool sections.
-                      </div>
-                    </div>
-                  </div>
-                  {territories.length > 0 ? (
-                    <div className="builder-territory-recommendation-controls">
-                      <label className="builder-territory-recommendation-picker">
-                        <span>Saved Territory</span>
-                        <select
-                          value={builderTerritoryPickerId}
-                          onChange={event => setBuilderTerritoryPickerId(event.target.value)}
-                        >
-                          {territories.map(territory => (
-                            <option key={territory.id} value={territory.id}>
-                              {territory.name}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <div className="builder-territory-recommendation-actions">
-                        <button
-                          type="button"
-                          className="builder-territory-recommendation-primary"
-                          onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
-                          disabled={!builderTerritoryPickerId}
-                        >
-                          Choose Territory
-                        </button>
-                        <button
-                          type="button"
-                          className="builder-territory-recommendation-secondary"
-                          onClick={handleOpenTerritoryWorkspaceSources}
-                        >
-                          {canManageTerritories ? 'Create Territory' : authUser ? 'Unlock Territories' : 'Log in for Territories'}
-                        </button>
-                        <button
-                          type="button"
-                          className="builder-territory-recommendation-tertiary"
-                          onClick={() => setDismissedTerritoryRecommendation(true)}
-                        >
-                          Continue in Open Workspace
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="builder-territory-recommendation-actions">
-                      <button
-                        type="button"
-                        className="builder-territory-recommendation-primary"
-                        onClick={handleOpenTerritoryWorkspaceSources}
-                      >
-                        {canManageTerritories ? 'Create Territory' : authUser ? 'Unlock Territories' : 'Log in for Territories'}
-                      </button>
-                      <button
-                        type="button"
-                        className="builder-territory-recommendation-tertiary"
-                        onClick={() => setDismissedTerritoryRecommendation(true)}
-                      >
-                        Continue in Open Workspace
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-              {isComplete ? (
-                <CompletionState
-                  totalSteps={navigationHistory.length}
-                  onStartOver={handleStartOver}
-                  onReview={handleReview}
-                />
-              ) : unavailableJumpNodeId === '__builder_empty__' ? (
-                <div className="app-error-state">
-                  <p>No Builder elements are currently available.</p>
-                  <div className="builder-state-actions">
-                    <button onClick={handleStartOver}>Restart Builder</button>
-                  </div>
-                </div>
-              ) : unavailableJumpNode ? (
-                <div className="app-error-state">
-                  <p>This section is not currently available.</p>
-                  <div className="builder-state-subtitle">{unavailableJumpNode.question}</div>
-                  <div className="builder-state-actions">
-                    <button
-                      onClick={() => handleGoToUsableNode(getAdjacentUsableNodeId(unavailableJumpNode.id, 'next'))}
-                    >
-                      Go to Next Available Section
-                    </button>
-                  </div>
-                </div>
-              ) : currentNode && !isCurrentNodeUsable ? (
-                <div className="app-error-state">
-                  <p>This section is currently unavailable.</p>
-                  <div className="builder-state-actions">
-                    <button
-                      onClick={() => handleGoToUsableNode(getAdjacentUsableNodeId(currentNode.id, 'next'))}
-                    >
-                      Go to Next Available Section
-                    </button>
-                  </div>
-                </div>
-              ) : currentNode ? (
-                <QuestionCard
-                  node={currentNode}
-                  currentStep={navigationHistory.length}
-                  selections={selectionsMap}
-                  modifierValues={modifierValues}
-                  attributeDefinitions={currentQuestionAttributesWithExtensions}
-                  modifiers={currentQuestionModifiers}
-                  onSelect={handleAttributeSelect}
-                  onDeselect={handleAttributeDeselect}
-                  onCustomExtensionChange={handleCustomExtensionChange}
-                  onWeightChange={handleWeightChange}
-                  weightsEnabledGlobal={weightsEnabledGlobal}
-                  onToggleGlobalWeights={setWeightsEnabledGlobal}
-                  selectionOutputOverrides={selectionOutputOverrides}
-                  onSetSelectionOutputOverride={handleSetSelectionOutputOverride}
-                  sectionTitle={currentBuilderAreaLabel}
-                  flowHint={currentBuilderFlowHint}
-                  territoryContext={currentTerritoryContext}
-                  territoryItems={currentTerritoryItems}
-                  onToggleTerritoryItem={itemId => {
-                    const territoryItem = currentTerritoryItems.find(item => item.id === itemId);
-                    if (!territoryItem) return;
-                    handleToggleTerritoryItem({
-                      id: territoryItem.id,
-                      text: territoryItem.outputText ?? territoryItem.text,
-                      section: territoryItem.section,
-                    });
-                  }}
-                  onSetTerritoryItemOutputOverride={handleSetPoolOutputOverride}
-                  onSetTerritoryItemWeight={handleSetPromptAdditionWeight}
-                />
-              ) : (
-                <div className="app-error-state">
-                  <p>Question not found. Please start over.</p>
-                  <button onClick={handleStartOver}>Restart Builder</button>
-                </div>
-              )}
-              {displayError && (
-                <ErrorDisplay
-                  error={displayError}
-                  selections={selectionsMap}
-                  onRemoveSelection={handleRemoveSelection}
-                />
-              )}
-            </div>
-            <div className="app-sidebar">
-                <div className="builder-sidebar-panel workspace-sidebar-panel">
-                  <div className="builder-sidebar-panel-header">
-                    <div>
-                      <div className="builder-sidebar-panel-label">Builder Workspace</div>
-                      <div className="builder-sidebar-panel-title">{currentBuilderAreaLabel}</div>
-                      <div className="builder-sidebar-helper">
-                        Builder is the main workspace for shaping the live prompt workflow.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="builder-sidebar-metrics">
-                    <div className="builder-sidebar-metric">
-                      <span className="builder-sidebar-metric-label">Workflow Mode</span>
-                      <span className="builder-sidebar-metric-value">{activeBuilderModeConfig.label}</span>
-                    </div>
-                    <div className="builder-sidebar-metric">
-                      <span className="builder-sidebar-metric-label">Current Area</span>
-                      <span className="builder-sidebar-metric-value">{currentBuilderAreaLabel}</span>
-                    </div>
-                    <div className="builder-sidebar-metric">
-                      <span className="builder-sidebar-metric-label">Territory Status</span>
-                      <span className="builder-sidebar-metric-value">
-                        {activeTerritory ? activeTerritory.name : 'Open workspace'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="builder-sidebar-flow-note">{currentBuilderFlowHint}</div>
-                </div>
-                <div className="builder-sidebar-panel territory-sidebar-panel">
-                  <div className="builder-sidebar-panel-header">
-                    <div>
-                      <div className="builder-sidebar-panel-label">Territory Context</div>
-                      <div className="builder-sidebar-panel-title">
-                        {activeTerritory ? activeTerritory.name : 'No active Territory'}
-                      </div>
-                      <div className="territory-sidebar-helper">
-                        {activeTerritory
-                          ? 'This Territory is shaping Builder with a focused workflow space built from selected Pool sections.'
-                          : 'Optional but recommended when you want Builder to stay inside a focused workflow space built from selected Pool sections.'}
-                      </div>
-                    </div>
-                  </div>
-                {activeTerritory ? (
-                  <>
-                    <div className="territory-sidebar-sources">
-                      {activeTerritory.sources.slice(0, 4).map(source => (
-                        <span key={source.id} className="territory-banner-chip">
-                          {source.section} from {source.poolName}
-                        </span>
-                      ))}
-                      {activeTerritory.sources.length > 4 && (
-                        <span className="territory-banner-more">
-                          +{activeTerritory.sources.length - 4} more
-                        </span>
-                      )}
-                    </div>
-                    <label className="territory-banner-switch territory-sidebar-switch">
-                      <span>Navigation</span>
-                      <select
-                        value={territoryNavigationMode}
-                        onChange={event => setTerritoryNavigationMode(event.target.value as 'biased' | 'full')}
-                      >
-                        <option value="biased">Territory-biased</option>
-                        <option value="full">Full Builder</option>
-                      </select>
-                    </label>
-                    <div className="territory-sidebar-mode-copy">
-                      {territoryNavigationMode === 'biased'
-                        ? 'Builder stays focused on Territory-relevant areas.'
-                        : 'Builder shows all areas while keeping this Territory active.'}
-                    </div>
-                    {(activeTerritory.description?.trim() || activeTerritoryMappings.length > 0) && (
-                      <details className="territory-banner-details">
-                        <summary>
-                          Territory details
-                          <span className="territory-banner-details-meta">
-                            {activeTerritoryMappings.length} mapping{activeTerritoryMappings.length === 1 ? '' : 's'}
-                          </span>
-                        </summary>
-                        {activeTerritory.description?.trim() && (
-                          <div className="territory-banner-description">
-                            {activeTerritory.description}
-                          </div>
-                        )}
-                        {activeTerritoryMappings.length > 0 && (
-                          <div className="territory-banner-mapping">
-                            <div className="territory-banner-mapping-heading">
-                              <span>Builder mapping</span>
-                              <span className="territory-banner-mapping-summary">
-                                {activeTerritoryMappings.length} source{activeTerritoryMappings.length === 1 ? '' : 's'}
-                              </span>
-                            </div>
-                            <div className="territory-banner-mapping-list">
-                              {activeTerritoryMappings.slice(0, 5).map(mapping => (
-                                <div key={mapping.id} className="territory-banner-mapping-item">
-                                  <span className="territory-banner-mapping-source">
-                                    {mapping.section} from {mapping.poolName}
-                                  </span>
-                                  <span className="territory-banner-mapping-arrow">-&gt;</span>
-                                  <span className="territory-banner-mapping-target">
-                                    {mapping.categoryLabels.length > 0 ? mapping.categoryLabels.join(', ') : 'No Builder areas yet'}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    className="territory-banner-mapping-remove"
-                                    onClick={() => void handleRemoveActiveTerritorySource(mapping.id)}
-                                  >
-                                    Remove
-                                  </button>
-                                </div>
-                              ))}
-                              {activeTerritoryMappings.length > 5 && (
-                                <div className="territory-banner-mapping-more">
-                                  +{activeTerritoryMappings.length - 5} more mappings
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-                      </details>
-                    )}
-                    <div className="territory-sidebar-actions">
-                      <button type="button" onClick={() => activeTerritory && handleOpenTerritoryEditor(activeTerritory.id)}>
-                        Edit Territory
-                      </button>
-                      <button type="button" onClick={handleOpenTerritoryWorkspaceSources}>
-                        Manage Territories
-                      </button>
-                      <button type="button" onClick={() => handleSetActiveTerritory(null)}>
-                        Turn Off Territory
-                      </button>
-                    </div>
-                  </>
-                ) : territories.length > 0 ? (
-                  <div className="territory-reactivate-bar territory-reactivate-bar-sidebar">
-                    <div className="territory-reactivate-copy">
-                      <span className="territory-reactivate-text">Activate a saved Territory when you want Builder to move inside a focused workflow space.</span>
-                    </div>
-                    <div className="territory-reactivate-actions">
-                      <select
-                        value={builderTerritoryPickerId}
-                        onChange={event => setBuilderTerritoryPickerId(event.target.value)}
-                      >
-                        {territories.map(territory => (
-                          <option key={territory.id} value={territory.id}>
-                            {territory.name}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => builderTerritoryPickerId && handleUseTerritoryInBuilder(builderTerritoryPickerId)}
-                        disabled={!builderTerritoryPickerId}
-                      >
-                        Activate Territory
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="territory-reactivate-text">Create a Territory in User Pools when you want a focused workflow space built from Pools.</div>
-                )}
-              </div>
-              {!isSavedPromptsDrawerOpen && (
-                <FloatingPromptFragments
-                  fragments={availablePromptFragments}
-                  selectedFragmentIds={selectedPromptFragments.map(fragment => fragment.id)}
-                  onToggleFragment={handleTogglePromptFragment}
-                  onAddCustomFragment={handleAddCustomPromptFragment}
-                  onRemoveCustomFragment={handleRemoveCustomPromptFragment}
-                />
-              )}
-              <PromptPreview 
-                prompt={prompt}
-                onSavePrompt={() => setSavePromptOpenSignal(prev => prev + 1)}
-                onOpenSavedPrompts={() => setIsSavedPromptsDrawerOpen(true)}
-                customAdditions={poolAdditionTexts}
-                positionedAdditions={promptAdditionEntries}
-                activeModeLabel={activeBuilderModeConfig.label}
-                activeTerritoryName={activeTerritory?.name ?? null}
-                territoryFocusMode={activeTerritory ? territoryNavigationMode : null}
-                activePoolNames={activeWorkflowPoolNames}
-                activeCharacterName={activeCharacterDisplayName}
-                activeCharacterSummary={activeCharacterSummaryText}
-                onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
-                onRemoveCharacter={activeCharacter ? handleRemoveActiveCharacter : undefined}
-                availableIdpSets={activeIdpPool?.idpSets ?? []}
-                activeIdpSetId={activeIdpSetId}
-                onSelectIdpSet={handleSelectActiveIdpSet}
-                exportMode={exportMode}
-                onExportModeChange={setExportMode}
-                onEditedOutputChange={handleEditedOutputChange}
-                onClear={handleClearPrompt}
-                onUndoClear={handleUndoClearPrompt}
-                canUndoClear={Boolean(clearUndoState)}
-              />
-              <PromptLibrary
-                prompt={prompt}
-                customAdditions={poolAdditionTexts}
-                positionedAdditions={promptAdditionEntries}
-                editedPositive={editedPositiveOutput}
-                editedNegative={editedNegativeOutput}
-                onAddToPrompt={handleAddPoolItem}
-                authUser={authUser}
-                isPro={isPro}
-                manualUrl={manualUrl}
-                showCloudPrompts={false}
-                showLocalPrompts={false}
-                hideSaveBar={true}
-                externalOpenSaveSignal={savePromptOpenSignal}
-                renderLibraryShell={false}
-                onPromptSaved={setTopToastMessage}
-                activeCharacterId={activeCharacterId}
-                activeCharacterName={activeCharacterDisplayName}
-              />
-            </div>
-
-            {isSavedPromptsDrawerOpen && (
-              <div className="saved-prompts-drawer-shell" role="dialog" aria-modal="true" aria-label="Saved Prompts">
-                <button
-                  type="button"
-                  className="saved-prompts-drawer-backdrop"
-                  onClick={() => setIsSavedPromptsDrawerOpen(false)}
-                  aria-label="Close saved prompts"
-                />
-                <div className="saved-prompts-drawer">
-                  <div className="saved-prompts-drawer-header">
-                    <div>
-                      <div className="saved-prompts-drawer-label">Prompt Archive</div>
-                      <div className="saved-prompts-drawer-title">Saved Prompts</div>
-                    </div>
-                    <button
-                      type="button"
-                      className="saved-prompts-drawer-close"
-                      onClick={() => setIsSavedPromptsDrawerOpen(false)}
-                    >
-                      Close
-                    </button>
-                  </div>
-                  <PromptLibrary
-                    prompt={prompt}
-                    customAdditions={poolAdditionTexts}
-                    positionedAdditions={promptAdditionEntries}
-                    editedPositive={editedPositiveOutput}
-                    editedNegative={editedNegativeOutput}
-                    onAddToPrompt={handleAddPoolItem}
-                    authUser={authUser}
-                    isPro={isPro}
-                    manualUrl={manualUrl}
-                    showCloudPrompts={false}
-                    showLocalPrompts={true}
-                    hideSaveBar={true}
-                    onPromptSaved={setTopToastMessage}
-                    activeCharacterId={activeCharacterId}
-                    activeCharacterName={activeCharacterDisplayName}
-                  />
-                </div>
-              </div>
-            )}
-            
-            {/* Random Prompt Generator Modal */}
-            <Modal
-              isOpen={isRandomPromptModalOpen}
-              onClose={() => setIsRandomPromptModalOpen(false)}
-              title="Random Prompt Generator"
-              className="random-prompt-modal"
-            >
-              <div className="random-prompt-modal-body">
-                {/* Description Section */}
-                <div className="random-prompt-description">
-                  <div className="random-prompt-description-content">
-                    <h3 className="random-prompt-description-title">What is this tool?</h3>
-                    <p className="random-prompt-description-text">
-                      The <strong>Random Prompt Generator</strong> helps you quickly create diverse, well-structured prompts without manually selecting every detail. 
-                      Simply choose which parts of the Builder interest you most, from defining the subject to refining lighting and finishing the look, and the tool will randomly combine attributes from those categories 
-                      to generate a complete prompt ready to use in Stable Diffusion.
-                    </p>
-                    <p className="random-prompt-description-text">
-                      You can also <strong>expand any category</strong> by clicking on it to see its subcategories (for example, expanding "Style" reveals "Illustration", "Realistic", "Painting", etc.). 
-                      This allows you to be more specific—you can enable only the subcategories you want, giving you precise control over which types of attributes will be randomly selected.
-                    </p>
-                    <p className="random-prompt-description-text">
-                      This is perfect for exploring new ideas, getting inspiration, or quickly generating variations of prompts to see what works best.
-                    </p>
-                  </div>
-                </div>
-                
-                <RandomPromptGenerator
-                  attributeDefinitions={attributeDefinitions}
-                  questionNodes={questionNodes}
-                  manualUrl={manualUrl}
-                  onRandomize={(selections) => {
-                    handleRandomize(selections);
-                    setIsRandomPromptModalOpen(false);
-                  }}
-                />
-              </div>
-            </Modal>
-
-            {/* App Tutorial Modal */}
-            <Modal
-              isOpen={isAppTutorialOpen}
-              onClose={() => setIsAppTutorialOpen(false)}
-              title="How to Use the Builder Workspace"
-            >
-              <div className="app-tutorial-body">
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">What is This Tool?</h3>
-                  <p>
-                    MorpBase gives you a Builder workspace for authoring prompt workflows for image generation models such as Stable Diffusion.
-                    Instead of rewriting one long prompt from scratch every time, you move through focused workflow areas
-                    that help define the main idea, refine the look, and finish the result only when extra polish is needed.
-                  </p>
-                  <p>
-                    Want the full guide? Open the manual section for the Builder workspace.
-                    {' '}
-                    <a href={manualLink('builder')} target="_blank" rel="noreferrer">
-                      Deep dive in the manual
-                    </a>
-                    .
-                  </p>
-                </section>
-
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">How It Works</h3>
-                  <p>
-                    Start by shaping the workflow through the core areas: who or what is in the scene, where it exists, and what visual language it should follow.
-                    Then refine the result with lighting, camera framing, actions, and other details. Finish with extra polish only when you need it.
-                  </p>
-                  <p>
-                    Each answer you choose adds structured pieces to the active prompt workflow, and Prompt Preview on the right updates as you go
-                    so you can see exactly what the workspace is producing.
-                  </p>
-                </section>
-
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">Navigating the Interface</h3>
-                  <p>
-                    <strong>Builder Sidebar:</strong> Jump directly to any workflow area or subcategory from the left side.
-                    The sidebar is grouped into Define, Refine, and Finish so it is easier to see what matters first.
-                    Finish is intentionally optional and is mainly for extra polish, atmosphere, and final treatment.
-                  </p>
-                  <p>
-                    <strong>Prompt Preview:</strong> Use the right side as your live output companion. It shows the current workflow result,
-                    plus any active Territory context, Character overlay, or identity baseline layered onto it.
-                  </p>
-                </section>
-
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">Building Your Prompt</h3>
-                  <p>
-                    Start by selecting attributes from the current question. You can select multiple options, and each selection
-                    contributes to the live workflow output. You can refine or remove choices at any time by navigating back to previous
-                    questions or by jumping between workflow areas in the sidebar.
-                  </p>
-                  <p>
-                    When you want stronger focus, activate a Territory so Builder stays inside a more specific workflow space.
-                    When you are happy with the result, save it or copy the prompt text from Prompt Preview into your image-generation interface.
-                  </p>
-                </section>
-
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">Using the Random Prompt Generator</h3>
-                  <p>
-                    If you want quick inspiration instead of manually shaping the workflow, use the <strong>Random Prompt Generator</strong>
-                    button in the bottom-right corner. This opens a separate tool that creates prompts automatically based on
-                    randomly selected attributes from the Builder areas you choose.
-                  </p>
-                  <p>
-                    This is perfect for exploring new ideas, getting inspiration, or quickly generating variations to see what works best.
-                  </p>
-                  <p>
-                    <a href={manualLink('random-prompt-generator')} target="_blank" rel="noreferrer">
-                      See Random Prompt Generator in the manual
-                    </a>
-                    .
-                  </p>
-                </section>
-
-                <section className="app-tutorial-section">
-                  <h3 className="app-tutorial-heading">Tips for Best Results</h3>
-                  <ul className="app-tutorial-list">
-                    <li>Be specific with your selections - more detail often leads to better results</li>
-                    <li>Use the sidebar to move between workflow areas and refine your choices</li>
-                    <li>Check Prompt Preview regularly to see how your selections and context layers combine</li>
-                    <li>Experiment with different combinations to find what works best for your needs</li>
-                    <li>Use the Random Generator to discover new workflow directions you might not have considered</li>
-                  </ul>
-                </section>
-              </div>
-            </Modal>
-            <CharacterLibraryModal
-              isOpen={isCharacterLibraryOpen}
-              onClose={() => setIsCharacterLibraryOpen(false)}
-              characters={characters}
-              activeCharacterId={activeCharacterId}
-              isLoading={charactersLoading}
-              onSelectCharacter={handleSelectCharacter}
-              onCreateCharacter={handleCreateCharacter}
-              onUpdateCharacter={handleUpdateCharacter}
-              onDeleteCharacter={handleDeleteCharacter}
-            />
-          </div>
-        </div>
-        </>
+        <WorkspacePage
+          activeChipTexts={activeChipTexts}
+          onChipToggle={handleChipToggle}
+          assembledPrompt={workspacePrompt}
+          onSavePrompt={() => { setSavePromptOpenSignal(s => s + 1); setActivePage('prompts'); }}
+          activeCharacterName={activeCharacter?.name ?? null}
+          onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
+          onDeactivateCharacter={activeCharacterId ? handleDeactivateCharacter : undefined}
+          activeEnvironmentName={activeEnvironment?.name ?? null}
+          environmentInPrompt={environmentInPrompt}
+          onChooseEnvironment={() => setIsEnvironmentLibraryOpen(true)}
+          onAddEnvironment={activeEnvironment && !environmentInPrompt ? handleAddEnvironmentToPrompt : undefined}
+          onRemoveEnvironment={activeEnvironment && environmentInPrompt ? handleRemoveActiveEnvironment : undefined}
+          activeOutfitName={activeOutfitId ? (outfits.find(o => o.id === activeOutfitId)?.name ?? null) : null}
+          onChooseWardrobe={() => setIsWardrobeOpen(true)}
+          onDeactivateWardrobe={activeOutfitId ? () => handleSelectOutfit(null) : undefined}
+          activeStyleName={activeStyleId ? (stylePresets.find(s => s.id === activeStyleId)?.name ?? null) : null}
+          onChooseStyle={() => setIsStyleOpen(true)}
+          onDeactivateStyle={activeStyleId ? () => handleSelectStylePreset(null) : undefined}
+          activeLightingName={activeLightingId ? (lightingSetups.find(l => l.id === activeLightingId)?.name ?? null) : null}
+          onChooseLighting={() => setIsLightingOpen(true)}
+          onDeactivateLighting={activeLightingId ? () => handleSelectLightingSetup(null) : undefined}
+          activeCompositionName={activeCompositionId ? (compositionFrames.find(c => c.id === activeCompositionId)?.name ?? null) : null}
+          onChooseComposition={() => setIsCompositionOpen(true)}
+          onDeactivateComposition={activeCompositionId ? () => handleSelectCompositionFrame(null) : undefined}
+          activeMoodName={activeMoodId ? (moodPresets.find(m => m.id === activeMoodId)?.name ?? null) : null}
+          onChooseMood={() => setIsMoodOpen(true)}
+          onDeactivateMood={activeMoodId ? () => handleSelectMoodPreset(null) : undefined}
+          activeNegativeItems={activeNegativeIds.map(id => ({ id, name: negativePresets.find(n => n.id === id)?.name ?? id }))}
+          assembledNegativePrompt={workspaceNegativePrompt}
+          onChooseNegative={() => setIsNegativeOpen(true)}
+          onRemoveNegative={handleRemoveNegativePreset}
+          activeObjectItems={activeObjectIds.map(id => ({ id, name: objects.find(o => o.id === id)?.name ?? id }))}
+          onChooseObject={() => setIsObjectOpen(true)}
+          onRemoveObject={handleRemoveObject}
+          activeWorldName={activeWorld?.name ?? null}
+          activeWorldPhrases={activeWorld?.phrases ?? []}
+          onChooseWorld={() => setIsWorldOpen(true)}
+          onDeactivateWorld={activeWorld ? () => { setActiveWorld(null); setActiveChipTexts([]); } : undefined}
+        />
       )}
       </>
       )}
       </div>
+      <CharacterLibraryModal
+        isOpen={isCharacterLibraryOpen}
+        onClose={() => setIsCharacterLibraryOpen(false)}
+        characters={characters}
+        activeCharacterId={activeCharacterId}
+        isLoading={charactersLoading}
+        onSelectCharacter={handleSelectCharacter}
+        onCreateCharacter={handleCreateCharacter}
+        onUpdateCharacter={handleUpdateCharacter}
+        onDeleteCharacter={handleDeleteCharacter}
+      />
+      <EnvironmentLibraryModal
+        isOpen={isEnvironmentLibraryOpen}
+        onClose={() => setIsEnvironmentLibraryOpen(false)}
+        environments={environments}
+        activeEnvironmentId={activeEnvironmentId}
+        onSelectEnvironment={handleSelectEnvironment}
+        onCreateEnvironment={handleCreateEnvironment}
+        onUpdateEnvironment={handleUpdateEnvironment}
+        onDeleteEnvironment={handleDeleteEnvironment}
+      />
+      <WardrobeModal
+        isOpen={isWardrobeOpen}
+        onClose={() => setIsWardrobeOpen(false)}
+        outfits={outfits}
+        activeOutfitId={activeOutfitId}
+        onSelectOutfit={handleSelectOutfit}
+        onCreateOutfit={handleCreateOutfit}
+        onUpdateOutfit={handleUpdateOutfit}
+        onDeleteOutfit={handleDeleteOutfit}
+      />
+      <StyleModal
+        isOpen={isStyleOpen}
+        onClose={() => setIsStyleOpen(false)}
+        items={stylePresets}
+        activeItemId={activeStyleId}
+        onSelectItem={handleSelectStylePreset}
+        onCreateItem={handleCreateStylePreset}
+        onUpdateItem={handleUpdateStylePreset}
+        onDeleteItem={handleDeleteStylePreset}
+      />
+      <LightingModal
+        isOpen={isLightingOpen}
+        onClose={() => setIsLightingOpen(false)}
+        items={lightingSetups}
+        activeItemId={activeLightingId}
+        onSelectItem={handleSelectLightingSetup}
+        onCreateItem={handleCreateLightingSetup}
+        onUpdateItem={handleUpdateLightingSetup}
+        onDeleteItem={handleDeleteLightingSetup}
+      />
+      <CompositionModal
+        isOpen={isCompositionOpen}
+        onClose={() => setIsCompositionOpen(false)}
+        items={compositionFrames}
+        activeItemId={activeCompositionId}
+        onSelectItem={handleSelectCompositionFrame}
+        onCreateItem={handleCreateCompositionFrame}
+        onUpdateItem={handleUpdateCompositionFrame}
+        onDeleteItem={handleDeleteCompositionFrame}
+      />
+      <MoodModal
+        isOpen={isMoodOpen}
+        onClose={() => setIsMoodOpen(false)}
+        items={moodPresets}
+        activeItemId={activeMoodId}
+        onSelectItem={handleSelectMoodPreset}
+        onCreateItem={handleCreateMoodPreset}
+        onUpdateItem={handleUpdateMoodPreset}
+        onDeleteItem={handleDeleteMoodPreset}
+      />
+      <NegativeModal
+        isOpen={isNegativeOpen}
+        onClose={() => setIsNegativeOpen(false)}
+        items={negativePresets}
+        activeItemIds={activeNegativeIds}
+        onAddItem={handleAddNegativePreset}
+        onRemoveItem={handleRemoveNegativePreset}
+        onCreateItem={handleCreateNegativePreset}
+        onUpdateItem={handleUpdateNegativePreset}
+        onDeleteItem={handleDeleteNegativePreset}
+      />
+      <ObjectLibraryModal
+        isOpen={isObjectOpen}
+        onClose={() => setIsObjectOpen(false)}
+        activeObjectIds={activeObjectIds}
+        onAdd={handleAddObject}
+        onRemove={handleRemoveObject}
+      />
+      <WorldModal
+        isOpen={isWorldOpen}
+        onClose={() => setIsWorldOpen(false)}
+        activeWorldId={activeWorld?.id ?? null}
+        onSelectWorld={(id, name, phrases) => { setActiveWorld({ id, name, phrases }); setActiveChipTexts([]); }}
+        onDeactivate={() => { setActiveWorld(null); setActiveChipTexts([]); }}
+      />
       <Modal
         isOpen={isFeedbackModalOpen}
         onClose={() => setIsFeedbackModalOpen(false)}

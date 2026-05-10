@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { CharacterAvatar, CharacterIdentity, CharacterIdentityInput } from '../../types';
+import { processCoverImage } from '../utils/coverImageUtils';
 import './CharacterLibraryModal.css';
 
 type CharacterLibrarySurfaceProps = {
@@ -16,6 +17,7 @@ type CharacterLibrarySurfaceProps = {
 type CharacterFormState = {
   name: string;
   summary: string;
+  coverImageUrl: string;
   avatar: CharacterAvatar | null;
   archetype: string;
   role: string;
@@ -30,6 +32,7 @@ type CharacterFormState = {
 const EMPTY_FORM: CharacterFormState = {
   name: '',
   summary: '',
+  coverImageUrl: '',
   avatar: null,
   archetype: '',
   role: '',
@@ -161,6 +164,7 @@ const toMultiline = (items: Array<{ label: string; text: string }>) =>
 const formFromCharacter = (character: CharacterIdentity): CharacterFormState => ({
   name: character.name,
   summary: character.summary ?? '',
+  coverImageUrl: character.coverImageUrl ?? '',
   avatar: character.avatar ?? null,
   archetype: character.identity.archetype ?? '',
   role: character.identity.role ?? '',
@@ -211,6 +215,7 @@ const parseStringList = (value: string): string[] => (
 const buildCharacterInput = (form: CharacterFormState): CharacterIdentityInput => ({
   name: form.name.trim(),
   summary: form.summary.trim() || undefined,
+  coverImageUrl: form.coverImageUrl.trim() || null,
   avatar: form.avatar ?? undefined,
   identity: {
     archetype: form.archetype.trim() || undefined,
@@ -277,6 +282,7 @@ export function CharacterLibrarySurface({
   onApplied,
 }: CharacterLibrarySurfaceProps) {
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const coverImageInputRef = useRef<HTMLInputElement | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingCharacterId, setEditingCharacterId] = useState<string | null>(null);
   const [form, setForm] = useState<CharacterFormState>(EMPTY_FORM);
@@ -284,6 +290,8 @@ export function CharacterLibrarySurface({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingAvatar, setIsProcessingAvatar] = useState(false);
+  const [isProcessingCover, setIsProcessingCover] = useState(false);
+
   const activeCharacter = useMemo(
     () => characters.find(character => character.id === activeCharacterId) ?? null,
     [characters, activeCharacterId]
@@ -341,6 +349,22 @@ export function CharacterLibrarySurface({
   const handleRemoveAvatar = () => {
     setForm(prev => ({ ...prev, avatar: null }));
     resetAvatarInput();
+  };
+
+  const handleCoverImageSelected = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      setIsProcessingCover(true);
+      setError(null);
+      const dataUrl = await processCoverImage(file);
+      setForm(prev => ({ ...prev, coverImageUrl: dataUrl }));
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to process the selected cover image.');
+    } finally {
+      setIsProcessingCover(false);
+      event.target.value = '';
+    }
   };
 
   const handleAvatarSelected = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -443,6 +467,13 @@ export function CharacterLibrarySurface({
         accept={CHARACTER_AVATAR_ACCEPT}
         className="character-avatar-input"
         onChange={event => void handleAvatarSelected(event)}
+      />
+      <input
+        ref={coverImageInputRef}
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        className="character-avatar-input"
+        onChange={event => void handleCoverImageSelected(event)}
       />
       <div className="character-library-intro">
         <div>
@@ -627,6 +658,34 @@ export function CharacterLibrarySurface({
                     placeholder="Recurring mystic heroine with luminous ornamented features."
                   />
                 </label>
+                <div className="character-editor-field character-editor-field-wide">
+                  <span>Cover image <span className="character-editor-cover-optional">(optional)</span></span>
+                  <div className="character-editor-cover-upload">
+                    <button
+                      type="button"
+                      className="character-library-secondary-button"
+                      onClick={() => coverImageInputRef.current?.click()}
+                      disabled={isProcessingCover || isSubmitting}
+                    >
+                      {isProcessingCover ? 'Processing…' : form.coverImageUrl ? 'Change Cover' : 'Upload Cover'}
+                    </button>
+                    {form.coverImageUrl && (
+                      <button
+                        type="button"
+                        className="character-library-danger-button"
+                        onClick={() => handleFormChange('coverImageUrl', '')}
+                        disabled={isProcessingCover || isSubmitting}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  {form.coverImageUrl && (
+                    <div className="character-editor-cover-preview">
+                      <img src={form.coverImageUrl} alt="Cover preview" />
+                    </div>
+                  )}
+                </div>
                 <label className="character-editor-field">
                   <span>Archetype</span>
                   <input

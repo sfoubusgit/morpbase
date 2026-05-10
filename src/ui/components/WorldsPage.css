@@ -1,0 +1,414 @@
+.worlds-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Gate (not logged in) ────────────────────────── */
+
+.worlds-gate {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
+}
+
+.worlds-gate-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.worlds-gate-body {
+  font-size: 14px;
+  color: var(--text-tertiary);
+}
+
+/* ── Layout ──────────────────────────────────────── */
+
+.worlds-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────── */
+
+.worlds-sidebar {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-subtle);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.worlds-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  flex-shrink: 0;
+}
+
+.worlds-sidebar-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.worlds-sidebar-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.worlds-create {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 14px;
+  flex-shrink: 0;
+}
+
+.worlds-create-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.worlds-create-input:focus {
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.worlds-create-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.worlds-create-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(167, 139, 250, 0.1);
+  color: #c4b5fd;
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.worlds-create-btn:hover:not(:disabled) {
+  background: rgba(167, 139, 250, 0.18);
+}
+
+.worlds-create-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.worlds-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.worlds-loading,
+.worlds-empty-list {
+  padding: 20px 10px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.worlds-card {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.worlds-card:hover {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.worlds-card-active {
+  border-color: rgba(167, 139, 250, 0.25);
+  background: rgba(167, 139, 250, 0.05);
+}
+
+.worlds-card-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.worlds-card-active .worlds-card-name {
+  color: #c4b5fd;
+}
+
+.worlds-card-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* ── Detail panel ────────────────────────────────── */
+
+.worlds-detail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.worlds-detail-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  padding: 40px;
+}
+
+.worlds-detail-inner {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 28px;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.worlds-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.worlds-detail-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.12s;
+}
+
+.worlds-detail-name:hover {
+  border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+.worlds-name-input {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(167, 139, 250, 0.5);
+  outline: none;
+  font-family: inherit;
+  padding: 0;
+  flex: 1;
+}
+
+.worlds-delete-btn {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 110, 110, 0.5);
+  background: none;
+  border: 1px solid rgba(255, 110, 110, 0.15);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 5px 12px;
+  font-family: inherit;
+  transition: all 0.12s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.worlds-delete-btn:hover {
+  color: #ff9090;
+  border-color: rgba(255, 110, 110, 0.35);
+}
+
+.worlds-error {
+  font-size: 12px;
+  color: #ff9090;
+  flex-shrink: 0;
+}
+
+/* ── Phrase list ─────────────────────────────────── */
+
+.worlds-phrases {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.worlds-phrases-empty {
+  padding: 16px 0;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.worlds-phrase {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border-radius: var(--radius-sm);
+  padding: 2px 0;
+}
+
+.worlds-phrase:hover .worlds-phrase-remove {
+  opacity: 1;
+}
+
+.worlds-phrase-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.1s, color 0.1s;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.worlds-phrase-text:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.worlds-phrase-edit {
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: var(--radius-sm);
+  outline: none;
+  font-family: inherit;
+  padding: 5px 8px;
+  line-height: 1.4;
+}
+
+.worlds-phrase-remove {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-tertiary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s;
+  flex-shrink: 0;
+}
+
+.worlds-phrase-remove:hover {
+  color: #ff9090;
+}
+
+/* ── Add phrase ──────────────────────────────────── */
+
+.worlds-add-phrase {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.worlds-add-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.worlds-add-input:focus {
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.worlds-add-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.worlds-add-btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border-accent-strong);
+  background: linear-gradient(135deg, rgba(110, 86, 249, 0.96), rgba(128, 104, 255, 0.96));
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.worlds-add-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(110, 86, 249, 0.2);
+}
+
+.worlds-add-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
