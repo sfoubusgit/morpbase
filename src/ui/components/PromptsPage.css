@@ -190,3 +190,138 @@
     margin: 0;
   }
 }
+
+/* ── Saved Sets ───────────────────────────────────── */
+
+.capture-sets-section {
+  margin-bottom: 32px;
+}
+
+.capture-sets-header {
+  margin-bottom: 14px;
+}
+
+.capture-sets-title {
+  font-size: 17px;
+  margin: 0 0 4px;
+}
+
+.capture-sets-sub {
+  font-size: 13px;
+  color: rgba(227, 224, 255, 0.56);
+  margin: 0;
+}
+
+.capture-sets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.capture-set-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.capture-set-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.capture-set-name-btn {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0;
+}
+
+.capture-set-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e8ebff;
+}
+
+.capture-set-meta {
+  font-size: 12px;
+  color: rgba(232, 235, 255, 0.45);
+}
+
+.capture-set-delete-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s;
+}
+
+.capture-set-delete-btn:hover {
+  color: rgba(255, 100, 100, 0.7);
+}
+
+.capture-set-prompts {
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.capture-set-prompt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.capture-set-prompt-row:last-child {
+  border-bottom: none;
+}
+
+.capture-set-prompt-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(232, 235, 255, 0.3);
+  padding-top: 2px;
+  min-width: 24px;
+}
+
+.capture-set-prompt-text {
+  flex: 1;
+  font-size: 13px;
+  color: rgba(232, 235, 255, 0.75);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.capture-set-copy-btn {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: rgba(232, 235, 255, 0.45);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.capture-set-copy-btn:hover {
+  color: #e8ebff;
+  border-color: rgba(255, 255, 255, 0.2);
+}

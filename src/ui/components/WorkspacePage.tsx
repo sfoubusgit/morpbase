@@ -225,6 +225,7 @@ export function WorkspacePage({
   const [wallComposerOpen, setWallComposerOpen] = useState(false);
   const [saveSetOpen, setSaveSetOpen] = useState(false);
   const [setName, setSetName] = useState('');
+  const [savedSetMessage, setSavedSetMessage] = useState<string | null>(null);
 
   const handleCopy = useCallback(() => {
     if (!assembledPrompt) return;
@@ -320,7 +321,14 @@ export function WorkspacePage({
                     <button
                       type="button"
                       className="workspace-capture-save-btn"
-                      onClick={() => { onSaveSet(setName || captureAutoName); setSaveSetOpen(false); setSetName(''); }}
+                      onClick={() => {
+                        const name = setName || captureAutoName;
+                        onSaveSet(name);
+                        setSaveSetOpen(false);
+                        setSetName('');
+                        setSavedSetMessage(`Saved: "${name}"`);
+                        setTimeout(() => setSavedSetMessage(null), 3000);
+                      }}
                     >
                       Save
                     </button>
@@ -330,6 +338,10 @@ export function WorkspacePage({
                   </div>
                 )}
               </div>
+            )}
+
+            {savedSetMessage && (
+              <div className="workspace-capture-toast">{savedSetMessage}</div>
             )}
 
             {wallComposerOpen && authUid && userId && userName && (

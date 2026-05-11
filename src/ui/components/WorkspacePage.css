@@ -286,6 +286,17 @@
   color: rgba(232, 235, 255, 0.7);
 }
 
+.workspace-capture-toast {
+  margin-top: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(118, 255, 201, 0.25);
+  background: rgba(118, 255, 201, 0.08);
+  color: rgba(118, 255, 201, 0.9);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* ── Middle inspiration column ───────────────────── */
 
 .workspace-inspiration {

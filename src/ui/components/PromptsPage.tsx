@@ -1,5 +1,7 @@
+import { useState, useEffect, useCallback } from 'react';
 import type { PromptAdditionEntry } from '../../types';
 import { PromptLibrary } from './PromptLibrary';
+import { listCaptureSets, deleteCaptureSet, type CaptureSet } from '../../engine/captureStore';
 import './PromptsPage.css';
 
 type PromptsPageProps = {
@@ -34,6 +36,75 @@ const FLOW_STEPS = [
     text: 'Organize proven outputs so they are easy to find and reuse.',
   },
 ];
+
+function CapturedSetsSection() {
+  const [sets, setSets] = useState<CaptureSet[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [copiedIdx, setCopiedIdx] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSets(listCaptureSets());
+  }, []);
+
+  const handleDelete = useCallback((id: string) => {
+    deleteCaptureSet(id);
+    setSets(prev => prev.filter(s => s.id !== id));
+  }, []);
+
+  const handleCopy = useCallback((text: string, key: string) => {
+    void navigator.clipboard.writeText(text);
+    setCopiedIdx(key);
+    setTimeout(() => setCopiedIdx(null), 1500);
+  }, []);
+
+  if (sets.length === 0) return null;
+
+  return (
+    <div className="capture-sets-section">
+      <div className="capture-sets-header">
+        <h2 className="capture-sets-title">Saved Sets</h2>
+        <p className="capture-sets-sub">Prompt sessions captured from the Workspace.</p>
+      </div>
+      <div className="capture-sets-list">
+        {sets.map(set => (
+          <div key={set.id} className="capture-set-card">
+            <div className="capture-set-top">
+              <button
+                type="button"
+                className="capture-set-name-btn"
+                onClick={() => setExpandedId(prev => prev === set.id ? null : set.id)}
+              >
+                <span className="capture-set-name">{set.name}</span>
+                <span className="capture-set-meta">{set.prompts.length} prompt{set.prompts.length !== 1 ? 's' : ''} · {new Date(set.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}</span>
+              </button>
+              <button type="button" className="capture-set-delete-btn" onClick={() => handleDelete(set.id)} title="Delete set">×</button>
+            </div>
+            {expandedId === set.id && (
+              <div className="capture-set-prompts">
+                {set.prompts.map((text, i) => {
+                  const key = `${set.id}:${i}`;
+                  return (
+                    <div key={key} className="capture-set-prompt-row">
+                      <span className="capture-set-prompt-num">#{i + 1}</span>
+                      <p className="capture-set-prompt-text">{text}</p>
+                      <button
+                        type="button"
+                        className="capture-set-copy-btn"
+                        onClick={() => handleCopy(text, key)}
+                      >
+                        {copiedIdx === key ? 'Copied' : 'Copy'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function PromptsPage({
   prompt,
@@ -87,6 +158,9 @@ export function PromptsPage({
           ))}
         </div>
       </div>
+
+      {/* Saved Sets */}
+      <CapturedSetsSection />
 
       {/* Library */}
       <div className="memory-body">
