@@ -468,6 +468,44 @@
   cursor: default;
 }
 
+.community-card-remix {
+  padding: 9px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: none;
+  border: 1px solid rgba(110, 86, 249, 0.3);
+  color: rgba(167, 139, 250, 0.7);
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.community-card-remix:hover {
+  border-color: rgba(110, 86, 249, 0.55);
+  color: #a78bfa;
+}
+
+.community-card-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.community-card-remix-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(167, 139, 250, 0.6);
+}
+
+.community-card-lineage {
+  font-size: 11px;
+  color: rgba(167, 139, 250, 0.55);
+  font-style: italic;
+}
+
 /* ── Responsive ──────────────────────────────────── */
 
 @media (max-width: 700px) {

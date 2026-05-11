@@ -108,6 +108,8 @@ type DisplayIdentity = {
   authorId: string | null;
   authorCoverImageUrl: string | null;
   isCurated: boolean;
+  parentId: string | null;
+  remixCount: number;
 };
 
 type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges';
@@ -139,6 +141,7 @@ export function CommunityPage({
   const [cardStates, setCardStates] = useState<Record<string, CardState>>({});
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [remixTarget, setRemixTarget] = useState<{ id: string; name: string } | null>(null);
   const fetchShared = useCallback(async () => {
     setLoadingShared(true);
     const items = await listCommunityIdentities();
@@ -162,6 +165,8 @@ export function CommunityPage({
       // Morp gets a test gradient so the cover-image effect is always visible
       authorCoverImageUrl: c.id === 'ci_mascot_morp' ? '__test_gradient__' : null,
       isCurated: true,
+      parentId: null,
+      remixCount: 0,
     })),
     [],
   );
@@ -177,6 +182,8 @@ export function CommunityPage({
       authorId: s.authorId,
       authorCoverImageUrl: s.authorCoverImageUrl,
       isCurated: false,
+      parentId: s.parentId,
+      remixCount: s.remixCount,
     })),
     [sharedItems],
   );
@@ -364,6 +371,10 @@ export function CommunityPage({
                     state === 'adding' ? '…' :
                     `Add to my ${TYPE_LABELS[item.type]}`;
 
+                  const parentName = item.parentId
+                    ? (all.find(i => i.id === item.parentId)?.name ?? null)
+                    : null;
+
                   const coverStyle: React.CSSProperties | undefined =
                     item.authorCoverImageUrl === '__test_gradient__'
                       ? undefined
@@ -380,9 +391,14 @@ export function CommunityPage({
                     >
                       <div className="community-card-header">
                         <div className="community-card-name">{item.name}</div>
-                        <span className={`community-card-type community-card-type-${item.type}`}>
-                          {TYPE_LABELS[item.type]}
-                        </span>
+                        <div className="community-card-header-right">
+                          {item.remixCount > 0 && (
+                            <span className="community-card-remix-count">↺ {item.remixCount}</span>
+                          )}
+                          <span className={`community-card-type community-card-type-${item.type}`}>
+                            {TYPE_LABELS[item.type]}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="community-card-author">
@@ -390,6 +406,9 @@ export function CommunityPage({
                         <span className={item.isCurated ? 'community-card-author-morpbase' : 'community-card-author-user'}>
                           {item.authorName}
                         </span>
+                        {parentName && (
+                          <span className="community-card-lineage"> · ↺ {parentName}</span>
+                        )}
                       </div>
 
                       {item.summary && (
@@ -411,6 +430,18 @@ export function CommunityPage({
                         >
                           {addLabel}
                         </button>
+                        {authUid && !isOwn && (
+                          <button
+                            type="button"
+                            className="community-card-remix"
+                            onClick={() => {
+                              setRemixTarget({ id: item.id, name: item.name });
+                              setIsShareOpen(true);
+                            }}
+                          >
+                            ↺ Remix
+                          </button>
+                        )}
                         {isOwn && (
                           <button
                             type="button"
@@ -435,11 +466,12 @@ export function CommunityPage({
 
       <ShareModal
         isOpen={isShareOpen}
-        onClose={() => setIsShareOpen(false)}
+        onClose={() => { setIsShareOpen(false); setRemixTarget(null); }}
         userId={userId ?? ''}
         userName={userName ?? ''}
         existingShared={existingShared}
         onShare={handleShare}
+        remixOf={remixTarget}
       />
     </div>
   );

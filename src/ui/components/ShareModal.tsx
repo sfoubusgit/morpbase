@@ -43,6 +43,7 @@ type ShareModalProps = {
   userName: string;
   existingShared: Array<{ name: string; type: string }>;
   onShare: (input: ShareIdentityInput) => Promise<void>;
+  remixOf?: { id: string; name: string } | null;
 };
 
 export function ShareModal({
@@ -50,6 +51,7 @@ export function ShareModal({
   onClose,
   existingShared,
   onShare,
+  remixOf,
 }: ShareModalProps) {
   const [identities, setIdentities] = useState<FlatIdentity[]>([]);
   const [loading, setLoading] = useState(false);
@@ -218,6 +220,7 @@ export function ShareModal({
         phrases: selected.phrases,
         summary: summary.trim(),
         authorCoverImageUrl: coverImageUrl.trim() || null,
+        parentId: remixOf?.id ?? null,
       });
       onClose();
     } catch (err: unknown) {
@@ -239,9 +242,15 @@ export function ShareModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Share to Community" className="share-modal-container">
       <div className="share-modal">
-        <p className="share-modal-description">
-          Choose one of your identities to share with the MorpBase community.
-        </p>
+        {remixOf ? (
+          <div className="share-modal-remix-banner">
+            ↺ Remixing <strong>{remixOf.name}</strong> — select your adapted version below to share with attribution.
+          </div>
+        ) : (
+          <p className="share-modal-description">
+            Choose one of your identities to share with the MorpBase community.
+          </p>
+        )}
 
         {loading ? (
           <div className="share-modal-loading">Loading your identities…</div>

@@ -15,6 +15,16 @@
   line-height: 1.5;
 }
 
+.share-modal-remix-banner {
+  font-size: 13px;
+  color: rgba(167, 139, 250, 0.9);
+  background: rgba(110, 86, 249, 0.1);
+  border: 1px solid rgba(110, 86, 249, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+
 .share-modal-loading,
 .share-modal-empty {
   font-size: 13px;
