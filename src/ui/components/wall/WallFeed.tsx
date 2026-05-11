@@ -8,6 +8,7 @@ import {
   unlikePost,
 } from '../../../engine/wallStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
+import { getXPMap } from '../../../engine/xpStore';
 import { WallPostCard } from './WallPostCard';
 import { WallPostComposer } from './WallPostComposer';
 import './WallFeed.css';
@@ -37,6 +38,7 @@ export function WallFeed({
   const [loading, setLoading] = useState(true);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [followingUids, setFollowingUids] = useState<Set<string>>(new Set());
+  const [authorXpMap, setAuthorXpMap] = useState<Map<string, number>>(new Map());
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -45,6 +47,9 @@ export function WallFeed({
     const data = await listWallPosts({ limit: 60 });
     setPosts(data);
     setLoading(false);
+    const authorUids = [...new Set(data.map(p => p.authUid))];
+    const xpMap = await getXPMap(authorUids);
+    setAuthorXpMap(xpMap);
   }, []);
 
   const fetchLikes = useCallback(async () => {
@@ -159,6 +164,7 @@ export function WallFeed({
               post={post}
               isOwnPost={post.authUid === authUid}
               isLiked={likedIds.has(post.id)}
+              authorXp={authorXpMap.get(post.authUid)}
               onLike={handleLike}
               onUnlike={handleUnlike}
               onDelete={handleDelete}

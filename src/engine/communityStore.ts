@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient';
 import type { CommunityIdentityType } from '../data/communityIdentities';
+import { awardXP } from './xpStore';
 
 export type CommunitySharedIdentity = {
   id: string;
@@ -112,6 +113,7 @@ export async function shareIdentity(
     }
   }
 
+  void awardXP(authUid, 'share_identity');
   return toIdentity(data as Row);
 }
 

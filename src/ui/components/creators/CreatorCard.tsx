@@ -1,9 +1,12 @@
 import { FollowButton } from '../shared/FollowButton';
+import { TitleBadge } from '../shared/TitleBadge';
+import { getTitleForXp } from '../../../data/communityTitles';
 import type { CreatorSummary } from '../../../engine/creatorFeedStore';
 import './CreatorCard.css';
 
 type CreatorCardProps = {
   creator: CreatorSummary;
+  authorXp?: number;
   authUid: string | null;
   followingSet: Set<string>;
   onFollowChanged: (creatorAuthUid: string, nowFollowing: boolean) => void;
@@ -12,6 +15,7 @@ type CreatorCardProps = {
 
 export function CreatorCard({
   creator,
+  authorXp,
   authUid,
   followingSet,
   onFollowChanged,
@@ -19,6 +23,7 @@ export function CreatorCard({
 }: CreatorCardProps) {
   const isOwnCard = authUid === creator.authUid;
   const isFollowing = followingSet.has(creator.authUid);
+  const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
 
   return (
     <div className="creator-card">
@@ -27,14 +32,17 @@ export function CreatorCard({
       </div>
 
       <div className="creator-card-body">
-        <button
-          type="button"
-          className="creator-card-name"
-          onClick={() => onViewCreator?.(creator.authUid, creator.name)}
-          disabled={!onViewCreator}
-        >
-          {creator.name}
-        </button>
+        <div className="creator-card-name-row">
+          <button
+            type="button"
+            className="creator-card-name"
+            onClick={() => onViewCreator?.(creator.authUid, creator.name)}
+            disabled={!onViewCreator}
+          >
+            {creator.name}
+          </button>
+          {title && <TitleBadge title={title} size="sm" />}
+        </div>
 
         <div className="creator-card-stats">
           {creator.wallPostCount > 0 && (

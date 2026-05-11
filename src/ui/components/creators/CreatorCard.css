@@ -34,6 +34,12 @@
   min-width: 0;
 }
 
+.creator-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .creator-card-name {
   font-size: 14px;
   font-weight: 700;

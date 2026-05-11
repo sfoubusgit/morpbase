@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listCreators, type CreatorSummary } from '../../../engine/creatorFeedStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
+import { getXPMap } from '../../../engine/xpStore';
 import { CreatorCard } from './CreatorCard';
 import './CreatorGrid.css';
 
@@ -13,6 +14,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
   const [creators, setCreators] = useState<CreatorSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
+  const [xpMap, setXpMap] = useState<Map<string, number>>(new Map());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -22,6 +24,8 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
     ]);
     setCreators(creatorsData);
     setFollowingSet(new Set(followingUids));
+    const map = await getXPMap(creatorsData.map(c => c.authUid));
+    setXpMap(map);
     setLoading(false);
   }, [authUid]);
 
@@ -54,6 +58,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
         <CreatorCard
           key={creator.authUid}
           creator={creator}
+          authorXp={xpMap.get(creator.authUid)}
           authUid={authUid}
           followingSet={followingSet}
           onFollowChanged={handleFollowChanged}
