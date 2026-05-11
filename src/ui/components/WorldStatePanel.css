@@ -1,0 +1,151 @@
+.ws-world-state {
+  margin-top: 4px;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+  border-radius: 10px;
+  background: rgba(52, 211, 153, 0.04);
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ws-world-state-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ws-world-state-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(110, 231, 183, 0.5);
+}
+
+.ws-world-state-header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.ws-world-state-explore {
+  background: rgba(52, 211, 153, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 6px;
+  color: #6ee7b7;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.ws-world-state-explore:hover {
+  background: rgba(52, 211, 153, 0.22);
+}
+
+.ws-world-state-reset {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.ws-world-state-reset:hover {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.ws-world-state-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ws-world-state-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ws-world-state-row-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.ws-world-state-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ws-world-state-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.ws-world-state-pill:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.ws-world-state-pill--on {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+/* Register pill accent colours */
+.ws-world-state-pill--sanctuary.ws-world-state-pill--on {
+  background: rgba(110, 231, 183, 0.12);
+  border-color: rgba(110, 231, 183, 0.3);
+  color: #a7f3d0;
+}
+
+.ws-world-state-pill--threshold.ws-world-state-pill--on {
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.3);
+  color: #c4b5fd;
+}
+
+.ws-world-state-pill--exposure.ws-world-state-pill--on {
+  background: rgba(251, 191, 36, 0.1);
+  border-color: rgba(251, 191, 36, 0.28);
+  color: #fcd34d;
+}
+
+.ws-world-state-pill--dread.ws-world-state-pill--on {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+}
+
+.ws-world-state-pill--wonder.ws-world-state-pill--on {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.ws-world-state-summary {
+  font-size: 10px;
+  color: rgba(110, 231, 183, 0.6);
+  font-style: italic;
+  padding-top: 2px;
+  border-top: 1px solid rgba(52, 211, 153, 0.1);
+}
