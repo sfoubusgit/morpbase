@@ -1,0 +1,168 @@
+.wall-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s;
+}
+
+.wall-card:hover {
+  border-color: var(--border-medium);
+}
+
+/* ── Header ── */
+
+.wall-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wall-card-author-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.wall-card-author-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.12s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wall-card-author-name:hover {
+  color: #c4b5fd;
+}
+
+.wall-card-time {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Caption ── */
+
+.wall-card-caption {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* ── Prompt text ── */
+
+.wall-card-prompt {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.6;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.wall-card-expand {
+  display: inline;
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(167, 139, 250, 0.7);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.12s;
+}
+
+.wall-card-expand:hover {
+  color: #c4b5fd;
+}
+
+/* ── Identity tags ── */
+
+.wall-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.wall-card-tag {
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 20px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+/* ── Footer ── */
+
+.wall-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.wall-card-like {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text-tertiary);
+  transition: color 0.12s;
+}
+
+.wall-card-like:hover {
+  color: #fda4af;
+}
+
+.wall-card-like--active {
+  color: #fb7185;
+}
+
+.wall-card-like-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.wall-card-like-count {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.wall-card-delete {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(248, 113, 113, 0.4);
+  transition: color 0.12s;
+}
+
+.wall-card-delete:hover {
+  color: #f87171;
+}

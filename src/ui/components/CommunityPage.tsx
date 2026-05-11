@@ -21,6 +21,8 @@ import { createOutfit } from '../../engine/wardrobeStore';
 import { createWorld, addWorldPhrase } from '../../engine/worldStore';
 import { createObject } from '../../engine/objectStore';
 import { ShareModal } from './ShareModal';
+import { WallFeed } from './wall/WallFeed';
+import type { WallPostIdentityTag } from '../../types/community';
 import './CommunityPage.css';
 
 const TYPE_LABELS: Record<CommunityIdentityType, string> = {
@@ -106,14 +108,28 @@ type DisplayIdentity = {
   isCurated: boolean;
 };
 
+type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges';
+
 type CommunityPageProps = {
   userId: string | null;
   authUid: string | null;
   userName: string | null;
   onIdentityAdded?: () => Promise<void>;
+  onViewCreator?: (authUid: string, name: string) => void;
+  activeIdentityTags?: WallPostIdentityTag[];
+  currentPromptText?: string;
 };
 
-export function CommunityPage({ userId, authUid, userName, onIdentityAdded }: CommunityPageProps) {
+export function CommunityPage({
+  userId,
+  authUid,
+  userName,
+  onIdentityAdded,
+  onViewCreator,
+  activeIdentityTags = [],
+  currentPromptText = '',
+}: CommunityPageProps) {
+  const [activeSection, setActiveSection] = useState<CommunitySection>('wall');
   const [activeTab, setActiveTab] = useState<CommunityIdentityType | 'all'>('all');
   const [search, setSearch] = useState('');
   const [sharedItems, setSharedItems] = useState<CommunitySharedIdentity[]>([]);
@@ -229,141 +245,184 @@ export function CommunityPage({ userId, authUid, userName, onIdentityAdded }: Co
             <div>
               <h1 className="community-title">Community</h1>
               <p className="community-subtitle">
-                Identities shared by MorpBase and the community. Add any to your workspace lanes.
+                A living creative space — share prompts, discover identities, and connect with other makers.
               </p>
             </div>
             <div className="community-header-actions">
-              {userId ? (
-                <button
-                  type="button"
-                  className="community-share-btn"
-                  onClick={() => setIsShareOpen(true)}
-                >
-                  Share an Identity
-                </button>
-              ) : (
-                <span className="community-login-hint">Log in to share</span>
+              {activeSection === 'identities' && (
+                userId ? (
+                  <button
+                    type="button"
+                    className="community-share-btn"
+                    onClick={() => setIsShareOpen(true)}
+                  >
+                    Share an Identity
+                  </button>
+                ) : (
+                  <span className="community-login-hint">Log in to share</span>
+                )
               )}
             </div>
           </div>
+
+          <div className="community-section-tabs">
+            {(['wall', 'identities', 'creators', 'challenges'] as CommunitySection[]).map(s => (
+              <button
+                key={s}
+                type="button"
+                className={`community-section-tab${activeSection === s ? ' community-section-tab--active' : ''}`}
+                onClick={() => setActiveSection(s)}
+              >
+                {s.charAt(0).toUpperCase() + s.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="community-tabs">
-          {TAB_ORDER.map(tab => (
-            <button
-              key={tab}
-              type="button"
-              className={`community-tab${activeTab === tab ? ' community-tab-active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab === 'all' ? 'All' : TYPE_LABELS[tab]}
-              <span className="community-tab-count">{countFor(tab)}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="community-search-row">
-          <input
-            type="text"
-            className="community-search"
-            placeholder="Search by name, phrase, or author…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+        {activeSection === 'wall' && (
+          <WallFeed
+            authUid={authUid}
+            userId={userId}
+            userName={userName}
+            followingAuthUids={[]}
+            activeIdentityTags={activeIdentityTags}
+            currentPromptText={currentPromptText}
+            onViewAuthor={onViewCreator}
           />
-          {search && (
-            <button
-              type="button"
-              className="community-search-clear"
-              onClick={() => setSearch('')}
-            >
-              Clear
-            </button>
-          )}
-        </div>
+        )}
 
-        {loadingShared && sharedItems.length === 0 ? (
-          <div className="community-loading">Loading community identities…</div>
-        ) : visible.length === 0 ? (
-          <div className="community-empty">
-            {search.trim()
-              ? `No results for "${search.trim()}".`
-              : `No ${activeTab === 'all' ? '' : TYPE_LABELS[activeTab] + ' '}identities yet.${userId ? ' Be the first to share one.' : ''}`
-            }
+        {activeSection === 'creators' && (
+          <div className="community-section-placeholder">
+            <p>Creator profiles coming soon.</p>
           </div>
-        ) : (
-          <div className="community-grid">
-            {visible.map(item => {
-              const state = cardStates[item.id] ?? 'idle';
-              const isOwn = !item.isCurated && item.authorId === authUid;
-              const addLabel =
-                state === 'done' ? 'Added' :
-                state === 'error' ? 'Failed' :
-                state === 'adding' ? '…' :
-                `Add to my ${TYPE_LABELS[item.type]}`;
+        )}
 
-              const coverStyle: React.CSSProperties | undefined =
-                item.authorCoverImageUrl === '__test_gradient__'
-                  ? undefined
-                  : item.authorCoverImageUrl
-                    ? { '--card-cover': `url(${item.authorCoverImageUrl})` } as React.CSSProperties
-                    : undefined;
+        {activeSection === 'challenges' && (
+          <div className="community-section-placeholder">
+            <p>Challenges coming soon.</p>
+          </div>
+        )}
 
-              return (
-                <div
-                  key={item.id}
-                  className={`community-card community-card--${item.type}${item.isCurated ? ' community-card-curated' : ''}${item.authorCoverImageUrl === '__test_gradient__' ? ' community-card--test-cover' : ''}`}
-                  data-has-cover={item.authorCoverImageUrl && item.authorCoverImageUrl !== '__test_gradient__' ? 'true' : undefined}
-                  style={coverStyle}
+        {activeSection === 'identities' && (
+          <>
+            <div className="community-tabs">
+              {TAB_ORDER.map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`community-tab${activeTab === tab ? ' community-tab-active' : ''}`}
+                  onClick={() => setActiveTab(tab)}
                 >
-                  <div className="community-card-header">
-                    <div className="community-card-name">{item.name}</div>
-                    <span className={`community-card-type community-card-type-${item.type}`}>
-                      {TYPE_LABELS[item.type]}
-                    </span>
-                  </div>
+                  {tab === 'all' ? 'All' : TYPE_LABELS[tab]}
+                  <span className="community-tab-count">{countFor(tab)}</span>
+                </button>
+              ))}
+            </div>
 
-                  <div className="community-card-author">
-                    <span className="community-card-author-by">by </span>
-                    <span className={item.isCurated ? 'community-card-author-morpbase' : 'community-card-author-user'}>
-                      {item.authorName}
-                    </span>
-                  </div>
+            <div className="community-search-row">
+              <input
+                type="text"
+                className="community-search"
+                placeholder="Search by name, phrase, or author…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+              {search && (
+                <button
+                  type="button"
+                  className="community-search-clear"
+                  onClick={() => setSearch('')}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
-                  {item.summary && (
-                    <div className="community-card-summary">{item.summary}</div>
-                  )}
+            {loadingShared && sharedItems.length === 0 ? (
+              <div className="community-loading">Loading community identities…</div>
+            ) : visible.length === 0 ? (
+              <div className="community-empty">
+                {search.trim()
+                  ? `No results for "${search.trim()}".`
+                  : `No ${activeTab === 'all' ? '' : TYPE_LABELS[activeTab] + ' '}identities yet.${userId ? ' Be the first to share one.' : ''}`
+                }
+              </div>
+            ) : (
+              <div className="community-grid">
+                {visible.map(item => {
+                  const state = cardStates[item.id] ?? 'idle';
+                  const isOwn = !item.isCurated && item.authorId === authUid;
+                  const addLabel =
+                    state === 'done' ? 'Added' :
+                    state === 'error' ? 'Failed' :
+                    state === 'adding' ? '…' :
+                    `Add to my ${TYPE_LABELS[item.type]}`;
 
-                  <div className="community-card-phrases">
-                    {item.phrases.slice(0, 4).map(phrase => (
-                      <span key={phrase} className="community-card-phrase">{phrase}</span>
-                    ))}
-                  </div>
+                  const coverStyle: React.CSSProperties | undefined =
+                    item.authorCoverImageUrl === '__test_gradient__'
+                      ? undefined
+                      : item.authorCoverImageUrl
+                        ? { '--card-cover': `url(${item.authorCoverImageUrl})` } as React.CSSProperties
+                        : undefined;
 
-                  <div className="community-card-footer">
-                    <button
-                      type="button"
-                      className={`community-card-add community-card-add-${state}`}
-                      disabled={state === 'adding' || state === 'done'}
-                      onClick={() => void handleAdd(item)}
+                  return (
+                    <div
+                      key={item.id}
+                      className={`community-card community-card--${item.type}${item.isCurated ? ' community-card-curated' : ''}${item.authorCoverImageUrl === '__test_gradient__' ? ' community-card--test-cover' : ''}`}
+                      data-has-cover={item.authorCoverImageUrl && item.authorCoverImageUrl !== '__test_gradient__' ? 'true' : undefined}
+                      style={coverStyle}
                     >
-                      {addLabel}
-                    </button>
-                    {isOwn && (
-                      <button
-                        type="button"
-                        className="community-card-remove"
-                        disabled={removingId === item.id}
-                        onClick={() => void handleRemove(item.id)}
-                        title="Remove from community"
-                      >
-                        {removingId === item.id ? '…' : 'Remove'}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                      <div className="community-card-header">
+                        <div className="community-card-name">{item.name}</div>
+                        <span className={`community-card-type community-card-type-${item.type}`}>
+                          {TYPE_LABELS[item.type]}
+                        </span>
+                      </div>
+
+                      <div className="community-card-author">
+                        <span className="community-card-author-by">by </span>
+                        <span className={item.isCurated ? 'community-card-author-morpbase' : 'community-card-author-user'}>
+                          {item.authorName}
+                        </span>
+                      </div>
+
+                      {item.summary && (
+                        <div className="community-card-summary">{item.summary}</div>
+                      )}
+
+                      <div className="community-card-phrases">
+                        {item.phrases.slice(0, 4).map(phrase => (
+                          <span key={phrase} className="community-card-phrase">{phrase}</span>
+                        ))}
+                      </div>
+
+                      <div className="community-card-footer">
+                        <button
+                          type="button"
+                          className={`community-card-add community-card-add-${state}`}
+                          disabled={state === 'adding' || state === 'done'}
+                          onClick={() => void handleAdd(item)}
+                        >
+                          {addLabel}
+                        </button>
+                        {isOwn && (
+                          <button
+                            type="button"
+                            className="community-card-remove"
+                            disabled={removingId === item.id}
+                            onClick={() => void handleRemove(item.id)}
+                            title="Remove from community"
+                          >
+                            {removingId === item.id ? '…' : 'Remove'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
 
       </div>

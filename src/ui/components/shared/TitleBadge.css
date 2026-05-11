@@ -1,0 +1,25 @@
+.title-badge {
+  display: inline-block;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.title-badge--sm {
+  font-size: 9px;
+  padding: 2px 7px;
+}
+
+.title-badge--md {
+  font-size: 11px;
+  padding: 3px 10px;
+}
+
+/* Title colours */
+.title-badge--moth_apprentice  { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+.title-badge--ink_weaver       { background: rgba(96,  165, 250, 0.12); color: #60a5fa; }
+.title-badge--lore_keeper      { background: rgba(167, 139, 250, 0.14); color: #c4b5fd; }
+.title-badge--world_architect  { background: rgba(52,  211, 153, 0.14); color: #6ee7b7; }
+.title-badge--the_unseen       { background: rgba(251, 146,  60, 0.14); color: #fdba74; }
