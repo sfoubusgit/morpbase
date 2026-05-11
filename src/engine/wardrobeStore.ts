@@ -2,7 +2,7 @@ import type { OutfitIdentity, OutfitIdentityInput, WardrobeStore } from '../type
 
 const WARDROBE_STORE_KEY = 'promptgen:wardrobe:v1';
 const WARDROBE_STORE_BACKUP_KEY = 'promptgen:wardrobe:backup:v1';
-const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v2';
+const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +84,7 @@ const sanitizeOutfit = (value: unknown): OutfitIdentity | null => {
 
 const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -159,6 +160,71 @@ const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
     ],
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'outfit_seed_stormcaller_robes',
+    name: "Stormcaller's Robes",
+    summary: 'Deep blue and silver mage robes with crackling static at the hems and collar.',
+    phrases: [
+      'deep midnight blue mage robes, wide layered sleeves',
+      'silver runic trim at hem and collar, faintly crackling with static',
+      'open-chested inner robe, heavy outer layer swept back',
+      'bare feet, the hem barely touching the ground',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'outfit_seed_lightning_forged_plate',
+    name: 'Lightning-Forged Plate',
+    summary: 'Black plate armor with electric blue runes etched across every surface, permanently magnetized by repeated lightning strikes.',
+    phrases: [
+      'black full plate armor, surface darkened by heat and repeated lightning strikes',
+      'electric blue runes etched across every panel, faintly luminous',
+      'pauldrons shaped like storm clouds, edges jagged',
+      'no visor, the face exposed and calm above the heavy gorget',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'outfit_seed_scale_weave_mantle',
+    name: 'Scale-Weave Mantle',
+    summary: 'A deep navy mantle woven with iridescent dragon scales, shifting between blue and violet in different light.',
+    phrases: [
+      'deep navy mantle falling to mid-thigh, hood down',
+      'surface woven with iridescent scales, shifting blue to violet',
+      'heavy and still, does not move with the wind',
+      'simple dark clothing beneath, the mantle the only statement',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'outfit_seed_sapphire_court_dress',
+    name: 'Sapphire Court Dress',
+    summary: 'A formal gown in deep sapphire silk with silver lightning bolt embroidery down the skirt.',
+    phrases: [
+      'deep sapphire silk gown, fitted through the waist',
+      'silver lightning bolt embroidery running the full length of the skirt',
+      'off-shoulder neckline, structured bodice with boning',
+      'long trailing hem, no ornamentation except the embroidery',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'outfit_seed_tempest_channeler',
+    name: "Tempest Channeler's Vest",
+    summary: 'Leather tactical vest with copper conducting rings, built to direct electrical energy through the body safely.',
+    phrases: [
+      'dark leather tactical vest, close-fitted with multiple buckle closures',
+      'copper conducting rings along the spine and forearms',
+      'bare arms, the conducting rings continuing to the wrists',
+      'worn canvas trousers, heavy boots with copper-tipped soles',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 

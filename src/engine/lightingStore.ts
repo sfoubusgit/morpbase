@@ -2,7 +2,7 @@ import type { LightingSetup, LightingSetupInput, LightingStore } from '../types'
 
 const LIGHTING_STORE_KEY = 'promptgen:lightings:v1';
 const LIGHTING_STORE_BACKUP_KEY = 'promptgen:lightings:backup:v1';
-const LIGHTING_SEED_FLAG_KEY = 'promptgen:lightings:seeded:v1';
+const LIGHTING_SEED_FLAG_KEY = 'promptgen:lightings:seeded:v2';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +84,7 @@ const sanitizeItem = (value: unknown): LightingSetup | null => {
 
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -157,6 +158,71 @@ const DEFAULT_SEED_LIGHTINGS: LightingSetup[] = [
     ],
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'lighting_seed_storm_strike',
+    name: 'Storm Strike',
+    summary: 'Blue-white lightning from directly above, harsh shadows cutting downward, the world frozen in a millisecond of discharge.',
+    phrases: [
+      'blue-white lightning from directly overhead, single frozen discharge',
+      'harsh downward shadows cut with electric precision',
+      'everything else dark, only the strike source illuminating',
+      'charged atmosphere, faint corona glow around exposed edges',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'lighting_seed_bioluminescent_glow',
+    name: 'Bioluminescent Self-Glow',
+    summary: 'Subject emits its own electric blue light from within — no external source, pure internal luminescence.',
+    phrases: [
+      'bioluminescent internal glow, electric blue light source within the subject',
+      'no external lighting, the subject itself illuminating the surrounding space',
+      'soft blue-white corona emanating from surface details',
+      'deep shadow everywhere outside the glow radius',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'lighting_seed_moonlit_storm',
+    name: 'Moonlit Storm',
+    summary: 'Cold blue moonlight filtering through storm clouds, periodically erased by lightning flashes.',
+    phrases: [
+      'cold blue moonlight filtering through heavy storm cloud breaks',
+      'intermittent lightning flashes bleaching all color momentarily',
+      'blue-grey ambient wash, deep indigo shadows',
+      'rain catching the light in diagonal silver streaks',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'lighting_seed_abyss_underlight',
+    name: 'Abyss Underlight',
+    summary: 'Light rising from below — glowing fissures, bioluminescent water, or subterranean fire — casting strange upward shadows.',
+    phrases: [
+      'light source from directly below, rising from glowing fissures or luminous water',
+      'upward-cast shadows, the face lit from an impossible angle',
+      'electric blue or deep amber underlighting, context-dependent',
+      'the space above dark, all luminosity concentrated at the ground plane',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'lighting_seed_aurora_canopy',
+    name: 'Aurora Canopy',
+    summary: 'Northern lights overhead — rippling curtains of blue-green and violet light falling from the sky.',
+    phrases: [
+      'aurora borealis overhead, rippling curtains of blue-green and violet light',
+      'soft diffuse illumination from the sky, no hard shadows',
+      'cool blue-green ambient wash, faint pink and violet accents',
+      'stars visible between the aurora bands, the sky the primary light source',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 

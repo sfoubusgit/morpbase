@@ -12,7 +12,7 @@ import type {
 
 const CHARACTER_STORE_KEY = 'promptgen:characters:v1';
 const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
-const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v2';
+const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v3';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -263,6 +263,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
 
 const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -359,6 +360,39 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
     },
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'character_seed_azurok',
+    name: 'Azurok',
+    summary: 'An ancient blue dragon whose scales shift from abyssal navy to electric cerulean, crackling with latent static charge absorbed over millennia.',
+    identity: {
+      archetype: 'dragon',
+      presentation: 'creature',
+      ageImpression: 'ancient',
+      visualAnchors: [
+        { id: 'anchor_az_1', label: 'Form', kind: 'silhouette', text: 'massive ancient dragon, colossal wingspan, battle-scarred and immovable' },
+        { id: 'anchor_az_2', label: 'Scales', kind: 'other', text: 'scales shifting from deep abyssal navy to electric cerulean, iridescent violet-silver at the oldest edges' },
+        { id: 'anchor_az_3', label: 'Patterns', kind: 'other', text: 'crystalline scale patterns, fractal and geometric like branching lightning frozen into sapphire' },
+        { id: 'anchor_az_4', label: 'Bioluminescence', kind: 'other', text: 'bioluminescent veins tracing electric blue light through the hide' },
+        { id: 'anchor_az_5', label: 'Eyes', kind: 'eyes', text: 'pale silver-white irises, vast ancient intelligence behind still eyes' },
+        { id: 'anchor_az_6', label: 'Charge', kind: 'other', text: 'crackling with latent static charge, faint ozone in the surrounding air' },
+      ],
+      motifs: [
+        { id: 'motif_az_1', label: 'The Tempest Ancient', text: 'storm, lightning, millennia of charge absorbed, the weight of geological time' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'ancient blue dragon, colossal and storm-scarred',
+        'scales shifting from deep abyssal navy to electric cerulean, iridescent violet-silver at the oldest edges',
+        'crystalline scale patterns, fractal and geometric like branching lightning frozen into sapphire',
+        'bioluminescent veins tracing electric blue light through the hide',
+        'pale silver-white irises, vast ancient intelligence behind still eyes',
+        'crackling with latent static charge, faint ozone in the surrounding air',
+      ],
+    },
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 

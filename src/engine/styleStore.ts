@@ -2,7 +2,7 @@ import type { StylePreset, StylePresetInput, StyleStore } from '../types';
 
 const STYLE_STORE_KEY = 'promptgen:styles:v1';
 const STYLE_STORE_BACKUP_KEY = 'promptgen:styles:backup:v1';
-const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v1';
+const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v2';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +84,7 @@ const sanitizeItem = (value: unknown): StylePreset | null => {
 
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -157,6 +158,71 @@ const DEFAULT_SEED_STYLES: StylePreset[] = [
     ],
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'style_seed_epic_fantasy_concept',
+    name: 'Epic Dark Fantasy Concept Art',
+    summary: 'High-contrast cinematic concept art, electric highlights, hyper-detailed creature and environment design.',
+    phrases: [
+      'epic dark fantasy concept art, cinematic quality',
+      'extreme high contrast, electric blue accent highlights',
+      'hyper-detailed scale and surface rendering',
+      'professional creature design, dynamic lighting throughout',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'style_seed_mythic_old_masters',
+    name: 'Mythic Old Masters Oil',
+    summary: 'Old masters oil technique applied to mythic subject matter — rich deep blues, gold, dramatic shadow.',
+    phrases: [
+      'mythic oil painting in the old masters tradition',
+      'rich deep blue and gold palette, glazed layers',
+      'dramatic shadow, luminous highlighted surfaces',
+      'museum quality, slow and considered brushwork',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'style_seed_iridescent_ink_wash',
+    name: 'Iridescent Ink Wash',
+    summary: 'Fluid ink wash with shimmering metallic highlights and electric blue accents bleeding through.',
+    phrases: [
+      'iridescent ink wash illustration',
+      'fluid wet-on-wet brushwork, soft diffuse edges',
+      'shimmering metallic blue and violet highlights bleeding through the wash',
+      'luminous white paper showing through, electric accent lines',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'style_seed_cinematic_creature_render',
+    name: 'Cinematic Creature Design Render',
+    summary: 'Photorealistic creature design render — subsurface scale detail, volumetric atmosphere, film-quality lighting.',
+    phrases: [
+      'cinematic photorealistic creature design render',
+      'subsurface scale detail, iridescent surface sheen',
+      'volumetric atmosphere, depth haze, film-quality lighting',
+      'ILM production quality, extreme fidelity throughout',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'style_seed_norse_saga_illumination',
+    name: 'Norse Saga Illumination',
+    summary: 'Bold graphic illustration in the tradition of illuminated manuscripts — electric blue, black, silver, rune aesthetics.',
+    phrases: [
+      'Norse saga illuminated manuscript style',
+      'bold graphic forms, thick black outline, flat color fills',
+      'electric blue and silver palette, gold leaf accent',
+      'rune border decorations, mythic symmetry',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 

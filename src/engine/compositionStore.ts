@@ -2,7 +2,7 @@ import type { CompositionFrame, CompositionFrameInput, CompositionStore } from '
 
 const COMPOSITION_STORE_KEY = 'promptgen:compositions:v1';
 const COMPOSITION_STORE_BACKUP_KEY = 'promptgen:compositions:backup:v1';
-const COMPOSITION_SEED_FLAG_KEY = 'promptgen:compositions:seeded:v1';
+const COMPOSITION_SEED_FLAG_KEY = 'promptgen:compositions:seeded:v2';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +84,7 @@ const sanitizeItem = (value: unknown): CompositionFrame | null => {
 
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_COMPOSITIONS: CompositionFrame[] = [
   {
@@ -157,6 +158,71 @@ const DEFAULT_SEED_COMPOSITIONS: CompositionFrame[] = [
     ],
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'composition_seed_scale_texture_closeup',
+    name: 'Scale Texture Close-Up',
+    summary: 'Extreme macro — surface texture dominates the frame, one eye visible at the edge, the full form implied but not shown.',
+    phrases: [
+      'extreme close-up macro, surface texture filling the frame',
+      'one eye partially visible at the far edge of the composition',
+      'the full form implied beyond the frame, never fully revealed',
+      'razor-sharp foreground, everything beyond dissolving into bokeh',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'composition_seed_full_form_horizon',
+    name: 'Full Form Horizon',
+    summary: 'Wide establishing shot — the complete form visible against a vast environment, scale undeniable.',
+    phrases: [
+      'wide establishing shot, the complete form visible from head to tail',
+      'vast environment framing the subject on all sides',
+      'horizon line low, the subject filling the upper two-thirds',
+      'the scale of the subject versus the landscape made undeniable',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'composition_seed_ground_angle_dominance',
+    name: 'Ground Angle Dominance',
+    summary: 'Shot from ground level looking steeply upward — the subject looms against the storm sky, viewer dwarfed.',
+    phrases: [
+      'low ground-level angle, camera pointing steeply upward',
+      'the subject looming overhead, occupying the full upper frame',
+      'storm sky visible behind, the environment compressed below',
+      'the viewer implied as tiny, dwarfed by what stands above',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'composition_seed_eye_level_confrontation',
+    name: 'Eye Level Confrontation',
+    summary: 'Camera exactly at eye level — intimate and direct, neither above nor below, a confrontation of equals.',
+    phrases: [
+      'camera exactly at eye level, perfectly horizontal',
+      'direct confrontation, the gaze meeting the lens without deflection',
+      'neither dominant nor submissive, a confrontation of equals',
+      'tight framing, head and upper body only, environment secondary',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'composition_seed_aerial_overview',
+    name: 'Aerial Overview',
+    summary: 'Shot from far above — the subject rendered as a massive landscape feature, the terrain spreading in all directions.',
+    phrases: [
+      'aerial view from directly above, the subject seen as a landscape feature',
+      'terrain and environment spreading in all directions around the form',
+      'the full scale of the subject against the ground finally legible',
+      'no horizon, only the top-down plane, shadow spreading below',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 

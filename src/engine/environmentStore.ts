@@ -6,7 +6,7 @@ import type {
 
 const ENVIRONMENT_STORE_KEY = 'promptgen:environments:v1';
 const ENVIRONMENT_STORE_BACKUP_KEY = 'promptgen:environments:backup:v1';
-const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v2';
+const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -97,6 +97,7 @@ const sanitizeEnvironment = (value: unknown): EnvironmentIdentity | null => {
 
 const ENV_SEED_TS = 1746748800000;
 const ENV_SEED_TS_2 = 1746835200000;
+const ENV_SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -149,6 +150,91 @@ const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
     },
     createdAt: ENV_SEED_TS_2,
     updatedAt: ENV_SEED_TS_2,
+  },
+  {
+    id: 'environment_seed_storm_spire',
+    name: 'The Storm Spire',
+    summary: 'A colossal obsidian tower at the peak of a mountain range, permanently wreathed in storm clouds and struck by continuous lightning.',
+    phraseBundle: {
+      core: [
+        'colossal obsidian tower rising from a mountain peak',
+        'permanently wreathed in storm clouds, continuous lightning striking the apex',
+        'sheer vertical black stone faces slick with rain',
+        'storm-charged air, wind so strong it bends the light',
+        'the world below lost in cloud, nothing above but the tempest',
+        'ancient rune channels carved into the stone, lit electric blue by each strike',
+      ],
+    },
+    createdAt: ENV_SEED_TS_3,
+    updatedAt: ENV_SEED_TS_3,
+  },
+  {
+    id: 'environment_seed_drowned_cathedral',
+    name: 'Drowned Cathedral of Static',
+    summary: 'A vast underwater cathedral half-submerged in black water, bioluminescent electric light pulsing through flooded chambers.',
+    phraseBundle: {
+      core: [
+        'ancient cathedral partially submerged in still black water',
+        'arched nave flooded to the knee, waterline cutting the columns in half',
+        'bioluminescent electric blue light pulsing through the water from unknown depths',
+        'cracked stained glass above the waterline, long shafts of cold light descending',
+        'the sound of dripping amplified by stone vaulted ceilings',
+        'pale moss and luminous lichen covering every submerged surface',
+      ],
+    },
+    createdAt: ENV_SEED_TS_3,
+    updatedAt: ENV_SEED_TS_3,
+  },
+  {
+    id: 'environment_seed_glacial_vault',
+    name: 'The Glacial Vault',
+    summary: 'A vast cavern carved deep inside a glacier, electric blue veins running through translucent ice walls of impossible scale.',
+    phraseBundle: {
+      core: [
+        'immense cavern inside a glacier, walls of translucent blue-white ice',
+        'electric blue veins running through the ice like frozen lightning',
+        'cathedral scale, ice formations hanging from the ceiling like stalactites',
+        'faint internal glow from deep within the ice, no external light source',
+        'the air absolutely still, cold so total it has physical presence',
+        'reflections multiplied infinitely through translucent ice planes',
+      ],
+    },
+    createdAt: ENV_SEED_TS_3,
+    updatedAt: ENV_SEED_TS_3,
+  },
+  {
+    id: 'environment_seed_lightning_coast',
+    name: 'The Lightning Coast',
+    summary: 'Dramatic storm cliffs over a perpetually churning sea, lightning striking the water and the rock face in continuous cycles.',
+    phraseBundle: {
+      core: [
+        'sheer cliffs dropping hundreds of meters to a storm-churned sea below',
+        'lightning striking the water and cliff face in continuous cycles',
+        'massive waves sending spray far above the clifftop',
+        'the horizon erased by dark storm front stretching wall to wall',
+        'wet black rock, ozone, the smell of salt and electricity',
+        'momentary silence between strikes, then thunder that moves through the chest',
+      ],
+    },
+    createdAt: ENV_SEED_TS_3,
+    updatedAt: ENV_SEED_TS_3,
+  },
+  {
+    id: 'environment_seed_azure_wastes',
+    name: 'The Azure Crystalline Wastes',
+    summary: 'A barren high plateau covered in strange sapphire crystal formations, the sky permanently charged and electric.',
+    phraseBundle: {
+      core: [
+        'vast barren plateau covered in sapphire and cerulean crystal formations',
+        'crystals ranging from ankle-height to thirty meters, geometric and asymmetric',
+        'the sky a deep electric violet, permanently overcharged with atmospheric energy',
+        'faint crackling sound from the crystals as they slowly accumulate static',
+        'no soil, only fractured blue stone and the roots of crystal clusters',
+        'distant thunder without cloud, the sound originating from the ground itself',
+      ],
+    },
+    createdAt: ENV_SEED_TS_3,
+    updatedAt: ENV_SEED_TS_3,
   },
 ];
 

@@ -2,7 +2,7 @@ import type { MoodPreset, MoodPresetInput, MoodStore } from '../types';
 
 const MOOD_STORE_KEY = 'promptgen:moods:v1';
 const MOOD_STORE_BACKUP_KEY = 'promptgen:moods:backup:v1';
-const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v1';
+const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v2';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -84,6 +84,7 @@ const sanitizeItem = (value: unknown): MoodPreset | null => {
 
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
+const SEED_TS_3 = 1747612800000;
 
 const DEFAULT_SEED_MOODS: MoodPreset[] = [
   {
@@ -157,6 +158,71 @@ const DEFAULT_SEED_MOODS: MoodPreset[] = [
     ],
     createdAt: SEED_TS_2,
     updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'mood_seed_ancient_and_terrible',
+    name: 'Ancient and Terrible',
+    summary: 'The weight of geological time, patient menace — a presence that has outlasted civilizations and expects to outlast more.',
+    phrases: [
+      'the weight of geological time, patient and unhurried menace',
+      'a presence that predates civilization and expects to outlast it',
+      'no anger, only the quiet inevitability of something vast and permanent',
+      'awe without warmth, power without display',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'mood_seed_storm_born_fury',
+    name: 'Storm-Born Fury',
+    summary: 'Raw elemental violence at its peak — the world tearing itself apart, nothing withheld.',
+    phrases: [
+      'raw elemental violence, nothing withheld or restrained',
+      'the world at the peak of its fury, tearing at itself',
+      'chaos made physical, energy beyond what the frame can hold',
+      'terrifying and magnificent in equal measure',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'mood_seed_cold_sovereign',
+    name: 'Cold Sovereign Stillness',
+    summary: 'Regal quiet authority — the certainty of something that has never been challenged and never needed to display its power.',
+    phrases: [
+      'regal stillness, absolute quiet authority',
+      'the certainty of something that has never been challenged',
+      'power held completely in reserve, no display necessary',
+      'cold composure, the world arranged around its presence',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'mood_seed_mythic_awe',
+    name: 'Mythic Awe',
+    summary: 'The feeling of encountering something that should not exist — wonder and terror arriving simultaneously.',
+    phrases: [
+      'the feeling of encountering something that should not exist',
+      'wonder and terror arriving at the same moment, inseparable',
+      'the viewer reduced to witness, all agency dissolved',
+      'mythic scale, the world reorganized by the presence of something impossible',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'mood_seed_dormant_thunder',
+    name: 'Dormant Thunder',
+    summary: 'The charged silence before the strike — potential so total it changes the quality of the air.',
+    phrases: [
+      'charged silence, the absolute stillness before the strike',
+      'potential so total it changes the quality of the air and light',
+      'everything held in suspension, nothing yet released',
+      'the world waiting, the next moment already decided but not yet arrived',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
   },
 ];
 
