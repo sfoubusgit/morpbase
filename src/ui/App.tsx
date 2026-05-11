@@ -2778,7 +2778,7 @@ export function App() {
       ? worldVariationPhrases.map((text, index) => ({
           id: `environment:${activeEnvironmentProjection.environmentId}:ws:${index}`,
           text,
-          position: 'end' as const,
+          position: 'start' as const,
           section: 'Environment',
           sourceType: 'environment' as const,
         }))
@@ -2860,7 +2860,7 @@ export function App() {
       })).filter(e => Boolean(e.text)) : [];
     });
 
-    return [...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...worldStateEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
+    return [...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
   }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentProjection, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitId, outfits, activeObjectIds, objects, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeCompositionId, compositionFrames, activeMoodId, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
