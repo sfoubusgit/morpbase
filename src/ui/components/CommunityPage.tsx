@@ -23,6 +23,7 @@ import { createObject } from '../../engine/objectStore';
 import { ShareModal } from './ShareModal';
 import { WallFeed } from './wall/WallFeed';
 import { CreatorGrid } from './creators/CreatorGrid';
+import { ChallengesPanel } from './challenges/ChallengesPanel';
 import type { WallPostIdentityTag } from '../../types/community';
 import './CommunityPage.css';
 
@@ -299,9 +300,13 @@ export function CommunityPage({
         )}
 
         {activeSection === 'challenges' && (
-          <div className="community-section-placeholder">
-            <p>Challenges coming soon.</p>
-          </div>
+          <ChallengesPanel
+            authUid={authUid}
+            userId={userId}
+            userName={userName}
+            activeIdentityTags={activeIdentityTags}
+            currentPromptText={currentPromptText}
+          />
         )}
 
         {activeSection === 'identities' && (

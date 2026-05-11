@@ -78,6 +78,18 @@ export async function checkAndAwardFollowerBadges(followingAuthUid: string): Pro
   if (!already) await grantBadge(followingAuthUid, 'first_follower');
 }
 
+export async function checkAndAwardChallengeBadges(
+  authUid: string,
+  challengeNumber: number,
+): Promise<void> {
+  const alreadyFirst = await hasBadge(authUid, 'first_challenge_entry');
+  if (!alreadyFirst) await grantBadge(authUid, 'first_challenge_entry');
+  if (challengeNumber === 1) {
+    const alreadyPioneer = await hasBadge(authUid, 'challenge_pioneer');
+    if (!alreadyPioneer) await grantBadge(authUid, 'challenge_pioneer');
+  }
+}
+
 export async function checkAndAwardRemixBadges(
   remixerAuthUid: string,
   originalAuthorAuthUid: string,
