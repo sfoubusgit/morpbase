@@ -129,6 +129,8 @@ import { listPools } from '../engine/poolStore';
 import { listObjects, type ObjectIdentity } from '../engine/objectStore';
 import { ObjectLibraryModal } from './components/ObjectLibraryModal';
 import { getVariationPhrases } from '../data/worldStateOverlays';
+import { buildAutoName } from './utils/buildAutoName';
+import { saveCaptureSet } from '../engine/captureStore';
 
 /**
  * Default model profile for Stable Diffusion
@@ -444,6 +446,7 @@ export function App() {
   const [envCondition, setEnvCondition] = useState<string | null>(initialBuilderSession?.envCondition ?? null);
   const [worldVariationEnabled, setWorldVariationEnabled] = useState(false);
   const [worldVariationPhrases, setWorldVariationPhrases] = useState<string[]>([]);
+  const [captureBuffer, setCaptureBuffer] = useState<string[]>([]);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
@@ -2915,6 +2918,28 @@ export function App() {
     return phrases.join(', ');
   }, [activeNegativeIds, negativePresets]);
 
+  const captureAutoName = useMemo(() => buildAutoName(
+    activeCharacterDisplayName,
+    activeEnvironment?.name ?? null,
+    activeMoodId ? (moodPresets.find(m => m.id === activeMoodId)?.name ?? null) : null,
+    activeStyleId ? (stylePresets.find(s => s.id === activeStyleId)?.name ?? null) : null,
+  ), [activeCharacterDisplayName, activeEnvironment, activeMoodId, moodPresets, activeStyleId, stylePresets]);
+
+  const handleCapture = useCallback(() => {
+    if (!workspacePrompt) return;
+    setCaptureBuffer(prev => [...prev, workspacePrompt]);
+  }, [workspacePrompt]);
+
+  const handleSaveSet = useCallback((name: string) => {
+    if (captureBuffer.length === 0) return;
+    saveCaptureSet(name || captureAutoName, captureBuffer);
+    setCaptureBuffer([]);
+  }, [captureBuffer, captureAutoName]);
+
+  const handleClearCapture = useCallback(() => {
+    setCaptureBuffer([]);
+  }, []);
+
   const activeIdentityTags = useMemo(() => [
     ...(activeCharacter ? [{ name: activeCharacter.name, type: 'character' as const }] : []),
     ...(activeStyleId ? [{ name: stylePresets.find(s => s.id === activeStyleId)?.name ?? '', type: 'style' as const }].filter(t => t.name) : []),
@@ -3576,6 +3601,11 @@ export function App() {
           userName={authUser?.name ?? null}
           activeIdentityTags={activeIdentityTags}
           onRandomize={handleRandomizeLanes}
+          captureCount={captureBuffer.length}
+          captureAutoName={captureAutoName}
+          onCapture={handleCapture}
+          onSaveSet={handleSaveSet}
+          onClearCapture={handleClearCapture}
         />
       )}
       </>

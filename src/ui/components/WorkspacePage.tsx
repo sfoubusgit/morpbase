@@ -162,6 +162,11 @@ type WorkspacePageProps = {
   userName?: string | null;
   activeIdentityTags?: WallPostIdentityTag[];
   onRandomize?: () => void;
+  captureCount?: number;
+  captureAutoName?: string;
+  onCapture?: () => void;
+  onSaveSet?: (name: string) => void;
+  onClearCapture?: () => void;
 };
 
 export function WorkspacePage({
@@ -211,8 +216,15 @@ export function WorkspacePage({
   userName = null,
   activeIdentityTags = [],
   onRandomize,
+  captureCount = 0,
+  captureAutoName = '',
+  onCapture,
+  onSaveSet,
+  onClearCapture,
 }: WorkspacePageProps) {
   const [wallComposerOpen, setWallComposerOpen] = useState(false);
+  const [saveSetOpen, setSaveSetOpen] = useState(false);
+  const [setName, setSetName] = useState('');
 
   const handleCopy = useCallback(() => {
     if (!assembledPrompt) return;
@@ -270,7 +282,55 @@ export function WorkspacePage({
                   Post to Wall
                 </button>
               )}
+              {onCapture && (
+                <button
+                  type="button"
+                  className="workspace-action-capture"
+                  onClick={onCapture}
+                  disabled={!assembledPrompt}
+                >
+                  {captureCount > 0 ? `+ Capture (${captureCount})` : '+ Capture'}
+                </button>
+              )}
             </div>
+
+            {captureCount > 0 && onSaveSet && (
+              <div className="workspace-capture-bar">
+                {!saveSetOpen ? (
+                  <>
+                    <span className="workspace-capture-count">{captureCount} prompt{captureCount !== 1 ? 's' : ''} captured</span>
+                    <button type="button" className="workspace-capture-save-btn" onClick={() => { setSetName(captureAutoName); setSaveSetOpen(true); }}>
+                      Save as Set
+                    </button>
+                    {onClearCapture && (
+                      <button type="button" className="workspace-capture-clear-btn" onClick={onClearCapture}>
+                        Clear
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <div className="workspace-capture-form">
+                    <input
+                      type="text"
+                      className="workspace-capture-name-input"
+                      value={setName}
+                      onChange={e => setSetName(e.target.value)}
+                      placeholder={captureAutoName}
+                    />
+                    <button
+                      type="button"
+                      className="workspace-capture-save-btn"
+                      onClick={() => { onSaveSet(setName || captureAutoName); setSaveSetOpen(false); setSetName(''); }}
+                    >
+                      Save
+                    </button>
+                    <button type="button" className="workspace-capture-clear-btn" onClick={() => setSaveSetOpen(false)}>
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {wallComposerOpen && authUid && userId && userName && (
               <WallPostComposer

@@ -184,6 +184,108 @@
   color: #c4b5fd;
 }
 
+.workspace-action-capture {
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid rgba(118, 255, 201, 0.3);
+  background: rgba(118, 255, 201, 0.07);
+  color: rgba(118, 255, 201, 0.85);
+  transition: background 0.12s, color 0.12s;
+}
+
+.workspace-action-capture:hover {
+  background: rgba(118, 255, 201, 0.14);
+  color: #76ffc9;
+}
+
+.workspace-action-capture:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.workspace-capture-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(118, 255, 201, 0.18);
+  background: rgba(118, 255, 201, 0.04);
+}
+
+.workspace-capture-count {
+  font-size: 12px;
+  color: rgba(118, 255, 201, 0.7);
+  flex: 1;
+}
+
+.workspace-capture-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.workspace-capture-name-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(118, 255, 201, 0.2);
+  border-radius: var(--radius-md);
+  color: #e8ebff;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.workspace-capture-name-input:focus {
+  border-color: rgba(118, 255, 201, 0.45);
+}
+
+.workspace-capture-name-input::placeholder {
+  color: rgba(232, 235, 255, 0.35);
+}
+
+.workspace-capture-save-btn {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(118, 255, 201, 0.3);
+  background: rgba(118, 255, 201, 0.1);
+  color: rgba(118, 255, 201, 0.9);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+
+.workspace-capture-save-btn:hover {
+  background: rgba(118, 255, 201, 0.2);
+}
+
+.workspace-capture-clear-btn {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: rgba(232, 235, 255, 0.4);
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.workspace-capture-clear-btn:hover {
+  color: rgba(232, 235, 255, 0.7);
+}
+
 /* ── Middle inspiration column ───────────────────── */
 
 .workspace-inspiration {
