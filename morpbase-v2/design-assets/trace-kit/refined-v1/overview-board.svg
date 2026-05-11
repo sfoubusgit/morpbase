@@ -1,0 +1,22 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="760" fill="#0F0D0B"/>
+  <rect x="40" y="36" width="1120" height="688" rx="28" fill="#151210" stroke="#F3EAD8" stroke-opacity="0.08"/>
+  <text x="72" y="92" fill="#F3EAD8" fill-opacity="0.92" font-family="Palatino Linotype, serif" font-size="28">MorpBase V2 Trace Refinement V1</text>
+  <text x="72" y="122" fill="#F3EAD8" fill-opacity="0.56" font-family="Segoe UI, sans-serif" font-size="16">Refined trace family fragments for Illustrator refinement</text>
+
+  <text x="72" y="188" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Shared trace family</text>
+  <rect x="72" y="204" width="1036" height="112" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="shared-trace-family-refined.svg" x="488" y="242" width="224" height="36"/>
+
+  <text x="72" y="382" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Center and Memory</text>
+  <rect x="72" y="398" width="500" height="148" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="center-arrival-trace-refined.svg" x="210" y="438" width="224" height="36"/>
+  <image href="memory-trace-refined.svg" x="210" y="486" width="224" height="36"/>
+
+  <text x="608" y="382" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Public and Continuity</text>
+  <rect x="608" y="398" width="500" height="148" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="public-trace-refined.svg" x="746" y="438" width="224" height="36"/>
+  <image href="continuity-trace-refined.svg" x="746" y="486" width="224" height="36"/>
+
+  <text x="72" y="638" fill="#F3EAD8" fill-opacity="0.5" font-family="Segoe UI, sans-serif" font-size="14">Aim: quieter than thresholds, more residue-like, more singular, still product-bound</text>
+</svg>

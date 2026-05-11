@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react';
 import { InspirationField } from './InspirationField';
 import { WallPostComposer } from './wall/WallPostComposer';
-import { WorldStatePanel } from './WorldStatePanel';
 import type { WallPostIdentityTag } from '../../types/community';
 import './WorkspacePage.css';
 
@@ -334,18 +333,37 @@ export function WorkspacePage({
               onChoose={onChooseCharacter}
               onDeactivate={onDeactivateCharacter}
             />
-            <LaneSlot
-              label="Environment"
-              activeName={activeEnvironmentName}
-              variant="environment"
-              inPrompt={environmentInPrompt}
-              onAdd={onAddEnvironment}
-              onRemove={onRemoveEnvironment}
-              onChoose={onChooseEnvironment}
-            />
-            {environmentInPrompt && (
-              <WorldStatePanel enabled={worldVariationEnabled} onToggle={onWorldVariationToggle} onNext={onWorldVariationNext} />
-            )}
+            <div className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}`}>
+              <div className="ws-lane-label">Environment</div>
+              <div className="ws-lane-name">
+                {activeEnvironmentName ?? <span className="ws-lane-name-empty">None</span>}
+              </div>
+              <div className="ws-lane-actions">
+                {activeEnvironmentName && !environmentInPrompt && onAddEnvironment && (
+                  <button type="button" className="ws-lane-btn ws-lane-btn-add" onClick={onAddEnvironment}>Add</button>
+                )}
+                {environmentInPrompt && onRemoveEnvironment && (
+                  <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onRemoveEnvironment}>Remove</button>
+                )}
+                <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseEnvironment}>
+                  {activeEnvironmentName ? 'Change' : 'Choose'}
+                </button>
+              </div>
+              {environmentInPrompt && (
+                <div className="ws-env-variation">
+                  <button
+                    type="button"
+                    className={`ws-env-variation-toggle${worldVariationEnabled ? ' ws-env-variation-toggle--on' : ''}`}
+                    onClick={onWorldVariationToggle}
+                  >
+                    Variation {worldVariationEnabled ? 'On' : 'Off'}
+                  </button>
+                  {worldVariationEnabled && (
+                    <button type="button" className="ws-env-variation-next" onClick={onWorldVariationNext}>→</button>
+                  )}
+                </div>
+              )}
+            </div>
             <LaneSlot
               label="Wardrobe"
               activeName={activeOutfitName}

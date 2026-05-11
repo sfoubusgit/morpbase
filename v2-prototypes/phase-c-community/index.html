@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MorpBase V2 Phase C Community Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="prototype-frame">
+      <header class="top-shell">
+        <div class="brand-cluster">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">MorpBase V2 Prototype</p>
+            <h1>Community Circulation Slice</h1>
+          </div>
+        </div>
+
+        <nav class="shell-nav" aria-label="Primary">
+          <button class="nav-item" type="button">Workspace</button>
+          <button class="nav-item" type="button">Memory</button>
+          <button class="nav-item is-active" type="button">Community</button>
+          <button class="nav-item nav-item-secondary" type="button">Continuity</button>
+        </nav>
+
+        <button class="profile-pill" type="button">Profile</button>
+      </header>
+
+      <main class="community-shell">
+        <section class="community-column panel panel-paper">
+          <div class="community-head">
+            <div>
+              <p class="eyebrow">Public Circulation Layer</p>
+              <h2>Community</h2>
+            </div>
+            <div class="community-status">
+              <span class="status-chip">Visible proof</span>
+              <span class="status-chip status-chip-quiet">Phase C prototype</span>
+            </div>
+          </div>
+
+          <section class="loop-card panel panel-inked">
+            <div class="loop-copy">
+              <p class="eyebrow">Public Loop</p>
+              <h3 id="state-title">Real work enters public life</h3>
+              <p id="state-description">
+                Community should feel like the next life of real MorpBase work, not like a separate content app.
+              </p>
+            </div>
+            <div class="loop-actions">
+              <div class="next-move">
+                <span class="next-label">Recommended next move</span>
+                <strong id="next-move">Release one real object</strong>
+              </div>
+              <button id="begin-loop" class="primary-button" type="button">Start the public loop</button>
+            </div>
+          </section>
+
+          <section class="community-lenses" aria-label="Community sections">
+            <button class="community-lens is-active" data-state-target="2" type="button">Discover</button>
+            <button class="community-lens" data-state-target="3" type="button">Workflow Results</button>
+            <button class="community-lens" data-state-target="4" type="button">Reusable Assets</button>
+            <button class="community-lens" data-state-target="5" type="button">Creators</button>
+          </section>
+
+          <section class="origin-panel panel panel-paper-soft">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow" id="origin-kicker">Publish origin</p>
+                <h3 id="origin-title">This began as private work inside Memory</h3>
+              </div>
+              <span class="origin-badge" id="origin-badge">Private to public</span>
+            </div>
+
+            <div class="origin-card" id="origin-card">
+              <div class="origin-visual">
+                <div class="visual-thumb visual-thumb-memory"></div>
+              </div>
+              <div class="origin-copy">
+                <strong id="origin-name">Moonlit oracle portrait</strong>
+                <p id="origin-summary">A kept result is about to become a public workflow result.</p>
+              </div>
+            </div>
+
+            <div class="threshold-strip" id="threshold-strip"></div>
+          </section>
+
+          <section class="stream-panel panel panel-paper-soft">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow" id="stream-kicker">Discover</p>
+                <h3 id="stream-title">Public objects moving through the product</h3>
+              </div>
+              <span class="stream-badge" id="stream-badge">Object circulation</span>
+            </div>
+
+            <div class="circulation-strip" id="circulation-strip"></div>
+            <div class="stream-list" id="stream-list"></div>
+          </section>
+        </section>
+
+        <aside class="detail-column panel panel-night">
+          <div class="detail-head">
+            <div>
+              <p class="eyebrow">Public Object Meaning</p>
+              <h2 id="detail-title">Why this is worth opening</h2>
+            </div>
+            <span class="detail-badge" id="detail-badge">Public proof</span>
+          </div>
+
+          <section class="detail-stage">
+            <div class="detail-hero" id="detail-hero">
+              <div class="hero-ring ring-a"></div>
+              <div class="hero-ring ring-b"></div>
+              <div class="hero-object" id="hero-object">
+                <div class="hero-image">
+                  <div class="hero-image-fill hero-image-result" id="hero-image-fill"></div>
+                </div>
+                <div class="hero-meta">
+                  <span class="hero-tag" id="hero-tag">Public workflow result</span>
+                  <h3 id="hero-name">Moonlit oracle portrait</h3>
+                  <p id="hero-summary">Visible proof should show why this public object matters without replacing the workflow meaning.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Creator grounding</h3>
+              <span class="mini-label">Human context</span>
+            </div>
+            <div class="creator-grounding" id="creator-grounding"></div>
+            <div class="creator-signals" id="creator-signals"></div>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Why it matters</h3>
+              <span class="mini-label">Product test</span>
+            </div>
+            <ul class="why-list" id="why-list"></ul>
+          </section>
+
+          <section class="action-surface panel panel-action" id="action-surface">
+            <div>
+              <p class="eyebrow">Main action</p>
+              <h3 id="action-heading">Bring public value back into practice</h3>
+              <p id="action-copy">Import should feel like adopting something into your own creative process.</p>
+            </div>
+            <div class="action-row" id="action-row"></div>
+          </section>
+
+          <section class="return-surface panel panel-return" id="return-surface">
+            <div>
+              <p class="eyebrow">Return to the core product</p>
+              <h3 id="return-heading">This public object now lives in your Memory</h3>
+              <p id="return-copy">Community should always feed back into Memory and Workspace.</p>
+            </div>
+            <div class="loop-line" id="loop-line"></div>
+            <div class="return-actions" id="return-actions"></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="prototype-dock panel panel-dock">
+        <div class="dock-copy">
+          <p class="eyebrow">Review navigator</p>
+          <strong id="dock-state">State 1 - Publish Handoff From Memory</strong>
+        </div>
+        <div class="dock-actions" id="state-stepper" aria-label="Prototype states"></div>
+        <button class="ghost-button" id="reset-button" type="button">Reset slice</button>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

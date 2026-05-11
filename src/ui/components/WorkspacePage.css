@@ -244,6 +244,67 @@
   transition: border-color 0.15s, background 0.15s;
 }
 
+.ws-env-variation {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 7px;
+  margin-top: 1px;
+  border-top: 1px solid rgba(52, 211, 153, 0.1);
+}
+
+.ws-env-variation-toggle {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 4px 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+}
+
+.ws-env-variation-toggle:hover {
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ws-env-variation-toggle--on {
+  background: rgba(52, 211, 153, 0.1);
+  border-color: rgba(52, 211, 153, 0.25);
+  color: #6ee7b7;
+}
+
+.ws-env-variation-toggle--on:hover {
+  background: rgba(52, 211, 153, 0.16);
+}
+
+.ws-env-variation-next {
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: 4px;
+  color: #6ee7b7;
+  font-size: 13px;
+  font-family: inherit;
+  width: 26px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.1s;
+}
+
+.ws-env-variation-next:hover {
+  background: rgba(52, 211, 153, 0.2);
+}
+
 .ws-lane-slot:hover {
   background: rgba(255, 255, 255, 0.02);
   border-color: rgba(255, 255, 255, 0.05);

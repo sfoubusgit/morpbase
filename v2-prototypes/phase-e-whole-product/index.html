@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MorpBase V2 - Phase E Whole Product</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">MB</div>
+          <div>
+            <p class="eyebrow">MorpBase V2 Prototype</p>
+            <h1>Whole-Product Synthesis</h1>
+          </div>
+        </div>
+        <nav class="main-nav" aria-label="Primary">
+          <button class="nav-item active" data-realm="workspace">Workspace</button>
+          <button class="nav-item" data-realm="memory">Memory</button>
+          <button class="nav-item" data-realm="community">Community</button>
+          <button class="nav-item secondary" data-realm="continuity">Continuity</button>
+          <button class="nav-item utility" data-realm="profile">Profile</button>
+        </nav>
+      </header>
+
+      <main class="layout">
+        <section class="experience-panel">
+          <div class="section-top">
+            <div>
+              <p class="eyebrow" id="realm-label">Workspace</p>
+              <h2 id="state-title">Live Workspace Center</h2>
+            </div>
+            <div class="state-chip" id="state-chip">Center Alive</div>
+          </div>
+
+          <p class="state-summary" id="state-summary"></p>
+
+          <div class="primary-card">
+            <div class="card-header">
+              <div>
+                <p class="card-label" id="primary-label">Active Session</p>
+                <h3 id="primary-title">Studio portrait session nearing a keep-worthy result</h3>
+              </div>
+              <button class="ghost-button" id="primary-action">Keep Result</button>
+            </div>
+            <p id="primary-body"></p>
+            <div class="card-grid" id="primary-grid"></div>
+          </div>
+
+          <div class="secondary-row">
+            <article class="secondary-card">
+              <p class="card-label">Why This Matters</p>
+              <p id="meaning-text"></p>
+            </article>
+            <article class="secondary-card">
+              <p class="card-label">Next Move</p>
+              <p id="next-text"></p>
+            </article>
+          </div>
+
+          <article class="future-card" id="future-card">
+            <div class="future-head">
+              <div>
+                <p class="card-label">Future Attachment Pressure</p>
+                <h3 id="future-title">The engine can grow without splitting apart</h3>
+              </div>
+            </div>
+            <p id="future-body"></p>
+            <div class="future-tags" id="future-tags"></div>
+          </article>
+        </section>
+
+        <aside class="return-panel">
+          <div class="return-head">
+            <p class="eyebrow">Return Loop</p>
+            <h2>How value comes back to creation</h2>
+          </div>
+
+          <div class="return-rail" id="return-rail"></div>
+
+          <div class="preview-card">
+            <p class="card-label">Visible Proof</p>
+            <div class="proof-frame">
+              <div class="proof-image">
+                <div class="proof-glow"></div>
+                <p id="proof-caption">Preview image proves why the workflow is worth keeping.</p>
+              </div>
+            </div>
+            <p class="proof-note" id="proof-note"></p>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="dock">
+        <div class="dock-copy">
+          <p class="eyebrow">Phase E Navigator</p>
+          <p id="dock-text">
+            This slice tests whether MorpBase feels like one integrated creative engine.
+          </p>
+        </div>
+        <div class="dock-steps" id="dock-steps"></div>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

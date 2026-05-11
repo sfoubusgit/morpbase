@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MorpBase V2 Phase A Workspace Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="prototype-frame">
+      <header class="top-shell">
+        <div class="brand-cluster">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">MorpBase V2 Prototype</p>
+            <h1>Workspace First-Use Slice</h1>
+          </div>
+        </div>
+
+        <nav class="shell-nav" aria-label="Primary">
+          <button class="nav-item is-active" type="button">Workspace</button>
+          <button class="nav-item" type="button">Memory</button>
+          <button class="nav-item" type="button">Community</button>
+          <button class="nav-item nav-item-secondary" type="button">Continuity</button>
+        </nav>
+
+        <button class="profile-pill" type="button">Profile</button>
+      </header>
+
+      <main class="workspace-shell">
+        <section class="workspace-column panel panel-paper">
+          <div class="workspace-head">
+            <div>
+              <p class="eyebrow">Real Product Entry</p>
+              <h2>Workspace</h2>
+            </div>
+            <div class="workspace-status">
+              <span class="status-chip">Portrait workflow</span>
+              <span class="status-chip status-chip-quiet">First-use slice</span>
+            </div>
+          </div>
+
+          <section class="guidance-card panel panel-inked">
+            <div class="guidance-copy">
+              <p class="eyebrow">Guided First Flow</p>
+              <h3 id="state-title">Enter the real Workspace</h3>
+              <p id="state-description">
+                The product should feel immediately active and calm. Start by shaping one meaningful subject choice.
+              </p>
+            </div>
+            <div class="guidance-actions">
+              <div class="next-move">
+                <span class="next-label">Recommended next move</span>
+                <strong id="next-move">Open the first block</strong>
+              </div>
+              <button id="begin-flow" class="primary-button" type="button">Begin the flow</button>
+            </div>
+          </section>
+
+          <section class="phase-strip" aria-label="Workflow phases">
+            <button class="phase-pill is-active" data-phase="subject" type="button">Define The Subject</button>
+            <button class="phase-pill" data-phase="look" type="button">Shape The Look</button>
+            <button class="phase-pill" data-phase="scene" type="button">Stage The Image</button>
+            <button class="phase-pill" data-phase="refine" type="button">Refine And Keep</button>
+          </section>
+
+          <section class="blocks-grid">
+            <article class="workflow-block is-focused" data-block="subject-core">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 1</p>
+                  <h3>Subject Core</h3>
+                </div>
+                <p class="block-summary" id="summary-subject-core">Choose an archetype and role.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="field-group">
+                  <span class="field-label">Archetype</span>
+                  <div class="choice-grid">
+                    <button class="choice-card" data-field="archetype" data-value="oracle" type="button">Oracle</button>
+                    <button class="choice-card" data-field="archetype" data-value="wanderer" type="button">Wanderer</button>
+                    <button class="choice-card" data-field="archetype" data-value="guardian" type="button">Guardian</button>
+                    <button class="choice-card" data-field="archetype" data-value="artist" type="button">Artist</button>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <span class="field-label">Role</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="role" data-value="ritual guide" type="button">Ritual guide</button>
+                    <button class="choice-chip" data-field="role" data-value="street visionary" type="button">Street visionary</button>
+                    <button class="choice-chip" data-field="role" data-value="memory keeper" type="button">Memory keeper</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="presence-signature">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 2</p>
+                  <h3>Presence And Signature</h3>
+                </div>
+                <p class="block-summary" id="summary-presence-signature">Give the subject a stronger presence.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="field-group">
+                  <span class="field-label">Presence</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="presence" data-value="calm authority" type="button">Calm authority</button>
+                    <button class="choice-chip" data-field="presence" data-value="magnetic stillness" type="button">Magnetic stillness</button>
+                    <button class="choice-chip" data-field="presence" data-value="soft intensity" type="button">Soft intensity</button>
+                  </div>
+                </div>
+
+                <label class="field-group" for="signature-note">
+                  <span class="field-label">Signature note</span>
+                  <textarea id="signature-note" rows="3" placeholder="Silver threadwork around the shoulders, direct gaze, small ceremonial talisman."></textarea>
+                </label>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="visual-direction">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 3</p>
+                  <h3>Visual Direction</h3>
+                </div>
+                <p class="block-summary" id="summary-visual-direction">Point the image toward a style direction.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="choice-grid">
+                  <button class="choice-card" data-field="visualDirection" data-value="editorial luminous portrait" type="button">Editorial luminous portrait</button>
+                  <button class="choice-card" data-field="visualDirection" data-value="graphic ritual poster" type="button">Graphic ritual poster</button>
+                  <button class="choice-card" data-field="visualDirection" data-value="cinematic analogue still" type="button">Cinematic analogue still</button>
+                </div>
+
+                <div class="field-group">
+                  <span class="field-label">Finish</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="finish" data-value="velvet detail" type="button">Velvet detail</button>
+                    <button class="choice-chip" data-field="finish" data-value="soft grain" type="button">Soft grain</button>
+                    <button class="choice-chip" data-field="finish" data-value="polished glow" type="button">Polished glow</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="mood-light">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 4</p>
+                  <h3>Mood And Light</h3>
+                </div>
+                <p class="block-summary" id="summary-mood-light">Set atmosphere and luminous pressure.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="field-group">
+                  <span class="field-label">Mood</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="mood" data-value="sacred hush" type="button">Sacred hush</button>
+                    <button class="choice-chip" data-field="mood" data-value="urban reverie" type="button">Urban reverie</button>
+                    <button class="choice-chip" data-field="mood" data-value="charged calm" type="button">Charged calm</button>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <span class="field-label">Light</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="light" data-value="halo sidelight" type="button">Halo sidelight</button>
+                    <button class="choice-chip" data-field="light" data-value="silver window wash" type="button">Silver window wash</button>
+                    <button class="choice-chip" data-field="light" data-value="amber rim haze" type="button">Amber rim haze</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="scene-pressure">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 5</p>
+                  <h3>Scene Pressure</h3>
+                </div>
+                <p class="block-summary" id="summary-scene-pressure">Decide how much environment the portrait carries.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="choice-grid">
+                  <button class="choice-card" data-field="scenePressure" data-value="bare backdrop with one emblem" type="button">Bare backdrop + one emblem</button>
+                  <button class="choice-card" data-field="scenePressure" data-value="architectural corridor haze" type="button">Architectural corridor haze</button>
+                  <button class="choice-card" data-field="scenePressure" data-value="textured studio relic setting" type="button">Textured studio relic setting</button>
+                </div>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="framing-focus">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 6</p>
+                  <h3>Framing And Focus</h3>
+                </div>
+                <p class="block-summary" id="summary-framing-focus">Choose where the eye lands first.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="choice-grid">
+                  <button class="choice-card" data-field="framing" data-value="close portrait crop" type="button">Close portrait crop</button>
+                  <button class="choice-card" data-field="framing" data-value="waist-up ceremonial frame" type="button">Waist-up ceremonial frame</button>
+                  <button class="choice-card" data-field="framing" data-value="wide solitary frame" type="button">Wide solitary frame</button>
+                </div>
+
+                <div class="field-group">
+                  <span class="field-label">Focus cue</span>
+                  <div class="chip-row">
+                    <button class="choice-chip" data-field="focusCue" data-value="direct eyes" type="button">Direct eyes</button>
+                    <button class="choice-chip" data-field="focusCue" data-value="hands and relic" type="button">Hands + relic</button>
+                    <button class="choice-chip" data-field="focusCue" data-value="ornament silhouette" type="button">Ornament silhouette</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="workflow-block" data-block="tighten-result">
+              <header class="block-head">
+                <div>
+                  <p class="block-kicker">Block 7</p>
+                  <h3>Tighten The Result</h3>
+                </div>
+                <p class="block-summary" id="summary-tighten-result">Make the result feel preserve-worthy.</p>
+              </header>
+
+              <div class="block-body">
+                <div class="chip-row">
+                  <button class="choice-chip" data-field="tighten" data-value="clarify silhouette" type="button">Clarify silhouette</button>
+                  <button class="choice-chip" data-field="tighten" data-value="reduce clutter" type="button">Reduce clutter</button>
+                  <button class="choice-chip" data-field="tighten" data-value="push atmosphere" type="button">Push atmosphere</button>
+                </div>
+              </div>
+            </article>
+          </section>
+        </section>
+
+        <aside class="preview-column panel panel-night">
+          <div class="preview-head">
+            <div>
+              <p class="eyebrow">Confidence Companion</p>
+              <h2>Prompt Preview</h2>
+            </div>
+            <span class="preview-badge" id="preview-stage-badge">Entry state</span>
+          </div>
+
+          <section class="preview-stage">
+            <div class="stage-card">
+              <div class="stage-orbit orbit-a"></div>
+              <div class="stage-orbit orbit-b"></div>
+              <div class="portrait-frame">
+                <div class="portrait-silhouette" id="portrait-silhouette"></div>
+              </div>
+              <div class="palette-band">
+                <span class="palette-chip palette-ink"></span>
+                <span class="palette-chip palette-amber"></span>
+                <span class="palette-chip palette-glow"></span>
+              </div>
+            </div>
+          </section>
+
+          <section class="preview-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Live composition</h3>
+              <span class="preview-trust" id="preview-trust">Preview is waking up</span>
+            </div>
+            <div class="preview-signals">
+              <span class="signal-chip" id="signal-subject">Subject set</span>
+              <span class="signal-chip" id="signal-look">Look forming</span>
+              <span class="signal-chip" id="signal-keep">Keep-worthy</span>
+            </div>
+            <p id="preview-summary" class="preview-summary">Start with a subject choice and the preview will begin taking shape.</p>
+            <p id="preview-prompt" class="preview-prompt">Portrait workflow waiting for direction.</p>
+          </section>
+
+          <section class="preview-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Why it matters</h3>
+              <span class="mini-label">Live explanation</span>
+            </div>
+            <ul id="why-list" class="why-list">
+              <li>The workspace should feel active before the user understands every system.</li>
+              <li>Preview should build trust through response, not through dense controls.</li>
+              <li>The first keep moment should feel earned.</li>
+            </ul>
+          </section>
+
+          <section class="save-surface panel panel-save" id="save-surface">
+            <div>
+              <p class="eyebrow">Preserve-worthy result</p>
+              <h3 id="save-heading">Keep this in Memory</h3>
+              <p id="save-copy">Once the result feels coherent, keeping it should feel like continuation, not storage.</p>
+            </div>
+            <ul class="save-reasons" id="save-reasons">
+              <li>The subject now feels distinct.</li>
+              <li>The visual direction is becoming coherent.</li>
+            </ul>
+            <div class="save-actions">
+              <button class="ghost-button" id="branch-button" type="button">Branch</button>
+              <button class="primary-button" id="keep-button" type="button">Keep</button>
+              <button class="secondary-button" id="save-button" type="button">Save</button>
+            </div>
+          </section>
+
+          <section class="memory-handoff panel panel-memory" id="memory-handoff">
+            <p class="eyebrow">Memory handoff</p>
+            <h3>Your work now has a future home</h3>
+            <p>The kept result can return as reusable work inside <strong>Memory Home</strong>, where it becomes part of the product’s continuation loop.</p>
+            <div class="memory-card">
+              <div>
+                <span class="memory-label">Saved Work</span>
+                <strong id="memory-title">Oracle portrait base</strong>
+              </div>
+              <button class="secondary-button" type="button">Open in Memory</button>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="prototype-dock panel panel-dock">
+        <div class="dock-copy">
+          <p class="eyebrow">Review navigator</p>
+          <strong id="dock-state">State 1 · Workspace Entry</strong>
+        </div>
+        <div class="dock-actions" id="state-stepper" aria-label="Prototype states"></div>
+        <button class="ghost-button" id="reset-button" type="button">Reset flow</button>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MorpBase V2 Phase D Continuity Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="prototype-frame">
+      <header class="top-shell">
+        <div class="brand-cluster">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">MorpBase V2 Prototype</p>
+            <h1>Continuity Activation Slice</h1>
+          </div>
+        </div>
+
+        <nav class="shell-nav" aria-label="Primary">
+          <button class="nav-item" id="workspace-nav" type="button">Workspace</button>
+          <button class="nav-item" type="button">Memory</button>
+          <button class="nav-item" type="button">Community</button>
+          <button class="nav-item nav-item-secondary is-active" id="continuity-nav" type="button">Continuity</button>
+        </nav>
+
+        <button class="profile-pill" type="button">Profile</button>
+      </header>
+
+      <main class="continuity-shell">
+        <section class="continuity-column panel panel-paper">
+          <div class="continuity-head">
+            <div>
+              <p class="eyebrow">Recurring Sameness</p>
+              <h2>Continuity</h2>
+            </div>
+            <div class="continuity-status">
+              <span class="status-chip">Entity and lineage</span>
+              <span class="status-chip status-chip-quiet">Phase D prototype</span>
+            </div>
+          </div>
+
+          <section class="bridge-card panel panel-inked">
+            <div class="bridge-copy">
+              <p class="eyebrow">Continuity Loop</p>
+              <h3 id="state-title">Recurring sameness should feel real</h3>
+              <p id="state-description">
+                Continuity should make one entity feel recognizable across work and meaningful enough to bring back into Workspace.
+              </p>
+            </div>
+            <div class="bridge-actions">
+              <div class="next-move">
+                <span class="next-label">Recommended next move</span>
+                <strong id="next-move">Open the featured entity</strong>
+              </div>
+              <button id="begin-flow" class="primary-button" type="button">Enter Continuity</button>
+            </div>
+          </section>
+
+          <section class="continuity-lenses" aria-label="Continuity sections">
+            <button class="continuity-lens is-active" data-state-target="1" type="button">Continuity Home</button>
+            <button class="continuity-lens" data-state-target="2" type="button">Entity</button>
+            <button class="continuity-lens" data-state-target="3" type="button">Appearances</button>
+            <button class="continuity-lens" data-state-target="4" type="button">Activate</button>
+          </section>
+
+          <section class="realm-panel panel panel-paper-soft">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow" id="realm-kicker">Continuity Home</p>
+                <h3 id="realm-title">A lighter realm with one real recurring center</h3>
+              </div>
+              <span class="realm-badge" id="realm-badge">Realm home</span>
+            </div>
+
+            <div class="entity-card" id="entity-card">
+              <div class="entity-visual">
+                <div class="visual-thumb visual-thumb-entity" id="entity-thumb"></div>
+              </div>
+              <div class="entity-copy">
+                <strong id="entity-name">Selene Vey</strong>
+                <p id="entity-summary">A recurring oracle identity that should remain recognizable across different saved works.</p>
+              </div>
+            </div>
+
+            <div class="continuity-strip" id="continuity-strip"></div>
+          </section>
+
+          <section class="appearances-panel panel panel-paper-soft">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow" id="appearances-kicker">Appearances</p>
+                <h3 id="appearances-title">Recurrence through real work</h3>
+              </div>
+              <span class="appearances-badge" id="appearances-badge">Evidence</span>
+            </div>
+
+            <div class="trace-strip" id="trace-strip"></div>
+            <div class="appearance-list" id="appearance-list"></div>
+          </section>
+        </section>
+
+        <aside class="detail-column panel panel-night">
+          <div class="detail-head">
+            <div>
+              <p class="eyebrow">Continuity Payoff</p>
+              <h2 id="detail-title">Why this recurring entity matters</h2>
+            </div>
+            <span class="detail-badge" id="detail-badge">Continuity focus</span>
+          </div>
+
+          <section class="detail-stage">
+            <div class="detail-hero">
+              <div class="hero-ring ring-a"></div>
+              <div class="hero-ring ring-b"></div>
+              <div class="hero-object">
+                <div class="hero-image">
+                  <div class="hero-image-fill hero-image-entity" id="hero-image-fill"></div>
+                </div>
+                <div class="hero-meta">
+                  <span class="hero-tag" id="hero-tag">Recurring entity</span>
+                  <h3 id="hero-name">Selene Vey</h3>
+                  <p id="hero-summary">Continuity should make one recurring thing feel stable, legible, and worth activating back into live work.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>What stays the same</h3>
+              <span class="mini-label">Stability cues</span>
+            </div>
+            <div class="anchor-list" id="anchor-list"></div>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Why it matters</h3>
+              <span class="mini-label">Product test</span>
+            </div>
+            <ul class="why-list" id="why-list"></ul>
+          </section>
+
+          <section class="activation-surface panel panel-action">
+            <div>
+              <p class="eyebrow">Activation bridge</p>
+              <h3 id="activation-heading">Bring continuity into Workspace</h3>
+              <p id="activation-copy">The realm only matters if activation changes live creation in a visible way.</p>
+            </div>
+            <div class="activation-row" id="activation-row"></div>
+          </section>
+
+          <section class="workspace-surface panel panel-return">
+            <div>
+              <p class="eyebrow">Workspace payoff</p>
+              <h3 id="workspace-heading">This entity is now active in live work</h3>
+              <p id="workspace-copy">Continuity should return to the product center instead of staying in its own realm.</p>
+            </div>
+            <div class="workspace-line" id="workspace-line"></div>
+            <div class="workspace-preview" id="workspace-preview"></div>
+            <div class="workspace-effects" id="workspace-effects"></div>
+            <div class="workspace-actions" id="workspace-actions"></div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="prototype-dock panel panel-dock">
+        <div class="dock-copy">
+          <p class="eyebrow">Review navigator</p>
+          <strong id="dock-state">State 1 - Continuity Home</strong>
+        </div>
+        <div class="dock-actions" id="state-stepper" aria-label="Prototype states"></div>
+        <button class="ghost-button" id="reset-button" type="button">Reset slice</button>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

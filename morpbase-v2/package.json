@@ -1,0 +1,25 @@
+{
+  "name": "morpbase-v2",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check": "npm test && npm run build",
+    "test": "node ../node_modules/vitest/vitest.mjs run --config vitest.config.ts --pool forks",
+    "test:watch": "node ../node_modules/vitest/vitest.mjs --config vitest.config.ts --pool forks"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}

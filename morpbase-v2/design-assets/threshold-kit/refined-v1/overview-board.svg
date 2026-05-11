@@ -1,0 +1,26 @@
+<svg width="1200" height="820" viewBox="0 0 1200 820" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="820" fill="#0F0D0B"/>
+  <rect x="40" y="36" width="1120" height="748" rx="28" fill="#151210" stroke="#F3EAD8" stroke-opacity="0.08"/>
+  <text x="72" y="92" fill="#F3EAD8" fill-opacity="0.92" font-family="Palatino Linotype, serif" font-size="28">MorpBase V2 Threshold Refinement V1</text>
+  <text x="72" y="122" fill="#F3EAD8" fill-opacity="0.56" font-family="Segoe UI, sans-serif" font-size="16">Refined crossing family for Illustrator refinement</text>
+
+  <text x="72" y="188" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Shared family grammar</text>
+  <rect x="72" y="204" width="1056" height="118" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="shared-threshold-family-refined.svg" x="164" y="236" width="240" height="56"/>
+
+  <text x="72" y="394" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Keep</text>
+  <rect x="72" y="410" width="500" height="148" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="keep-threshold-refined.svg" x="202" y="456" width="240" height="56"/>
+
+  <text x="628" y="394" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Publish</text>
+  <rect x="628" y="410" width="500" height="148" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="publish-threshold-refined.svg" x="758" y="456" width="240" height="56"/>
+
+  <text x="72" y="630" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Use In Workspace</text>
+  <rect x="72" y="646" width="500" height="118" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="use-threshold-refined.svg" x="202" y="677" width="240" height="56"/>
+
+  <text x="628" y="630" fill="#F3EAD8" fill-opacity="0.7" font-family="Segoe UI, sans-serif" font-size="16">Activate</text>
+  <rect x="628" y="646" width="500" height="118" rx="18" fill="#1A1613" stroke="#F3EAD8" stroke-opacity="0.06"/>
+  <image href="activate-threshold-refined.svg" x="758" y="677" width="240" height="56"/>
+</svg>

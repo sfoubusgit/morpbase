@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MorpBase V2 Phase B Memory Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="prototype-frame">
+      <header class="top-shell">
+        <div class="brand-cluster">
+          <div class="brand-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div>
+            <p class="eyebrow">MorpBase V2 Prototype</p>
+            <h1>Memory Continuation Slice</h1>
+          </div>
+        </div>
+
+        <nav class="shell-nav" aria-label="Primary">
+          <button class="nav-item" type="button">Workspace</button>
+          <button class="nav-item is-active" type="button">Memory</button>
+          <button class="nav-item" type="button">Community</button>
+          <button class="nav-item nav-item-secondary" type="button">Continuity</button>
+        </nav>
+
+        <button class="profile-pill" type="button">Profile</button>
+      </header>
+
+      <main class="memory-shell">
+        <section class="memory-column panel panel-paper">
+          <div class="memory-head">
+            <div>
+              <p class="eyebrow">Second Pole Of The Product</p>
+              <h2>Memory</h2>
+            </div>
+            <div class="memory-status">
+              <span class="status-chip">Living continuation</span>
+              <span class="status-chip status-chip-quiet">Phase B prototype</span>
+            </div>
+          </div>
+
+          <section class="arrival-card panel panel-inked">
+            <div class="arrival-copy">
+              <p class="eyebrow">Arrival From Workspace</p>
+              <h3 id="state-title">Your kept result still matters</h3>
+              <p id="state-description">
+                Memory should feel like the next natural place for the work you just shaped, not a storage area.
+              </p>
+            </div>
+            <div class="arrival-actions">
+              <div class="next-move">
+                <span class="next-label">Recommended next move</span>
+                <strong id="next-move">Enter Memory Home</strong>
+              </div>
+              <button id="enter-memory" class="primary-button" type="button">Continue into Memory</button>
+            </div>
+          </section>
+
+          <section class="memory-tabs" aria-label="Memory sections">
+            <button class="memory-tab is-active" data-state-target="2" type="button">Memory Home</button>
+            <button class="memory-tab" data-state-target="3" type="button">Saved Work</button>
+            <button class="memory-tab" data-state-target="4" type="button">Reusable Assets</button>
+            <button class="memory-tab" data-state-target="5" type="button">Capture Inbox</button>
+          </section>
+
+          <section class="home-overview" id="home-overview">
+            <article class="hero-object">
+              <div>
+                <p class="eyebrow">Recently kept</p>
+                <h3 id="hero-title">Moonlit oracle portrait</h3>
+                <p id="hero-summary">
+                  A kept portrait base that should now feel reusable, branchable, and worth returning to.
+                </p>
+              </div>
+              <div class="hero-actions">
+                <button class="secondary-button object-action" data-action="open" data-target="saved" type="button">Open</button>
+                <button class="primary-button object-action" data-action="continue" data-target="saved" type="button">Continue</button>
+              </div>
+            </article>
+
+            <section class="momentum-panel" id="momentum-panel">
+              <div class="momentum-head">
+                <p class="eyebrow">Still In Motion</p>
+                <strong>Why Memory feels alive</strong>
+              </div>
+              <div class="momentum-strip" id="momentum-strip"></div>
+            </section>
+
+            <div class="pillar-grid">
+              <article class="pillar-card" data-state-target="3">
+                <p class="eyebrow">Saved Work</p>
+                <h4>Keep-worthy results that stay alive</h4>
+                <p>Return to strong results, branch from them, or continue their direction.</p>
+              </article>
+
+              <article class="pillar-card" data-state-target="4">
+                <p class="eyebrow">Reusable Assets</p>
+                <h4>Material for future workflows</h4>
+                <p>Use shaping material that can influence new sessions without feeling like storage.</p>
+              </article>
+
+              <article class="pillar-card" data-state-target="5">
+                <p class="eyebrow">Capture Inbox</p>
+                <h4>Rough but worth returning to</h4>
+                <p>Quick saves and unfinished sparks stay visible without crowding the core.</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="collection-panel panel panel-paper-soft">
+            <div class="panel-title-row">
+              <div>
+                <p class="eyebrow" id="collection-kicker">Memory Home</p>
+                <h3 id="collection-title">What is active in your creative memory right now</h3>
+              </div>
+              <span class="collection-badge" id="collection-badge">Living front door</span>
+            </div>
+
+            <div class="collection-list" id="collection-list"></div>
+          </section>
+        </section>
+
+        <aside class="detail-column panel panel-night">
+          <div class="detail-head">
+            <div>
+              <p class="eyebrow">Continuation Loop</p>
+              <h2 id="detail-title">Kept work stays alive here</h2>
+            </div>
+            <span class="detail-badge" id="detail-badge">Arrival</span>
+          </div>
+
+          <section class="detail-stage">
+            <div class="detail-hero" id="detail-hero">
+              <div class="memory-orbit orbit-a"></div>
+              <div class="memory-orbit orbit-b"></div>
+              <div class="kept-card">
+                <span class="kept-tag" id="kept-tag">Saved Work</span>
+                <h3 id="selected-name">Moonlit oracle portrait</h3>
+                <p id="selected-summary">
+                  A calm, keep-worthy portrait base that should feel like it still has momentum.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Why this matters</h3>
+              <span class="mini-label">Product test</span>
+            </div>
+            <ul class="why-list" id="why-list">
+              <li>Memory should feel like a second home for useful work.</li>
+              <li>Saved results should be easy to reopen or branch from.</li>
+              <li>Returning to Workspace should feel obvious.</li>
+            </ul>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Current action</h3>
+              <span class="mini-label">Live reading</span>
+            </div>
+            <p class="action-summary" id="action-summary">
+              You just kept something meaningful. The next question is whether Memory keeps that meaning alive.
+            </p>
+            <p class="action-detail" id="action-detail">
+              Enter Memory Home to confirm that your kept work still feels active, visible, and ready to continue.
+            </p>
+          </section>
+
+          <section class="detail-panel panel panel-night-soft">
+            <div class="panel-title-row">
+              <h3>Fast return path</h3>
+              <span class="mini-label">Main loop</span>
+            </div>
+            <div class="return-path" id="return-path"></div>
+          </section>
+
+          <section class="return-surface panel panel-return" id="return-surface">
+            <div>
+              <p class="eyebrow">Return to active work</p>
+              <h3 id="return-heading">Branch this back into Workspace</h3>
+              <p id="return-copy">Memory should make it obvious how work becomes live again.</p>
+            </div>
+            <div class="return-actions">
+              <button class="ghost-button" id="inspect-button" type="button">Inspect Memory</button>
+              <button class="primary-button" id="return-button" type="button">Return to Workspace</button>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="prototype-dock panel panel-dock">
+        <div class="dock-copy">
+          <p class="eyebrow">Review navigator</p>
+          <strong id="dock-state">State 1 - Arrival From Workspace</strong>
+        </div>
+        <div class="dock-actions" id="state-stepper" aria-label="Prototype states"></div>
+        <button class="ghost-button" id="reset-button" type="button">Reset slice</button>
+      </footer>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
