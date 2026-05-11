@@ -51,6 +51,20 @@ export const getPublicProfileByUserId = async (userId: string): Promise<PublicPr
   return data ? toPublicProfile(data) : null;
 };
 
+export const getPublicProfileByAuthUid = async (authUid: string): Promise<PublicProfile | null> => {
+  try {
+    const { data: userRow } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('auth_uid', authUid)
+      .maybeSingle();
+    if (!userRow) return null;
+    return getPublicProfileByUserId(userRow.id);
+  } catch {
+    return null;
+  }
+};
+
 export const searchPublicProfiles = async (input: {
   query?: string;
   tags?: string[];

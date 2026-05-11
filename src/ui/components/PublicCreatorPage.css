@@ -74,9 +74,27 @@
   margin-bottom: 6px;
 }
 
+.public-creator-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
 .public-creator-identity h1 {
   margin: 0;
   font-size: 32px;
+}
+
+.public-creator-xp {
+  font-size: 12px;
+  color: rgba(167, 139, 250, 0.8);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.public-creator-badges {
+  margin-top: 8px;
 }
 
 .public-creator-identity p {
@@ -298,6 +316,65 @@
 
 .public-creator-prompt-meta {
   margin-top: 11px;
+}
+
+/* Wall posts */
+.public-creator-wall-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.public-creator-wall-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.public-creator-wall-caption {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(167, 139, 250, 0.75);
+}
+
+.public-creator-wall-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.55;
+  margin: 0;
+  font-style: italic;
+}
+
+.public-creator-wall-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.public-creator-wall-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.public-creator-wall-tag--character { background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+.public-creator-wall-tag--style     { background: rgba(236, 72, 153, 0.12); color: #f472b6; }
+.public-creator-wall-tag--environment { background: rgba(59, 130, 246, 0.12); color: #60a5fa; }
+.public-creator-wall-tag--aura      { background: rgba(110, 86, 249, 0.15); color: #a78bfa; }
+
+.public-creator-wall-meta {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 @media (max-width: 860px) {

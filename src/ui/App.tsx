@@ -298,27 +298,30 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-const parseCreatorHash = (): { creatorId?: string | null; creatorName?: string | null } | null => {
+const parseCreatorHash = (): { creatorId?: string | null; creatorName?: string | null; creatorAuthUid?: string | null } | null => {
   try {
     if (!window.location.hash.startsWith('#creator')) return null;
     const raw = window.location.hash.slice('#creator'.length);
     const params = new URLSearchParams(raw.startsWith('?') ? raw.slice(1) : raw);
     const creatorId = params.get('user');
     const creatorName = params.get('name');
-    if (!creatorId && !creatorName) return null;
+    const creatorAuthUid = params.get('authuid');
+    if (!creatorId && !creatorName && !creatorAuthUid) return null;
     return {
       creatorId: creatorId || null,
       creatorName: creatorName || null,
+      creatorAuthUid: creatorAuthUid || null,
     };
   } catch {
     return null;
   }
 };
 
-const buildCreatorHash = (input: { creatorId?: string | null; creatorName?: string | null }): string => {
+const buildCreatorHash = (input: { creatorId?: string | null; creatorName?: string | null; creatorAuthUid?: string | null }): string => {
   const params = new URLSearchParams();
   if (input.creatorId) params.set('user', input.creatorId);
   if (input.creatorName) params.set('name', input.creatorName);
+  if (input.creatorAuthUid) params.set('authuid', input.creatorAuthUid);
   const query = params.toString();
   return query ? `#creator?${query}` : '';
 };
@@ -585,6 +588,7 @@ export function App() {
   const [selectedCreatorProfileTarget, setSelectedCreatorProfileTarget] = useState<{
     creatorId?: string | null;
     creatorName?: string | null;
+    creatorAuthUid?: string | null;
   } | null>(() => parseCreatorHash());
   // UI State: Engine Result
   const [engineResult, setEngineResult] = useState<Prompt | ValidationError | null>(null);
@@ -1879,6 +1883,11 @@ export function App() {
       refreshNegativePresets(),
     ]);
   }, [refreshCharacters, refreshEnvironments, refreshOutfits, refreshStylePresets, refreshLightingSetups, refreshCompositionFrames, refreshMoodPresets, refreshNegativePresets]);
+
+  const handleViewCreator = useCallback((creatorAuthUid: string, name: string) => {
+    setSelectedCreatorProfileTarget({ creatorAuthUid, creatorName: name });
+    setActivePage('creator-profile');
+  }, []);
 
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);
@@ -3414,6 +3423,7 @@ export function App() {
         <PublicCreatorPage
           creatorId={selectedCreatorProfileTarget?.creatorId ?? null}
           creatorName={selectedCreatorProfileTarget?.creatorName ?? null}
+          creatorAuthUid={selectedCreatorProfileTarget?.creatorAuthUid ?? null}
           onBack={() => setActivePage('community')}
           onOpenPool={(entryId) => {
             setActivePage('community');
@@ -3428,6 +3438,7 @@ export function App() {
           authUid={authUser?.authUid ?? null}
           userName={authUser?.name ?? null}
           onIdentityAdded={handleCommunityIdentityAdded}
+          onViewCreator={handleViewCreator}
           currentPromptText={workspacePrompt}
           activeIdentityTags={activeIdentityTags}
         />
