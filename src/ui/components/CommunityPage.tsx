@@ -24,6 +24,7 @@ import { ShareModal } from './ShareModal';
 import { WallFeed } from './wall/WallFeed';
 import { CreatorGrid } from './creators/CreatorGrid';
 import { ChallengesPanel } from './challenges/ChallengesPanel';
+import { DMInbox } from './dm/DMInbox';
 import type { WallPostIdentityTag } from '../../types/community';
 import './CommunityPage.css';
 
@@ -112,7 +113,7 @@ type DisplayIdentity = {
   remixCount: number;
 };
 
-type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges';
+type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges' | 'messages';
 
 type CommunityPageProps = {
   userId: string | null;
@@ -122,6 +123,7 @@ type CommunityPageProps = {
   onViewCreator?: (authUid: string, name: string) => void;
   activeIdentityTags?: WallPostIdentityTag[];
   currentPromptText?: string;
+  dmInitialRecipient?: { authUid: string; name: string } | null;
 };
 
 export function CommunityPage({
@@ -132,6 +134,7 @@ export function CommunityPage({
   onViewCreator,
   activeIdentityTags = [],
   currentPromptText = '',
+  dmInitialRecipient,
 }: CommunityPageProps) {
   const [activeSection, setActiveSection] = useState<CommunitySection>('wall');
   const [activeTab, setActiveTab] = useState<CommunityIdentityType | 'all'>('all');
@@ -142,6 +145,11 @@ export function CommunityPage({
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [remixTarget, setRemixTarget] = useState<{ id: string; name: string } | null>(null);
+
+  useEffect(() => {
+    if (dmInitialRecipient) setActiveSection('messages');
+  }, [dmInitialRecipient]);
+
   const fetchShared = useCallback(async () => {
     setLoadingShared(true);
     const items = await listCommunityIdentities();
@@ -275,7 +283,7 @@ export function CommunityPage({
           </div>
 
           <div className="community-section-tabs">
-            {(['wall', 'identities', 'creators', 'challenges'] as CommunitySection[]).map(s => (
+            {(['wall', 'identities', 'creators', 'challenges', 'messages'] as CommunitySection[]).map(s => (
               <button
                 key={s}
                 type="button"
@@ -304,6 +312,16 @@ export function CommunityPage({
             authUid={authUid}
             onViewCreator={onViewCreator}
           />
+        )}
+
+        {activeSection === 'messages' && authUid ? (
+          <DMInbox
+            authUid={authUid}
+            authName={userName ?? ''}
+            initialRecipient={dmInitialRecipient}
+          />
+        ) : activeSection === 'messages' && (
+          <p className="community-login-hint">Log in to send and receive messages.</p>
         )}
 
         {activeSection === 'challenges' && (

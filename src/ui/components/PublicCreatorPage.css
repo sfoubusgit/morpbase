@@ -42,6 +42,23 @@
   cursor: pointer;
 }
 
+.public-creator-message-btn {
+  border: 1px solid rgba(110, 86, 249, 0.4);
+  border-radius: var(--radius-pill);
+  background: rgba(110, 86, 249, 0.15);
+  color: #a78bfa;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.public-creator-message-btn:hover {
+  background: rgba(110, 86, 249, 0.28);
+}
+
 .public-creator-hero-main {
   display: flex;
   gap: 16px;

@@ -1890,6 +1890,13 @@ export function App() {
     setActivePage('creator-profile');
   }, []);
 
+  const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
+
+  const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
+    setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
+    setActivePage('community');
+  }, []);
+
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);
     persistActiveTerritoryId(id);
@@ -3426,6 +3433,7 @@ export function App() {
           creatorId={selectedCreatorProfileTarget?.creatorId ?? null}
           creatorName={selectedCreatorProfileTarget?.creatorName ?? null}
           creatorAuthUid={selectedCreatorProfileTarget?.creatorAuthUid ?? null}
+          viewerAuthUid={authUser?.authUid ?? null}
           onBack={() => setActivePage('community')}
           onOpenPool={(entryId) => {
             setActivePage('community');
@@ -3433,6 +3441,7 @@ export function App() {
               window.dispatchEvent(new CustomEvent('morpbase:open-hub-entry', { detail: { entryId } }));
             }, 0);
           }}
+          onMessage={handleStartDM}
         />
       ) : activePage === 'community' ? (
         <CommunityPage
@@ -3443,6 +3452,7 @@ export function App() {
           onViewCreator={handleViewCreator}
           currentPromptText={workspacePrompt}
           activeIdentityTags={activeIdentityTags}
+          dmInitialRecipient={dmInitialRecipient}
         />
       ) : activePage === 'prompts' ? (
         <PromptsPage

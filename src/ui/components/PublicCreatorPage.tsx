@@ -18,8 +18,10 @@ type PublicCreatorPageProps = {
   creatorId?: string | null;
   creatorAuthUid?: string | null;
   creatorName?: string | null;
+  viewerAuthUid?: string | null;
   onBack?: () => void;
   onOpenPool?: (entryId: string) => void;
+  onMessage?: (recipientAuthUid: string, recipientName: string) => void;
 };
 
 function formatDate(ts: number): string {
@@ -30,8 +32,10 @@ export function PublicCreatorPage({
   creatorId,
   creatorAuthUid,
   creatorName,
+  viewerAuthUid,
   onBack,
   onOpenPool,
+  onMessage,
 }: PublicCreatorPageProps) {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
@@ -226,6 +230,15 @@ export function PublicCreatorPage({
           >
             Copy Link
           </button>
+          {onMessage && viewerAuthUid && creatorAuthUid && viewerAuthUid !== creatorAuthUid && (
+            <button
+              type="button"
+              className="public-creator-message-btn"
+              onClick={() => onMessage(creatorAuthUid, displayName)}
+            >
+              Send Message
+            </button>
+          )}
         </div>
 
         <div className="public-creator-hero-main">
