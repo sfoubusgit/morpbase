@@ -165,6 +165,25 @@
   cursor: not-allowed;
 }
 
+.workspace-action-wall {
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1px solid rgba(110, 86, 249, 0.4);
+  background: rgba(110, 86, 249, 0.1);
+  color: #a78bfa;
+}
+
+.workspace-action-wall:hover {
+  border-color: rgba(110, 86, 249, 0.65);
+  background: rgba(110, 86, 249, 0.16);
+  color: #c4b5fd;
+}
+
 /* ── Middle inspiration column ───────────────────── */
 
 .workspace-inspiration {

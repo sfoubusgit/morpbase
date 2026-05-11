@@ -2839,6 +2839,18 @@ export function App() {
     return phrases.join(', ');
   }, [activeNegativeIds, negativePresets]);
 
+  const activeIdentityTags = useMemo(() => [
+    ...(activeCharacter ? [{ name: activeCharacter.name, type: 'character' as const }] : []),
+    ...(activeStyleId ? [{ name: stylePresets.find(s => s.id === activeStyleId)?.name ?? '', type: 'style' as const }].filter(t => t.name) : []),
+    ...(activeLightingId ? [{ name: lightingSetups.find(l => l.id === activeLightingId)?.name ?? '', type: 'lighting' as const }].filter(t => t.name) : []),
+    ...(activeEnvironment ? [{ name: activeEnvironment.name, type: 'environment' as const }] : []),
+    ...(activeOutfitId ? [{ name: outfits.find(o => o.id === activeOutfitId)?.name ?? '', type: 'wardrobe' as const }].filter(t => t.name) : []),
+    ...(activeCompositionId ? [{ name: compositionFrames.find(c => c.id === activeCompositionId)?.name ?? '', type: 'composition' as const }].filter(t => t.name) : []),
+    ...(activeMoodId ? [{ name: moodPresets.find(m => m.id === activeMoodId)?.name ?? '', type: 'mood' as const }].filter(t => t.name) : []),
+    ...(activeWorld ? [{ name: activeWorld.name, type: 'aura' as const }] : []),
+    ...activeObjectIds.map(id => ({ name: objects.find(o => o.id === id)?.name ?? '', type: 'object' as const })).filter(t => t.name),
+  ], [activeCharacter, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeEnvironment, activeOutfitId, outfits, activeCompositionId, compositionFrames, activeMoodId, moodPresets, activeWorld, activeObjectIds, objects]);
+
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
     ...attr,
@@ -3416,6 +3428,8 @@ export function App() {
           authUid={authUser?.authUid ?? null}
           userName={authUser?.name ?? null}
           onIdentityAdded={handleCommunityIdentityAdded}
+          currentPromptText={workspacePrompt}
+          activeIdentityTags={activeIdentityTags}
         />
       ) : activePage === 'prompts' ? (
         <PromptsPage
@@ -3472,6 +3486,10 @@ export function App() {
           activeWorldPhrases={activeWorld?.phrases ?? []}
           onChooseWorld={() => setIsWorldOpen(true)}
           onDeactivateWorld={activeWorld ? () => { setActiveWorld(null); setActiveChipTexts([]); } : undefined}
+          authUid={authUser?.authUid ?? null}
+          userId={authUser?.id ?? null}
+          userName={authUser?.name ?? null}
+          activeIdentityTags={activeIdentityTags}
         />
       )}
       </>

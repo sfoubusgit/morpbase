@@ -1,5 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { InspirationField } from './InspirationField';
+import { WallPostComposer } from './wall/WallPostComposer';
+import type { WallPostIdentityTag } from '../../types/community';
 import './WorkspacePage.css';
 
 type LaneSlotProps = {
@@ -151,6 +153,11 @@ type WorkspacePageProps = {
   activeWorldPhrases: string[];
   onChooseWorld: () => void;
   onDeactivateWorld?: () => void;
+
+  authUid?: string | null;
+  userId?: string | null;
+  userName?: string | null;
+  activeIdentityTags?: WallPostIdentityTag[];
 };
 
 export function WorkspacePage({
@@ -192,7 +199,13 @@ export function WorkspacePage({
   activeWorldPhrases,
   onChooseWorld,
   onDeactivateWorld,
+  authUid = null,
+  userId = null,
+  userName = null,
+  activeIdentityTags = [],
 }: WorkspacePageProps) {
+  const [wallComposerOpen, setWallComposerOpen] = useState(false);
+
   const handleCopy = useCallback(() => {
     if (!assembledPrompt) return;
     void navigator.clipboard.writeText(assembledPrompt);
@@ -240,7 +253,29 @@ export function WorkspacePage({
                   Save to Memory
                 </button>
               )}
+              {authUid && userId && userName && assembledPrompt && !wallComposerOpen && (
+                <button
+                  type="button"
+                  className="workspace-action-wall"
+                  onClick={() => setWallComposerOpen(true)}
+                >
+                  Post to Wall
+                </button>
+              )}
             </div>
+
+            {wallComposerOpen && authUid && userId && userName && (
+              <WallPostComposer
+                authUid={authUid}
+                userId={userId}
+                userName={userName}
+                availableIdentityTags={activeIdentityTags}
+                promptText={assembledPrompt}
+                onPosted={() => setWallComposerOpen(false)}
+                onCancel={() => setWallComposerOpen(false)}
+                compact
+              />
+            )}
           </div>
 
           <div className="workspace-field">
