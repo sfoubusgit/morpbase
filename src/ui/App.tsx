@@ -43,6 +43,7 @@ import { LandingPage } from './components/LandingPage';
 import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
+import { NotificationBell } from './components/notifications/NotificationBell';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
 import {
@@ -3294,6 +3295,7 @@ export function App() {
               >
                 {authUser.name}
               </button>
+              <NotificationBell authUid={authUser.authUid} />
               <button
                 type="button"
                 className="app-page-toggle-action-button"
