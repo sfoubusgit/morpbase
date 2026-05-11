@@ -7,6 +7,7 @@ import {
   listWallPosts,
   unlikePost,
 } from '../../../engine/wallStore';
+import { getFollowingAuthUids } from '../../../engine/followStore';
 import { WallPostCard } from './WallPostCard';
 import { WallPostComposer } from './WallPostComposer';
 import './WallFeed.css';
@@ -17,7 +18,6 @@ type WallFeedProps = {
   authUid: string | null;
   userId: string | null;
   userName: string | null;
-  followingAuthUids: string[];
   activeIdentityTags: WallPostIdentityTag[];
   currentPromptText: string;
   onViewAuthor?: (authUid: string, name: string) => void;
@@ -29,7 +29,6 @@ export function WallFeed({
   authUid,
   userId,
   userName,
-  followingAuthUids,
   activeIdentityTags,
   currentPromptText,
   onViewAuthor,
@@ -37,6 +36,7 @@ export function WallFeed({
   const [posts, setPosts] = useState<WallPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [followingUids, setFollowingUids] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -53,12 +53,19 @@ export function WallFeed({
     setLikedIds(new Set(ids));
   }, [authUid]);
 
+  const fetchFollowing = useCallback(async () => {
+    if (!authUid) return;
+    const uids = await getFollowingAuthUids(authUid);
+    setFollowingUids(new Set(uids));
+  }, [authUid]);
+
   useEffect(() => {
     void fetchPosts();
     void fetchLikes();
+    void fetchFollowing();
     pollRef.current = setInterval(() => { void fetchPosts(); }, POLL_INTERVAL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [fetchPosts, fetchLikes]);
+  }, [fetchPosts, fetchLikes, fetchFollowing]);
 
   const handlePosted = useCallback(() => {
     setComposerOpen(false);
@@ -83,7 +90,7 @@ export function WallFeed({
   }, []);
 
   const visible = filter === 'following'
-    ? posts.filter(p => followingAuthUids.includes(p.authUid))
+    ? posts.filter(p => followingUids.has(p.authUid))
     : posts;
 
   return (

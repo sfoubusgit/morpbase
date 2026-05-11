@@ -22,6 +22,7 @@ import { createWorld, addWorldPhrase } from '../../engine/worldStore';
 import { createObject } from '../../engine/objectStore';
 import { ShareModal } from './ShareModal';
 import { WallFeed } from './wall/WallFeed';
+import { CreatorGrid } from './creators/CreatorGrid';
 import type { WallPostIdentityTag } from '../../types/community';
 import './CommunityPage.css';
 
@@ -284,7 +285,6 @@ export function CommunityPage({
             authUid={authUid}
             userId={userId}
             userName={userName}
-            followingAuthUids={[]}
             activeIdentityTags={activeIdentityTags}
             currentPromptText={currentPromptText}
             onViewAuthor={onViewCreator}
@@ -292,9 +292,10 @@ export function CommunityPage({
         )}
 
         {activeSection === 'creators' && (
-          <div className="community-section-placeholder">
-            <p>Creator profiles coming soon.</p>
-          </div>
+          <CreatorGrid
+            authUid={authUid}
+            onViewCreator={onViewCreator}
+          />
         )}
 
         {activeSection === 'challenges' && (
