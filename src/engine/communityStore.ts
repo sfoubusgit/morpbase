@@ -12,6 +12,8 @@ export type CommunitySharedIdentity = {
   authorCoverImageUrl: string | null;
   featured: boolean;
   createdAt: number;
+  parentId: string | null;
+  remixCount: number;
 };
 
 export type ShareIdentityInput = {
@@ -20,6 +22,7 @@ export type ShareIdentityInput = {
   phrases: string[];
   summary: string;
   authorCoverImageUrl?: string | null;
+  parentId?: string | null;
 };
 
 type Row = {
@@ -33,6 +36,8 @@ type Row = {
   author_cover_image_url: string | null;
   featured: boolean;
   created_at: string;
+  parent_id: string | null;
+  remix_count: number;
 };
 
 const toIdentity = (row: Row): CommunitySharedIdentity => ({
@@ -46,6 +51,8 @@ const toIdentity = (row: Row): CommunitySharedIdentity => ({
   authorCoverImageUrl: row.author_cover_image_url ?? null,
   featured: row.featured ?? false,
   createdAt: new Date(row.created_at).getTime(),
+  parentId: row.parent_id ?? null,
+  remixCount: row.remix_count ?? 0,
 });
 
 export async function listCommunityIdentities(
@@ -74,7 +81,6 @@ export async function shareIdentity(
   _userId: string,
   authorName: string,
 ): Promise<CommunitySharedIdentity> {
-  // RLS policy requires auth.uid() = author_id
   const { data: { session } } = await supabase.auth.getSession();
   const authUid = session?.user?.id;
   if (!authUid) throw new Error('No active session.');
@@ -90,11 +96,22 @@ export async function shareIdentity(
       author_name: authorName.trim() || 'Anonymous',
       author_cover_image_url: input.authorCoverImageUrl?.trim() || null,
       featured: false,
+      parent_id: input.parentId ?? null,
     })
     .select()
     .single();
 
   if (error) throw new Error(error.message);
+
+  // If this is a remix, increment the parent's remix_count (non-fatal)
+  if (input.parentId) {
+    try {
+      await supabase.rpc('increment_remix_count', { identity_id: input.parentId });
+    } catch {
+      // remix_count is a convenience cache — failure here is non-fatal
+    }
+  }
+
   return toIdentity(data as Row);
 }
 

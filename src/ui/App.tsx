@@ -349,14 +349,14 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'pool-hub' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
     try {
       if (parseCreatorHash()) return 'creator-profile';
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'identity-systems') return 'identity-systems';
       if (saved === 'prompts') return 'prompts';
       if (saved === 'user-pools') return 'user-pools';
-      if (saved === 'pool-hub') return 'pool-hub';
+      if (saved === 'pool-hub' || saved === 'community') return 'community';
       if (saved === 'my-profile') return 'my-profile';
       if (saved === 'creator-profile') return 'creator-profile';
       if (saved === 'admin') return 'admin';
@@ -3359,8 +3359,8 @@ export function App() {
               </button>
               <button
                 type="button"
-                className={`app-page-toggle-btn ${activePage === 'pool-hub' ? 'active' : ''}`}
-                onClick={() => setActivePage('pool-hub')}
+                className={`app-page-toggle-btn ${activePage === 'community' ? 'active' : ''}`}
+                onClick={() => setActivePage('community')}
               >
                 Community
               </button>
@@ -3402,15 +3402,15 @@ export function App() {
         <PublicCreatorPage
           creatorId={selectedCreatorProfileTarget?.creatorId ?? null}
           creatorName={selectedCreatorProfileTarget?.creatorName ?? null}
-          onBack={() => setActivePage('pool-hub')}
+          onBack={() => setActivePage('community')}
           onOpenPool={(entryId) => {
-            setActivePage('pool-hub');
+            setActivePage('community');
             window.setTimeout(() => {
               window.dispatchEvent(new CustomEvent('morpbase:open-hub-entry', { detail: { entryId } }));
             }, 0);
           }}
         />
-      ) : activePage === 'pool-hub' ? (
+      ) : activePage === 'community' ? (
         <CommunityPage
           userId={authUser?.id ?? null}
           authUid={authUser?.authUid ?? null}
