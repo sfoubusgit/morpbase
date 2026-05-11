@@ -9,6 +9,8 @@ import {
 } from '../../../engine/wallStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
 import { getXPMap } from '../../../engine/xpStore';
+import { getBadgeMap } from '../../../engine/badgeStore';
+import type { EarnedBadge } from '../../../types/community';
 import { WallPostCard } from './WallPostCard';
 import { WallPostComposer } from './WallPostComposer';
 import './WallFeed.css';
@@ -39,6 +41,7 @@ export function WallFeed({
   const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
   const [followingUids, setFollowingUids] = useState<Set<string>>(new Set());
   const [authorXpMap, setAuthorXpMap] = useState<Map<string, number>>(new Map());
+  const [authorBadgeMap, setAuthorBadgeMap] = useState<Map<string, EarnedBadge[]>>(new Map());
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -48,8 +51,12 @@ export function WallFeed({
     setPosts(data);
     setLoading(false);
     const authorUids = [...new Set(data.map(p => p.authUid))];
-    const xpMap = await getXPMap(authorUids);
+    const [xpMap, badgeMap] = await Promise.all([
+      getXPMap(authorUids),
+      getBadgeMap(authorUids),
+    ]);
     setAuthorXpMap(xpMap);
+    setAuthorBadgeMap(badgeMap);
   }, []);
 
   const fetchLikes = useCallback(async () => {
@@ -165,6 +172,7 @@ export function WallFeed({
               isOwnPost={post.authUid === authUid}
               isLiked={likedIds.has(post.id)}
               authorXp={authorXpMap.get(post.authUid)}
+              authorBadges={authorBadgeMap.get(post.authUid) ?? []}
               onLike={handleLike}
               onUnlike={handleUnlike}
               onDelete={handleDelete}

@@ -1,0 +1,50 @@
+.badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.badge-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 13px;
+  border: 1px solid transparent;
+  cursor: default;
+  transition: transform 0.1s;
+}
+
+.badge-chip:hover {
+  transform: scale(1.2);
+}
+
+.badge-chip--common {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-subtle);
+}
+
+.badge-chip--rare {
+  background: rgba(110, 86, 249, 0.1);
+  border-color: rgba(110, 86, 249, 0.3);
+}
+
+.badge-chip--legendary {
+  background: rgba(251, 146, 60, 0.1);
+  border-color: rgba(251, 146, 60, 0.35);
+  box-shadow: 0 0 6px rgba(251, 146, 60, 0.2);
+}
+
+.badge-chip--overflow {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-subtle);
+  width: auto;
+  padding: 0 6px;
+  border-radius: 12px;
+}

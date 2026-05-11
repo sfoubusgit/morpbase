@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import type { CommunityIdentityType } from '../data/communityIdentities';
 import { awardXP } from './xpStore';
+import { checkAndAwardShareBadges, checkAndAwardRemixBadges } from './badgeStore';
 
 export type CommunitySharedIdentity = {
   id: string;
@@ -114,6 +115,20 @@ export async function shareIdentity(
   }
 
   void awardXP(authUid, 'share_identity');
+  void checkAndAwardShareBadges(authUid);
+  if (input.parentId) {
+    // Look up the original author's auth_uid so we can award them the remix-received badge
+    supabase
+      .from('community_identities')
+      .select('author_id')
+      .eq('id', input.parentId)
+      .maybeSingle()
+      .then(({ data: parentRow }) => {
+        if (parentRow?.author_id) {
+          void checkAndAwardRemixBadges(authUid, parentRow.author_id as string);
+        }
+      });
+  }
   return toIdentity(data as Row);
 }
 

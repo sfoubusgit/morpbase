@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { listCreators, type CreatorSummary } from '../../../engine/creatorFeedStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
 import { getXPMap } from '../../../engine/xpStore';
+import { getBadgeMap } from '../../../engine/badgeStore';
+import type { EarnedBadge } from '../../../types/community';
 import { CreatorCard } from './CreatorCard';
 import './CreatorGrid.css';
 
@@ -15,6 +17,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
   const [loading, setLoading] = useState(true);
   const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
   const [xpMap, setXpMap] = useState<Map<string, number>>(new Map());
+  const [badgeMap, setBadgeMap] = useState<Map<string, EarnedBadge[]>>(new Map());
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -24,8 +27,10 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
     ]);
     setCreators(creatorsData);
     setFollowingSet(new Set(followingUids));
-    const map = await getXPMap(creatorsData.map(c => c.authUid));
+    const uids = creatorsData.map(c => c.authUid);
+    const [map, badges] = await Promise.all([getXPMap(uids), getBadgeMap(uids)]);
     setXpMap(map);
+    setBadgeMap(badges);
     setLoading(false);
   }, [authUid]);
 
@@ -59,6 +64,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
           key={creator.authUid}
           creator={creator}
           authorXp={xpMap.get(creator.authUid)}
+          authorBadges={badgeMap.get(creator.authUid) ?? []}
           authUid={authUid}
           followingSet={followingSet}
           onFollowChanged={handleFollowChanged}

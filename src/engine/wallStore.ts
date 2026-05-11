@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import type { WallPost, CreateWallPostInput } from '../types/community';
 import { awardXP } from './xpStore';
+import { checkAndAwardWallPostBadges } from './badgeStore';
 
 type WallPostRow = {
   id: string;
@@ -72,6 +73,7 @@ export async function createWallPost(
   if (error) throw new Error(error.message);
   const post = toWallPost(data as WallPostRow);
   void awardXP(authUid, 'post_to_wall');
+  void checkAndAwardWallPostBadges(authUid);
   return post;
 }
 

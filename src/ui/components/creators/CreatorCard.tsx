@@ -1,12 +1,15 @@
 import { FollowButton } from '../shared/FollowButton';
 import { TitleBadge } from '../shared/TitleBadge';
+import { BadgeStrip } from '../shared/BadgeStrip';
 import { getTitleForXp } from '../../../data/communityTitles';
 import type { CreatorSummary } from '../../../engine/creatorFeedStore';
+import type { EarnedBadge } from '../../../types/community';
 import './CreatorCard.css';
 
 type CreatorCardProps = {
   creator: CreatorSummary;
   authorXp?: number;
+  authorBadges?: EarnedBadge[];
   authUid: string | null;
   followingSet: Set<string>;
   onFollowChanged: (creatorAuthUid: string, nowFollowing: boolean) => void;
@@ -16,6 +19,7 @@ type CreatorCardProps = {
 export function CreatorCard({
   creator,
   authorXp,
+  authorBadges = [],
   authUid,
   followingSet,
   onFollowChanged,
@@ -43,6 +47,8 @@ export function CreatorCard({
           </button>
           {title && <TitleBadge title={title} size="sm" />}
         </div>
+
+        <BadgeStrip badges={authorBadges} max={4} />
 
         <div className="creator-card-stats">
           {creator.wallPostCount > 0 && (

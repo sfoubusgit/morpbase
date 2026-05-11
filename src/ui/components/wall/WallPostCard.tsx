@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import type { WallPost } from '../../../types/community';
+import type { WallPost, EarnedBadge } from '../../../types/community';
 import { TitleBadge } from '../shared/TitleBadge';
+import { BadgeStrip } from '../shared/BadgeStrip';
 import { getTitleForXp } from '../../../data/communityTitles';
 import './WallPostCard.css';
 
@@ -36,6 +37,7 @@ type WallPostCardProps = {
   isOwnPost: boolean;
   isLiked: boolean;
   authorXp?: number;
+  authorBadges?: EarnedBadge[];
   onLike: (postId: string) => void;
   onUnlike: (postId: string) => void;
   onDelete: (postId: string) => void;
@@ -47,6 +49,7 @@ export function WallPostCard({
   isOwnPost,
   isLiked,
   authorXp,
+  authorBadges = [],
   onLike,
   onUnlike,
   onDelete,
@@ -87,6 +90,7 @@ export function WallPostCard({
             {post.authorName}
           </button>
           {title && <TitleBadge title={title} size="sm" />}
+          <BadgeStrip badges={authorBadges} max={4} />
         </div>
         <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
       </div>

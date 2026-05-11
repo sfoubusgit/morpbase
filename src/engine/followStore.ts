@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { checkAndAwardFollowerBadges } from './badgeStore';
 
 export async function followUser(followerAuthUid: string, followingAuthUid: string): Promise<void> {
   const { error } = await supabase
@@ -6,6 +7,7 @@ export async function followUser(followerAuthUid: string, followingAuthUid: stri
     .insert({ follower_auth_uid: followerAuthUid, following_auth_uid: followingAuthUid });
 
   if (error && error.code !== '23505') throw new Error(error.message);
+  void checkAndAwardFollowerBadges(followingAuthUid);
 }
 
 export async function unfollowUser(followerAuthUid: string, followingAuthUid: string): Promise<void> {
