@@ -128,8 +128,7 @@ import {
 import { listPools } from '../engine/poolStore';
 import { listObjects, type ObjectIdentity } from '../engine/objectStore';
 import { ObjectLibraryModal } from './components/ObjectLibraryModal';
-import type { WorldState } from '../data/worldStateOverlays';
-import { DEFAULT_WORLD_STATE, getWorldStateOverlayPhrases } from '../data/worldStateOverlays';
+import { getVariationPhrases } from '../data/worldStateOverlays';
 
 /**
  * Default model profile for Stable Diffusion
@@ -443,7 +442,8 @@ export function App() {
   const [envWeather, setEnvWeather] = useState<string | null>(initialBuilderSession?.envWeather ?? null);
   const [envScale, setEnvScale] = useState<string | null>(initialBuilderSession?.envScale ?? null);
   const [envCondition, setEnvCondition] = useState<string | null>(initialBuilderSession?.envCondition ?? null);
-  const [worldState, setWorldState] = useState<WorldState>(DEFAULT_WORLD_STATE);
+  const [worldVariationEnabled, setWorldVariationEnabled] = useState(false);
+  const [worldVariationPhrases, setWorldVariationPhrases] = useState<string[]>([]);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
@@ -1607,7 +1607,8 @@ export function App() {
     setEnvWeather(null);
     setEnvScale(null);
     setEnvCondition(null);
-    setWorldState(DEFAULT_WORLD_STATE);
+    setWorldVariationEnabled(false);
+    setWorldVariationPhrases([]);
     if (next) {
       setBuilderNotice(`"${next.name}" selected — press Add to inject into the prompt.`);
     }
@@ -1630,11 +1631,25 @@ export function App() {
     setEnvWeather(null);
     setEnvScale(null);
     setEnvCondition(null);
-    setWorldState(DEFAULT_WORLD_STATE);
+    setWorldVariationEnabled(false);
+    setWorldVariationPhrases([]);
     if (env) {
       setBuilderNotice(`Removed "${env.name}" phrases from the prompt.`);
     }
   }, [activeEnvironmentId, environments]);
+
+  const handleWorldVariationToggle = useCallback(() => {
+    setWorldVariationEnabled(prev => {
+      const next = !prev;
+      if (next) setWorldVariationPhrases(getVariationPhrases());
+      else setWorldVariationPhrases([]);
+      return next;
+    });
+  }, []);
+
+  const handleWorldVariationNext = useCallback(() => {
+    setWorldVariationPhrases(prev => getVariationPhrases(prev));
+  }, []);
 
   const handleEnvironmentLightChange = useCallback((dimension: 'time' | 'weather' | 'scale' | 'condition', value: string | null) => {
     switch (dimension) {
@@ -2759,14 +2774,15 @@ export function App() {
         }]
       : [];
 
-    const wsOverlayPhrases = activeEnvironmentProjection ? getWorldStateOverlayPhrases(worldState) : [];
-    const worldStateEntries: PromptAdditionEntry[] = wsOverlayPhrases.map((text, index) => ({
-      id: `environment:${activeEnvironmentProjection!.environmentId}:ws:${index}`,
-      text,
-      position: 'end' as const,
-      section: 'Environment',
-      sourceType: 'environment' as const,
-    }));
+    const worldStateEntries: PromptAdditionEntry[] = activeEnvironmentProjection && worldVariationEnabled
+      ? worldVariationPhrases.map((text, index) => ({
+          id: `environment:${activeEnvironmentProjection.environmentId}:ws:${index}`,
+          text,
+          position: 'end' as const,
+          section: 'Environment',
+          sourceType: 'environment' as const,
+        }))
+      : [];
 
     const activeOutfit = activeOutfitId ? outfits.find(o => o.id === activeOutfitId) ?? null : null;
     const outfitEntries: PromptAdditionEntry[] = activeOutfit
@@ -2845,7 +2861,7 @@ export function App() {
     });
 
     return [...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...worldStateEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentProjection, envTime, envWeather, envScale, envCondition, worldState, activeOutfitId, outfits, activeObjectIds, objects, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeCompositionId, compositionFrames, activeMoodId, moodPresets]);
+  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentProjection, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitId, outfits, activeObjectIds, objects, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeCompositionId, compositionFrames, activeMoodId, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
@@ -3497,8 +3513,9 @@ export function App() {
           onChooseEnvironment={() => setIsEnvironmentLibraryOpen(true)}
           onAddEnvironment={activeEnvironment && !environmentInPrompt ? handleAddEnvironmentToPrompt : undefined}
           onRemoveEnvironment={activeEnvironment && environmentInPrompt ? handleRemoveActiveEnvironment : undefined}
-          worldState={worldState}
-          onWorldStateChange={setWorldState}
+          worldVariationEnabled={worldVariationEnabled}
+          onWorldVariationToggle={handleWorldVariationToggle}
+          onWorldVariationNext={handleWorldVariationNext}
           activeOutfitName={activeOutfitId ? (outfits.find(o => o.id === activeOutfitId)?.name ?? null) : null}
           onChooseWardrobe={() => setIsWardrobeOpen(true)}
           onDeactivateWardrobe={activeOutfitId ? () => handleSelectOutfit(null) : undefined}

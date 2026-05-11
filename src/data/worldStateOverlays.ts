@@ -1,65 +1,92 @@
-export type WorldStatePosition = 'in-front' | 'behind' | 'inside' | 'above' | 'at-distance';
-export type WorldStateTemporal = 'before' | 'after';
-export type WorldStateResonance = 'sanctuary' | 'threshold' | 'exposure' | 'dread' | 'wonder';
+export const VARIATION_PHRASE_POOL: string[] = [
+  // position & spatial relationship
+  'viewed from below, looking up',
+  'aerial view looking down upon the scene',
+  'seen from behind',
+  'interior space, enclosed within',
+  'looking outward from within',
+  'at great distance, environment as backdrop',
+  'viewed from the threshold',
+  'hidden vantage point, partially obscured',
+  'from the periphery, edge of the space',
+  'the facade facing directly forward',
+  'rear approach, the hidden side',
+  'looking through an opening in the structure',
+  'elevated vantage, above the main level',
+  'ground level, close to the earth',
+  'submerged perspective, world looming above',
+  'framed by the architecture',
+  'the subject dwarfed by the environment',
+  'intimate proximity to the surface',
+  'viewed from a narrow passage',
+  'standing at the boundary between inside and outside',
 
-export type WorldState = {
-  position: WorldStatePosition | null;
-  temporal: WorldStateTemporal | null;
-  resonance: WorldStateResonance | null;
-};
+  // temporal & narrative moment
+  'before anything has happened',
+  'traces of what came before remain',
+  'long after everyone has left',
+  'before the first arrival',
+  'time has passed visibly',
+  'caught mid-transition',
+  'the day is ending',
+  'the night is at its deepest point',
+  'early morning stillness, not yet awake',
+  'the light is in the middle of changing',
+  'suspended in anticipation of what comes next',
+  'the moment just after the event',
+  'preserved against decay, held in stasis',
+  'overgrown with time, reclaimed',
+  'recently abandoned, still warm',
+  'lived-in and worn by years of use',
+  'pristine and unused, waiting',
 
-export const DEFAULT_WORLD_STATE: WorldState = {
-  position: null,
-  temporal: null,
-  resonance: null,
-};
+  // atmosphere & register
+  'warmth despite the cold surroundings',
+  'nowhere to hide, fully exposed',
+  'something is wrong, difficult to name',
+  'the light feels displaced, off',
+  'impossibly vast, scale beyond comprehension',
+  'awe and quiet discovery',
+  'safe harbor, the world outside cannot enter',
+  'liminal, between states, neither here nor there',
+  'oppressive presence, the space pressing inward',
+  'unease without visible source',
+  'wonder and scale overwhelming the senses',
+  'deep intimacy and enclosure',
+  'exposed and observed from an unseen direction',
+  'suspended silence, sound absorbed',
+  'charged with memory and absence',
+  'emptiness that has physical weight',
+  'the sublime, too large to fully perceive',
+  'gentle and quietly forgotten',
+  'melancholy without cause',
+  'relief, as if arriving after a long journey',
 
-const POSITION_OVERLAYS: Record<WorldStatePosition, string[]> = {
-  'in-front':    ['viewed from the approach', 'facing forward', 'facade prominent'],
-  'behind':      ['rear aspect', 'seen from behind', 'the hidden side'],
-  'inside':      ['enclosed within', 'interior space', 'looking outward from within'],
-  'above':       ['aerial vantage', 'looking down upon', 'overhead view'],
-  'at-distance': ['seen from afar', 'environment as backdrop', 'full scale revealed'],
-};
+  // scale & detail emphasis
+  'texture and surface detail fill the frame',
+  'the full scale of the environment revealed',
+  'close enough to touch the surface',
+  'a single detail dominates everything',
+  'depth and layered planes of space',
+  'foreground elements dominate the composition',
+  'the background carries the emotional weight',
+  'partial view, cut off at the edges',
+  'the architecture frames the sky',
+  'shadow and light divide the space equally',
+  'a single light source from an unexpected angle',
+  'diffused light, no hard shadows',
+  'the environment in silhouette',
+  'reflected surfaces doubling the space',
+  'the path through the space made visible',
+];
 
-const TEMPORAL_OVERLAYS: Record<WorldStateTemporal, string[]> = {
-  'before': ['not yet touched', 'anticipatory stillness', 'before the event'],
-  'after':  ['traces remain', 'aftermath', 'time has passed'],
-};
+const PICK_COUNT = 3;
 
-const RESONANCE_OVERLAYS: Record<WorldStateResonance, string[]> = {
-  'sanctuary': ['warmth despite the cold', 'safe harbor', 'protected'],
-  'threshold': ['liminal', 'between states', 'hovering at the edge'],
-  'exposure':  ['nowhere to hide', 'open and seen', 'vulnerability'],
-  'dread':     ['something is wrong', 'the light feels off', 'unease without source'],
-  'wonder':    ['impossibly vast', 'the sublime', 'awe and discovery'],
-};
+export function getVariationPhrases(excludePhrases?: string[]): string[] {
+  const pool = excludePhrases?.length
+    ? VARIATION_PHRASE_POOL.filter(p => !excludePhrases.includes(p))
+    : VARIATION_PHRASE_POOL;
 
-export function getWorldStateOverlayPhrases(state: WorldState): string[] {
-  const phrases: string[] = [];
-  if (state.position) phrases.push(...POSITION_OVERLAYS[state.position]);
-  if (state.temporal) phrases.push(...TEMPORAL_OVERLAYS[state.temporal]);
-  if (state.resonance) phrases.push(...RESONANCE_OVERLAYS[state.resonance]);
-  return phrases;
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, Math.min(PICK_COUNT, shuffled.length));
 }
-
-export const WORLD_STATE_POSITIONS: Array<{ value: WorldStatePosition; label: string }> = [
-  { value: 'in-front',    label: 'In Front' },
-  { value: 'behind',      label: 'Behind' },
-  { value: 'inside',      label: 'Inside' },
-  { value: 'above',       label: 'Above' },
-  { value: 'at-distance', label: 'Distant' },
-];
-
-export const WORLD_STATE_TEMPORALS: Array<{ value: WorldStateTemporal; label: string }> = [
-  { value: 'before', label: 'Before' },
-  { value: 'after',  label: 'After' },
-];
-
-export const WORLD_STATE_RESONANCES: Array<{ value: WorldStateResonance; label: string }> = [
-  { value: 'sanctuary', label: 'Sanctuary' },
-  { value: 'threshold', label: 'Threshold' },
-  { value: 'exposure',  label: 'Exposure' },
-  { value: 'dread',     label: 'Dread' },
-  { value: 'wonder',    label: 'Wonder' },
-];

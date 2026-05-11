@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { InspirationField } from './InspirationField';
 import { WallPostComposer } from './wall/WallPostComposer';
 import { WorldStatePanel } from './WorldStatePanel';
-import type { WorldState } from '../../data/worldStateOverlays';
 import type { WallPostIdentityTag } from '../../types/community';
 import './WorkspacePage.css';
 
@@ -121,8 +120,9 @@ type WorkspacePageProps = {
   onChooseEnvironment: () => void;
   onAddEnvironment?: () => void;
   onRemoveEnvironment?: () => void;
-  worldState: WorldState;
-  onWorldStateChange: (next: WorldState) => void;
+  worldVariationEnabled: boolean;
+  onWorldVariationToggle: () => void;
+  onWorldVariationNext: () => void;
 
   activeOutfitName: string | null;
   onChooseWardrobe: () => void;
@@ -177,8 +177,9 @@ export function WorkspacePage({
   onChooseEnvironment,
   onAddEnvironment,
   onRemoveEnvironment,
-  worldState,
-  onWorldStateChange,
+  worldVariationEnabled,
+  onWorldVariationToggle,
+  onWorldVariationNext,
   activeOutfitName,
   onChooseWardrobe,
   onDeactivateWardrobe,
@@ -343,7 +344,7 @@ export function WorkspacePage({
               onChoose={onChooseEnvironment}
             />
             {environmentInPrompt && (
-              <WorldStatePanel state={worldState} onChange={onWorldStateChange} />
+              <WorldStatePanel enabled={worldVariationEnabled} onToggle={onWorldVariationToggle} onNext={onWorldVariationNext} />
             )}
             <LaneSlot
               label="Wardrobe"
