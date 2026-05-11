@@ -1812,6 +1812,35 @@ export function App() {
     setActiveMoodId(id);
   }, []);
 
+  const handleRandomizeLanes = useCallback(() => {
+    const pick = <T,>(arr: T[]): T | null =>
+      arr.length === 0 ? null : arr[Math.floor(Math.random() * arr.length)];
+
+    const char = pick(characters);
+    if (char) handleSelectCharacter(char.id);
+
+    const env = pick(environments);
+    if (env) {
+      handleSelectEnvironment(env.id);
+      setEnvironmentInPrompt(true);
+    }
+
+    const outfit = pick(outfits);
+    handleSelectOutfit(outfit?.id ?? null);
+
+    const style = pick(stylePresets);
+    handleSelectStylePreset(style?.id ?? null);
+
+    const lighting = pick(lightingSetups);
+    handleSelectLightingSetup(lighting?.id ?? null);
+
+    const comp = pick(compositionFrames);
+    handleSelectCompositionFrame(comp?.id ?? null);
+
+    const mood = pick(moodPresets);
+    handleSelectMoodPreset(mood?.id ?? null);
+  }, [characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, handleSelectCharacter, handleSelectEnvironment, handleSelectOutfit, handleSelectStylePreset, handleSelectLightingSetup, handleSelectCompositionFrame, handleSelectMoodPreset]);
+
   const refreshNegativePresets = useCallback(async () => {
     try {
       const next = await listNegativePresets();
@@ -3546,6 +3575,7 @@ export function App() {
           userId={authUser?.id ?? null}
           userName={authUser?.name ?? null}
           activeIdentityTags={activeIdentityTags}
+          onRandomize={handleRandomizeLanes}
         />
       )}
       </>

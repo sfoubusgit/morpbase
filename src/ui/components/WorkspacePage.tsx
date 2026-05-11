@@ -161,6 +161,7 @@ type WorkspacePageProps = {
   userId?: string | null;
   userName?: string | null;
   activeIdentityTags?: WallPostIdentityTag[];
+  onRandomize?: () => void;
 };
 
 export function WorkspacePage({
@@ -209,6 +210,7 @@ export function WorkspacePage({
   userId = null,
   userName = null,
   activeIdentityTags = [],
+  onRandomize,
 }: WorkspacePageProps) {
   const [wallComposerOpen, setWallComposerOpen] = useState(false);
 
@@ -324,6 +326,11 @@ export function WorkspacePage({
         <aside className="workspace-panel">
           <div className="workspace-panel-header">
             <span className="workspace-panel-title">Identities</span>
+            {onRandomize && (
+              <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize all lanes">
+                ⚄ Randomize
+              </button>
+            )}
           </div>
           <div className="workspace-lane-list">
             <LaneSlot
