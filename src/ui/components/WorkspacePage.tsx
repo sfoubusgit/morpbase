@@ -13,6 +13,8 @@ type LaneSlotProps = {
   onRemove?: () => void;
   onChoose: () => void;
   onDeactivate?: () => void;
+  locked?: boolean;
+  onToggleLock?: () => void;
 };
 
 type MultiLaneSlotProps = {
@@ -62,13 +64,27 @@ function LaneSlot({
   onRemove,
   onChoose,
   onDeactivate,
+  locked = false,
+  onToggleLock,
 }: LaneSlotProps) {
   const hasTwoStep = onAdd !== undefined || onRemove !== undefined;
   const isActiveInPrompt = hasTwoStep ? inPrompt : Boolean(activeName);
 
   return (
-    <div className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}`}>
-      <div className="ws-lane-label">{label}</div>
+    <div className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}`}>
+      <div className="ws-lane-label">
+        {label}
+        {onToggleLock && (
+          <button
+            type="button"
+            className={`ws-lane-lock-btn${locked ? ' ws-lane-lock-btn--on' : ''}`}
+            onClick={onToggleLock}
+            title={locked ? 'Unlock lane' : 'Lock lane'}
+          >
+            {locked ? '⊠' : '⊡'}
+          </button>
+        )}
+      </div>
       <div className="ws-lane-name">{activeName ?? <span className="ws-lane-name-empty">None</span>}</div>
       <div className="ws-lane-actions">
         {hasTwoStep ? (
@@ -170,6 +186,8 @@ type WorkspacePageProps = {
   userName?: string | null;
   activeIdentityTags?: WallPostIdentityTag[];
   onRandomize?: () => void;
+  lockedLanes?: Set<string>;
+  onToggleLaneLock?: (lane: string) => void;
   captureCount?: number;
   captureAutoName?: string;
   onCapture?: () => void;
@@ -232,6 +250,8 @@ export function WorkspacePage({
   userName = null,
   activeIdentityTags = [],
   onRandomize,
+  lockedLanes,
+  onToggleLaneLock,
   captureCount = 0,
   captureAutoName = '',
   onCapture,
@@ -427,9 +447,23 @@ export function WorkspacePage({
               variant="character"
               onChoose={onChooseCharacter}
               onDeactivate={onDeactivateCharacter}
+              locked={lockedLanes?.has('character')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
-            <div className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}`}>
-              <div className="ws-lane-label">Environment</div>
+            <div className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}`}>
+              <div className="ws-lane-label">
+                Environment
+                {onToggleLaneLock && (
+                  <button
+                    type="button"
+                    className={`ws-lane-lock-btn${lockedLanes?.has('environment') ? ' ws-lane-lock-btn--on' : ''}`}
+                    onClick={() => onToggleLaneLock('environment')}
+                    title={lockedLanes?.has('environment') ? 'Unlock lane' : 'Lock lane'}
+                  >
+                    {lockedLanes?.has('environment') ? '⊠' : '⊡'}
+                  </button>
+                )}
+              </div>
               <div className="ws-lane-name">
                 {activeEnvironmentName ?? <span className="ws-lane-name-empty">None</span>}
               </div>
@@ -465,6 +499,8 @@ export function WorkspacePage({
               variant="wardrobe"
               onChoose={onChooseWardrobe}
               onDeactivate={onDeactivateWardrobe}
+              locked={lockedLanes?.has('wardrobe')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('wardrobe') : undefined}
             />
             <LaneSlot
               label="Style"
@@ -472,6 +508,8 @@ export function WorkspacePage({
               variant="style"
               onChoose={onChooseStyle}
               onDeactivate={onDeactivateStyle}
+              locked={lockedLanes?.has('style')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('style') : undefined}
             />
             <LaneSlot
               label="Lighting"
@@ -479,6 +517,8 @@ export function WorkspacePage({
               variant="lighting"
               onChoose={onChooseLighting}
               onDeactivate={onDeactivateLighting}
+              locked={lockedLanes?.has('lighting')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('lighting') : undefined}
             />
             <LaneSlot
               label="Composition"
@@ -486,6 +526,8 @@ export function WorkspacePage({
               variant="composition"
               onChoose={onChooseComposition}
               onDeactivate={onDeactivateComposition}
+              locked={lockedLanes?.has('composition')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('composition') : undefined}
             />
             <LaneSlot
               label="Mood"
@@ -493,6 +535,8 @@ export function WorkspacePage({
               variant="mood"
               onChoose={onChooseMood}
               onDeactivate={onDeactivateMood}
+              locked={lockedLanes?.has('mood')}
+              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('mood') : undefined}
             />
             <div className="ws-lane-divider" />
             <MultiLaneSlot

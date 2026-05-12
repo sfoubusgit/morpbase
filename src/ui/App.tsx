@@ -452,6 +452,7 @@ export function App() {
   const [activeMoodId, setActiveMoodId] = useState<string | null>(initialBuilderSession?.activeMoodId ?? null);
   const [moodPresets, setMoodPresets] = useState<MoodPreset[]>([]);
   const [isMoodOpen, setIsMoodOpen] = useState(false);
+  const [lockedLanes, setLockedLanes] = useState<Set<string>>(new Set());
   const [activeNegativeIds, setActiveNegativeIds] = useState<string[]>(initialBuilderSession?.activeNegativeIds ?? []);
   const [negativePresets, setNegativePresets] = useState<NegativePreset[]>([]);
   const [isNegativeOpen, setIsNegativeOpen] = useState(false);
@@ -1887,34 +1888,54 @@ export function App() {
     setActiveMoodId(id);
   }, []);
 
+  const handleToggleLaneLock = useCallback((lane: string) => {
+    setLockedLanes(prev => {
+      const next = new Set(prev);
+      if (next.has(lane)) next.delete(lane); else next.add(lane);
+      return next;
+    });
+  }, []);
+
   const handleRandomizeLanes = useCallback(() => {
     const pick = <T,>(arr: T[]): T | null =>
       arr.length === 0 ? null : arr[Math.floor(Math.random() * arr.length)];
+    const locked = lockedLanes;
 
-    const char = pick(characters);
-    if (char) handleSelectCharacter(char.id);
-
-    const env = pick(environments);
-    if (env) {
-      handleSelectEnvironment(env.id);
-      setEnvironmentInPrompt(true);
+    if (!locked.has('character')) {
+      const char = pick(characters);
+      if (char) handleSelectCharacter(char.id);
     }
 
-    const outfit = pick(outfits);
-    handleSelectOutfit(outfit?.id ?? null);
+    if (!locked.has('environment')) {
+      const env = pick(environments);
+      if (env) { handleSelectEnvironment(env.id); setEnvironmentInPrompt(true); }
+    }
 
-    const style = pick(stylePresets);
-    handleSelectStylePreset(style?.id ?? null);
+    if (!locked.has('wardrobe')) {
+      const outfit = pick(outfits);
+      handleSelectOutfit(outfit?.id ?? null);
+    }
 
-    const lighting = pick(lightingSetups);
-    handleSelectLightingSetup(lighting?.id ?? null);
+    if (!locked.has('style')) {
+      const style = pick(stylePresets);
+      handleSelectStylePreset(style?.id ?? null);
+    }
 
-    const comp = pick(compositionFrames);
-    handleSelectCompositionFrame(comp?.id ?? null);
+    if (!locked.has('lighting')) {
+      const lighting = pick(lightingSetups);
+      handleSelectLightingSetup(lighting?.id ?? null);
+    }
 
-    const mood = pick(moodPresets);
-    handleSelectMoodPreset(mood?.id ?? null);
-  }, [characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, handleSelectCharacter, handleSelectEnvironment, handleSelectOutfit, handleSelectStylePreset, handleSelectLightingSetup, handleSelectCompositionFrame, handleSelectMoodPreset]);
+    if (!locked.has('composition')) {
+      const comp = pick(compositionFrames);
+      handleSelectCompositionFrame(comp?.id ?? null);
+    }
+
+    if (!locked.has('mood')) {
+      const mood = pick(moodPresets);
+      handleSelectMoodPreset(mood?.id ?? null);
+    }
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, handleSelectCharacter, handleSelectEnvironment, handleSelectOutfit, handleSelectStylePreset, handleSelectLightingSetup, handleSelectCompositionFrame, handleSelectMoodPreset]);
 
   const refreshNegativePresets = useCallback(async () => {
     try {
@@ -3702,6 +3723,8 @@ export function App() {
           userName={authUser?.name ?? null}
           activeIdentityTags={activeIdentityTags}
           onRandomize={handleRandomizeLanes}
+          lockedLanes={lockedLanes}
+          onToggleLaneLock={handleToggleLaneLock}
           captureCount={captureBuffer.length}
           captureAutoName={captureAutoName}
           onCapture={handleCapture}
