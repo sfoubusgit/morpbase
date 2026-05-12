@@ -449,7 +449,6 @@ export function App() {
   const [auraVariationEnabled, setAuraVariationEnabled] = useState(false);
   const [auraVariationMin, setAuraVariationMin] = useState(1);
   const [auraVariationMax, setAuraVariationMax] = useState(3);
-  const [auraVariationPhrases, setAuraVariationPhrases] = useState<string[]>([]);
   const [captureBuffer, setCaptureBuffer] = useState<string[]>([]);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
@@ -1666,36 +1665,40 @@ export function App() {
     return [...phrases].sort(() => Math.random() - 0.5).slice(0, count);
   }, []);
 
+  const applyAuraSample = useCallback((sampled: string[]) => {
+    const allWorldPhrases = activeWorld?.phrases ?? [];
+    setActiveChipTexts(prev => [
+      ...prev.filter(t => !allWorldPhrases.includes(t)),
+      ...sampled,
+    ]);
+  }, [activeWorld]);
+
   const handleAuraVariationToggle = useCallback(() => {
     setAuraVariationEnabled(prev => {
       const next = !prev;
-      if (next) setAuraVariationPhrases(pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax));
-      else setAuraVariationPhrases([]);
+      if (next) {
+        const sampled = pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax);
+        const allWorldPhrases = activeWorld?.phrases ?? [];
+        setActiveChipTexts(c => [...c.filter(t => !allWorldPhrases.includes(t)), ...sampled]);
+      }
       return next;
     });
   }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
 
   const handleAuraVariationNext = useCallback(() => {
-    setAuraVariationPhrases(pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax));
-  }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
+    const sampled = pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax);
+    applyAuraSample(sampled);
+  }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases, applyAuraSample]);
 
   const handleAuraVariationMinChange = useCallback((val: number) => {
     setAuraVariationMin(val);
     setAuraVariationMax(prev => Math.max(prev, val));
-    if (auraVariationEnabled) {
-      const newMax = Math.max(auraVariationMax, val);
-      setAuraVariationPhrases(pickAuraPhrases(activeWorld?.phrases ?? [], val, newMax));
-    }
-  }, [auraVariationEnabled, auraVariationMax, activeWorld, pickAuraPhrases]);
+  }, []);
 
   const handleAuraVariationMaxChange = useCallback((val: number) => {
     setAuraVariationMax(val);
     setAuraVariationMin(prev => Math.min(prev, val));
-    if (auraVariationEnabled) {
-      const newMin = Math.min(auraVariationMin, val);
-      setAuraVariationPhrases(pickAuraPhrases(activeWorld?.phrases ?? [], newMin, val));
-    }
-  }, [auraVariationEnabled, auraVariationMin, activeWorld, pickAuraPhrases]);
+  }, []);
 
   const handleEnvironmentLightChange = useCallback((dimension: 'time' | 'weather' | 'scale' | 'condition', value: string | null) => {
     switch (dimension) {
@@ -3637,10 +3640,10 @@ export function App() {
           onChooseObject={() => setIsObjectOpen(true)}
           onRemoveObject={handleRemoveObject}
           activeWorldName={activeWorld?.name ?? null}
-          activeWorldPhrases={auraVariationEnabled && auraVariationPhrases.length > 0 ? auraVariationPhrases : (activeWorld?.phrases ?? [])}
+          activeWorldPhrases={activeWorld?.phrases ?? []}
           activeWorldPhraseCount={activeWorld?.phrases.length ?? 0}
           onChooseWorld={() => setIsWorldOpen(true)}
-          onDeactivateWorld={activeWorld ? () => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); setAuraVariationPhrases([]); } : undefined}
+          onDeactivateWorld={activeWorld ? () => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); } : undefined}
           auraVariationEnabled={auraVariationEnabled}
           auraVariationMin={auraVariationMin}
           auraVariationMax={auraVariationMax}
@@ -3756,8 +3759,8 @@ export function App() {
         isOpen={isWorldOpen}
         onClose={() => setIsWorldOpen(false)}
         activeWorldId={activeWorld?.id ?? null}
-        onSelectWorld={(id, name, phrases) => { setActiveWorld({ id, name, phrases }); setActiveChipTexts([]); setAuraVariationEnabled(false); setAuraVariationPhrases([]); }}
-        onDeactivate={() => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); setAuraVariationPhrases([]); }}
+        onSelectWorld={(id, name, phrases) => { setActiveWorld({ id, name, phrases }); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
+        onDeactivate={() => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
       />
       <Modal
         isOpen={isFeedbackModalOpen}
