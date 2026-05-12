@@ -154,8 +154,16 @@ type WorkspacePageProps = {
 
   activeWorldName: string | null;
   activeWorldPhrases: string[];
+  activeWorldPhraseCount?: number;
   onChooseWorld: () => void;
   onDeactivateWorld?: () => void;
+  auraVariationEnabled?: boolean;
+  auraVariationMin?: number;
+  auraVariationMax?: number;
+  onAuraVariationToggle?: () => void;
+  onAuraVariationNext?: () => void;
+  onAuraVariationMinChange?: (n: number) => void;
+  onAuraVariationMaxChange?: (n: number) => void;
 
   authUid?: string | null;
   userId?: string | null;
@@ -211,6 +219,14 @@ export function WorkspacePage({
   activeWorldPhrases,
   onChooseWorld,
   onDeactivateWorld,
+  activeWorldPhraseCount = 0,
+  auraVariationEnabled = false,
+  auraVariationMin = 1,
+  auraVariationMax = 3,
+  onAuraVariationToggle,
+  onAuraVariationNext,
+  onAuraVariationMinChange,
+  onAuraVariationMaxChange,
   authUid = null,
   userId = null,
   userName = null,
@@ -494,13 +510,52 @@ export function WorkspacePage({
               onRemove={onRemoveNegative}
             />
             <div className="ws-lane-divider" />
-            <LaneSlot
-              label="Aura"
-              activeName={activeWorldName}
-              variant="aura"
-              onChoose={onChooseWorld}
-              onDeactivate={onDeactivateWorld}
-            />
+            <div className={`ws-lane-slot ws-lane-slot-aura${activeWorldName ? ' ws-lane-slot-active' : ''}`}>
+              <div className="ws-lane-label">Aura</div>
+              <div className="ws-lane-name">{activeWorldName ?? <span className="ws-lane-name-empty">None</span>}</div>
+              <div className="ws-lane-actions">
+                {activeWorldName && onDeactivateWorld && (
+                  <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onDeactivateWorld}>Off</button>
+                )}
+                <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseWorld}>
+                  {activeWorldName ? 'Change' : 'Choose'}
+                </button>
+              </div>
+              {activeWorldName && activeWorldPhraseCount >= 2 && onAuraVariationToggle && (
+                <div className="ws-aura-variation">
+                  <button
+                    type="button"
+                    className={`ws-env-variation-toggle${auraVariationEnabled ? ' ws-env-variation-toggle--on' : ''}`}
+                    onClick={onAuraVariationToggle}
+                  >
+                    Variation {auraVariationEnabled ? 'On' : 'Off'}
+                  </button>
+                  {auraVariationEnabled && (
+                    <>
+                      <span className="ws-aura-variation-label">pick</span>
+                      <input
+                        type="number"
+                        className="ws-aura-variation-input"
+                        min={1}
+                        max={activeWorldPhraseCount}
+                        value={auraVariationMin}
+                        onChange={e => onAuraVariationMinChange?.(Math.max(1, Math.min(activeWorldPhraseCount, Number(e.target.value))))}
+                      />
+                      <span className="ws-aura-variation-label">–</span>
+                      <input
+                        type="number"
+                        className="ws-aura-variation-input"
+                        min={1}
+                        max={activeWorldPhraseCount}
+                        value={auraVariationMax}
+                        onChange={e => onAuraVariationMaxChange?.(Math.max(1, Math.min(activeWorldPhraseCount, Number(e.target.value))))}
+                      />
+                      <button type="button" className="ws-env-variation-next" onClick={onAuraVariationNext}>→</button>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </aside>
 
