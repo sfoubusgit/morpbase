@@ -151,7 +151,7 @@ export function InspirationField({
             {text}
           </button>
         ))}
-        {chips.map(chip => (
+        {chips.filter(c => !activeTexts.includes(c.text)).map(chip => (
           <button
             key={chip.id}
             type="button"

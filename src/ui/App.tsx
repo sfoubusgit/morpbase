@@ -1665,30 +1665,28 @@ export function App() {
     return [...phrases].sort(() => Math.random() - 0.5).slice(0, count);
   }, []);
 
-  const applyAuraSample = useCallback((sampled: string[]) => {
-    const allWorldPhrases = activeWorld?.phrases ?? [];
-    setActiveChipTexts(prev => [
-      ...prev.filter(t => !allWorldPhrases.includes(t)),
-      ...sampled,
-    ]);
-  }, [activeWorld]);
-
   const handleAuraVariationToggle = useCallback(() => {
-    setAuraVariationEnabled(prev => {
-      const next = !prev;
-      if (next) {
-        const sampled = pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax);
-        const allWorldPhrases = activeWorld?.phrases ?? [];
-        setActiveChipTexts(c => [...c.filter(t => !allWorldPhrases.includes(t)), ...sampled]);
-      }
-      return next;
-    });
-  }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
+    const willEnable = !auraVariationEnabled;
+    setAuraVariationEnabled(willEnable);
+    if (willEnable) {
+      const phrases = activeWorld?.phrases ?? [];
+      const sampled = pickAuraPhrases(phrases, auraVariationMin, auraVariationMax);
+      setActiveChipTexts(prev => [
+        ...prev.filter(t => !phrases.includes(t)),
+        ...sampled,
+      ]);
+    }
+  }, [auraVariationEnabled, activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
 
   const handleAuraVariationNext = useCallback(() => {
-    const sampled = pickAuraPhrases(activeWorld?.phrases ?? [], auraVariationMin, auraVariationMax);
-    applyAuraSample(sampled);
-  }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases, applyAuraSample]);
+    const phrases = activeWorld?.phrases ?? [];
+    if (phrases.length === 0) return;
+    const sampled = pickAuraPhrases(phrases, auraVariationMin, auraVariationMax);
+    setActiveChipTexts(prev => [
+      ...prev.filter(t => !phrases.includes(t)),
+      ...sampled,
+    ]);
+  }, [activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
 
   const handleAuraVariationMinChange = useCallback((val: number) => {
     setAuraVariationMin(val);
