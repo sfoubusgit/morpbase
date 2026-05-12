@@ -71,17 +71,15 @@ function LaneSlot({
   const isActiveInPrompt = hasTwoStep ? inPrompt : Boolean(activeName);
 
   return (
-    <div className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}`}>
-      <div
-        className={`ws-lane-label${onToggleLock ? ' ws-lane-label-toggleable' : ''}`}
-        onClick={onToggleLock}
-        title={onToggleLock ? (locked ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
-        role={onToggleLock ? 'button' : undefined}
-      >
-        {label}
-      </div>
+    <div
+      className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}`}
+      onClick={onToggleLock}
+      title={onToggleLock ? (locked ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+      role={onToggleLock ? 'button' : undefined}
+    >
+      <div className="ws-lane-label">{label}</div>
       <div className="ws-lane-name">{activeName ?? <span className="ws-lane-name-empty">None</span>}</div>
-      <div className="ws-lane-actions">
+      <div className="ws-lane-actions" onClick={onToggleLock ? e => e.stopPropagation() : undefined}>
         {hasTwoStep ? (
           <>
             {activeName && !inPrompt && onAdd && (
@@ -448,19 +446,17 @@ export function WorkspacePage({
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
-            <div className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}`}>
-              <div
-                className={`ws-lane-label${onToggleLaneLock ? ' ws-lane-label-toggleable' : ''}`}
-                onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
-                title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
-                role={onToggleLaneLock ? 'button' : undefined}
-              >
-                Environment
-              </div>
+            <div
+              className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
+              onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
+              title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+              role={onToggleLaneLock ? 'button' : undefined}
+            >
+              <div className="ws-lane-label">Environment</div>
               <div className="ws-lane-name">
                 {activeEnvironmentName ?? <span className="ws-lane-name-empty">None</span>}
               </div>
-              <div className="ws-lane-actions">
+              <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                 {activeEnvironmentName && !environmentInPrompt && onAddEnvironment && (
                   <button type="button" className="ws-lane-btn ws-lane-btn-add" onClick={onAddEnvironment}>Add</button>
                 )}
@@ -472,7 +468,7 @@ export function WorkspacePage({
                 </button>
               </div>
               {environmentInPrompt && (
-                <div className="ws-env-variation">
+                <div className="ws-env-variation" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                   <button
                     type="button"
                     className={`ws-env-variation-toggle${worldVariationEnabled ? ' ws-env-variation-toggle--on' : ''}`}
