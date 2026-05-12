@@ -81,7 +81,7 @@ function LaneSlot({
             onClick={onToggleLock}
             title={locked ? 'Unlock lane' : 'Lock lane'}
           >
-            {locked ? '⊠' : '⊡'}
+            {locked ? 'Locked' : 'Lock'}
           </button>
         )}
       </div>
@@ -435,9 +435,12 @@ export function WorkspacePage({
           <div className="workspace-panel-header">
             <span className="workspace-panel-title">Identities</span>
             {onRandomize && (
-              <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize all lanes">
-                ⚄ Randomize
-              </button>
+              <div className="ws-randomize-group">
+                <span className="ws-randomize-hint">lock to pin →</span>
+                <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize unlocked lanes">
+                  ⚄ Randomize
+                </button>
+              </div>
             )}
           </div>
           <div className="workspace-lane-list">
@@ -460,7 +463,7 @@ export function WorkspacePage({
                     onClick={() => onToggleLaneLock('environment')}
                     title={lockedLanes?.has('environment') ? 'Unlock lane' : 'Lock lane'}
                   >
-                    {lockedLanes?.has('environment') ? '⊠' : '⊡'}
+                    {lockedLanes?.has('environment') ? 'Locked' : 'Lock'}
                   </button>
                 )}
               </div>

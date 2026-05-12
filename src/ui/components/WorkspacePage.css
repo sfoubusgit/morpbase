@@ -489,26 +489,37 @@
 
 .ws-lane-lock-btn {
   background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid transparent;
+  padding: 1px 5px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-  color: #4b5563;
-  opacity: 0.35;
-  transition: opacity 0.15s, color 0.15s;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: #6b7280;
   margin-left: auto;
-  letter-spacing: 0;
-  text-transform: none;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.ws-lane-lock-btn:hover { opacity: 0.7; }
+.ws-lane-lock-btn:hover {
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.08);
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.35);
+}
 .ws-lane-lock-btn--on {
-  opacity: 1;
   color: #a78bfa;
+  border-color: rgba(167, 139, 250, 0.6);
+  background: rgba(167, 139, 250, 0.12);
+  box-shadow: 0 0 10px rgba(167, 139, 250, 0.5), 0 0 20px rgba(167, 139, 250, 0.2);
+}
+.ws-lane-lock-btn--on:hover {
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.65), 0 0 24px rgba(167, 139, 250, 0.3);
 }
 
 .ws-lane-slot-locked {
-  opacity: 0.55;
+  opacity: 0.6;
   position: relative;
 }
 .ws-lane-slot-locked::after {
@@ -516,8 +527,23 @@
   position: absolute;
   inset: 0;
   border-radius: 6px;
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  box-shadow: inset 0 0 8px rgba(167, 139, 250, 0.08);
   pointer-events: none;
+}
+
+.ws-randomize-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ws-randomize-hint {
+  font-size: 9px;
+  font-weight: 500;
+  color: #4b5563;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  white-space: nowrap;
 }
 
 .ws-lane-name {
