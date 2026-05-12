@@ -302,6 +302,32 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'my-profile' | 'creator-profile' | 'admin';
+
+const PAGE_TO_PARAM: Record<PageId, string> = {
+  'generator': '',
+  'identity-systems': 'worlds',
+  'prompts': 'memory',
+  'user-pools': 'lexicon',
+  'community': 'community',
+  'my-profile': 'profile',
+  'creator-profile': '',
+  'admin': 'admin',
+};
+
+const PARAM_TO_PAGE: Record<string, PageId> = Object.fromEntries(
+  Object.entries(PAGE_TO_PARAM).filter(([, v]) => v).map(([k, v]) => [v, k as PageId])
+);
+
+const getPageFromUrl = (): PageId | null => {
+  try {
+    const param = new URLSearchParams(window.location.search).get('page');
+    return param && PARAM_TO_PAGE[param] ? PARAM_TO_PAGE[param] : null;
+  } catch {
+    return null;
+  }
+};
+
 const parseCreatorHash = (): { creatorId?: string | null; creatorName?: string | null; creatorAuthUid?: string | null } | null => {
   try {
     if (!window.location.hash.startsWith('#creator')) return null;
@@ -356,9 +382,11 @@ export function App() {
       return false;
     }
   });
-  const [activePage, setActivePage] = useState<'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'my-profile' | 'creator-profile' | 'admin'>(() => {
+  const [activePage, setActivePage] = useState<PageId>(() => {
     try {
       if (parseCreatorHash()) return 'creator-profile';
+      const fromUrl = getPageFromUrl();
+      if (fromUrl) return fromUrl;
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'identity-systems') return 'identity-systems';
       if (saved === 'prompts') return 'prompts';
@@ -3241,12 +3269,19 @@ export function App() {
     : null;
   
 
-  // Persist active page
+  // Persist active page + sync URL
   useEffect(() => {
     try {
       window.localStorage.setItem('promptgen:active_page', activePage);
     } catch {
       // ignore
+    }
+    if (activePage === 'creator-profile') return; // hash system handles this
+    const param = PAGE_TO_PARAM[activePage];
+    const next = param ? `?page=${param}` : window.location.pathname;
+    const current = window.location.search || window.location.pathname;
+    if (current !== next) {
+      window.history.pushState({ page: activePage }, '', param ? `?page=${param}` : '/');
     }
   }, [activePage]);
 
@@ -3306,10 +3341,23 @@ export function App() {
       }
     };
 
+    const syncFromPopState = () => {
+      const creatorTarget = parseCreatorHash();
+      if (creatorTarget) {
+        setSelectedCreatorProfileTarget(creatorTarget);
+        setActivePage('creator-profile');
+        return;
+      }
+      const page = getPageFromUrl();
+      setActivePage(page ?? 'generator');
+    };
+
     syncFromHash();
     window.addEventListener('hashchange', syncFromHash);
+    window.addEventListener('popstate', syncFromPopState);
     return () => {
       window.removeEventListener('hashchange', syncFromHash);
+      window.removeEventListener('popstate', syncFromPopState);
     };
   }, []);
 
