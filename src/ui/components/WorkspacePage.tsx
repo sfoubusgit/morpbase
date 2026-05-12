@@ -72,18 +72,13 @@ function LaneSlot({
 
   return (
     <div className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}`}>
-      <div className="ws-lane-label">
+      <div
+        className={`ws-lane-label${onToggleLock ? ' ws-lane-label-toggleable' : ''}`}
+        onClick={onToggleLock}
+        title={onToggleLock ? (locked ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+        role={onToggleLock ? 'button' : undefined}
+      >
         {label}
-        {onToggleLock && (
-          <button
-            type="button"
-            className={`ws-lane-lock-btn${locked ? ' ws-lane-lock-btn--on' : ''}`}
-            onClick={onToggleLock}
-            title={locked ? 'Unlock lane' : 'Lock lane'}
-          >
-            {locked ? 'Locked' : 'Lock'}
-          </button>
-        )}
       </div>
       <div className="ws-lane-name">{activeName ?? <span className="ws-lane-name-empty">None</span>}</div>
       <div className="ws-lane-actions">
@@ -454,18 +449,13 @@ export function WorkspacePage({
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
             <div className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}`}>
-              <div className="ws-lane-label">
+              <div
+                className={`ws-lane-label${onToggleLaneLock ? ' ws-lane-label-toggleable' : ''}`}
+                onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
+                title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+                role={onToggleLaneLock ? 'button' : undefined}
+              >
                 Environment
-                {onToggleLaneLock && (
-                  <button
-                    type="button"
-                    className={`ws-lane-lock-btn${lockedLanes?.has('environment') ? ' ws-lane-lock-btn--on' : ''}`}
-                    onClick={() => onToggleLaneLock('environment')}
-                    title={lockedLanes?.has('environment') ? 'Unlock lane' : 'Lock lane'}
-                  >
-                    {lockedLanes?.has('environment') ? 'Locked' : 'Lock'}
-                  </button>
-                )}
               </div>
               <div className="ws-lane-name">
                 {activeEnvironmentName ?? <span className="ws-lane-name-empty">None</span>}
