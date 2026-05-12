@@ -74,7 +74,7 @@ function LaneSlot({
     <div
       className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}`}
       onClick={onToggleLock}
-      title={onToggleLock ? (locked ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+      title={onToggleLock ? (locked ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
       role={onToggleLock ? 'button' : undefined}
     >
       <div className="ws-lane-label">{label}</div>
@@ -429,7 +429,7 @@ export function WorkspacePage({
             <span className="workspace-panel-title">Identities</span>
             {onRandomize && (
               <div className="ws-randomize-group">
-                <span className="ws-randomize-hint">lock to pin →</span>
+                <span className="ws-randomize-hint">lock to roll →</span>
                 <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize unlocked lanes">
                   ⚄ Randomize
                 </button>
@@ -449,7 +449,7 @@ export function WorkspacePage({
             <div
               className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
-              title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to unpin' : 'Click to pin (exclude from randomize)') : undefined}
+              title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
               role={onToggleLaneLock ? 'button' : undefined}
             >
               <div className="ws-lane-label">Environment</div>

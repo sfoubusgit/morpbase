@@ -1900,38 +1900,39 @@ export function App() {
     const pick = <T,>(arr: T[]): T | null =>
       arr.length === 0 ? null : arr[Math.floor(Math.random() * arr.length)];
     const locked = lockedLanes;
+    const rollAll = locked.size === 0;
 
-    if (!locked.has('character')) {
+    if (rollAll || locked.has('character')) {
       const char = pick(characters);
       if (char) handleSelectCharacter(char.id);
     }
 
-    if (!locked.has('environment')) {
+    if (rollAll || locked.has('environment')) {
       const env = pick(environments);
       if (env) { handleSelectEnvironment(env.id); setEnvironmentInPrompt(true); }
     }
 
-    if (!locked.has('wardrobe')) {
+    if (rollAll || locked.has('wardrobe')) {
       const outfit = pick(outfits);
       handleSelectOutfit(outfit?.id ?? null);
     }
 
-    if (!locked.has('style')) {
+    if (rollAll || locked.has('style')) {
       const style = pick(stylePresets);
       handleSelectStylePreset(style?.id ?? null);
     }
 
-    if (!locked.has('lighting')) {
+    if (rollAll || locked.has('lighting')) {
       const lighting = pick(lightingSetups);
       handleSelectLightingSetup(lighting?.id ?? null);
     }
 
-    if (!locked.has('composition')) {
+    if (rollAll || locked.has('composition')) {
       const comp = pick(compositionFrames);
       handleSelectCompositionFrame(comp?.id ?? null);
     }
 
-    if (!locked.has('mood')) {
+    if (rollAll || locked.has('mood')) {
       const mood = pick(moodPresets);
       handleSelectMoodPreset(mood?.id ?? null);
     }
