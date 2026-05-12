@@ -3595,6 +3595,7 @@ export function App() {
           activeCharacterId={activeCharacterId}
           activeCharacterName={activeCharacterDisplayName}
           externalOpenSaveSignal={savePromptOpenSignal}
+          defaultSaveName={captureAutoName}
         />
       ) : (
         <WorkspacePage

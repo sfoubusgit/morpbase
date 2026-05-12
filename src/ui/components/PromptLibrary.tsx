@@ -38,6 +38,7 @@ type PromptLibraryProps = {
   showLocalPrompts?: boolean;
   hideSaveBar?: boolean;
   externalOpenSaveSignal?: number;
+  defaultSaveName?: string;
   renderLibraryShell?: boolean;
   onPromptSaved?: (message: string) => void;
   activeCharacterId?: string | null;
@@ -130,6 +131,7 @@ export function PromptLibrary({
   showLocalPrompts = true,
   hideSaveBar = false,
   externalOpenSaveSignal = 0,
+  defaultSaveName,
   renderLibraryShell = true,
   onPromptSaved,
   activeCharacterId = null,
@@ -259,9 +261,12 @@ export function PromptLibrary({
   useEffect(() => {
     if (externalOpenSaveSignal > lastHandledOpenSignalRef.current) {
       lastHandledOpenSignalRef.current = externalOpenSaveSignal;
+      if (defaultSaveName && !name) {
+        setName(defaultSaveName);
+      }
       setIsSaveModalOpen(true);
     }
-  }, [externalOpenSaveSignal]);
+  }, [externalOpenSaveSignal, defaultSaveName, name]);
 
   useEffect(() => {
     try {

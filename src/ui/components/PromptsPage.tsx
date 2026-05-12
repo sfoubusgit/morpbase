@@ -17,6 +17,7 @@ type PromptsPageProps = {
   activeCharacterId?: string | null;
   activeCharacterName?: string | null;
   externalOpenSaveSignal?: number;
+  defaultSaveName?: string;
 };
 
 const FLOW_STEPS = [
@@ -119,6 +120,7 @@ export function PromptsPage({
   activeCharacterId = null,
   activeCharacterName = null,
   externalOpenSaveSignal,
+  defaultSaveName,
 }: PromptsPageProps) {
   return (
     <div className="memory-page">
@@ -177,6 +179,7 @@ export function PromptsPage({
           activeCharacterId={activeCharacterId}
           activeCharacterName={activeCharacterName}
           externalOpenSaveSignal={externalOpenSaveSignal}
+          defaultSaveName={defaultSaveName}
           showCloudPrompts
           showLocalPrompts={false}
         />
