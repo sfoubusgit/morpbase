@@ -306,9 +306,9 @@ type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'com
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
-  'identity-systems': 'worlds',
+  'identity-systems': 'lexicon',
   'prompts': 'memory',
-  'user-pools': 'lexicon',
+  'user-pools': 'auras',
   'community': 'community',
   'my-profile': 'profile',
   'creator-profile': '',
