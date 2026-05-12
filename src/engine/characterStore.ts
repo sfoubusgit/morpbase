@@ -13,6 +13,7 @@ import type {
 const CHARACTER_STORE_KEY = 'promptgen:characters:v1';
 const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
 const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v3';
+const CHARACTER_SEED_FLAG_KEY_V4 = 'promptgen:characters:seeded:v4';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -264,6 +265,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
 const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1747699200000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -396,6 +398,42 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V4_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_thalara',
+    name: 'Thalara',
+    summary: 'A deep-sea primordial — indigo skin mapped with bioluminescent aquamarine patterns, kelp-black drifting hair, and abyssal eyes lit cold from within.',
+    identity: {
+      archetype: 'primordial',
+      presentation: 'nude',
+      ageImpression: 'ageless adult',
+      visualAnchors: [
+        { id: 'anchor_th_1', label: 'Silhouette', kind: 'silhouette', text: 'tall lithe woman, unnaturally long limbs, slight iridescent membrane between elongated fingers' },
+        { id: 'anchor_th_2', label: 'Skin', kind: 'other', text: 'deep indigo-blue skin, matte with a subtle scaled texture, catches light like wet obsidian' },
+        { id: 'anchor_th_3', label: 'Bioluminescence', kind: 'other', text: 'aquamarine bioluminescent patterns tracing the spine, collarbones, and hands, pulsing faintly' },
+        { id: 'anchor_th_4', label: 'Hair', kind: 'hair', text: 'kelp-black hair drifting as if submerged, loose strands of deep emerald-black, weightless' },
+        { id: 'anchor_th_5', label: 'Eyes', kind: 'eyes', text: 'large eyes with no whites, deep abyssal black iris lit by a cold blue inner glow' },
+        { id: 'anchor_th_6', label: 'Face', kind: 'face', text: 'sharp symmetrical features, slightly too-wide mouth, expression of ancient and absolute calm' },
+      ],
+      motifs: [
+        { id: 'motif_th_1', label: 'The Abyss', text: 'crushing depth, cold light, the patience of geological time, beauty born in total darkness' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tall lithe woman with deep indigo-blue skin, subtle scaled texture',
+        'aquamarine bioluminescent patterns tracing the spine, collarbones, and hands',
+        'kelp-black hair drifting weightlessly as if submerged',
+        'large abyssal black eyes with cold blue inner glow',
+        'sharp symmetrical features, slightly too-wide mouth, ancient calm expression',
+        'iridescent membrane between elongated fingers',
+      ],
+    },
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -435,14 +473,29 @@ const writeCharacters = (characters: CharacterIdentity[]) => {
 };
 
 const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] => {
-  if (readStorageItem(CHARACTER_SEED_FLAG_KEY) !== null) return characters;
-  writeStorageItem(CHARACTER_SEED_FLAG_KEY, true);
-  const existingIds = new Set(characters.map(c => c.id));
-  const toAdd = DEFAULT_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
-  if (toAdd.length === 0) return characters;
-  const merged = sortCharacters([...characters, ...toAdd]);
-  writeCharacters(merged);
-  return merged;
+  let result = characters;
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = DEFAULT_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V4_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  return result;
 };
 
 const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput => {
