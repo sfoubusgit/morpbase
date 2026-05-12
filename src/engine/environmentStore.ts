@@ -7,6 +7,7 @@ import type {
 const ENVIRONMENT_STORE_KEY = 'promptgen:environments:v1';
 const ENVIRONMENT_STORE_BACKUP_KEY = 'promptgen:environments:backup:v1';
 const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v3';
+const ENVIRONMENT_SEED_FLAG_KEY_V4 = 'promptgen:environments:seeded:v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -98,6 +99,7 @@ const sanitizeEnvironment = (value: unknown): EnvironmentIdentity | null => {
 const ENV_SEED_TS = 1746748800000;
 const ENV_SEED_TS_2 = 1746835200000;
 const ENV_SEED_TS_3 = 1747612800000;
+const ENV_SEED_TS_4 = 1747785600000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -238,6 +240,179 @@ const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+const V4_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_tidal_archive',
+    name: 'The Tidal Archive',
+    summary: 'A vast underwater library, shelves colonized by coral, pages drifting in slow current, bioluminescent jellyfish between the stacks.',
+    phraseBundle: {
+      core: [
+        'vast underwater library, stone shelves colonized by coral and sea anemone',
+        'waterlogged tomes open and drifting, pages turned by slow current',
+        'bioluminescent jellyfish drifting silently between the stacks',
+        'salt-encrusted reading tables and overturned candelabra on the seafloor',
+        'diffuse green light filtering from far above, cold and even',
+        'absolute silence except for the low groan of deep water pressure',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_salt_mirror',
+    name: 'The Salt Mirror',
+    summary: 'A vast salt flat at dusk, a thin film of water creating a perfect reflection of the sky — horizon indistinguishable.',
+    phraseBundle: {
+      core: [
+        'vast salt flat at dusk, sky reflected without distortion in a thin film of still water',
+        'indigo and burnt orange twilight, the horizon invisible where sky meets its mirror',
+        'white crystalline salt beneath ankle-deep water, the world doubled and inverted underfoot',
+        'no wind, no movement, total stillness in every direction',
+        'distant dark mountain silhouettes at the very edge of the world',
+        'silence that has physical weight, complete and permanent',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_ossuary_garden',
+    name: 'The Ossuary Garden',
+    summary: 'An ancient enclosed garden of carved bone arches and overgrown memorial stonework, wildflowers growing through ribcages.',
+    phraseBundle: {
+      core: [
+        'ancient enclosed garden, carved skeletal arches spanning weathered stone paths',
+        'wildflowers growing through ribcages and between vertebrae, vivid against bleached white bone',
+        'climbing roses and thick moss reclaiming the ossuary, bones barely visible beneath',
+        'soft overcast light, no hard shadows, the air quiet and enclosed',
+        'stone garden walls covered in memorial script, mostly worn illegible',
+        'the smell of rain, earth, and very old stone',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_hanging_forest',
+    name: 'The Hanging Forest',
+    summary: 'A forest grown on the underside of a massive cliff face — roots above, canopy below, trees descending into mist.',
+    phraseBundle: {
+      core: [
+        'massive sandstone cliff, a forest growing from its underside, trees descending into open air',
+        'roots gripping the rock ceiling above, canopy hanging below into mist',
+        'looking down into the treetops, sky visible below the lowest branches',
+        'warm amber light filtering upward through the inverted canopy',
+        'deep mist threading between hanging branches, birds moving upward through it',
+        'the sense of gravity quietly disagreeing with everything visible',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_glass_ruin',
+    name: 'The Glass Ruin',
+    summary: 'Ruins of an ancient city built entirely from glass, now shattered and overgrown, light refracting into spectrum across every surface.',
+    phraseBundle: {
+      core: [
+        'ruins of a city built entirely from glass, collapsed and overgrown',
+        'shattered colored panes everywhere, light refracting into spectrum fragments across moss and stone',
+        'towers still partially standing, hollow and transparent, sky visible through their walls',
+        'thick moss and creeping vines threading through glass debris and fallen arches',
+        'every step crunches, every surface catches a different angle of light',
+        'the sound of glass shifting in wind, faint and continuous',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_black_tide_docks',
+    name: 'Black Tide Docks',
+    summary: 'Rain-soaked floating docks at deep night, oil lanterns swinging, black water below, figures moving in fog.',
+    phraseBundle: {
+      core: [
+        'rain-soaked floating docks at deep night, black water below',
+        'oil lanterns swinging in the wind, amber smears across wet planking',
+        'narrow platforms between moored vessels, ropes groaning in the swell',
+        'figures in long coats moving between stalls, heads down against the rain',
+        'the smell of brine, engine oil, and something being cooked somewhere nearby',
+        'fog pressing down on everything above shoulder height, the sky gone',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_volcanic_shore',
+    name: 'The Volcanic Shore',
+    summary: 'Black volcanic rock coast where slow lava meets cold ocean — steam columns rising, orange glow, the world still being made.',
+    phraseBundle: {
+      core: [
+        'black volcanic rock coast, slow lava meeting cold ocean at the waterline',
+        'columns of white steam rising where lava touches sea, continuous and enormous',
+        'deep orange and red glow from the lava surface, deep black sky above',
+        'the rock underfoot still warm, cracked into geometric plates by cooling',
+        'the hiss of superheated stone, waves breaking against rock that did not exist yesterday',
+        'distant volcanic cone glowing at the horizon, the source of everything',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_drowned_planetarium',
+    name: 'The Drowned Planetarium',
+    summary: 'A vast domed planetarium submerged beneath a lake, star projectors still running, constellations turning slowly through cold water.',
+    phraseBundle: {
+      core: [
+        'vast domed planetarium submerged under a still lake, dome cracked but holding',
+        'star projectors still running, casting constellation patterns through the water',
+        'constellations rotating slowly on the curved ceiling, shapes distorted by water',
+        'overturned wooden seating, fine sediment settled on every surface',
+        'cold clear water, visibility good, everything lit by the slowly turning projector',
+        'the sky and the deep occupying the same space, indistinguishable',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_brine_caves',
+    name: 'The Brine Caves',
+    summary: 'A vast cave system of salt crystal formations, walls and ceiling dense with translucent white pillars, amber light through thick crystal.',
+    phraseBundle: {
+      core: [
+        'vast cave system formed by salt crystallization, walls and ceiling covered in white formations',
+        'translucent crystal pillars growing floor to ceiling, dense and geometric',
+        'pink and amber light filtering through thick crystal walls, warm and sourceless',
+        'a shallow brine pool on the cave floor, perfectly still and perfectly clear',
+        'absolute silence, no wind, only the occasional slow drip from above',
+        'crystal edges catching light at every angle, the cave never fully dark',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+  {
+    id: 'environment_seed_fog_monastery',
+    name: 'The Fog Monastery',
+    summary: 'An ancient stone monastery on a narrow mountain ridge, perpetual fog on all sides — an island above the cloud line.',
+    phraseBundle: {
+      core: [
+        'ancient stone monastery on a narrow mountain ridge, perpetual fog pressing in on all sides',
+        'the monastery emerging from white fog like an island above the cloud line',
+        'worn flagstone paths between stone buildings, lanterns lit at midday against the white',
+        'fog so thick the building edges dissolve, architecture fading into pale nothing',
+        'the sound of distant bells and wind moving through stone corridors',
+        'total isolation, the world below the fog line, the sky above unreachable',
+      ],
+    },
+    createdAt: ENV_SEED_TS_4,
+    updatedAt: ENV_SEED_TS_4,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -274,14 +449,29 @@ const writeEnvironments = (environments: EnvironmentIdentity[]) => {
 };
 
 const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIdentity[] => {
-  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY) !== null) return environments;
-  writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY, true);
-  const existingIds = new Set(environments.map(e => e.id));
-  const toAdd = DEFAULT_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
-  if (toAdd.length === 0) return environments;
-  const merged = sortEnvironments([...environments, ...toAdd]);
-  writeEnvironments(merged);
-  return merged;
+  let result = environments;
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = DEFAULT_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V4_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  return result;
 };
 
 const sanitizeInput = (input: EnvironmentIdentityInput): EnvironmentIdentityInput => {
