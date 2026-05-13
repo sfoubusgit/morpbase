@@ -17,6 +17,7 @@ const CHARACTER_SEED_FLAG_KEY_V4 = 'promptgen:characters:seeded:v4';
 const CHARACTER_SEED_FLAG_KEY_V5 = 'promptgen:characters:seeded:v5';
 const CHARACTER_SEED_FLAG_KEY_V6 = 'promptgen:characters:seeded:v6';
 const CHARACTER_SEED_FLAG_KEY_V7 = 'promptgen:characters:seeded:v7';
+const CHARACTER_SEED_FLAG_KEY_V8 = 'promptgen:characters:seeded:v8';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -275,6 +276,7 @@ const SEED_TS_4 = 1747699200000;
 const SEED_TS_5 = 1747872000000;
 const SEED_TS_6 = 1747958400000;
 const SEED_TS_7 = 1748044800000;
+const SEED_TS_8 = 1748131200000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -569,6 +571,43 @@ const V7_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V8_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_pyrrok',
+    name: 'Pyrrok',
+    summary: 'An ancient red dragon whose scales shift from obsidian-black to volcanic crimson — heat that has accumulated over geological time and has not yet finished burning.',
+    tags: ['solo', 'creature'],
+    identity: {
+      archetype: 'dragon',
+      presentation: 'creature',
+      ageImpression: 'ancient',
+      visualAnchors: [
+        { id: 'anchor_py_1', label: 'Form', kind: 'silhouette', text: 'massive ancient dragon, colossal wingspan, volcanic-scarred and immovable, every scar still faintly glowing' },
+        { id: 'anchor_py_2', label: 'Scales', kind: 'other', text: 'scales shifting from deep obsidian-black to volcanic crimson, ember-orange fractures glowing at the oldest edges' },
+        { id: 'anchor_py_3', label: 'Patterns', kind: 'other', text: 'fractured volcanic glass patterns, obsidian geometry shattered and set into rigid angular formations across every surface' },
+        { id: 'anchor_py_4', label: 'Molten Veins', kind: 'other', text: 'deep red-orange molten channels tracing through the hide, glowing from within like cooling magma that has never fully cooled' },
+        { id: 'anchor_py_5', label: 'Eyes', kind: 'eyes', text: 'smoldering deep amber-gold irises, ancient intelligence behind eyes like looking into a furnace at its core' },
+        { id: 'anchor_py_6', label: 'Heat', kind: 'other', text: 'radiating waves of scorching heat, air shimmering in distortion around the entire form, faint sulfur and ash in the surrounding air' },
+      ],
+      motifs: [
+        { id: 'motif_py_1', label: 'The Tectonic Ancient', text: 'magma, volcanic age, tectonic weight, the heat of the earth\'s core given form and patience' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'ancient red dragon, colossal and volcanic-scarred, every old wound still faintly glowing',
+        'scales shifting from deep obsidian-black to volcanic crimson, ember-orange fractures at the oldest edges',
+        'fractured volcanic glass patterns, obsidian geometry shattered and set into rigid angular formations',
+        'deep red-orange molten channels tracing through the hide, glowing like magma that never fully cools',
+        'smoldering amber-gold irises, ancient intelligence behind eyes like looking into a furnace',
+        'radiating scorching heat, air shimmering in distortion, faint sulfur and ash throughout',
+      ],
+    },
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -654,6 +693,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V7_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V8_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
