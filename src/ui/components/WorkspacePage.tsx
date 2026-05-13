@@ -445,34 +445,41 @@ export function WorkspacePage({
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
-            {activeCharacterItems.length >= 2 && (
-              <div
-                className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
-                onClick={onToggleLaneLock ? () => onToggleLaneLock('dynamics') : undefined}
-                role={onToggleLaneLock ? 'button' : undefined}
-                title={onToggleLaneLock ? (lockedLanes?.has('dynamics') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
-              >
-                <div className="ws-lane-label">Dynamics</div>
-                {activeInteractionPhrase ? (
-                  <div className="ws-lane-name ws-interaction-phrase-preview">{activeInteractionPhrase.text}</div>
-                ) : (
-                  <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
-                )}
-                <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
-                  <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onRandomizeInteraction}>
-                    ⚄ Roll
-                  </button>
-                  <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseInteraction}>
-                    Browse
-                  </button>
-                  {activeInteractionPhrase && (
-                    <button type="button" className="ws-lane-btn" onClick={onRemoveInteraction} title="Clear dynamic">
-                      ×
-                    </button>
+            {(() => {
+              const needsMoreChars = activeCharacterItems.length < 2;
+              return (
+                <div
+                  className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase && !needsMoreChars ? ' ws-lane-slot-active' : ''}${needsMoreChars ? ' ws-lane-slot-inactive' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock && !needsMoreChars ? ' ws-lane-slot-lockable' : ''}`}
+                  onClick={onToggleLaneLock && !needsMoreChars ? () => onToggleLaneLock('dynamics') : undefined}
+                  role={onToggleLaneLock && !needsMoreChars ? 'button' : undefined}
+                  title={onToggleLaneLock && !needsMoreChars ? (lockedLanes?.has('dynamics') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+                >
+                  <div className="ws-lane-label">Dynamics</div>
+                  {needsMoreChars ? (
+                    <div className="ws-lane-name"><span className="ws-lane-name-empty">Needs 2+ characters</span></div>
+                  ) : activeInteractionPhrase ? (
+                    <div className="ws-lane-name ws-interaction-phrase-preview">{activeInteractionPhrase.text}</div>
+                  ) : (
+                    <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
+                  )}
+                  {!needsMoreChars && (
+                    <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
+                      <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onRandomizeInteraction}>
+                        ⚄ Roll
+                      </button>
+                      <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseInteraction}>
+                        Browse
+                      </button>
+                      {activeInteractionPhrase && (
+                        <button type="button" className="ws-lane-btn" onClick={onRemoveInteraction} title="Clear dynamic">
+                          ×
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
             <div
               className={`ws-lane-slot ws-lane-slot-environment${activeEnvironmentItems.length > 0 ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
