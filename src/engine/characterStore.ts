@@ -16,6 +16,7 @@ const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v3';
 const CHARACTER_SEED_FLAG_KEY_V4 = 'promptgen:characters:seeded:v4';
 const CHARACTER_SEED_FLAG_KEY_V5 = 'promptgen:characters:seeded:v5';
 const CHARACTER_SEED_FLAG_KEY_V6 = 'promptgen:characters:seeded:v6';
+const CHARACTER_SEED_FLAG_KEY_V7 = 'promptgen:characters:seeded:v7';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -270,6 +271,7 @@ const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747699200000;
 const SEED_TS_5 = 1747872000000;
 const SEED_TS_6 = 1747958400000;
+const SEED_TS_7 = 1748044800000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -515,6 +517,47 @@ const V6_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V7_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_homura_and_raiu',
+    name: 'Homura & Raiu',
+    summary: 'Two divine women, back-to-back — the pink flame and the purple storm. Equals in power, opposite in temperament, bound by something older than their rivalry.',
+    identity: {
+      archetype: 'duo',
+      presentation: 'clothed',
+      ageImpression: 'ageless, presented as mature young women',
+      personalityTone: 'Homura — warm, confident, slightly smug; Raiu — composed, serious, quietly sovereign',
+      visualAnchors: [
+        { id: 'anchor_hr_1', label: 'Homura — Hair', kind: 'hair', text: 'long flowing pink-salmon hair, windswept layers' },
+        { id: 'anchor_hr_2', label: 'Homura — Accessories', kind: 'accessory', text: 'gold arc-shaped ornamental hairpins, chandelier earrings with purple gemstone center, red choker' },
+        { id: 'anchor_hr_3', label: 'Homura — Eyes', kind: 'eyes', text: 'bright violet eyes, soft confident smile' },
+        { id: 'anchor_hr_4', label: 'Homura — Clothing', kind: 'clothing', text: 'white ceremonial garment with red and gold accents, revealing neckline' },
+        { id: 'anchor_hr_5', label: 'Raiu — Hair', kind: 'hair', text: 'long straight deep purple-navy hair with blunt bangs' },
+        { id: 'anchor_hr_6', label: 'Raiu — Accessories', kind: 'accessory', text: 'small blue flower hair ornament, gold hair clip' },
+        { id: 'anchor_hr_7', label: 'Raiu — Eyes', kind: 'eyes', text: 'glowing violet eyes, small beauty mark near eye, composed expression' },
+        { id: 'anchor_hr_8', label: 'Raiu — Clothing', kind: 'clothing', text: 'off-shoulder white and purple ceremonial garment with gold trim, red floral accent at shoulder' },
+        { id: 'anchor_hr_9', label: 'Pose', kind: 'other', text: 'back-to-back pose, both facing outward, equal and opposing' },
+      ],
+      motifs: [
+        { id: 'motif_hr_1', label: 'Flame & Storm', text: 'sakura petals at night, purple lightning, warmth against cold, two opposites bound as equals' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'two divine women standing back-to-back, pink flame and purple storm',
+        'long flowing pink-salmon hair beside long straight deep purple-navy hair with blunt bangs',
+        'gold arc ornamental hairpins, chandelier earrings with violet gem, red choker',
+        'white ceremonial garments with red and gold accents, off-shoulder silhouettes',
+        'bright violet eyes and glowing violet eyes, one smiling, one composed',
+        'sakura petals drifting and purple lightning splitting the night sky behind them',
+        'the quiet gravity of equals who have long since stopped needing to prove it',
+      ],
+    },
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -590,6 +633,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V6_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V7_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
