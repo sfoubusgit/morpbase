@@ -3,6 +3,7 @@ import type { LaneSet, LaneSetInput } from '../types/laneSets';
 const KEY = 'promptgen:lanesets:v1';
 const BACKUP_KEY = 'promptgen:lanesets:backup:v1';
 const SEED_FLAG = 'promptgen:lanesets:seeded:v1';
+const SEED_FLAG_V2 = 'promptgen:lanesets:seeded:v2';
 
 const SEED_TS = 1748131200000;
 
@@ -91,14 +92,33 @@ function save(sets: LaneSet[]): void {
 }
 
 function maybeApplySeed(sets: LaneSet[]): LaneSet[] {
-  if (localStorage.getItem(SEED_FLAG) !== null) return sets;
-  localStorage.setItem(SEED_FLAG, 'true');
-  const existingIds = new Set(sets.map(s => s.id));
-  const toAdd = SEED_LANE_SETS.filter(s => !existingIds.has(s.id));
-  if (toAdd.length === 0) return sets;
-  const merged = [...sets, ...toAdd];
-  save(merged);
-  return merged;
+  let current = sets;
+
+  if (localStorage.getItem(SEED_FLAG) === null) {
+    localStorage.setItem(SEED_FLAG, 'true');
+    const existingIds = new Set(current.map(s => s.id));
+    const toAdd = SEED_LANE_SETS.filter(s => !existingIds.has(s.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  // V2: overwrites seed entries that were stored with old lane configs
+  if (localStorage.getItem(SEED_FLAG_V2) === null) {
+    localStorage.setItem(SEED_FLAG_V2, 'true');
+    const seedById = new Map(SEED_LANE_SETS.map(s => [s.id, s]));
+    let changed = false;
+    current = current.map(s => {
+      const canonical = seedById.get(s.id);
+      if (!canonical) return s;
+      changed = true;
+      return canonical;
+    });
+    if (changed) save(current);
+  }
+
+  return current;
 }
 
 export function listLaneSets(): LaneSet[] {
