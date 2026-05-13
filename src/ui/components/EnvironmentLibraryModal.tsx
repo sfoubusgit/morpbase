@@ -40,7 +40,6 @@ export function EnvironmentLibraryModal({
         onCreateEnvironment={onCreateEnvironment}
         onUpdateEnvironment={onUpdateEnvironment}
         onDeleteEnvironment={onDeleteEnvironment}
-        onApplied={onClose}
       />
     </Modal>
   );

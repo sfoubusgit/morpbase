@@ -40,7 +40,6 @@ export function CharacterLibraryModal({
         onCreateCharacter={onCreateCharacter}
         onUpdateCharacter={onUpdateCharacter}
         onDeleteCharacter={onDeleteCharacter}
-        onApplied={onClose}
       />
     </Modal>
   );

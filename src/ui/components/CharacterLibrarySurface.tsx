@@ -11,7 +11,6 @@ type CharacterLibrarySurfaceProps = {
   onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onUpdateCharacter: (characterId: string, input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onDeleteCharacter: (characterId: string) => Promise<void>;
-  onApplied?: () => void;
 };
 
 type CharacterFormState = {
@@ -279,7 +278,6 @@ export function CharacterLibrarySurface({
   onCreateCharacter,
   onUpdateCharacter,
   onDeleteCharacter,
-  onApplied,
 }: CharacterLibrarySurfaceProps) {
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const coverImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -386,11 +384,7 @@ export function CharacterLibrarySurface({
 
   const handleUseCharacter = (character: CharacterIdentity) => {
     onSelectCharacter(character.id);
-    if (onApplied) {
-      onApplied();
-      return;
-    }
-    setMessage(`Applied "${character.name}" to the current workflow.`);
+    setMessage(null);
     setError(null);
   };
 
@@ -438,10 +432,6 @@ export function CharacterLibrarySurface({
       const created = await onCreateCharacter(payload);
       onSelectCharacter(created.id);
       resetAvatarInput();
-      if (onApplied) {
-        onApplied();
-        return;
-      }
       setMessage(`Created and applied "${created.name}" to the current workflow.`);
       setIsCreating(false);
       setEditingCharacterId(null);
@@ -519,6 +509,8 @@ export function CharacterLibrarySurface({
                   <article
                     key={character.id}
                     className={`character-library-card ${isActive ? 'active' : ''}`}
+                    onClick={() => handleUseCharacter(character)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <div className="character-library-card-header">
                       <div className="character-library-card-identity">
@@ -556,25 +548,20 @@ export function CharacterLibrarySurface({
                       </div>
                     )}
                     <div className="character-library-card-actions">
+                      <span className={`character-library-secondary-button${isActive ? ' character-library-active-indicator' : ''}`}>
+                        {isActive ? '✓ Active' : '+ Add'}
+                      </span>
                       <button
                         type="button"
                         className="character-library-secondary-button"
-                        onClick={() => handleUseCharacter(character)}
-                        disabled={isActive}
-                      >
-                        {isActive ? 'Active' : 'Apply'}
-                      </button>
-                      <button
-                        type="button"
-                        className="character-library-secondary-button"
-                        onClick={() => handleBeginEdit(character)}
+                        onClick={e => { e.stopPropagation(); handleBeginEdit(character); }}
                       >
                         Edit
                       </button>
                       <button
                         type="button"
                         className="character-library-danger-button"
-                        onClick={() => void handleDelete(character)}
+                        onClick={e => { e.stopPropagation(); void handleDelete(character); }}
                       >
                         Delete
                       </button>

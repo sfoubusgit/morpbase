@@ -11,7 +11,6 @@ type WardrobeSurfaceProps = {
   onCreateOutfit: (input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onUpdateOutfit: (outfitId: string, input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onDeleteOutfit: (outfitId: string) => Promise<void>;
-  onApplied?: () => void;
 };
 
 type OutfitFormState = {
@@ -45,7 +44,6 @@ export function WardrobeSurface({
   onCreateOutfit,
   onUpdateOutfit,
   onDeleteOutfit,
-  onApplied,
 }: WardrobeSurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -74,9 +72,7 @@ export function WardrobeSurface({
   };
 
   const handleApply = (id: string) => {
-    const isActive = activeOutfitIds.includes(id);
     onSelectOutfit(id);
-    if (!isActive) onApplied?.();
   };
 
   const handleSave = async (e: FormEvent) => {

@@ -40,7 +40,6 @@ export function WardrobeModal({
         onCreateOutfit={onCreateOutfit}
         onUpdateOutfit={onUpdateOutfit}
         onDeleteOutfit={onDeleteOutfit}
-        onApplied={onClose}
       />
     </Modal>
   );

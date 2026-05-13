@@ -11,7 +11,6 @@ type EnvironmentLibrarySurfaceProps = {
   onCreateEnvironment: (input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onUpdateEnvironment: (environmentId: string, input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onDeleteEnvironment: (environmentId: string) => Promise<void>;
-  onApplied?: () => void;
 };
 
 type EnvironmentFormState = {
@@ -55,7 +54,6 @@ export function EnvironmentLibrarySurface({
   onCreateEnvironment,
   onUpdateEnvironment,
   onDeleteEnvironment,
-  onApplied,
 }: EnvironmentLibrarySurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -84,7 +82,6 @@ export function EnvironmentLibrarySurface({
 
   const handleApply = (id: string) => {
     onSelectEnvironment(id);
-    onApplied?.();
   };
 
   const handleSave = async (e: FormEvent) => {

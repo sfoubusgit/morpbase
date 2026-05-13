@@ -45,7 +45,6 @@ export function LightingModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
-        onApplied={onClose}
       />
     </Modal>
   );

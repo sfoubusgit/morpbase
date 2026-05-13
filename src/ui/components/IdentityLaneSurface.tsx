@@ -58,7 +58,6 @@ type IdentityLaneSurfaceProps = {
   onCreateItem: (input: LaneItemInput) => Promise<LaneItem>;
   onUpdateItem: (id: string, input: LaneItemInput) => Promise<LaneItem>;
   onDeleteItem: (id: string) => Promise<void>;
-  onApplied?: () => void;
 };
 
 export function IdentityLaneSurface({
@@ -70,7 +69,6 @@ export function IdentityLaneSurface({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
-  onApplied,
 }: IdentityLaneSurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -89,6 +87,7 @@ export function IdentityLaneSurface({
     const item = items.find(i => i.id === id);
     if (item) setForm(formFromItem(item));
     setError(null);
+    onSelectItem(id);
   };
 
   const handleStartCreate = () => {
@@ -99,9 +98,7 @@ export function IdentityLaneSurface({
   };
 
   const handleApply = (id: string) => {
-    const isActive = activeItemIds.includes(id);
     onSelectItem(id);
-    if (!isActive) onApplied?.();
   };
 
   const handleSave = async (e: FormEvent) => {
