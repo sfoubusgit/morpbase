@@ -3,6 +3,7 @@ import type { CompositionFrame, CompositionFrameInput, CompositionStore } from '
 const COMPOSITION_STORE_KEY = 'promptgen:compositions:v1';
 const COMPOSITION_STORE_BACKUP_KEY = 'promptgen:compositions:backup:v1';
 const COMPOSITION_SEED_FLAG_KEY = 'promptgen:compositions:seeded:v2';
+const COMPOSITION_SEED_FLAG_KEY_V3 = 'promptgen:compositions:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -85,6 +86,7 @@ const sanitizeItem = (value: unknown): CompositionFrame | null => {
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1748304000000;
 
 const DEFAULT_SEED_COMPOSITIONS: CompositionFrame[] = [
   {
@@ -226,6 +228,23 @@ const DEFAULT_SEED_COMPOSITIONS: CompositionFrame[] = [
   },
 ];
 
+const V3_SEED_COMPOSITIONS: CompositionFrame[] = [
+  {
+    id: 'composition_seed_bilateral_standoff',
+    name: 'The Bilateral Standoff',
+    summary: 'Two massive subjects flanking the frame on opposing sides, facing inward. Vast negative space between them — the gap is the subject.',
+    phrases: [
+      'two subjects flanking the frame on opposing sides, both in full form head to tail',
+      'vast negative space between them — the gap is the subject of the image',
+      'camera slightly below eye level, looking horizontally across the divide',
+      'both subjects equal in frame weight, neither pushed forward or back',
+      'wide framing, the scale of the distance between them made undeniable',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const writeItems = (items: CompositionFrame[]) => {
   const payload: CompositionStore = { version: 1, items: sortItems(items) };
   writeStorageItem(COMPOSITION_STORE_KEY, payload);
@@ -233,14 +252,29 @@ const writeItems = (items: CompositionFrame[]) => {
 };
 
 const maybeApplySeed = (items: CompositionFrame[]): CompositionFrame[] => {
-  if (readStorageItem(COMPOSITION_SEED_FLAG_KEY) !== null) return items;
-  writeStorageItem(COMPOSITION_SEED_FLAG_KEY, true);
-  const existingIds = new Set(items.map(i => i.id));
-  const toAdd = DEFAULT_SEED_COMPOSITIONS.filter(i => !existingIds.has(i.id));
-  if (toAdd.length === 0) return items;
-  const merged = sortItems([...items, ...toAdd]);
-  writeItems(merged);
-  return merged;
+  let result = items;
+
+  if (readStorageItem(COMPOSITION_SEED_FLAG_KEY) === null) {
+    writeStorageItem(COMPOSITION_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = DEFAULT_SEED_COMPOSITIONS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(COMPOSITION_SEED_FLAG_KEY_V3) === null) {
+    writeStorageItem(COMPOSITION_SEED_FLAG_KEY_V3, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V3_SEED_COMPOSITIONS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  return result;
 };
 
 const readItems = (): CompositionFrame[] => {

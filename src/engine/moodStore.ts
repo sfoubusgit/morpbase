@@ -3,6 +3,7 @@ import type { MoodPreset, MoodPresetInput, MoodStore } from '../types';
 const MOOD_STORE_KEY = 'promptgen:moods:v1';
 const MOOD_STORE_BACKUP_KEY = 'promptgen:moods:backup:v1';
 const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v2';
+const MOOD_SEED_FLAG_KEY_V3 = 'promptgen:moods:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -85,6 +86,7 @@ const sanitizeItem = (value: unknown): MoodPreset | null => {
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1748304000000;
 
 const DEFAULT_SEED_MOODS: MoodPreset[] = [
   {
@@ -226,6 +228,23 @@ const DEFAULT_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+const V3_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_seed_weight_of_recognition',
+    name: 'The Weight of Recognition',
+    summary: 'The specific quality of meeting an equal after centuries alone — not challenge, not submission, only the cold acknowledgment of two things that understand each other completely.',
+    phrases: [
+      'the quality of meeting an equal after centuries alone — recognition, not challenge',
+      'neither aggression nor submission, only the absolute stillness of mutual understanding',
+      'ancient and cold, coiled but not tense, waiting without impatience',
+      'this may never become a fight — both know exactly what it would cost',
+      'the heaviest silence — not empty, but full of what is already decided',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -233,14 +252,29 @@ const writeItems = (items: MoodPreset[]) => {
 };
 
 const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
-  if (readStorageItem(MOOD_SEED_FLAG_KEY) !== null) return items;
-  writeStorageItem(MOOD_SEED_FLAG_KEY, true);
-  const existingIds = new Set(items.map(i => i.id));
-  const toAdd = DEFAULT_SEED_MOODS.filter(i => !existingIds.has(i.id));
-  if (toAdd.length === 0) return items;
-  const merged = sortItems([...items, ...toAdd]);
-  writeItems(merged);
-  return merged;
+  let result = items;
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = DEFAULT_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V3) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V3, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V3_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  return result;
 };
 
 const readItems = (): MoodPreset[] => {

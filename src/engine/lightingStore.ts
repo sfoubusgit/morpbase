@@ -3,6 +3,7 @@ import type { LightingSetup, LightingSetupInput, LightingStore } from '../types'
 const LIGHTING_STORE_KEY = 'promptgen:lightings:v1';
 const LIGHTING_STORE_BACKUP_KEY = 'promptgen:lightings:backup:v1';
 const LIGHTING_SEED_FLAG_KEY = 'promptgen:lightings:seeded:v2';
+const LIGHTING_SEED_FLAG_KEY_V3 = 'promptgen:lightings:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -85,6 +86,24 @@ const sanitizeItem = (value: unknown): LightingSetup | null => {
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1748304000000;
+
+const V3_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_seed_dual_elemental_opposition',
+    name: 'Dual Elemental Opposition',
+    summary: 'Two hostile key sources, no fill — cold blue-white storm light from upper left, deep red-orange volcanic glow from lower right, with pure shadow between.',
+    phrases: [
+      'two hostile key light sources with no fill, no reconciliation between them',
+      'cold blue-white storm light from upper left — hard, electric, cutting across from the Azurok side',
+      'deep red-orange volcanic ember glow from lower right — rising, furnace-hot, from the Pyrrok side',
+      'a dead corridor of pure shadow between the two subjects, neither source reaching across the divide',
+      'no ambient fill, no bounce light — each form lit only by its own elemental source',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
 
 const DEFAULT_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -233,14 +252,29 @@ const writeItems = (items: LightingSetup[]) => {
 };
 
 const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
-  if (readStorageItem(LIGHTING_SEED_FLAG_KEY) !== null) return items;
-  writeStorageItem(LIGHTING_SEED_FLAG_KEY, true);
-  const existingIds = new Set(items.map(i => i.id));
-  const toAdd = DEFAULT_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
-  if (toAdd.length === 0) return items;
-  const merged = sortItems([...items, ...toAdd]);
-  writeItems(merged);
-  return merged;
+  let result = items;
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = DEFAULT_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V3) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V3, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V3_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  return result;
 };
 
 const readItems = (): LightingSetup[] => {

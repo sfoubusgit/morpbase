@@ -8,6 +8,7 @@ const ENVIRONMENT_STORE_KEY = 'promptgen:environments:v1';
 const ENVIRONMENT_STORE_BACKUP_KEY = 'promptgen:environments:backup:v1';
 const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v3';
 const ENVIRONMENT_SEED_FLAG_KEY_V4 = 'promptgen:environments:seeded:v4';
+const ENVIRONMENT_SEED_FLAG_KEY_V5 = 'promptgen:environments:seeded:v5';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -100,6 +101,7 @@ const ENV_SEED_TS = 1746748800000;
 const ENV_SEED_TS_2 = 1746835200000;
 const ENV_SEED_TS_3 = 1747612800000;
 const ENV_SEED_TS_4 = 1747785600000;
+const ENV_SEED_TS_5 = 1748304000000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -413,6 +415,26 @@ const V4_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+const V5_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_ashveil_ridge',
+    name: 'Ashveil Ridge',
+    summary: 'A high volcanic mountain pass at the exact boundary where a permanent storm system meets a volcanic plateau — neither domain claims it, the divide itself.',
+    phraseBundle: {
+      core: [
+        'a high volcanic mountain pass at the precise boundary where a permanent storm system meets a volcanic plateau',
+        'storm side: heavy charged cloud pressing down, cold rain, ozone smell, ground slick and electric beneath grey stone',
+        'volcanic side: ancient lava-flow channels grey with age, heat shimmer above cracked basalt plates, ash-grey and bone-dry',
+        'the ridge itself: dry ash on fractured stone, thermal updraft from below grinding against cold downdraft from above',
+        'the air at the centre carries both — a breath of sulfur, a charge of static, temperature at an uneasy equilibrium',
+        'no shelter, no life, no structure — only the ancient geology of two weather systems that have ground against each other for ten thousand years',
+      ],
+    },
+    createdAt: ENV_SEED_TS_5,
+    updatedAt: ENV_SEED_TS_5,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -465,6 +487,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V4_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V5_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

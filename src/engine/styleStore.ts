@@ -4,6 +4,7 @@ const STYLE_STORE_KEY = 'promptgen:styles:v1';
 const STYLE_STORE_BACKUP_KEY = 'promptgen:styles:backup:v1';
 const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v2';
 const STYLE_SEED_FLAG_KEY_V3 = 'promptgen:styles:seeded:v3';
+const STYLE_SEED_FLAG_KEY_V4 = 'promptgen:styles:seeded:v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,6 +88,7 @@ const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747872000000;
+const SEED_TS_5 = 1748304000000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -228,6 +230,23 @@ const DEFAULT_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+const V4_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_seed_ancient_creature_concept',
+    name: 'Ancient Creature Concept Art',
+    summary: 'Analytical creature illustration — surface material study, elemental wear, anatomical weight. Two opposing material languages in one frame.',
+    phrases: [
+      'ancient creature concept illustration, anatomical detail emphasis',
+      'surface material study — scale texture, elemental wear, geological age visible in every ridge and fracture',
+      'bilateral elemental contrast in a single frame, two opposing material languages each completely realized',
+      'dark neutral background, subjects only, no competing environment elements',
+      'detailed linework underlying painterly surface, creature design discipline throughout',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
+
 const V3_SEED_STYLES: StylePreset[] = [
   {
     id: 'style_seed_beksinski',
@@ -270,6 +289,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V3, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V3_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V4_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
