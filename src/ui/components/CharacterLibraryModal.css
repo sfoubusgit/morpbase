@@ -523,6 +523,126 @@
   gap: 10px;
 }
 
+/* Tag filter bar */
+.character-tag-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.character-tag-filter-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-medium);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: lowercase;
+}
+
+.character-tag-filter-chip:hover {
+  border-color: rgba(167, 139, 250, 0.3);
+  color: var(--text-primary);
+  background: rgba(167, 139, 250, 0.08);
+}
+
+.character-tag-filter-chip.active {
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.12);
+  color: #c4b5fd;
+}
+
+/* Tag chips on cards */
+.character-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.character-card-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(167, 139, 250, 0.08);
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  color: #c4b5fd;
+  font-size: 11px;
+}
+
+/* Tag editor in form */
+.character-tag-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 8px 10px;
+  background: rgba(8, 9, 14, 0.82);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  cursor: text;
+}
+
+.character-tag-editor:focus-within {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 2px rgba(110, 86, 249, 0.12);
+}
+
+.character-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(167, 139, 250, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.24);
+  color: #c4b5fd;
+  font-size: 12px;
+}
+
+.character-tag-chip-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.7;
+}
+
+.character-tag-chip-remove:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.character-tag-input {
+  flex: 1;
+  min-width: 100px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  outline: none;
+  padding: 0;
+}
+
+.character-tag-input::placeholder {
+  color: var(--text-tertiary);
+}
+
 @media (max-width: 960px) {
   .character-library-layout {
     grid-template-columns: 1fr;

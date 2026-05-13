@@ -252,6 +252,8 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     ? value.updatedAt
     : createdAt;
 
+  const rawTags = Array.isArray(value.tags) ? sanitizeStringArray(value.tags) : [];
+
   return {
     id,
     name,
@@ -260,6 +262,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     avatar: sanitizeAvatar(value.avatar),
     identity: sanitizeFields(value.identity),
     phraseBundle,
+    tags: rawTags.length > 0 ? rawTags : undefined,
     createdAt,
     updatedAt,
   };
@@ -278,6 +281,7 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_lyra_voss',
     name: 'Lyra Voss',
     summary: 'A pale cartographer with white voluminous hair, amber spectacles, and an ink-stained left hand.',
+    tags: ['solo', 'scholar'],
     identity: {
       archetype: 'scholar',
       presentation: 'nude',
@@ -312,6 +316,7 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_mira_duskhollow',
     name: 'Mira Duskhollow',
     summary: 'A warm-skinned alchemist with curvy build, coily black hair, and burn-marked forearms.',
+    tags: ['solo', 'scholar'],
     identity: {
       archetype: 'alchemist',
       presentation: 'nude',
@@ -342,6 +347,7 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_vesper',
     name: 'Vesper',
     summary: 'A pale oracle — ageless, extremely slender, with floor-length silver-white hair and unsettling stillness.',
+    tags: ['solo', 'oracle'],
     identity: {
       archetype: 'oracle',
       presentation: 'nude',
@@ -373,6 +379,7 @@ const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_azurok',
     name: 'Azurok',
     summary: 'An ancient blue dragon whose scales shift from abyssal navy to electric cerulean, crackling with latent static charge absorbed over millennia.',
+    tags: ['solo', 'creature'],
     identity: {
       archetype: 'dragon',
       presentation: 'creature',
@@ -409,6 +416,7 @@ const V4_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_thalara',
     name: 'Thalara',
     summary: 'A deep-sea primordial — indigo skin mapped with bioluminescent aquamarine patterns, kelp-black drifting hair, and abyssal eyes lit cold from within.',
+    tags: ['solo', 'primordial'],
     identity: {
       archetype: 'primordial',
       presentation: 'nude',
@@ -445,6 +453,7 @@ const V5_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_alice_and_the_white',
     name: 'Alice & The White',
     summary: 'A slight girl in a blue pinafore looking up with complete delight at a colossal grotesque white rabbit-creature — unbothered by what she cannot see is wrong about it.',
+    tags: ['duo', 'horror'],
     identity: {
       archetype: 'duo',
       presentation: 'clothed',
@@ -483,6 +492,7 @@ const V6_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_vael_and_holt',
     name: 'Vael & Holt',
     summary: 'A half-demon scout and her battle-worn guardian — she clings to his back like she belongs there, and he carries her like it\'s the only thing still making sense.',
+    tags: ['duo', 'urban', 'combat'],
     identity: {
       archetype: 'duo',
       presentation: 'clothed',
@@ -522,6 +532,7 @@ const V7_SEED_CHARACTERS: CharacterIdentity[] = [
     id: 'character_seed_homura_and_raiu',
     name: 'Homura & Raiu',
     summary: 'Two divine women, back-to-back — the pink flame and the purple storm. Equals in power, opposite in temperament, bound by something older than their rivalry.',
+    tags: ['duo', 'divine', 'japan'],
     identity: {
       archetype: 'duo',
       presentation: 'clothed',
@@ -668,6 +679,8 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
     throw new Error('At least one core identity phrase is required.');
   }
 
+  const rawTags = Array.isArray(input.tags) ? sanitizeStringArray(input.tags) : [];
+
   return {
     name,
     summary: input.summary ? normalizeText(input.summary) || undefined : undefined,
@@ -675,6 +688,7 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
     avatar: sanitizeAvatar(input.avatar),
     identity,
     phraseBundle,
+    tags: rawTags.length > 0 ? rawTags : undefined,
   };
 };
 
@@ -708,6 +722,7 @@ export async function createCharacter(input: CharacterIdentityInput): Promise<Ch
     avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
+    tags: sanitized.tags,
     createdAt: now,
     updatedAt: now,
   };
@@ -741,6 +756,7 @@ export async function updateCharacter(
     avatar: sanitized.avatar,
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
+    tags: sanitized.tags,
     updatedAt: Date.now(),
   };
 

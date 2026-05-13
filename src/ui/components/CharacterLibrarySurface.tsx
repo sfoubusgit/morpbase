@@ -26,6 +26,7 @@ type CharacterFormState = {
   visualAnchors: string;
   motifs: string;
   corePhrases: string;
+  tags: string[];
 };
 
 const EMPTY_FORM: CharacterFormState = {
@@ -41,6 +42,7 @@ const EMPTY_FORM: CharacterFormState = {
   visualAnchors: '',
   motifs: '',
   corePhrases: '',
+  tags: [],
 };
 
 const CHARACTER_AVATAR_SIZE = 160;
@@ -173,6 +175,7 @@ const formFromCharacter = (character: CharacterIdentity): CharacterFormState => 
   visualAnchors: toMultiline(character.identity.visualAnchors),
   motifs: toMultiline(character.identity.motifs),
   corePhrases: character.phraseBundle.core.join('\n'),
+  tags: character.tags ?? [],
 });
 
 const parseLineItems = (
@@ -228,6 +231,7 @@ const buildCharacterInput = (form: CharacterFormState): CharacterIdentityInput =
   phraseBundle: {
     core: parseStringList(form.corePhrases),
   },
+  tags: form.tags.length > 0 ? form.tags : undefined,
 });
 
 const validateCharacterInput = (input: CharacterIdentityInput): string | null => {
@@ -289,6 +293,8 @@ export function CharacterLibrarySurface({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingAvatar, setIsProcessingAvatar] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+  const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
 
   const activeCharacter = useMemo(
     () => characters.find(character => activeCharacterIds.includes(character.id)) ?? null,
@@ -449,6 +455,37 @@ export function CharacterLibrarySurface({
   );
   const isEditorOpen = isCreating || Boolean(editingCharacterId);
 
+  const allTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    characters.forEach(c => c.tags?.forEach(t => tagSet.add(t)));
+    return Array.from(tagSet).sort();
+  }, [characters]);
+
+  const filteredCharacters = useMemo(() => {
+    if (!activeTagFilter) return characters;
+    return characters.filter(c => c.tags?.includes(activeTagFilter));
+  }, [characters, activeTagFilter]);
+
+  const handleAddTag = (tag: string) => {
+    const trimmed = tag.trim().toLowerCase().replace(/\s+/g, '-');
+    if (!trimmed || form.tags.includes(trimmed)) return;
+    handleFormChange('tags', [...form.tags, trimmed]);
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    handleFormChange('tags', form.tags.filter(t => t !== tag));
+  };
+
+  const handleTagInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      handleAddTag(tagInput);
+      setTagInput('');
+    } else if (e.key === 'Backspace' && !tagInput && form.tags.length > 0) {
+      handleFormChange('tags', form.tags.slice(0, -1));
+    }
+  };
+
   return (
     <div className="character-library">
       <input
@@ -493,6 +530,28 @@ export function CharacterLibrarySurface({
             </div>
           </div>
 
+          {allTags.length > 0 && (
+            <div className="character-tag-filter-bar">
+              <button
+                type="button"
+                className={`character-tag-filter-chip${!activeTagFilter ? ' active' : ''}`}
+                onClick={() => setActiveTagFilter(null)}
+              >
+                All
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  type="button"
+                  className={`character-tag-filter-chip${activeTagFilter === tag ? ' active' : ''}`}
+                  onClick={() => setActiveTagFilter(prev => prev === tag ? null : tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
+
           {isLoading ? (
             <div className="character-library-empty">Loading characters...</div>
           ) : characters.length === 0 ? (
@@ -500,9 +559,14 @@ export function CharacterLibrarySurface({
               <strong>No characters yet.</strong>
               <span>Create one to start building recurring character continuity across workflows.</span>
             </div>
+          ) : filteredCharacters.length === 0 ? (
+            <div className="character-library-empty">
+              <strong>No characters tagged "{activeTagFilter}".</strong>
+              <span>Try a different filter or clear it to see all characters.</span>
+            </div>
           ) : (
             <div className="character-library-list">
-              {characters.map(character => {
+              {filteredCharacters.map(character => {
                 const isActive = activeCharacterIds.includes(character.id);
                 const needsVisualAnchorRepair = characterNeedsVisualAnchorRepair(character);
                 return (
@@ -530,6 +594,13 @@ export function CharacterLibrarySurface({
                           <p className="character-library-card-summary">
                             {character.summary || 'No summary yet.'}
                           </p>
+                          {character.tags && character.tags.length > 0 && (
+                            <div className="character-card-tags">
+                              {character.tags.map(tag => (
+                                <span key={tag} className="character-card-tag-chip">{tag}</span>
+                              ))}
+                            </div>
+                          )}
                           {needsVisualAnchorRepair && (
                             <p className="character-library-card-warning">
                               This legacy character needs at least one visual anchor before it can be saved again.
@@ -748,6 +819,38 @@ export function CharacterLibrarySurface({
                     placeholder={`luminous young oracle with long silver braid\nviolet eyes and ceremonial prayer ribbons\nornamented mystic heroine with moon sigils`}
                   />
                 </label>
+                <div className="character-editor-field character-editor-field-wide">
+                  <span>Tags</span>
+                  <div className="character-tag-editor">
+                    {form.tags.map(tag => (
+                      <span key={tag} className="character-tag-chip">
+                        {tag}
+                        <button
+                          type="button"
+                          className="character-tag-chip-remove"
+                          onClick={() => handleRemoveTag(tag)}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      className="character-tag-input"
+                      value={tagInput}
+                      onChange={e => setTagInput(e.target.value)}
+                      onKeyDown={handleTagInputKeyDown}
+                      onBlur={() => {
+                        if (tagInput.trim()) {
+                          handleAddTag(tagInput);
+                          setTagInput('');
+                        }
+                      }}
+                      placeholder={form.tags.length === 0 ? 'solo, duo, horror…' : 'Add tag…'}
+                    />
+                  </div>
+                  <div className="character-editor-field-hint">Press Enter or comma to add. Backspace removes the last tag.</div>
+                </div>
               </div>
 
               <div className="character-editor-preview">

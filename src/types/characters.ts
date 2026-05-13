@@ -50,6 +50,7 @@ export type CharacterIdentity = {
   avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
+  tags?: string[];
   createdAt: number;
   updatedAt: number;
 };
@@ -61,6 +62,7 @@ export type CharacterIdentityInput = {
   avatar?: CharacterAvatar;
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
+  tags?: string[];
 };
 
 export type CharacterStore = {
