@@ -1868,46 +1868,49 @@ export function App() {
   }, []);
 
   const handleRandomizeLanes = useCallback(() => {
-    const pick = <T,>(arr: T[]): T | null =>
-      arr.length === 0 ? null : arr[Math.floor(Math.random() * arr.length)];
+    const pickN = <T extends { id: string }>(arr: T[], n: number): string[] => {
+      if (arr.length === 0) return [];
+      const shuffled = [...arr].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, Math.min(n, arr.length)).map(i => i.id);
+    };
     const locked = lockedLanes;
     const rollAll = locked.size === 0;
 
     if (rollAll || locked.has('character')) {
-      const char = pick(characters);
-      if (char) setActiveCharacterIds([char.id]);
+      const n = Math.max(1, activeCharacterIds.length);
+      setActiveCharacterIds(pickN(characters, n));
     }
 
     if (rollAll || locked.has('environment')) {
-      const env = pick(environments);
-      if (env) setActiveEnvironmentIds([env.id]);
+      const n = Math.max(1, activeEnvironmentIds.length);
+      setActiveEnvironmentIds(pickN(environments, n));
     }
 
     if (rollAll || locked.has('wardrobe')) {
-      const outfit = pick(outfits);
-      setActiveOutfitIds(outfit ? [outfit.id] : []);
+      const n = Math.max(1, activeOutfitIds.length);
+      setActiveOutfitIds(pickN(outfits, n));
     }
 
     if (rollAll || locked.has('style')) {
-      const style = pick(stylePresets);
-      setActiveStyleIds(style ? [style.id] : []);
+      const n = Math.max(1, activeStyleIds.length);
+      setActiveStyleIds(pickN(stylePresets, n));
     }
 
     if (rollAll || locked.has('lighting')) {
-      const lighting = pick(lightingSetups);
-      setActiveLightingIds(lighting ? [lighting.id] : []);
+      const n = Math.max(1, activeLightingIds.length);
+      setActiveLightingIds(pickN(lightingSetups, n));
     }
 
     if (rollAll || locked.has('composition')) {
-      const comp = pick(compositionFrames);
-      setActiveCompositionIds(comp ? [comp.id] : []);
+      const n = Math.max(1, activeCompositionIds.length);
+      setActiveCompositionIds(pickN(compositionFrames, n));
     }
 
     if (rollAll || locked.has('mood')) {
-      const mood = pick(moodPresets);
-      setActiveMoodIds(mood ? [mood.id] : []);
+      const n = Math.max(1, activeMoodIds.length);
+      setActiveMoodIds(pickN(moodPresets, n));
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets]);
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds]);
 
   const refreshNegativePresets = useCallback(async () => {
     try {
