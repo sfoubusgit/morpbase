@@ -104,6 +104,9 @@ import { NegativeModal } from './components/NegativeModal';
 import { WorldModal } from './components/WorldModal';
 import { InteractionModal } from './components/InteractionModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
+import { listWorlds } from '../engine/worldStore';
+import { listLaneSets } from '../engine/laneSetStore';
+import type { LaneSet } from '../types/laneSets';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -494,6 +497,11 @@ export function App() {
   const [isObjectOpen, setIsObjectOpen] = useState(false);
   const [activeWorld, setActiveWorld] = useState<{ id: string; name: string; phrases: string[] } | null>(initialBuilderSession?.activeWorld ?? null);
   const [isWorldOpen, setIsWorldOpen] = useState(false);
+  const [worlds, setWorlds] = useState<{ id: string; name: string; phrases: string[] }[]>(() =>
+    listWorlds().map(w => ({ id: w.id, name: w.name, phrases: w.phrases.map(p => p.text) }))
+  );
+  const [laneSets, setLaneSets] = useState<LaneSet[]>(() => listLaneSets());
+  const [isLaneSetsOpen, setIsLaneSetsOpen] = useState(false);
   const [poseFraming, setPoseFraming] = useState<string | null>(initialBuilderSession?.poseFraming ?? null);
   const [poseOrientation, setPoseOrientation] = useState<string | null>(initialBuilderSession?.poseOrientation ?? null);
   const [poseEnergy, setPoseEnergy] = useState<string | null>(initialBuilderSession?.poseEnergy ?? null);
@@ -1950,7 +1958,23 @@ export function App() {
       const n = Math.max(1, activeMoodIds.length);
       setActiveMoodIds(pickN(moodPresets, n));
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds]);
+
+    if (rollAll || locked.has('dynamics')) {
+      const others = INTERACTION_PHRASES.filter(p => p.id !== activeInteractionPhraseId);
+      const pool = others.length > 0 ? others : INTERACTION_PHRASES;
+      const picked = pool[Math.floor(Math.random() * pool.length)];
+      setActiveInteractionPhraseId(picked.id);
+    }
+
+    if (rollAll || locked.has('aura')) {
+      if (worlds.length > 0) {
+        const picked = worlds[Math.floor(Math.random() * worlds.length)];
+        setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
+        setActiveChipTexts([]);
+        setAuraVariationEnabled(false);
+      }
+    }
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds]);
 
   const refreshNegativePresets = useCallback(async () => {
     try {

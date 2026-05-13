@@ -437,14 +437,19 @@ export function WorkspacePage({
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
             {activeCharacterItems.length >= 2 && (
-              <div className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase ? ' ws-lane-slot-active' : ''}`}>
+              <div
+                className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
+                onClick={onToggleLaneLock ? () => onToggleLaneLock('dynamics') : undefined}
+                role={onToggleLaneLock ? 'button' : undefined}
+                title={onToggleLaneLock ? (lockedLanes?.has('dynamics') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+              >
                 <div className="ws-lane-label">Dynamics</div>
                 {activeInteractionPhrase ? (
                   <div className="ws-lane-name ws-interaction-phrase-preview">{activeInteractionPhrase.text}</div>
                 ) : (
                   <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
                 )}
-                <div className="ws-lane-actions">
+                <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                   <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onRandomizeInteraction}>
                     ⚄ Roll
                   </button>
@@ -563,10 +568,15 @@ export function WorkspacePage({
               onRemove={onRemoveNegative}
             />
             <div className="ws-lane-divider" />
-            <div className={`ws-lane-slot ws-lane-slot-aura${activeWorldName ? ' ws-lane-slot-active' : ''}`}>
+            <div
+              className={`ws-lane-slot ws-lane-slot-aura${activeWorldName ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('aura') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
+              onClick={onToggleLaneLock ? () => onToggleLaneLock('aura') : undefined}
+              role={onToggleLaneLock ? 'button' : undefined}
+              title={onToggleLaneLock ? (lockedLanes?.has('aura') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+            >
               <div className="ws-lane-label">Aura</div>
               <div className="ws-lane-name">{activeWorldName ?? <span className="ws-lane-name-empty">None</span>}</div>
-              <div className="ws-lane-actions">
+              <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                 {activeWorldName && onDeactivateWorld && (
                   <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onDeactivateWorld}>Off</button>
                 )}
@@ -575,7 +585,7 @@ export function WorkspacePage({
                 </button>
               </div>
               {activeWorldName && activeWorldPhraseCount >= 2 && onAuraVariationToggle && (
-                <div className="ws-aura-variation">
+                <div className="ws-aura-variation" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                   <button
                     type="button"
                     className={`ws-env-variation-toggle${auraVariationEnabled ? ' ws-env-variation-toggle--on' : ''}`}

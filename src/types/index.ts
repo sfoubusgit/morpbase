@@ -25,3 +25,4 @@ export * from './compositions';
 export * from './moods';
 export * from './negatives';
 export * from './community';
+export * from './laneSets';
