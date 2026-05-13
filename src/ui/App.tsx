@@ -103,10 +103,11 @@ import { MoodModal } from './components/MoodModal';
 import { NegativeModal } from './components/NegativeModal';
 import { WorldModal } from './components/WorldModal';
 import { InteractionModal } from './components/InteractionModal';
+import { LaneSetsModal } from './components/LaneSetsModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
-import { listLaneSets } from '../engine/laneSetStore';
-import type { LaneSet } from '../types/laneSets';
+import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
+import type { LaneSet, LaneSetLanes } from '../types/laneSets';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -1976,6 +1977,92 @@ export function App() {
     }
   }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds]);
 
+  const handleApplyLaneSet = useCallback((set: LaneSet) => {
+    const { lanes } = set;
+    const pickN = <T extends { id: string }>(pool: T[], n: number): string[] => {
+      const shuffled = [...pool].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, Math.min(n, shuffled.length)).map(x => x.id);
+    };
+
+    if (lanes.character.mode === 'fixed') setActiveCharacterIds(lanes.character.ids);
+    else if (lanes.character.mode === 'random') setActiveCharacterIds(pickN(characters, lanes.character.count));
+    else setActiveCharacterIds([]);
+
+    if (lanes.dynamics.mode === 'fixed') setActiveInteractionPhraseId(lanes.dynamics.id);
+    else if (lanes.dynamics.mode === 'random') {
+      const picked = INTERACTION_PHRASES[Math.floor(Math.random() * INTERACTION_PHRASES.length)];
+      setActiveInteractionPhraseId(picked.id);
+    } else setActiveInteractionPhraseId(null);
+
+    if (lanes.wardrobe.mode === 'fixed') setActiveOutfitIds(lanes.wardrobe.ids);
+    else if (lanes.wardrobe.mode === 'random') setActiveOutfitIds(pickN(outfits, lanes.wardrobe.count));
+    else setActiveOutfitIds([]);
+
+    if (lanes.style.mode === 'fixed') setActiveStyleIds(lanes.style.ids);
+    else if (lanes.style.mode === 'random') setActiveStyleIds(pickN(stylePresets, lanes.style.count));
+    else setActiveStyleIds([]);
+
+    if (lanes.lighting.mode === 'fixed') setActiveLightingIds(lanes.lighting.ids);
+    else if (lanes.lighting.mode === 'random') setActiveLightingIds(pickN(lightingSetups, lanes.lighting.count));
+    else setActiveLightingIds([]);
+
+    if (lanes.composition.mode === 'fixed') setActiveCompositionIds(lanes.composition.ids);
+    else if (lanes.composition.mode === 'random') setActiveCompositionIds(pickN(compositionFrames, lanes.composition.count));
+    else setActiveCompositionIds([]);
+
+    if (lanes.mood.mode === 'fixed') setActiveMoodIds(lanes.mood.ids);
+    else if (lanes.mood.mode === 'random') setActiveMoodIds(pickN(moodPresets, lanes.mood.count));
+    else setActiveMoodIds([]);
+
+    if (lanes.environment.mode === 'fixed') setActiveEnvironmentIds(lanes.environment.ids);
+    else if (lanes.environment.mode === 'random') setActiveEnvironmentIds(pickN(environments, lanes.environment.count));
+    else setActiveEnvironmentIds([]);
+
+    if (lanes.aura.mode === 'fixed') {
+      const auraId = lanes.aura.id;
+      const world = auraId ? worlds.find(w => w.id === auraId) : null;
+      if (world) {
+        setActiveWorld({ id: world.id, name: world.name, phrases: world.phrases });
+      } else {
+        setActiveWorld(null);
+      }
+      setActiveChipTexts([]);
+      setAuraVariationEnabled(false);
+    } else if (lanes.aura.mode === 'random') {
+      if (worlds.length > 0) {
+        const picked = worlds[Math.floor(Math.random() * worlds.length)];
+        setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
+        setActiveChipTexts([]);
+        setAuraVariationEnabled(false);
+      }
+    } else {
+      setActiveWorld(null);
+      setActiveChipTexts([]);
+      setAuraVariationEnabled(false);
+    }
+  }, [characters, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, environments, worlds]);
+
+  const handleSaveCurrentAsLaneSet = useCallback((name: string, description?: string) => {
+    const lanes: LaneSetLanes = {
+      character: activeCharacterIds.length > 0 ? { mode: 'fixed', ids: activeCharacterIds } : { mode: 'off' },
+      dynamics: activeInteractionPhraseId ? { mode: 'fixed', id: activeInteractionPhraseId } : { mode: 'off' },
+      wardrobe: activeOutfitIds.length > 0 ? { mode: 'fixed', ids: activeOutfitIds } : { mode: 'off' },
+      style: activeStyleIds.length > 0 ? { mode: 'fixed', ids: activeStyleIds } : { mode: 'off' },
+      lighting: activeLightingIds.length > 0 ? { mode: 'fixed', ids: activeLightingIds } : { mode: 'off' },
+      composition: activeCompositionIds.length > 0 ? { mode: 'fixed', ids: activeCompositionIds } : { mode: 'off' },
+      mood: activeMoodIds.length > 0 ? { mode: 'fixed', ids: activeMoodIds } : { mode: 'off' },
+      environment: activeEnvironmentIds.length > 0 ? { mode: 'fixed', ids: activeEnvironmentIds } : { mode: 'off' },
+      aura: activeWorld ? { mode: 'fixed', id: activeWorld.id } : { mode: 'off' },
+    };
+    const created = createLaneSet({ name, description, lanes });
+    setLaneSets(prev => [...prev, created]);
+  }, [activeCharacterIds, activeInteractionPhraseId, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeEnvironmentIds, activeWorld]);
+
+  const handleDeleteLaneSet = useCallback((id: string) => {
+    deleteLaneSet(id);
+    setLaneSets(prev => prev.filter(s => s.id !== id));
+  }, []);
+
   const refreshNegativePresets = useCallback(async () => {
     try {
       const next = await listNegativePresets();
@@ -3766,6 +3853,7 @@ export function App() {
           userName={authUser?.name ?? null}
           activeIdentityTags={activeIdentityTags}
           onRandomize={handleRandomizeLanes}
+          onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           lockedLanes={lockedLanes}
           onToggleLaneLock={handleToggleLaneLock}
           captureCount={captureBuffer.length}
@@ -3794,6 +3882,14 @@ export function App() {
         onClose={() => setIsInteractionOpen(false)}
         activeId={activeInteractionPhraseId}
         onSelect={setActiveInteractionPhraseId}
+      />
+      <LaneSetsModal
+        isOpen={isLaneSetsOpen}
+        onClose={() => setIsLaneSetsOpen(false)}
+        laneSets={laneSets}
+        onApply={handleApplyLaneSet}
+        onDelete={handleDeleteLaneSet}
+        onSaveCurrent={handleSaveCurrentAsLaneSet}
       />
       <EnvironmentLibraryModal
         isOpen={isEnvironmentLibraryOpen}

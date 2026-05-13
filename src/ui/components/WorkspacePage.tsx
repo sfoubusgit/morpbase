@@ -164,6 +164,7 @@ type WorkspacePageProps = {
   userName?: string | null;
   activeIdentityTags?: WallPostIdentityTag[];
   onRandomize?: () => void;
+  onOpenLaneSets?: () => void;
   lockedLanes?: Set<string>;
   onToggleLaneLock?: (lane: string) => void;
   captureCount?: number;
@@ -230,6 +231,7 @@ export function WorkspacePage({
   userName = null,
   activeIdentityTags = [],
   onRandomize,
+  onOpenLaneSets,
   lockedLanes,
   onToggleLaneLock,
   captureCount = 0,
@@ -417,14 +419,21 @@ export function WorkspacePage({
         <aside className="workspace-panel">
           <div className="workspace-panel-header">
             <span className="workspace-panel-title">Identities</span>
-            {onRandomize && (
-              <div className="ws-randomize-group">
-                <span className="ws-randomize-hint">lock to roll →</span>
-                <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize unlocked lanes">
-                  ⚄ Randomize
+            <div className="ws-panel-header-actions">
+              {onOpenLaneSets && (
+                <button type="button" className="ws-lane-sets-btn" onClick={onOpenLaneSets} title="Browse Lane Sets">
+                  ☰ Sets
                 </button>
-              </div>
-            )}
+              )}
+              {onRandomize && (
+                <div className="ws-randomize-group">
+                  <span className="ws-randomize-hint">lock to roll →</span>
+                  <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize unlocked lanes">
+                    ⚄ Randomize
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="workspace-lane-list">
             <LaneSlot

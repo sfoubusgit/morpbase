@@ -327,6 +327,30 @@
   flex-shrink: 0;
 }
 
+.ws-panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-lane-sets-btn {
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  background: rgba(94, 234, 212, 0.05);
+  color: rgba(94, 234, 212, 0.7);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.ws-lane-sets-btn:hover {
+  background: rgba(94, 234, 212, 0.12);
+  color: #5eead4;
+}
+
 .ws-randomize-btn {
   font-size: 11px;
   font-weight: 600;
