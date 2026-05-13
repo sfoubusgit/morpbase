@@ -3,6 +3,7 @@ import type { StylePreset, StylePresetInput, StyleStore } from '../types';
 const STYLE_STORE_KEY = 'promptgen:styles:v1';
 const STYLE_STORE_BACKUP_KEY = 'promptgen:styles:backup:v1';
 const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v2';
+const STYLE_SEED_FLAG_KEY_V3 = 'promptgen:styles:seeded:v3';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -85,6 +86,7 @@ const sanitizeItem = (value: unknown): StylePreset | null => {
 const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1747872000000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -226,6 +228,25 @@ const DEFAULT_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+const V3_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_seed_beksinski',
+    name: 'Beksiński — Dystopian Dreamscape',
+    summary: 'Zdzisław Beksiński\'s signature style: organic-architectural fusion, rust and bone palette, corroded textures, vast scale, shrouded figures, melancholic cosmic silence.',
+    phrases: [
+      'Zdzisław Beksiński oil painting style, dystopian surrealist dreamscape',
+      'muted palette of ochre, rust, ash-grey and bone-white, desaturated and aged',
+      'organic-architectural fusion — structures of stretched skin, corroded iron and exposed bone that breathe like living things',
+      'extremely fine photorealistic texture throughout: rust, dried fabric, cracked stone, pitted metal, ancient decay',
+      'vast impossible scale, lone shrouded or bandaged figures dwarfed by labyrinthine cathedral-like forms',
+      'deep perspective drawing the eye into oppressive darkness, melancholic and ancient atmosphere',
+      'no explicit horror — the dread lives in the beautiful wrongness of every surface',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -233,14 +254,29 @@ const writeItems = (items: StylePreset[]) => {
 };
 
 const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
-  if (readStorageItem(STYLE_SEED_FLAG_KEY) !== null) return items;
-  writeStorageItem(STYLE_SEED_FLAG_KEY, true);
-  const existingIds = new Set(items.map(i => i.id));
-  const toAdd = DEFAULT_SEED_STYLES.filter(i => !existingIds.has(i.id));
-  if (toAdd.length === 0) return items;
-  const merged = sortItems([...items, ...toAdd]);
-  writeItems(merged);
-  return merged;
+  let result = items;
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = DEFAULT_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V3) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V3, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V3_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  return result;
 };
 
 const readItems = (): StylePreset[] => {
