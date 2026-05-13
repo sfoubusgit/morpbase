@@ -105,6 +105,10 @@ type WorkspacePageProps = {
   activeCharacterItems: { id: string; name: string }[];
   onChooseCharacter: () => void;
   onRemoveCharacter: (id: string) => void;
+  activeInteractionPhrase: { id: string; text: string } | null;
+  onChooseInteraction: () => void;
+  onRemoveInteraction: () => void;
+  onRandomizeInteraction: () => void;
 
   activeEnvironmentItems: { id: string; name: string }[];
   onChooseEnvironment: () => void;
@@ -177,6 +181,10 @@ export function WorkspacePage({
   activeCharacterItems,
   onChooseCharacter,
   onRemoveCharacter,
+  activeInteractionPhrase,
+  onChooseInteraction,
+  onRemoveInteraction,
+  onRandomizeInteraction,
   activeEnvironmentItems,
   onChooseEnvironment,
   onRemoveEnvironment,
@@ -428,6 +436,29 @@ export function WorkspacePage({
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
+            {activeCharacterItems.length >= 2 && (
+              <div className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase ? ' ws-lane-slot-active' : ''}`}>
+                <div className="ws-lane-label">Dynamics</div>
+                {activeInteractionPhrase ? (
+                  <div className="ws-lane-name ws-interaction-phrase-preview">{activeInteractionPhrase.text}</div>
+                ) : (
+                  <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
+                )}
+                <div className="ws-lane-actions">
+                  <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onRandomizeInteraction}>
+                    ⚄ Roll
+                  </button>
+                  <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseInteraction}>
+                    Browse
+                  </button>
+                  {activeInteractionPhrase && (
+                    <button type="button" className="ws-lane-btn" onClick={onRemoveInteraction} title="Clear dynamic">
+                      ×
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
             <div
               className={`ws-lane-slot ws-lane-slot-environment${activeEnvironmentItems.length > 0 ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}

@@ -662,6 +662,27 @@
 .ws-lane-slot-aura.ws-lane-slot-active .ws-lane-label { color: rgba(167, 139, 250, 0.65); }
 .ws-lane-slot-aura.ws-lane-slot-active .ws-lane-name { color: #c4b5fd; }
 
+/* ── Interaction / Dynamics lane ────────────────── */
+.ws-lane-slot-interaction:hover { box-shadow: 0 0 0 1px rgba(232, 180, 255, 0.45), 0 0 14px rgba(232, 180, 255, 0.18); }
+
+.ws-lane-slot-interaction.ws-lane-slot-active {
+  border-color: rgba(232, 180, 255, 0.18);
+  background: rgba(232, 180, 255, 0.02);
+}
+.ws-lane-slot-interaction.ws-lane-slot-active .ws-lane-label { color: rgba(232, 180, 255, 0.65); }
+.ws-lane-slot-interaction.ws-lane-slot-active .ws-lane-name { color: #e8b4ff; }
+
+.ws-interaction-phrase-preview {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #e8b4ff;
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* ── Multi-tag lane ──────────────────────────────── */
 
 .ws-multi-tags {

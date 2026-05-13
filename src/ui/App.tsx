@@ -102,6 +102,8 @@ import { CompositionModal } from './components/CompositionModal';
 import { MoodModal } from './components/MoodModal';
 import { NegativeModal } from './components/NegativeModal';
 import { WorldModal } from './components/WorldModal';
+import { InteractionModal } from './components/InteractionModal';
+import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -646,6 +648,8 @@ export function App() {
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
   const [isSavedPromptsDrawerOpen, setIsSavedPromptsDrawerOpen] = useState(false);
   const [isCharacterLibraryOpen, setIsCharacterLibraryOpen] = useState(false);
+  const [isInteractionOpen, setIsInteractionOpen] = useState(false);
+  const [activeInteractionPhraseId, setActiveInteractionPhraseId] = useState<string | null>(null);
   const [builderNotice, setBuilderNotice] = useState<string | null>(null);
   const [dismissedTerritoryRecommendation, setDismissedTerritoryRecommendation] = useState(false);
   const [topToastMessage, setTopToastMessage] = useState<string | null>(null);
@@ -746,6 +750,18 @@ export function App() {
     [activeCharacterIds, characters]
   );
   const activeCharacterDisplayName = activeCharacterProjection?.displayName ?? activeCharacter?.name ?? null;
+
+  const activeInteractionPhrase = useMemo(
+    () => INTERACTION_PHRASES.find(p => p.id === activeInteractionPhraseId) ?? null,
+    [activeInteractionPhraseId]
+  );
+
+  const handleRandomizeInteraction = () => {
+    const others = INTERACTION_PHRASES.filter(p => p.id !== activeInteractionPhraseId);
+    const pool = others.length > 0 ? others : INTERACTION_PHRASES;
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    setActiveInteractionPhraseId(picked.id);
+  };
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
@@ -2950,8 +2966,18 @@ export function App() {
       })).filter(e => Boolean(e.text)) : [];
     });
 
-    return [...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjections, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
+    const interactionEntries: PromptAdditionEntry[] = activeCharacterIds.length >= 2 && activeInteractionPhrase
+      ? [{
+          id: `interaction:${activeInteractionPhrase.id}`,
+          text: activeInteractionPhrase.text,
+          position: 'start' as const,
+          section: 'Character',
+          sourceType: 'interaction' as const,
+        }]
+      : [];
+
+    return [...interactionEntries, ...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
+  }, [activeCharacterProjections, activeCharacterIds, activeInteractionPhrase, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
@@ -3641,6 +3667,10 @@ export function App() {
           activeCharacterItems={activeCharacterIds.map(id => ({ id, name: characters.find(c => c.id === id)?.name ?? id }))}
           onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
           onRemoveCharacter={handleRemoveCharacter}
+          activeInteractionPhrase={activeInteractionPhrase}
+          onChooseInteraction={() => setIsInteractionOpen(true)}
+          onRemoveInteraction={() => setActiveInteractionPhraseId(null)}
+          onRandomizeInteraction={handleRandomizeInteraction}
           activeEnvironmentItems={activeEnvironmentIds.map(id => ({ id, name: environments.find(e => e.id === id)?.name ?? id }))}
           onChooseEnvironment={() => setIsEnvironmentLibraryOpen(true)}
           onRemoveEnvironment={handleRemoveEnvironment}
@@ -3708,6 +3738,12 @@ export function App() {
         onCreateCharacter={handleCreateCharacter}
         onUpdateCharacter={handleUpdateCharacter}
         onDeleteCharacter={handleDeleteCharacter}
+      />
+      <InteractionModal
+        isOpen={isInteractionOpen}
+        onClose={() => setIsInteractionOpen(false)}
+        activeId={activeInteractionPhraseId}
+        onSelect={setActiveInteractionPhraseId}
       />
       <EnvironmentLibraryModal
         isOpen={isEnvironmentLibraryOpen}
