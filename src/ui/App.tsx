@@ -107,6 +107,7 @@ import { LaneSetsModal } from './components/LaneSetsModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
 import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
+import { initPresence, destroyPresence } from '../engine/presenceStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
 import {
   changeUserPassword,
@@ -1463,6 +1464,7 @@ export function App() {
       .then(user => {
         if (!isMounted) return;
         setAuthUser(user);
+        if (user) void initPresence(user.authUid, user.id);
         setAuthReady(true);
       })
       .catch(() => {
@@ -1479,6 +1481,7 @@ export function App() {
     try {
       const user = await loginUser(email, password);
       setAuthUser(user);
+      void initPresence(user.authUid, user.id);
       setAuthError(null);
       setIsAuthModalOpen(false);
       return true;
@@ -1492,6 +1495,7 @@ export function App() {
     try {
       const user = await registerUser(name, email, password);
       setAuthUser(user);
+      void initPresence(user.authUid, user.id);
       setAuthError(null);
       setIsAuthModalOpen(false);
       return true;
@@ -1505,6 +1509,7 @@ export function App() {
     try {
       await logoutUser();
     } finally {
+      destroyPresence();
       setAuthUser(null);
     }
   };

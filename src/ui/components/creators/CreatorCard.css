@@ -15,6 +15,7 @@
 }
 
 .creator-card-avatar {
+  position: relative;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -27,6 +28,15 @@
   font-weight: 700;
   color: #c4b5fd;
   flex-shrink: 0;
+}
+
+.creator-card-avatar .online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--surface-primary, #0f172a);
 }
 
 .creator-card-body {

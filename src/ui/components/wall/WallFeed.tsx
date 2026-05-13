@@ -9,6 +9,7 @@ import {
 } from '../../../engine/wallStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
 import { getXPMap } from '../../../engine/xpStore';
+import { useOnlineAuthUids } from '../../hooks/useOnlineAuthUids';
 import { WallPostCard } from './WallPostCard';
 import { WallPostComposer } from './WallPostComposer';
 import './WallFeed.css';
@@ -42,6 +43,7 @@ export function WallFeed({
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onlineUids = useOnlineAuthUids();
 
   const fetchPosts = useCallback(async () => {
     const data = await listWallPosts({ limit: 60 });
@@ -165,6 +167,7 @@ export function WallFeed({
               isOwnPost={post.authUid === authUid}
               isLiked={likedIds.has(post.id)}
               authorXp={authorXpMap.get(post.authUid)}
+              isAuthorOnline={onlineUids.has(post.authUid)}
               onLike={handleLike}
               onUnlike={handleUnlike}
               onDelete={handleDelete}

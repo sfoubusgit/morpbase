@@ -1,5 +1,6 @@
 import { FollowButton } from '../shared/FollowButton';
 import { TitleBadge } from '../shared/TitleBadge';
+import { OnlineIndicator } from '../shared/OnlineIndicator';
 import { getTitleForXp } from '../../../data/communityTitles';
 import type { CreatorSummary } from '../../../engine/creatorFeedStore';
 import './CreatorCard.css';
@@ -9,6 +10,7 @@ type CreatorCardProps = {
   authorXp?: number;
   authUid: string | null;
   followingSet: Set<string>;
+  isOnline?: boolean;
   onFollowChanged: (creatorAuthUid: string, nowFollowing: boolean) => void;
   onViewCreator?: (authUid: string, name: string) => void;
 };
@@ -18,6 +20,7 @@ export function CreatorCard({
   authorXp,
   authUid,
   followingSet,
+  isOnline,
   onFollowChanged,
   onViewCreator,
 }: CreatorCardProps) {
@@ -29,6 +32,7 @@ export function CreatorCard({
     <div className="creator-card">
       <div className="creator-card-avatar">
         {creator.name.charAt(0).toUpperCase()}
+        <OnlineIndicator isOnline={!!isOnline} />
       </div>
 
       <div className="creator-card-body">

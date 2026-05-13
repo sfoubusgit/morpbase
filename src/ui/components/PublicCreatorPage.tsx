@@ -9,9 +9,12 @@ import { getCreatorSummaryFromPoolEntries, mergeCreatorSummaryWithStats } from '
 import { getUserXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
 import { listWallPosts } from '../../engine/wallStore';
+import { getLastSeenAt } from '../../engine/presenceStore';
 import { getTitleForXp } from '../../data/communityTitles';
+import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
 import { TitleBadge } from './shared/TitleBadge';
 import { BadgeStrip } from './shared/BadgeStrip';
+import { OnlineIndicator } from './shared/OnlineIndicator';
 import './PublicCreatorPage.css';
 
 type PublicCreatorPageProps = {
@@ -49,6 +52,10 @@ export function PublicCreatorPage({
   const [creatorBadges, setCreatorBadges] = useState<EarnedBadge[]>([]);
   const [wallPosts, setWallPosts] = useState<WallPost[]>([]);
   const [loadingWall, setLoadingWall] = useState(false);
+  const [lastSeenAt, setLastSeenAt] = useState<number | null>(null);
+
+  const onlineUids = useOnlineAuthUids();
+  const isOnline = creatorAuthUid ? onlineUids.has(creatorAuthUid) : false;
 
   // Effective profile-UUID for pool/prompt lookups (may come from either prop or profile.userId)
   const [effectiveCreatorId, setEffectiveCreatorId] = useState<string | null>(creatorId ?? null);
@@ -132,6 +139,12 @@ export function PublicCreatorPage({
     void getUserXP(creatorAuthUid).then(setCreatorXp);
     void getEarnedBadges(creatorAuthUid).then(setCreatorBadges);
   }, [creatorAuthUid]);
+
+  // Fetch last_seen_at for offline indicator
+  useEffect(() => {
+    if (!effectiveCreatorId) return;
+    void getLastSeenAt(effectiveCreatorId).then(setLastSeenAt);
+  }, [effectiveCreatorId]);
 
   // Load wall posts
   useEffect(() => {
@@ -254,6 +267,7 @@ export function PublicCreatorPage({
             <div className="public-creator-name-row">
               <h1>{displayName}</h1>
               {title && <TitleBadge title={title} size="md" />}
+              <OnlineIndicator isOnline={isOnline} lastSeenAt={lastSeenAt} showLastSeen />
             </div>
             {creatorXp !== null && (
               <div className="public-creator-xp">{creatorXp.toLocaleString()} XP</div>

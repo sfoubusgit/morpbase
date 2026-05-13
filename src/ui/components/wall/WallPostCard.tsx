@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { WallPost } from '../../../types/community';
 import { TitleBadge } from '../shared/TitleBadge';
+import { OnlineIndicator } from '../shared/OnlineIndicator';
 import { getTitleForXp } from '../../../data/communityTitles';
 import './WallPostCard.css';
 
@@ -36,6 +37,7 @@ type WallPostCardProps = {
   isOwnPost: boolean;
   isLiked: boolean;
   authorXp?: number;
+  isAuthorOnline?: boolean;
   onLike: (postId: string) => void;
   onUnlike: (postId: string) => void;
   onDelete: (postId: string) => void;
@@ -47,6 +49,7 @@ export function WallPostCard({
   isOwnPost,
   isLiked,
   authorXp,
+  isAuthorOnline,
   onLike,
   onUnlike,
   onDelete,
@@ -86,6 +89,7 @@ export function WallPostCard({
           >
             {post.authorName}
           </button>
+          <OnlineIndicator isOnline={!!isAuthorOnline} />
           {title && <TitleBadge title={title} size="sm" />}
         </div>
         <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
