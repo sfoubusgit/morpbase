@@ -737,6 +737,14 @@ export function App() {
     () => activeCharacterIds.length > 0 ? buildCharacterPromptProjection(activeCharacter) : null,
     [activeCharacterIds, activeCharacter]
   );
+  const activeCharacterProjections = useMemo(
+    () => activeCharacterIds
+      .map(id => characters.find(c => c.id === id) ?? null)
+      .filter((c): c is CharacterIdentity => c !== null)
+      .map(buildCharacterPromptProjection)
+      .filter((p): p is CharacterPromptProjection => p !== null),
+    [activeCharacterIds, characters]
+  );
   const activeCharacterDisplayName = activeCharacterProjection?.displayName ?? activeCharacter?.name ?? null;
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
@@ -2792,17 +2800,17 @@ export function App() {
     [customPromptFragments]
   );
   const promptAdditionEntries = useMemo<PromptAdditionEntry[]>(() => {
-    const characterEntries: PromptAdditionEntry[] = activeCharacterProjection
-      ? activeCharacterProjection.corePhrases
-          .map((text, index) => ({
-            id: `character:${activeCharacterProjection.characterId}:${index}`,
-            text,
-            position: 'start' as const,
-            section: 'Character',
-            sourceType: 'character' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const characterEntries: PromptAdditionEntry[] = activeCharacterProjections.flatMap(proj =>
+      proj.corePhrases
+        .map((text, index) => ({
+          id: `character:${proj.characterId}:${index}`,
+          text,
+          position: 'start' as const,
+          section: 'Character',
+          sourceType: 'character' as const,
+        }))
+        .filter(entry => Boolean(entry.text))
+    );
 
     const fragmentEntries = selectedPromptFragments
       .map(fragment => {
@@ -2831,9 +2839,9 @@ export function App() {
     }));
 
     const posePhrases = [poseFraming, poseOrientation, poseEnergy, poseGaze].filter(Boolean) as string[];
-    const poseEntries: PromptAdditionEntry[] = posePhrases.length > 0 && activeCharacterProjection
+    const poseEntries: PromptAdditionEntry[] = posePhrases.length > 0 && activeCharacterProjections.length > 0
       ? [{
-          id: `character:${activeCharacterProjection.characterId}:pose`,
+          id: `character:${activeCharacterProjections[0].characterId}:pose`,
           text: posePhrases.join(', '),
           position: 'start' as const,
           section: 'Character',
@@ -2943,7 +2951,7 @@ export function App() {
     });
 
     return [...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
+  }, [activeCharacterProjections, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
