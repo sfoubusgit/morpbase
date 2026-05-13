@@ -6,13 +6,10 @@ import './WorkspacePage.css';
 
 type LaneSlotProps = {
   label: string;
-  activeName: string | null;
+  activeItems: { id: string; name: string }[];
   variant: 'character' | 'environment' | 'wardrobe' | 'style' | 'lighting' | 'composition' | 'mood' | 'aura';
-  inPrompt?: boolean;
-  onAdd?: () => void;
-  onRemove?: () => void;
+  onRemoveItem: (id: string) => void;
   onChoose: () => void;
-  onDeactivate?: () => void;
   locked?: boolean;
   onToggleLock?: () => void;
 };
@@ -57,57 +54,43 @@ function MultiLaneSlot({ label, variant, items, onChoose, onRemove }: MultiLaneS
 
 function LaneSlot({
   label,
-  activeName,
+  activeItems,
   variant,
-  inPrompt,
-  onAdd,
-  onRemove,
+  onRemoveItem,
   onChoose,
-  onDeactivate,
   locked = false,
   onToggleLock,
 }: LaneSlotProps) {
-  const hasTwoStep = onAdd !== undefined || onRemove !== undefined;
-  const isActiveInPrompt = hasTwoStep ? inPrompt : Boolean(activeName);
+  const isActive = activeItems.length > 0;
 
   return (
     <div
-      className={`ws-lane-slot ws-lane-slot-${variant}${isActiveInPrompt ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}`}
+      className={`ws-lane-slot ws-lane-slot-${variant}${isActive ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}`}
       onClick={onToggleLock}
       title={onToggleLock ? (locked ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
       role={onToggleLock ? 'button' : undefined}
     >
       <div className="ws-lane-label">{label}</div>
-      <div className="ws-lane-name">{activeName ?? <span className="ws-lane-name-empty">None</span>}</div>
+      {activeItems.length === 0 ? (
+        <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
+      ) : (
+        <div className="ws-multi-tags">
+          {activeItems.map(item => (
+            <span key={item.id} className="ws-multi-tag">
+              {item.name}
+              <button
+                type="button"
+                className="ws-multi-tag-remove"
+                onClick={e => { e.stopPropagation(); onRemoveItem(item.id); }}
+              >×</button>
+            </span>
+          ))}
+        </div>
+      )}
       <div className="ws-lane-actions" onClick={onToggleLock ? e => e.stopPropagation() : undefined}>
-        {hasTwoStep ? (
-          <>
-            {activeName && !inPrompt && onAdd && (
-              <button type="button" className="ws-lane-btn ws-lane-btn-add" onClick={onAdd}>
-                Add
-              </button>
-            )}
-            {inPrompt && onRemove && (
-              <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onRemove}>
-                Remove
-              </button>
-            )}
-            <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChoose}>
-              {activeName ? 'Change' : 'Choose'}
-            </button>
-          </>
-        ) : (
-          <>
-            {activeName && onDeactivate && (
-              <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onDeactivate}>
-                Off
-              </button>
-            )}
-            <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChoose}>
-              {activeName ? 'Change' : 'Choose'}
-            </button>
-          </>
-        )}
+        <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChoose}>
+          {isActive ? '+ Add' : 'Choose'}
+        </button>
       </div>
     </div>
   );
@@ -119,38 +102,36 @@ type WorkspacePageProps = {
   assembledPrompt: string;
   onSavePrompt?: () => void;
 
-  activeCharacterName: string | null;
+  activeCharacterItems: { id: string; name: string }[];
   onChooseCharacter: () => void;
-  onDeactivateCharacter?: () => void;
+  onRemoveCharacter: (id: string) => void;
 
-  activeEnvironmentName: string | null;
-  environmentInPrompt: boolean;
+  activeEnvironmentItems: { id: string; name: string }[];
   onChooseEnvironment: () => void;
-  onAddEnvironment?: () => void;
-  onRemoveEnvironment?: () => void;
+  onRemoveEnvironment: (id: string) => void;
   worldVariationEnabled: boolean;
   onWorldVariationToggle: () => void;
   onWorldVariationNext: () => void;
 
-  activeOutfitName: string | null;
+  activeOutfitItems: { id: string; name: string }[];
   onChooseWardrobe: () => void;
-  onDeactivateWardrobe?: () => void;
+  onRemoveWardrobe: (id: string) => void;
 
-  activeStyleName: string | null;
+  activeStyleItems: { id: string; name: string }[];
   onChooseStyle: () => void;
-  onDeactivateStyle?: () => void;
+  onRemoveStyle: (id: string) => void;
 
-  activeLightingName: string | null;
+  activeLightingItems: { id: string; name: string }[];
   onChooseLighting: () => void;
-  onDeactivateLighting?: () => void;
+  onRemoveLighting: (id: string) => void;
 
-  activeCompositionName: string | null;
+  activeCompositionItems: { id: string; name: string }[];
   onChooseComposition: () => void;
-  onDeactivateComposition?: () => void;
+  onRemoveComposition: (id: string) => void;
 
-  activeMoodName: string | null;
+  activeMoodItems: { id: string; name: string }[];
   onChooseMood: () => void;
-  onDeactivateMood?: () => void;
+  onRemoveMood: (id: string) => void;
 
   activeNegativeItems: { id: string; name: string }[];
   assembledNegativePrompt: string;
@@ -193,32 +174,30 @@ export function WorkspacePage({
   onChipToggle,
   assembledPrompt,
   onSavePrompt,
-  activeCharacterName,
+  activeCharacterItems,
   onChooseCharacter,
-  onDeactivateCharacter,
-  activeEnvironmentName,
-  environmentInPrompt,
+  onRemoveCharacter,
+  activeEnvironmentItems,
   onChooseEnvironment,
-  onAddEnvironment,
   onRemoveEnvironment,
   worldVariationEnabled,
   onWorldVariationToggle,
   onWorldVariationNext,
-  activeOutfitName,
+  activeOutfitItems,
   onChooseWardrobe,
-  onDeactivateWardrobe,
-  activeStyleName,
+  onRemoveWardrobe,
+  activeStyleItems,
   onChooseStyle,
-  onDeactivateStyle,
-  activeLightingName,
+  onRemoveStyle,
+  activeLightingItems,
   onChooseLighting,
-  onDeactivateLighting,
-  activeCompositionName,
+  onRemoveLighting,
+  activeCompositionItems,
   onChooseComposition,
-  onDeactivateComposition,
-  activeMoodName,
+  onRemoveComposition,
+  activeMoodItems,
   onChooseMood,
-  onDeactivateMood,
+  onRemoveMood,
   activeNegativeItems,
   assembledNegativePrompt,
   onChooseNegative,
@@ -265,6 +244,9 @@ export function WorkspacePage({
     if (!assembledNegativePrompt) return;
     void navigator.clipboard.writeText(assembledNegativePrompt);
   }, [assembledNegativePrompt]);
+
+  // Use the first active character name for InspirationField
+  const activeCharacterName = activeCharacterItems[0]?.name ?? null;
 
   return (
     <div className="workspace-page">
@@ -439,35 +421,42 @@ export function WorkspacePage({
           <div className="workspace-lane-list">
             <LaneSlot
               label="Character"
-              activeName={activeCharacterName}
+              activeItems={activeCharacterItems}
               variant="character"
+              onRemoveItem={onRemoveCharacter}
               onChoose={onChooseCharacter}
-              onDeactivate={onDeactivateCharacter}
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
             />
             <div
-              className={`ws-lane-slot ws-lane-slot-environment${environmentInPrompt ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
+              className={`ws-lane-slot ws-lane-slot-environment${activeEnvironmentItems.length > 0 ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
               title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
               role={onToggleLaneLock ? 'button' : undefined}
             >
               <div className="ws-lane-label">Environment</div>
-              <div className="ws-lane-name">
-                {activeEnvironmentName ?? <span className="ws-lane-name-empty">None</span>}
-              </div>
+              {activeEnvironmentItems.length === 0 ? (
+                <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
+              ) : (
+                <div className="ws-multi-tags">
+                  {activeEnvironmentItems.map(item => (
+                    <span key={item.id} className="ws-multi-tag">
+                      {item.name}
+                      <button
+                        type="button"
+                        className="ws-multi-tag-remove"
+                        onClick={e => { e.stopPropagation(); onRemoveEnvironment(item.id); }}
+                      >×</button>
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
-                {activeEnvironmentName && !environmentInPrompt && onAddEnvironment && (
-                  <button type="button" className="ws-lane-btn ws-lane-btn-add" onClick={onAddEnvironment}>Add</button>
-                )}
-                {environmentInPrompt && onRemoveEnvironment && (
-                  <button type="button" className="ws-lane-btn ws-lane-btn-remove" onClick={onRemoveEnvironment}>Remove</button>
-                )}
                 <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseEnvironment}>
-                  {activeEnvironmentName ? 'Change' : 'Choose'}
+                  {activeEnvironmentItems.length > 0 ? '+ Add' : 'Choose'}
                 </button>
               </div>
-              {environmentInPrompt && (
+              {activeEnvironmentItems.length > 0 && (
                 <div className="ws-env-variation" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
                   <button
                     type="button"
@@ -484,46 +473,46 @@ export function WorkspacePage({
             </div>
             <LaneSlot
               label="Wardrobe"
-              activeName={activeOutfitName}
+              activeItems={activeOutfitItems}
               variant="wardrobe"
+              onRemoveItem={onRemoveWardrobe}
               onChoose={onChooseWardrobe}
-              onDeactivate={onDeactivateWardrobe}
               locked={lockedLanes?.has('wardrobe')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('wardrobe') : undefined}
             />
             <LaneSlot
               label="Style"
-              activeName={activeStyleName}
+              activeItems={activeStyleItems}
               variant="style"
+              onRemoveItem={onRemoveStyle}
               onChoose={onChooseStyle}
-              onDeactivate={onDeactivateStyle}
               locked={lockedLanes?.has('style')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('style') : undefined}
             />
             <LaneSlot
               label="Lighting"
-              activeName={activeLightingName}
+              activeItems={activeLightingItems}
               variant="lighting"
+              onRemoveItem={onRemoveLighting}
               onChoose={onChooseLighting}
-              onDeactivate={onDeactivateLighting}
               locked={lockedLanes?.has('lighting')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('lighting') : undefined}
             />
             <LaneSlot
               label="Composition"
-              activeName={activeCompositionName}
+              activeItems={activeCompositionItems}
               variant="composition"
+              onRemoveItem={onRemoveComposition}
               onChoose={onChooseComposition}
-              onDeactivate={onDeactivateComposition}
               locked={lockedLanes?.has('composition')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('composition') : undefined}
             />
             <LaneSlot
               label="Mood"
-              activeName={activeMoodName}
+              activeItems={activeMoodItems}
               variant="mood"
+              onRemoveItem={onRemoveMood}
               onChoose={onChooseMood}
-              onDeactivate={onDeactivateMood}
               locked={lockedLanes?.has('mood')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('mood') : undefined}
             />

@@ -198,22 +198,20 @@ type BuilderSessionSnapshot = {
   hasReachedEndViaNext: boolean;
   activeChipTexts: string[];
   activeIdpSetId: string | null;
-  activeCharacterId: string | null;
-  activeOutfitId: string | null;
-  activeStyleId: string | null;
-  activeLightingId: string | null;
-  activeCompositionId: string | null;
-  activeMoodId: string | null;
+  activeCharacterIds: string[];
+  activeOutfitIds: string[];
+  activeStyleIds: string[];
+  activeLightingIds: string[];
+  activeCompositionIds: string[];
+  activeMoodIds: string[];
   activeNegativeIds: string[];
   activeObjectIds: string[];
   activeWorld: { id: string; name: string; phrases: string[] } | null;
-  characterInPrompt: boolean;
   poseFraming: string | null;
   poseOrientation: string | null;
   poseEnergy: string | null;
   poseGaze: string | null;
-  activeEnvironmentId: string | null;
-  environmentInPrompt: boolean;
+  activeEnvironmentIds: string[];
   envTime: string | null;
   envWeather: string | null;
   envScale: string | null;
@@ -270,12 +268,42 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       hasReachedEndViaNext: Boolean(parsed.hasReachedEndViaNext),
       activeChipTexts: Array.isArray(parsed.activeChipTexts) ? (parsed.activeChipTexts as unknown[]).filter((t): t is string => typeof t === 'string') : [],
       activeIdpSetId: typeof parsed.activeIdpSetId === 'string' ? parsed.activeIdpSetId : null,
-      activeCharacterId: typeof parsed.activeCharacterId === 'string' ? parsed.activeCharacterId : null,
-      activeOutfitId: typeof parsed.activeOutfitId === 'string' ? parsed.activeOutfitId : null,
-      activeStyleId: typeof parsed.activeStyleId === 'string' ? parsed.activeStyleId : null,
-      activeLightingId: typeof parsed.activeLightingId === 'string' ? parsed.activeLightingId : null,
-      activeCompositionId: typeof parsed.activeCompositionId === 'string' ? parsed.activeCompositionId : null,
-      activeMoodId: typeof parsed.activeMoodId === 'string' ? parsed.activeMoodId : null,
+      activeCharacterIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeCharacterIds)) return (p.activeCharacterIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeCharacterId === 'string') return [p.activeCharacterId];
+        return [];
+      })(),
+      activeOutfitIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeOutfitIds)) return (p.activeOutfitIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeOutfitId === 'string') return [p.activeOutfitId];
+        return [];
+      })(),
+      activeStyleIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeStyleIds)) return (p.activeStyleIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeStyleId === 'string') return [p.activeStyleId];
+        return [];
+      })(),
+      activeLightingIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeLightingIds)) return (p.activeLightingIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeLightingId === 'string') return [p.activeLightingId];
+        return [];
+      })(),
+      activeCompositionIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeCompositionIds)) return (p.activeCompositionIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeCompositionId === 'string') return [p.activeCompositionId];
+        return [];
+      })(),
+      activeMoodIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeMoodIds)) return (p.activeMoodIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeMoodId === 'string') return [p.activeMoodId];
+        return [];
+      })(),
       activeNegativeIds: Array.isArray(parsed.activeNegativeIds)
         ? (parsed.activeNegativeIds as unknown[]).filter((x): x is string => typeof x === 'string')
         : typeof (parsed as any).activeNegativeId === 'string' ? [(parsed as any).activeNegativeId] : [],
@@ -285,13 +313,16 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       activeWorld: parsed.activeWorld && typeof parsed.activeWorld === 'object' && typeof (parsed.activeWorld as any).id === 'string'
         ? parsed.activeWorld as { id: string; name: string; phrases: string[] }
         : null,
-      characterInPrompt: Boolean(parsed.characterInPrompt),
       poseFraming: typeof parsed.poseFraming === 'string' ? parsed.poseFraming : null,
       poseOrientation: typeof parsed.poseOrientation === 'string' ? parsed.poseOrientation : null,
       poseEnergy: typeof parsed.poseEnergy === 'string' ? parsed.poseEnergy : null,
       poseGaze: typeof parsed.poseGaze === 'string' ? parsed.poseGaze : null,
-      activeEnvironmentId: typeof parsed.activeEnvironmentId === 'string' ? parsed.activeEnvironmentId : null,
-      environmentInPrompt: Boolean(parsed.environmentInPrompt),
+      activeEnvironmentIds: (() => {
+        const p = parsed as any;
+        if (Array.isArray(p.activeEnvironmentIds)) return (p.activeEnvironmentIds as unknown[]).filter((x): x is string => typeof x === 'string');
+        if (typeof p.activeEnvironmentId === 'string') return p.environmentInPrompt ? [p.activeEnvironmentId] : [];
+        return [];
+      })(),
       envTime: typeof parsed.envTime === 'string' ? parsed.envTime : null,
       envWeather: typeof parsed.envWeather === 'string' ? parsed.envWeather : null,
       envScale: typeof parsed.envScale === 'string' ? parsed.envScale : null,
@@ -436,20 +467,20 @@ export function App() {
   };
   const [activeIdpPool, setActiveIdpPool] = useState<Pool | null>(null);
   const [activeIdpSetId, setActiveIdpSetId] = useState<string | null>(initialBuilderSession?.activeIdpSetId ?? null);
-  const [activeCharacterId, setActiveCharacterId] = useState<string | null>(initialBuilderSession?.activeCharacterId ?? null);
-  const [activeOutfitId, setActiveOutfitId] = useState<string | null>(initialBuilderSession?.activeOutfitId ?? null);
+  const [activeCharacterIds, setActiveCharacterIds] = useState<string[]>(initialBuilderSession?.activeCharacterIds ?? []);
+  const [activeOutfitIds, setActiveOutfitIds] = useState<string[]>(initialBuilderSession?.activeOutfitIds ?? []);
   const [outfits, setOutfits] = useState<OutfitIdentity[]>([]);
   const [isWardrobeOpen, setIsWardrobeOpen] = useState(false);
-  const [activeStyleId, setActiveStyleId] = useState<string | null>(initialBuilderSession?.activeStyleId ?? null);
+  const [activeStyleIds, setActiveStyleIds] = useState<string[]>(initialBuilderSession?.activeStyleIds ?? []);
   const [stylePresets, setStylePresets] = useState<StylePreset[]>([]);
   const [isStyleOpen, setIsStyleOpen] = useState(false);
-  const [activeLightingId, setActiveLightingId] = useState<string | null>(initialBuilderSession?.activeLightingId ?? null);
+  const [activeLightingIds, setActiveLightingIds] = useState<string[]>(initialBuilderSession?.activeLightingIds ?? []);
   const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
   const [isLightingOpen, setIsLightingOpen] = useState(false);
-  const [activeCompositionId, setActiveCompositionId] = useState<string | null>(initialBuilderSession?.activeCompositionId ?? null);
+  const [activeCompositionIds, setActiveCompositionIds] = useState<string[]>(initialBuilderSession?.activeCompositionIds ?? []);
   const [compositionFrames, setCompositionFrames] = useState<CompositionFrame[]>([]);
   const [isCompositionOpen, setIsCompositionOpen] = useState(false);
-  const [activeMoodId, setActiveMoodId] = useState<string | null>(initialBuilderSession?.activeMoodId ?? null);
+  const [activeMoodIds, setActiveMoodIds] = useState<string[]>(initialBuilderSession?.activeMoodIds ?? []);
   const [moodPresets, setMoodPresets] = useState<MoodPreset[]>([]);
   const [isMoodOpen, setIsMoodOpen] = useState(false);
   const [lockedLanes, setLockedLanes] = useState<Set<string>>(new Set());
@@ -461,14 +492,12 @@ export function App() {
   const [isObjectOpen, setIsObjectOpen] = useState(false);
   const [activeWorld, setActiveWorld] = useState<{ id: string; name: string; phrases: string[] } | null>(initialBuilderSession?.activeWorld ?? null);
   const [isWorldOpen, setIsWorldOpen] = useState(false);
-  const [characterInPrompt, setCharacterInPrompt] = useState<boolean>(initialBuilderSession?.characterInPrompt ?? false);
   const [poseFraming, setPoseFraming] = useState<string | null>(initialBuilderSession?.poseFraming ?? null);
   const [poseOrientation, setPoseOrientation] = useState<string | null>(initialBuilderSession?.poseOrientation ?? null);
   const [poseEnergy, setPoseEnergy] = useState<string | null>(initialBuilderSession?.poseEnergy ?? null);
   const [poseGaze, setPoseGaze] = useState<string | null>(initialBuilderSession?.poseGaze ?? null);
   const [environments, setEnvironments] = useState<EnvironmentIdentity[]>([]);
-  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string | null>(initialBuilderSession?.activeEnvironmentId ?? null);
-  const [environmentInPrompt, setEnvironmentInPrompt] = useState<boolean>(initialBuilderSession?.environmentInPrompt ?? false);
+  const [activeEnvironmentIds, setActiveEnvironmentIds] = useState<string[]>(initialBuilderSession?.activeEnvironmentIds ?? []);
   const [envTime, setEnvTime] = useState<string | null>(initialBuilderSession?.envTime ?? null);
   const [envWeather, setEnvWeather] = useState<string | null>(initialBuilderSession?.envWeather ?? null);
   const [envScale, setEnvScale] = useState<string | null>(initialBuilderSession?.envScale ?? null);
@@ -517,19 +546,17 @@ export function App() {
     poolOutputOverrides: Map<string, string>;
     selectionOutputOverrides: Map<string, string>;
     selectedPromptFragments: SelectedPromptFragment[];
-    activeCharacterId: string | null;
-    activeOutfitId: string | null;
-    activeStyleId: string | null;
-    activeLightingId: string | null;
-    activeCompositionId: string | null;
-    activeMoodId: string | null;
-    characterInPrompt: boolean;
+    activeCharacterIds: string[];
+    activeOutfitIds: string[];
+    activeStyleIds: string[];
+    activeLightingIds: string[];
+    activeCompositionIds: string[];
+    activeMoodIds: string[];
     poseFraming: string | null;
     poseOrientation: string | null;
     poseEnergy: string | null;
     poseGaze: string | null;
-    activeEnvironmentId: string | null;
-    environmentInPrompt: boolean;
+    activeEnvironmentIds: string[];
     envTime: string | null;
     envWeather: string | null;
     envScale: string | null;
@@ -703,25 +730,14 @@ export function App() {
   }, []);
 
   const activeCharacter = useMemo(
-    () => characters.find(character => character.id === activeCharacterId) ?? null,
-    [characters, activeCharacterId]
+    () => characters.find(c => activeCharacterIds.includes(c.id)) ?? null,
+    [characters, activeCharacterIds]
   );
   const activeCharacterProjection = useMemo(
-    () => characterInPrompt ? buildCharacterPromptProjection(activeCharacter) : null,
-    [characterInPrompt, activeCharacter]
+    () => activeCharacterIds.length > 0 ? buildCharacterPromptProjection(activeCharacter) : null,
+    [activeCharacterIds, activeCharacter]
   );
   const activeCharacterDisplayName = activeCharacterProjection?.displayName ?? activeCharacter?.name ?? null;
-  const activeEnvironment = useMemo(
-    () => environments.find(e => e.id === activeEnvironmentId) ?? null,
-    [environments, activeEnvironmentId]
-  );
-  const activeEnvironmentProjection = useMemo(() => {
-    if (!environmentInPrompt || !activeEnvironment) return null;
-    return {
-      environmentId: activeEnvironment.id,
-      corePhrases: activeEnvironment.phraseBundle.core.filter(Boolean),
-    };
-  }, [environmentInPrompt, activeEnvironment]);
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
@@ -1503,14 +1519,10 @@ export function App() {
     try {
       const next = await listCharacters();
       setCharacters(next);
-      setActiveCharacterId(prev => (
-        prev && !next.some(character => character.id === prev)
-          ? null
-          : prev
-      ));
+      setActiveCharacterIds(prev => prev.filter(id => next.some(c => c.id === id)));
     } catch {
       setCharacters([]);
-      setActiveCharacterId(null);
+      setActiveCharacterIds([]);
     } finally {
       setCharactersLoading(false);
     }
@@ -1520,9 +1532,7 @@ export function App() {
     try {
       const next = await listEnvironments();
       setEnvironments(next);
-      setActiveEnvironmentId(prev => (
-        prev && !next.some(e => e.id === prev) ? null : prev
-      ));
+      setActiveEnvironmentIds(prev => prev.filter(id => next.some(e => e.id === id)));
     } catch {
       setEnvironments([]);
     }
@@ -1532,9 +1542,7 @@ export function App() {
     try {
       const next = await listOutfits();
       setOutfits(next);
-      setActiveOutfitId(prev => (
-        prev && !next.some(o => o.id === prev) ? null : prev
-      ));
+      setActiveOutfitIds(prev => prev.filter(id => next.some(o => o.id === id)));
     } catch {
       setOutfits([]);
     }
@@ -1556,44 +1564,23 @@ export function App() {
     const deletedCharacter = characters.find(character => character.id === id) ?? null;
     await deleteStoredCharacter(id);
     await refreshCharacters();
-    if (activeCharacterId === id) {
-      setActiveCharacterId(null);
-      setCharacterInPrompt(false);
-      setPoseFraming(null);
-      setPoseOrientation(null);
-      setPoseEnergy(null);
-      setPoseGaze(null);
+    if (activeCharacterIds.includes(id)) {
+      setActiveCharacterIds(prev => prev.filter(i => i !== id));
       if (deletedCharacter) {
         setBuilderNotice(`Removed "${deletedCharacter.name}" from the current workflow because it was deleted.`);
       }
     }
-  }, [activeCharacterId, characters, refreshCharacters]);
+  }, [activeCharacterIds, characters, refreshCharacters]);
 
   const handleSelectCharacter = useCallback((id: string) => {
-    const nextCharacter = characters.find(character => character.id === id);
-    setActiveCharacterId(id);
-    setCharacterInPrompt(true);
-    setPoseFraming(null);
-    setPoseOrientation(null);
-    setPoseEnergy(null);
-    setPoseGaze(null);
-    if (nextCharacter) {
-      setBuilderNotice(`"${nextCharacter.name}" activated.`);
-    }
+    setActiveCharacterIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    const char = characters.find(c => c.id === id);
+    if (char) setBuilderNotice(`"${char.name}" toggled.`);
   }, [characters]);
 
-  const handleDeactivateCharacter = useCallback(() => {
-    const character = characters.find(c => c.id === activeCharacterId) ?? null;
-    setActiveCharacterId(null);
-    setCharacterInPrompt(false);
-    setPoseFraming(null);
-    setPoseOrientation(null);
-    setPoseEnergy(null);
-    setPoseGaze(null);
-    if (character) {
-      setBuilderNotice(`"${character.name}" deactivated.`);
-    }
-  }, [activeCharacterId, characters]);
+  const handleRemoveCharacter = useCallback((id: string) => {
+    setActiveCharacterIds(prev => prev.filter(i => i !== id));
+  }, []);
 
   const handlePoseChange = useCallback((dimension: 'framing' | 'orientation' | 'energy' | 'gaze', value: string | null) => {
     switch (dimension) {
@@ -1621,57 +1608,21 @@ export function App() {
     const deletedEnv = environments.find(e => e.id === id) ?? null;
     await deleteStoredEnvironment(id);
     await refreshEnvironments();
-    if (activeEnvironmentId === id) {
-      setActiveEnvironmentId(null);
-      setEnvironmentInPrompt(false);
-      setEnvTime(null);
-      setEnvWeather(null);
-      setEnvScale(null);
-      setEnvCondition(null);
+    if (activeEnvironmentIds.includes(id)) {
+      setActiveEnvironmentIds(prev => prev.filter(i => i !== id));
       if (deletedEnv) {
         setBuilderNotice(`Removed "${deletedEnv.name}" from the current workflow because it was deleted.`);
       }
     }
-  }, [activeEnvironmentId, environments, refreshEnvironments]);
+  }, [activeEnvironmentIds, environments, refreshEnvironments]);
 
   const handleSelectEnvironment = useCallback((id: string) => {
-    const next = environments.find(e => e.id === id);
-    setActiveEnvironmentId(id);
-    setEnvironmentInPrompt(false);
-    setEnvTime(null);
-    setEnvWeather(null);
-    setEnvScale(null);
-    setEnvCondition(null);
-    setWorldVariationEnabled(false);
-    setWorldVariationPhrases([]);
-    if (next) {
-      setBuilderNotice(`"${next.name}" selected — press Add to inject into the prompt.`);
-    }
-  }, [environments]);
+    setActiveEnvironmentIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
 
-  const handleAddEnvironmentToPrompt = useCallback(() => {
-    if (!activeEnvironmentId) return;
-    setEnvironmentInPrompt(true);
-    const env = environments.find(e => e.id === activeEnvironmentId);
-    if (env) {
-      setBuilderNotice(`"${env.name}" phrases added to the prompt.`);
-    }
-  }, [activeEnvironmentId, environments]);
-
-  const handleRemoveActiveEnvironment = useCallback(() => {
-    if (!activeEnvironmentId) return;
-    const env = environments.find(e => e.id === activeEnvironmentId) ?? null;
-    setEnvironmentInPrompt(false);
-    setEnvTime(null);
-    setEnvWeather(null);
-    setEnvScale(null);
-    setEnvCondition(null);
-    setWorldVariationEnabled(false);
-    setWorldVariationPhrases([]);
-    if (env) {
-      setBuilderNotice(`Removed "${env.name}" phrases from the prompt.`);
-    }
-  }, [activeEnvironmentId, environments]);
+  const handleRemoveEnvironment = useCallback((id: string) => {
+    setActiveEnvironmentIds(prev => prev.filter(i => i !== id));
+  }, []);
 
   const handleWorldVariationToggle = useCallback(() => {
     setWorldVariationEnabled(prev => {
@@ -1751,20 +1702,24 @@ export function App() {
   const handleDeleteOutfit = useCallback(async (id: string) => {
     await deleteStoredOutfit(id);
     await refreshOutfits();
-    if (activeOutfitId === id) {
-      setActiveOutfitId(null);
+    if (activeOutfitIds.includes(id)) {
+      setActiveOutfitIds(prev => prev.filter(i => i !== id));
     }
-  }, [activeOutfitId, refreshOutfits]);
+  }, [activeOutfitIds, refreshOutfits]);
 
-  const handleSelectOutfit = useCallback((id: string | null) => {
-    setActiveOutfitId(id);
+  const handleSelectOutfit = useCallback((id: string) => {
+    setActiveOutfitIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleRemoveOutfit = useCallback((id: string) => {
+    setActiveOutfitIds(prev => prev.filter(i => i !== id));
   }, []);
 
   const refreshStylePresets = useCallback(async () => {
     try {
       const next = await listStylePresets();
       setStylePresets(next);
-      setActiveStyleId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+      setActiveStyleIds(prev => prev.filter(id => next.some(i => i.id === id)));
     } catch {
       setStylePresets([]);
     }
@@ -1785,18 +1740,22 @@ export function App() {
   const handleDeleteStylePreset = useCallback(async (id: string) => {
     await deleteStoredStylePreset(id);
     await refreshStylePresets();
-    if (activeStyleId === id) setActiveStyleId(null);
-  }, [activeStyleId, refreshStylePresets]);
+    if (activeStyleIds.includes(id)) setActiveStyleIds(prev => prev.filter(i => i !== id));
+  }, [activeStyleIds, refreshStylePresets]);
 
-  const handleSelectStylePreset = useCallback((id: string | null) => {
-    setActiveStyleId(id);
+  const handleSelectStylePreset = useCallback((id: string) => {
+    setActiveStyleIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleRemoveStyle = useCallback((id: string) => {
+    setActiveStyleIds(prev => prev.filter(i => i !== id));
   }, []);
 
   const refreshLightingSetups = useCallback(async () => {
     try {
       const next = await listLightingSetups();
       setLightingSetups(next);
-      setActiveLightingId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+      setActiveLightingIds(prev => prev.filter(id => next.some(i => i.id === id)));
     } catch {
       setLightingSetups([]);
     }
@@ -1817,18 +1776,22 @@ export function App() {
   const handleDeleteLightingSetup = useCallback(async (id: string) => {
     await deleteStoredLightingSetup(id);
     await refreshLightingSetups();
-    if (activeLightingId === id) setActiveLightingId(null);
-  }, [activeLightingId, refreshLightingSetups]);
+    if (activeLightingIds.includes(id)) setActiveLightingIds(prev => prev.filter(i => i !== id));
+  }, [activeLightingIds, refreshLightingSetups]);
 
-  const handleSelectLightingSetup = useCallback((id: string | null) => {
-    setActiveLightingId(id);
+  const handleSelectLightingSetup = useCallback((id: string) => {
+    setActiveLightingIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleRemoveLighting = useCallback((id: string) => {
+    setActiveLightingIds(prev => prev.filter(i => i !== id));
   }, []);
 
   const refreshCompositionFrames = useCallback(async () => {
     try {
       const next = await listCompositionFrames();
       setCompositionFrames(next);
-      setActiveCompositionId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+      setActiveCompositionIds(prev => prev.filter(id => next.some(i => i.id === id)));
     } catch {
       setCompositionFrames([]);
     }
@@ -1849,18 +1812,22 @@ export function App() {
   const handleDeleteCompositionFrame = useCallback(async (id: string) => {
     await deleteStoredCompositionFrame(id);
     await refreshCompositionFrames();
-    if (activeCompositionId === id) setActiveCompositionId(null);
-  }, [activeCompositionId, refreshCompositionFrames]);
+    if (activeCompositionIds.includes(id)) setActiveCompositionIds(prev => prev.filter(i => i !== id));
+  }, [activeCompositionIds, refreshCompositionFrames]);
 
-  const handleSelectCompositionFrame = useCallback((id: string | null) => {
-    setActiveCompositionId(id);
+  const handleSelectCompositionFrame = useCallback((id: string) => {
+    setActiveCompositionIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleRemoveComposition = useCallback((id: string) => {
+    setActiveCompositionIds(prev => prev.filter(i => i !== id));
   }, []);
 
   const refreshMoodPresets = useCallback(async () => {
     try {
       const next = await listMoodPresets();
       setMoodPresets(next);
-      setActiveMoodId(prev => (prev && !next.some(i => i.id === prev) ? null : prev));
+      setActiveMoodIds(prev => prev.filter(id => next.some(i => i.id === id)));
     } catch {
       setMoodPresets([]);
     }
@@ -1881,11 +1848,15 @@ export function App() {
   const handleDeleteMoodPreset = useCallback(async (id: string) => {
     await deleteStoredMoodPreset(id);
     await refreshMoodPresets();
-    if (activeMoodId === id) setActiveMoodId(null);
-  }, [activeMoodId, refreshMoodPresets]);
+    if (activeMoodIds.includes(id)) setActiveMoodIds(prev => prev.filter(i => i !== id));
+  }, [activeMoodIds, refreshMoodPresets]);
 
-  const handleSelectMoodPreset = useCallback((id: string | null) => {
-    setActiveMoodId(id);
+  const handleSelectMoodPreset = useCallback((id: string) => {
+    setActiveMoodIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  }, []);
+
+  const handleRemoveMood = useCallback((id: string) => {
+    setActiveMoodIds(prev => prev.filter(i => i !== id));
   }, []);
 
   const handleToggleLaneLock = useCallback((lane: string) => {
@@ -1904,39 +1875,39 @@ export function App() {
 
     if (rollAll || locked.has('character')) {
       const char = pick(characters);
-      if (char) handleSelectCharacter(char.id);
+      if (char) setActiveCharacterIds([char.id]);
     }
 
     if (rollAll || locked.has('environment')) {
       const env = pick(environments);
-      if (env) { handleSelectEnvironment(env.id); setEnvironmentInPrompt(true); }
+      if (env) setActiveEnvironmentIds([env.id]);
     }
 
     if (rollAll || locked.has('wardrobe')) {
       const outfit = pick(outfits);
-      handleSelectOutfit(outfit?.id ?? null);
+      setActiveOutfitIds(outfit ? [outfit.id] : []);
     }
 
     if (rollAll || locked.has('style')) {
       const style = pick(stylePresets);
-      handleSelectStylePreset(style?.id ?? null);
+      setActiveStyleIds(style ? [style.id] : []);
     }
 
     if (rollAll || locked.has('lighting')) {
       const lighting = pick(lightingSetups);
-      handleSelectLightingSetup(lighting?.id ?? null);
+      setActiveLightingIds(lighting ? [lighting.id] : []);
     }
 
     if (rollAll || locked.has('composition')) {
       const comp = pick(compositionFrames);
-      handleSelectCompositionFrame(comp?.id ?? null);
+      setActiveCompositionIds(comp ? [comp.id] : []);
     }
 
     if (rollAll || locked.has('mood')) {
       const mood = pick(moodPresets);
-      handleSelectMoodPreset(mood?.id ?? null);
+      setActiveMoodIds(mood ? [mood.id] : []);
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, handleSelectCharacter, handleSelectEnvironment, handleSelectOutfit, handleSelectStylePreset, handleSelectLightingSetup, handleSelectCompositionFrame, handleSelectMoodPreset]);
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets]);
 
   const refreshNegativePresets = useCallback(async () => {
     try {
@@ -2576,7 +2547,7 @@ export function App() {
     const hasModifiers = modifiers.size > 0;
     const hasPoolItems = poolPromptItems.length > 0;
     const hasPromptFragments = selectedPromptFragments.length > 0;
-    const hasCharacter = activeCharacterId !== null || characterInPrompt;
+    const hasCharacter = activeCharacterIds.length > 0;
     if (!hasSelections && !hasModifiers && !hasPoolItems && !hasPromptFragments && !hasCharacter) {
       return;
     }
@@ -2587,19 +2558,17 @@ export function App() {
       poolOutputOverrides: new Map(poolOutputOverrides),
       selectionOutputOverrides: new Map(selectionOutputOverrides),
       selectedPromptFragments: [...selectedPromptFragments],
-      activeCharacterId,
-      activeOutfitId,
-      activeStyleId,
-      activeLightingId,
-      activeCompositionId,
-      activeMoodId,
-      characterInPrompt,
+      activeCharacterIds: [...activeCharacterIds],
+      activeOutfitIds: [...activeOutfitIds],
+      activeStyleIds: [...activeStyleIds],
+      activeLightingIds: [...activeLightingIds],
+      activeCompositionIds: [...activeCompositionIds],
+      activeMoodIds: [...activeMoodIds],
       poseFraming,
       poseOrientation,
       poseEnergy,
       poseGaze,
-      activeEnvironmentId,
-      environmentInPrompt,
+      activeEnvironmentIds: [...activeEnvironmentIds],
       envTime,
       envWeather,
       envScale,
@@ -2622,19 +2591,17 @@ export function App() {
     });
     setSelectionOutputOverrides(new Map());
     setSelectedPromptFragments([]);
-    setActiveCharacterId(null);
-    setCharacterInPrompt(false);
+    setActiveCharacterIds([]);
     setPoseFraming(null);
     setPoseOrientation(null);
     setPoseEnergy(null);
     setPoseGaze(null);
-    setActiveEnvironmentId(null);
-    setEnvironmentInPrompt(false);
+    setActiveEnvironmentIds([]);
     setEnvTime(null);
     setEnvWeather(null);
     setEnvScale(null);
     setEnvCondition(null);
-  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments, activeCharacterId, characterInPrompt, activeEnvironmentId, environmentInPrompt]);
+  }, [selections, modifiers, poolPromptItems, poolOutputOverrides, selectionOutputOverrides, selectedPromptFragments, activeCharacterIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, envTime, envWeather, envScale, envCondition]);
 
   const handleUndoClearPrompt = useCallback(() => {
     if (!clearUndoState) return;
@@ -2644,19 +2611,17 @@ export function App() {
     setPoolOutputOverrides(new Map(clearUndoState.poolOutputOverrides));
     setSelectionOutputOverrides(new Map(clearUndoState.selectionOutputOverrides));
     setSelectedPromptFragments([...clearUndoState.selectedPromptFragments]);
-    setActiveCharacterId(clearUndoState.activeCharacterId);
-    setActiveOutfitId(clearUndoState.activeOutfitId);
-    setActiveStyleId(clearUndoState.activeStyleId);
-    setActiveLightingId(clearUndoState.activeLightingId);
-    setActiveCompositionId(clearUndoState.activeCompositionId);
-    setActiveMoodId(clearUndoState.activeMoodId);
-    setCharacterInPrompt(clearUndoState.characterInPrompt);
+    setActiveCharacterIds([...clearUndoState.activeCharacterIds]);
+    setActiveOutfitIds([...clearUndoState.activeOutfitIds]);
+    setActiveStyleIds([...clearUndoState.activeStyleIds]);
+    setActiveLightingIds([...clearUndoState.activeLightingIds]);
+    setActiveCompositionIds([...clearUndoState.activeCompositionIds]);
+    setActiveMoodIds([...clearUndoState.activeMoodIds]);
     setPoseFraming(clearUndoState.poseFraming);
     setPoseOrientation(clearUndoState.poseOrientation);
     setPoseEnergy(clearUndoState.poseEnergy);
     setPoseGaze(clearUndoState.poseGaze);
-    setActiveEnvironmentId(clearUndoState.activeEnvironmentId);
-    setEnvironmentInPrompt(clearUndoState.environmentInPrompt);
+    setActiveEnvironmentIds([...clearUndoState.activeEnvironmentIds]);
     setEnvTime(clearUndoState.envTime);
     setEnvWeather(clearUndoState.envWeather);
     setEnvScale(clearUndoState.envScale);
@@ -2698,22 +2663,20 @@ export function App() {
         hasReachedEndViaNext,
         activeChipTexts,
         activeIdpSetId,
-        activeCharacterId,
-        activeOutfitId,
-        activeStyleId,
-        activeLightingId,
-        activeCompositionId,
-        activeMoodId,
+        activeCharacterIds,
+        activeOutfitIds,
+        activeStyleIds,
+        activeLightingIds,
+        activeCompositionIds,
+        activeMoodIds,
         activeNegativeIds,
         activeObjectIds,
         activeWorld,
-        characterInPrompt,
         poseFraming,
         poseOrientation,
         poseEnergy,
         poseGaze,
-        activeEnvironmentId,
-        environmentInPrompt,
+        activeEnvironmentIds,
         envTime,
         envWeather,
         envScale,
@@ -2739,21 +2702,19 @@ export function App() {
     hasReachedEndViaNext,
     activeChipTexts,
     activeIdpSetId,
-    activeCharacterId,
-    activeOutfitId,
-    activeStyleId,
-    activeLightingId,
-    activeCompositionId,
-    activeMoodId,
+    activeCharacterIds,
+    activeOutfitIds,
+    activeStyleIds,
+    activeLightingIds,
+    activeCompositionIds,
+    activeMoodIds,
     activeNegativeIds,
     activeObjectIds,
-    characterInPrompt,
     poseFraming,
     poseOrientation,
     poseEnergy,
     poseGaze,
-    activeEnvironmentId,
-    environmentInPrompt,
+    activeEnvironmentIds,
     envTime,
     envWeather,
     envScale,
@@ -2877,22 +2838,24 @@ export function App() {
         }]
       : [];
 
-    const environmentEntries: PromptAdditionEntry[] = activeEnvironmentProjection
-      ? activeEnvironmentProjection.corePhrases
-          .map((text, index) => ({
-            id: `environment:${activeEnvironmentProjection.environmentId}:${index}`,
-            text,
-            position: 'end' as const,
-            section: 'Environment',
-            sourceType: 'environment' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const environmentEntries: PromptAdditionEntry[] = activeEnvironmentIds.flatMap(envId => {
+      const env = environments.find(e => e.id === envId);
+      return env ? env.phraseBundle.core
+        .map((text, index) => ({
+          id: `environment:${env.id}:${index}`,
+          text,
+          position: 'end' as const,
+          section: 'Environment',
+          sourceType: 'environment' as const,
+        }))
+        .filter(entry => Boolean(entry.text)) : [];
+    });
 
     const lightPhrases = [envTime, envWeather, envScale, envCondition].filter(Boolean) as string[];
-    const lightEntries: PromptAdditionEntry[] = lightPhrases.length > 0 && activeEnvironmentProjection
+    const firstActiveEnvId = activeEnvironmentIds[0] ?? null;
+    const lightEntries: PromptAdditionEntry[] = lightPhrases.length > 0 && firstActiveEnvId
       ? [{
-          id: `environment:${activeEnvironmentProjection.environmentId}:light`,
+          id: `environment:${firstActiveEnvId}:light`,
           text: lightPhrases.join(', '),
           position: 'end' as const,
           section: 'Environment',
@@ -2900,9 +2863,9 @@ export function App() {
         }]
       : [];
 
-    const worldStateEntries: PromptAdditionEntry[] = activeEnvironmentProjection && worldVariationEnabled
+    const worldStateEntries: PromptAdditionEntry[] = firstActiveEnvId && worldVariationEnabled
       ? worldVariationPhrases.map((text, index) => ({
-          id: `environment:${activeEnvironmentProjection.environmentId}:ws:${index}`,
+          id: `environment:${firstActiveEnvId}:ws:${index}`,
           text,
           position: 'start' as const,
           section: 'Environment',
@@ -2910,70 +2873,60 @@ export function App() {
         }))
       : [];
 
-    const activeOutfit = activeOutfitId ? outfits.find(o => o.id === activeOutfitId) ?? null : null;
-    const outfitEntries: PromptAdditionEntry[] = activeOutfit
-      ? activeOutfit.phrases
-          .map((text, index) => ({
-            id: `outfit:${activeOutfit.id}:${index}`,
-            text,
-            position: 'start' as const,
-            section: 'Wardrobe',
-            sourceType: 'outfit' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const outfitEntries: PromptAdditionEntry[] = activeOutfitIds.flatMap(id => {
+      const item = outfits.find(o => o.id === id);
+      return item ? item.phrases.map((text, index) => ({
+        id: `outfit:${item.id}:${index}`,
+        text,
+        position: 'start' as const,
+        section: 'Wardrobe',
+        sourceType: 'outfit' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
 
-    const activeStyle = activeStyleId ? stylePresets.find(s => s.id === activeStyleId) ?? null : null;
-    const styleEntries: PromptAdditionEntry[] = activeStyle
-      ? activeStyle.phrases
-          .map((text, index) => ({
-            id: `style:${activeStyle.id}:${index}`,
-            text,
-            position: 'end' as const,
-            section: 'Style',
-            sourceType: 'style' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const styleEntries: PromptAdditionEntry[] = activeStyleIds.flatMap(id => {
+      const item = stylePresets.find(s => s.id === id);
+      return item ? item.phrases.map((text, index) => ({
+        id: `style:${item.id}:${index}`,
+        text,
+        position: 'end' as const,
+        section: 'Style',
+        sourceType: 'style' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
 
-    const activeLighting = activeLightingId ? lightingSetups.find(l => l.id === activeLightingId) ?? null : null;
-    const lightingEntries: PromptAdditionEntry[] = activeLighting
-      ? activeLighting.phrases
-          .map((text, index) => ({
-            id: `lighting:${activeLighting.id}:${index}`,
-            text,
-            position: 'end' as const,
-            section: 'Lighting',
-            sourceType: 'lighting' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const lightingEntries: PromptAdditionEntry[] = activeLightingIds.flatMap(id => {
+      const item = lightingSetups.find(l => l.id === id);
+      return item ? item.phrases.map((text, index) => ({
+        id: `lighting:${item.id}:${index}`,
+        text,
+        position: 'end' as const,
+        section: 'Lighting',
+        sourceType: 'lighting' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
 
-    const activeComposition = activeCompositionId ? compositionFrames.find(c => c.id === activeCompositionId) ?? null : null;
-    const compositionEntries: PromptAdditionEntry[] = activeComposition
-      ? activeComposition.phrases
-          .map((text, index) => ({
-            id: `composition:${activeComposition.id}:${index}`,
-            text,
-            position: 'end' as const,
-            section: 'Composition',
-            sourceType: 'composition' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const compositionEntries: PromptAdditionEntry[] = activeCompositionIds.flatMap(id => {
+      const item = compositionFrames.find(c => c.id === id);
+      return item ? item.phrases.map((text, index) => ({
+        id: `composition:${item.id}:${index}`,
+        text,
+        position: 'end' as const,
+        section: 'Composition',
+        sourceType: 'composition' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
 
-    const activeMood = activeMoodId ? moodPresets.find(m => m.id === activeMoodId) ?? null : null;
-    const moodEntries: PromptAdditionEntry[] = activeMood
-      ? activeMood.phrases
-          .map((text, index) => ({
-            id: `mood:${activeMood.id}:${index}`,
-            text,
-            position: 'end' as const,
-            section: 'Mood',
-            sourceType: 'mood' as const,
-          }))
-          .filter(entry => Boolean(entry.text))
-      : [];
+    const moodEntries: PromptAdditionEntry[] = activeMoodIds.flatMap(id => {
+      const item = moodPresets.find(m => m.id === id);
+      return item ? item.phrases.map((text, index) => ({
+        id: `mood:${item.id}:${index}`,
+        text,
+        position: 'end' as const,
+        section: 'Mood',
+        sourceType: 'mood' as const,
+      })).filter(e => Boolean(e.text)) : [];
+    });
 
     const objectEntries: PromptAdditionEntry[] = activeObjectIds.flatMap(id => {
       const obj = objects.find(o => o.id === id);
@@ -2987,7 +2940,7 @@ export function App() {
     });
 
     return [...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentProjection, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitId, outfits, activeObjectIds, objects, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeCompositionId, compositionFrames, activeMoodId, moodPresets]);
+  }, [activeCharacterProjection, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
@@ -3014,10 +2967,10 @@ export function App() {
 
   const captureAutoName = useMemo(() => buildAutoName(
     activeCharacterDisplayName,
-    activeEnvironment?.name ?? null,
-    activeMoodId ? (moodPresets.find(m => m.id === activeMoodId)?.name ?? null) : null,
-    activeStyleId ? (stylePresets.find(s => s.id === activeStyleId)?.name ?? null) : null,
-  ), [activeCharacterDisplayName, activeEnvironment, activeMoodId, moodPresets, activeStyleId, stylePresets]);
+    environments.find(e => activeEnvironmentIds.includes(e.id))?.name ?? null,
+    activeMoodIds.length > 0 ? (moodPresets.find(m => m.id === activeMoodIds[0])?.name ?? null) : null,
+    activeStyleIds.length > 0 ? (stylePresets.find(s => s.id === activeStyleIds[0])?.name ?? null) : null,
+  ), [activeCharacterDisplayName, activeEnvironmentIds, environments, activeMoodIds, moodPresets, activeStyleIds, stylePresets]);
 
   const handleCapture = useCallback(() => {
     if (!workspacePrompt) return;
@@ -3035,16 +2988,16 @@ export function App() {
   }, []);
 
   const activeIdentityTags = useMemo(() => [
-    ...(activeCharacter ? [{ name: activeCharacter.name, type: 'character' as const }] : []),
-    ...(activeStyleId ? [{ name: stylePresets.find(s => s.id === activeStyleId)?.name ?? '', type: 'style' as const }].filter(t => t.name) : []),
-    ...(activeLightingId ? [{ name: lightingSetups.find(l => l.id === activeLightingId)?.name ?? '', type: 'lighting' as const }].filter(t => t.name) : []),
-    ...(activeEnvironment ? [{ name: activeEnvironment.name, type: 'environment' as const }] : []),
-    ...(activeOutfitId ? [{ name: outfits.find(o => o.id === activeOutfitId)?.name ?? '', type: 'wardrobe' as const }].filter(t => t.name) : []),
-    ...(activeCompositionId ? [{ name: compositionFrames.find(c => c.id === activeCompositionId)?.name ?? '', type: 'composition' as const }].filter(t => t.name) : []),
-    ...(activeMoodId ? [{ name: moodPresets.find(m => m.id === activeMoodId)?.name ?? '', type: 'mood' as const }].filter(t => t.name) : []),
+    ...activeCharacterIds.map(id => ({ name: characters.find(c => c.id === id)?.name ?? id, type: 'character' as const })),
+    ...activeStyleIds.map(id => ({ name: stylePresets.find(s => s.id === id)?.name ?? '', type: 'style' as const })).filter(t => t.name),
+    ...activeLightingIds.map(id => ({ name: lightingSetups.find(l => l.id === id)?.name ?? '', type: 'lighting' as const })).filter(t => t.name),
+    ...activeEnvironmentIds.map(id => ({ name: environments.find(e => e.id === id)?.name ?? '', type: 'environment' as const })).filter(t => t.name),
+    ...activeOutfitIds.map(id => ({ name: outfits.find(o => o.id === id)?.name ?? '', type: 'wardrobe' as const })).filter(t => t.name),
+    ...activeCompositionIds.map(id => ({ name: compositionFrames.find(c => c.id === id)?.name ?? '', type: 'composition' as const })).filter(t => t.name),
+    ...activeMoodIds.map(id => ({ name: moodPresets.find(m => m.id === id)?.name ?? '', type: 'mood' as const })).filter(t => t.name),
     ...(activeWorld ? [{ name: activeWorld.name, type: 'aura' as const }] : []),
     ...activeObjectIds.map(id => ({ name: objects.find(o => o.id === id)?.name ?? '', type: 'object' as const })).filter(t => t.name),
-  ], [activeCharacter, activeStyleId, stylePresets, activeLightingId, lightingSetups, activeEnvironment, activeOutfitId, outfits, activeCompositionId, compositionFrames, activeMoodId, moodPresets, activeWorld, activeObjectIds, objects]);
+  ], [activeCharacterIds, characters, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeEnvironmentIds, environments, activeOutfitIds, outfits, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets, activeWorld, activeObjectIds, objects]);
 
   // Add allowCustomExtension to attribute definitions for current question
   const currentQuestionAttributesWithExtensions = currentQuestionAttributes.map(attr => ({
@@ -3663,7 +3616,7 @@ export function App() {
           onAddToPrompt={handleAddPoolItem}
           authUser={authUser}
           isPro={isPro}
-          activeCharacterId={activeCharacterId}
+          activeCharacterId={activeCharacterIds[0] ?? null}
           activeCharacterName={activeCharacterDisplayName}
           externalOpenSaveSignal={savePromptOpenSignal}
           defaultSaveName={captureAutoName}
@@ -3674,32 +3627,30 @@ export function App() {
           onChipToggle={handleChipToggle}
           assembledPrompt={workspacePrompt}
           onSavePrompt={() => { setSavePromptOpenSignal(s => s + 1); setActivePage('prompts'); }}
-          activeCharacterName={activeCharacter?.name ?? null}
+          activeCharacterItems={activeCharacterIds.map(id => ({ id, name: characters.find(c => c.id === id)?.name ?? id }))}
           onChooseCharacter={() => setIsCharacterLibraryOpen(true)}
-          onDeactivateCharacter={activeCharacterId ? handleDeactivateCharacter : undefined}
-          activeEnvironmentName={activeEnvironment?.name ?? null}
-          environmentInPrompt={environmentInPrompt}
+          onRemoveCharacter={handleRemoveCharacter}
+          activeEnvironmentItems={activeEnvironmentIds.map(id => ({ id, name: environments.find(e => e.id === id)?.name ?? id }))}
           onChooseEnvironment={() => setIsEnvironmentLibraryOpen(true)}
-          onAddEnvironment={activeEnvironment && !environmentInPrompt ? handleAddEnvironmentToPrompt : undefined}
-          onRemoveEnvironment={activeEnvironment && environmentInPrompt ? handleRemoveActiveEnvironment : undefined}
+          onRemoveEnvironment={handleRemoveEnvironment}
           worldVariationEnabled={worldVariationEnabled}
           onWorldVariationToggle={handleWorldVariationToggle}
           onWorldVariationNext={handleWorldVariationNext}
-          activeOutfitName={activeOutfitId ? (outfits.find(o => o.id === activeOutfitId)?.name ?? null) : null}
+          activeOutfitItems={activeOutfitIds.map(id => ({ id, name: outfits.find(o => o.id === id)?.name ?? id }))}
           onChooseWardrobe={() => setIsWardrobeOpen(true)}
-          onDeactivateWardrobe={activeOutfitId ? () => handleSelectOutfit(null) : undefined}
-          activeStyleName={activeStyleId ? (stylePresets.find(s => s.id === activeStyleId)?.name ?? null) : null}
+          onRemoveWardrobe={handleRemoveOutfit}
+          activeStyleItems={activeStyleIds.map(id => ({ id, name: stylePresets.find(s => s.id === id)?.name ?? id }))}
           onChooseStyle={() => setIsStyleOpen(true)}
-          onDeactivateStyle={activeStyleId ? () => handleSelectStylePreset(null) : undefined}
-          activeLightingName={activeLightingId ? (lightingSetups.find(l => l.id === activeLightingId)?.name ?? null) : null}
+          onRemoveStyle={handleRemoveStyle}
+          activeLightingItems={activeLightingIds.map(id => ({ id, name: lightingSetups.find(l => l.id === id)?.name ?? id }))}
           onChooseLighting={() => setIsLightingOpen(true)}
-          onDeactivateLighting={activeLightingId ? () => handleSelectLightingSetup(null) : undefined}
-          activeCompositionName={activeCompositionId ? (compositionFrames.find(c => c.id === activeCompositionId)?.name ?? null) : null}
+          onRemoveLighting={handleRemoveLighting}
+          activeCompositionItems={activeCompositionIds.map(id => ({ id, name: compositionFrames.find(c => c.id === id)?.name ?? id }))}
           onChooseComposition={() => setIsCompositionOpen(true)}
-          onDeactivateComposition={activeCompositionId ? () => handleSelectCompositionFrame(null) : undefined}
-          activeMoodName={activeMoodId ? (moodPresets.find(m => m.id === activeMoodId)?.name ?? null) : null}
+          onRemoveComposition={handleRemoveComposition}
+          activeMoodItems={activeMoodIds.map(id => ({ id, name: moodPresets.find(m => m.id === id)?.name ?? id }))}
           onChooseMood={() => setIsMoodOpen(true)}
-          onDeactivateMood={activeMoodId ? () => handleSelectMoodPreset(null) : undefined}
+          onRemoveMood={handleRemoveMood}
           activeNegativeItems={activeNegativeIds.map(id => ({ id, name: negativePresets.find(n => n.id === id)?.name ?? id }))}
           assembledNegativePrompt={workspaceNegativePrompt}
           onChooseNegative={() => setIsNegativeOpen(true)}
