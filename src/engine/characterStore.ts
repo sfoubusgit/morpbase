@@ -14,6 +14,7 @@ const CHARACTER_STORE_KEY = 'promptgen:characters:v1';
 const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
 const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v3';
 const CHARACTER_SEED_FLAG_KEY_V4 = 'promptgen:characters:seeded:v4';
+const CHARACTER_SEED_FLAG_KEY_V5 = 'promptgen:characters:seeded:v5';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -266,6 +267,7 @@ const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747699200000;
+const SEED_TS_5 = 1747872000000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -434,6 +436,44 @@ const V4_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V5_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_alice_and_the_white',
+    name: 'Alice & The White',
+    summary: 'A slight girl in a blue pinafore looking up with complete delight at a colossal grotesque white rabbit-creature — unbothered by what she cannot see is wrong about it.',
+    identity: {
+      archetype: 'duo',
+      presentation: 'clothed',
+      ageImpression: 'child and ageless',
+      visualAnchors: [
+        { id: 'anchor_aw_1', label: 'Alice — Form', kind: 'silhouette', text: 'slight young girl, slim build, standing small on a forest path, looking upward' },
+        { id: 'anchor_aw_2', label: 'Alice — Clothing', kind: 'clothing', text: 'blue short-sleeved pinafore dress, white apron, white ankle socks, black mary jane shoes, black bow headband' },
+        { id: 'anchor_aw_3', label: 'Alice — Face', kind: 'face', text: 'blonde hair, wide blue eyes, broad delighted smile, expression of complete and fearless wonder' },
+        { id: 'anchor_aw_4', label: 'The White — Form', kind: 'silhouette', text: 'colossal white-furred creature, three times her height, bloated round belly, long floppy rabbit ears, small fluffy tail, humanoid posture' },
+        { id: 'anchor_aw_5', label: 'The White — Face', kind: 'face', text: 'elongated horse-like snout, massive wide mouth full of large flat human teeth, long pink tongue hanging loose, single bulging bloodshot eye' },
+        { id: 'anchor_aw_6', label: 'The White — Limbs', kind: 'other', text: 'humanoid arms, long-fingered clawed hands hanging at its sides, rabbit hindquarters, white fur throughout' },
+        { id: 'anchor_aw_7', label: 'Dynamic', kind: 'other', text: 'Alice looking up at the creature with delight, the creature looming over her, tongue descending toward her, size contrast enormous, the girl wholly unbothered' },
+      ],
+      motifs: [
+        { id: 'motif_aw_1', label: 'Innocence & the Uncanny', text: 'the horror of Wonderland seen through the eyes of someone who finds it wonderful, wrongness met with delight' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'a slight young girl in a blue pinafore and white apron, standing on a forest path looking upward with wide delighted eyes and a fearless smile',
+        'beside her: a colossal white-furred creature, three times her height, vaguely rabbit in shape but wrong in every specific',
+        'elongated horse-like snout, massive wide mouth full of large flat human teeth, long pink tongue hanging loose toward her',
+        'single bulging bloodshot eye regarding her from above, long floppy white ears, small fluffy tail',
+        'humanoid arms and long-fingered clawed hands, bloated round belly, white fur, rabbit hindquarters',
+        'the girl smiling upward with complete delight, unbothered by what she cannot see is wrong about it',
+        'dark forest path, tall trees, dappled light, small wildflowers at the edge of the path',
+      ],
+    },
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -489,6 +529,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V4_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V5_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
