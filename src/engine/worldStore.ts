@@ -12,8 +12,10 @@ export type World = {
 const KEY = 'promptgen:worlds:v1';
 const BACKUP_KEY = 'promptgen:worlds:backup:v1';
 const WORLD_SEED_FLAG_KEY = 'promptgen:worlds:seeded:v1';
+const WORLD_SEED_FLAG_KEY_V2 = 'promptgen:worlds:seeded:v2';
 
 const WORLD_SEED_TS = 1747872000000;
+const WORLD_SEED_TS_V2 = 1747094400000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -57,17 +59,74 @@ const SEED_WORLDS: World[] = [
   },
 ];
 
+const SEED_WORLDS_V2: World[] = [
+  {
+    id: 'world_seed_creatine_cyberspace_gym',
+    name: 'Creatine Cyberspace Gym',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_ccg_01', text: 'glowing neon grid floor, each square pulsing faintly under heavy footfall' },
+      { id: 'wp_ccg_02', text: 'chrome dumbbells catching electric blue light, reflections fragmenting across the ceiling' },
+      { id: 'wp_ccg_03', text: 'barbell suspended in a holographic rack, weight plates rendered in wireframe light' },
+      { id: 'wp_ccg_04', text: 'protein shake foam catching neon, iridescent and chemical and slightly wrong' },
+      { id: 'wp_ccg_05', text: 'sweat on polished mirror surfaces, heat haze distorting everything reflected behind' },
+      { id: 'wp_ccg_06', text: 'motivational text dissolving and reforming on every wall in five-pixel bitmap font' },
+      { id: 'wp_ccg_07', text: 'chalk dust rising in slow drifts, each particle lit electric pink before it fades' },
+      { id: 'wp_ccg_08', text: 'weight plates stacked like server disks in a rack stretching into the dark' },
+      { id: 'wp_ccg_09', text: 'resistance band pulled taut and glowing, the tension visible as heat shimmer' },
+      { id: 'wp_ccg_10', text: 'mirror wall floor to ceiling, the reflection fractured by sweat streaks and fingerprints' },
+      { id: 'wp_ccg_11', text: 'ceiling fans spinning in the fog of creatine powder and exhaled breath' },
+      { id: 'wp_ccg_12', text: 'the compound scent of iron and voltage, a smell this space never fully loses' },
+      { id: 'wp_ccg_13', text: 'squat rack silhouette against a grid of blue light, structural and electric' },
+      { id: 'wp_ccg_14', text: 'heart rate monitor readout floating holographically at eye level, numbers still climbing' },
+      { id: 'wp_ccg_15', text: 'pre-workout ritual — scoop, measure, pour, the powder catching the light before it dissolves' },
+      { id: 'wp_ccg_16', text: 'cardio machines glowing in standby mode, displays idle, treadmill belt still warm' },
+      { id: 'wp_ccg_17', text: 'foam roller tracks pressed into the rubber mat like tire marks in hot asphalt' },
+      { id: 'wp_ccg_18', text: 'creatine crystals in the measuring scoop, each grain fractured like synthetic diamond' },
+      { id: 'wp_ccg_19', text: 'a figure mid-rep, form perfect, lit from below in electric blue and hot magenta' },
+      { id: 'wp_ccg_20', text: 'the pump — veins raised and mapping pathways beneath the skin, visible and deliberate' },
+      { id: 'wp_ccg_21', text: 'bench press bar bending slightly at peak load, chrome surface under full pressure' },
+      { id: 'wp_ccg_22', text: 'neon progress bar rendering on the wall, 85% and climbing, no label needed' },
+      { id: 'wp_ccg_23', text: 'supplement labels with impossible font stacks, illegible at distance, glowing close up' },
+      { id: 'wp_ccg_24', text: 'cable machine weight stack catching sequential light as the plates separate' },
+      { id: 'wp_ccg_25', text: 'the low electric hum of everything powered on at once, a frequency the body absorbs' },
+      { id: 'wp_ccg_26', text: 'cooling fan exhaust mixing with chalk fog, the air turbulent and fully lit' },
+      { id: 'wp_ccg_27', text: 'timer countdown in bitmap numerals at the top of the visual field, silent and precise' },
+      { id: 'wp_ccg_28', text: 'locker room tile with puddles catching overhead pink light, each reflection a small world' },
+      { id: 'wp_ccg_29', text: 'gym bag unzipped on the floor, contents spilling out into neon-highlighted chaos' },
+      { id: 'wp_ccg_30', text: 'set complete — bars re-racked, breath returning slowly, the neon holding perfectly still' },
+    ],
+    createdAt: WORLD_SEED_TS_V2,
+    updatedAt: WORLD_SEED_TS_V2,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
-  if (localStorage.getItem(WORLD_SEED_FLAG_KEY) !== null) return worlds;
-  localStorage.setItem(WORLD_SEED_FLAG_KEY, 'true');
-  const existingIds = new Set(worlds.map(w => w.id));
-  const toAdd = SEED_WORLDS.filter(w => !existingIds.has(w.id));
-  if (toAdd.length === 0) return worlds;
-  const merged = [...worlds, ...toAdd];
-  save(merged);
-  return merged;
+  let current = worlds;
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V2) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V2, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V2.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  return current;
 }
 
 function load(): World[] {
