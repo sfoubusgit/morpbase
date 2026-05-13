@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import type { Notification } from '../../../types/community';
 import { getUnreadCount } from '../../../engine/notificationStore';
 import { NotificationsPanel } from './NotificationsPanel';
 import './NotificationBell.css';
@@ -7,9 +8,10 @@ const POLL_INTERVAL_MS = 60_000;
 
 type NotificationBellProps = {
   authUid: string;
+  onNavigate?: (n: Notification) => void;
 };
 
-export function NotificationBell({ authUid }: NotificationBellProps) {
+export function NotificationBell({ authUid, onNavigate }: NotificationBellProps) {
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -49,6 +51,7 @@ export function NotificationBell({ authUid }: NotificationBellProps) {
           authUid={authUid}
           onClose={() => setOpen(false)}
           onAllRead={handleAllRead}
+          onNavigate={onNavigate}
         />
       )}
     </div>

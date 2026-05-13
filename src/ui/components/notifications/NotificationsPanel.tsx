@@ -60,9 +60,10 @@ type NotificationsPanelProps = {
   authUid: string;
   onClose: () => void;
   onAllRead: () => void;
+  onNavigate?: (n: Notification) => void;
 };
 
-export function NotificationsPanel({ authUid, onClose, onAllRead }: NotificationsPanelProps) {
+export function NotificationsPanel({ authUid, onClose, onAllRead, onNavigate }: NotificationsPanelProps) {
   const [notifs, setNotifs] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,10 +74,15 @@ export function NotificationsPanel({ authUid, onClose, onAllRead }: Notification
     });
   }, [authUid]);
 
-  const handleMarkRead = (n: Notification) => {
-    if (n.readAt) return;
-    void markRead(n.id);
-    setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, readAt: Date.now() } : x));
+  const handleClick = (n: Notification) => {
+    if (!n.readAt) {
+      void markRead(n.id);
+      setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, readAt: Date.now() } : x));
+    }
+    if (onNavigate) {
+      onNavigate(n);
+      onClose();
+    }
   };
 
   const handleMarkAll = () => {
@@ -110,8 +116,8 @@ export function NotificationsPanel({ authUid, onClose, onAllRead }: Notification
               <button
                 key={n.id}
                 type="button"
-                className={`notif-item${n.readAt ? ' notif-item--read' : ''}`}
-                onClick={() => handleMarkRead(n)}
+                className={`notif-item${n.readAt ? ' notif-item--read' : ''}${onNavigate ? ' notif-item--clickable' : ''}`}
+                onClick={() => handleClick(n)}
               >
                 <span className="notif-item-icon">{notifIcon(n.type)}</span>
                 <div className="notif-item-body">

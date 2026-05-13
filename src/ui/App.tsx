@@ -44,6 +44,7 @@ import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
+import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
 import {
@@ -2173,6 +2174,36 @@ export function App() {
     setActivePage('community');
   }, []);
 
+  const handleNotificationNavigate = useCallback((n: Notification) => {
+    const p = n.payload;
+    switch (n.type) {
+      case 'dm_received':
+        if (typeof p.senderAuthUid === 'string' && typeof p.senderName === 'string') {
+          handleStartDM(p.senderAuthUid, p.senderName);
+        } else {
+          setActivePage('community');
+        }
+        break;
+      case 'new_follower':
+        if (typeof p.followerAuthUid === 'string' && typeof p.followerName === 'string') {
+          handleViewCreator(p.followerAuthUid, p.followerName);
+        } else {
+          setActivePage('community');
+        }
+        break;
+      case 'wall_post_liked':
+      case 'identity_remixed':
+        setActivePage('community');
+        break;
+      case 'badge_earned':
+      case 'xp_milestone':
+        setActivePage('my-profile');
+        break;
+      default:
+        setActivePage('community');
+    }
+  }, [handleStartDM, handleViewCreator]);
+
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);
     persistActiveTerritoryId(id);
@@ -3632,7 +3663,7 @@ export function App() {
               >
                 {authUser.name}
               </button>
-              <NotificationBell authUid={authUser.authUid} />
+              <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
               <button
                 type="button"
                 className="app-page-toggle-action-button"
