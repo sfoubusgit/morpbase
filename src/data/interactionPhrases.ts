@@ -29,4 +29,11 @@ export const INTERACTION_PHRASES: InteractionPhrase[] = [
   { id: 'ip_23', text: 'side by side, the gap between their arms a deliberate and unspoken negotiation' },
   { id: 'ip_24', text: 'one figure luminous, one deep in shadow — the contrast between them architectural' },
   { id: 'ip_25', text: 'one protecting, one protected — the arrangement between them ancient and unspoken' },
+
+  // Same-type pairs — explicit count and spatial anchoring
+  { id: 'ip_26', text: 'two of the same kind — one on the left, one on the right, each a distinct entity, each casting its own shadow' },
+  { id: 'ip_27', text: 'a pair, facing each other — opposed in color, equal in scale, neither yielding the center of the frame' },
+  { id: 'ip_28', text: 'two massive presences, one dark and one bright, mirrored in form and opposite in element — two separate creatures sharing one composition' },
+  { id: 'ip_29', text: 'one creature on each side — distinct silhouettes, distinct colors, the contrast between them the subject of the image' },
+  { id: 'ip_30', text: 'two ancient beings flanking the center — one to the left, one to the right, their combined mass the architecture of the scene' },
 ];

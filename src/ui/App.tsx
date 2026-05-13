@@ -762,6 +762,22 @@ export function App() {
     const picked = pool[Math.floor(Math.random() * pool.length)];
     setActiveInteractionPhraseId(picked.id);
   };
+
+  const characterCountPhrase = useMemo(() => {
+    if (activeCharacterIds.length < 2) return null;
+    const activeChars = activeCharacterIds
+      .map(id => characters.find(c => c.id === id))
+      .filter((c): c is CharacterIdentity => Boolean(c));
+    if (activeChars.length < 2) return null;
+    const archetypes = activeChars
+      .map(c => c.identity.archetype)
+      .filter((a): a is string => Boolean(a) && a !== 'duo');
+    if (archetypes.length < 2) return null;
+    const allSame = archetypes.every(a => a === archetypes[0]);
+    if (!allSame) return null;
+    return `two ${archetypes[0]}s`;
+  }, [activeCharacterIds, characters]);
+
   const activeTerritory = territories.find(territory => territory.id === activeTerritoryId) ?? null;
   const canManageTerritories = Boolean(authUser && isPro);
   const activeTerritoryCategoryIds = useMemo(() => {
@@ -2966,6 +2982,16 @@ export function App() {
       })).filter(e => Boolean(e.text)) : [];
     });
 
+    const countEntries: PromptAdditionEntry[] = characterCountPhrase
+      ? [{
+          id: 'interaction:count',
+          text: characterCountPhrase,
+          position: 'start' as const,
+          section: 'Character',
+          sourceType: 'interaction' as const,
+        }]
+      : [];
+
     const interactionEntries: PromptAdditionEntry[] = activeCharacterIds.length >= 2 && activeInteractionPhrase
       ? [{
           id: `interaction:${activeInteractionPhrase.id}`,
@@ -2976,8 +3002,8 @@ export function App() {
         }]
       : [];
 
-    return [...interactionEntries, ...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjections, activeCharacterIds, activeInteractionPhrase, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
+    return [...countEntries, ...interactionEntries, ...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
+  }, [activeCharacterProjections, activeCharacterIds, activeInteractionPhrase, characterCountPhrase, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
