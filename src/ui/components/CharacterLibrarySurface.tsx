@@ -5,7 +5,7 @@ import './CharacterLibraryModal.css';
 
 type CharacterLibrarySurfaceProps = {
   characters: CharacterIdentity[];
-  activeCharacterId: string | null;
+  activeCharacterIds: string[];
   isLoading?: boolean;
   onSelectCharacter: (characterId: string) => void;
   onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
@@ -273,7 +273,7 @@ function CharacterAvatarTile({
 
 export function CharacterLibrarySurface({
   characters,
-  activeCharacterId,
+  activeCharacterIds,
   isLoading = false,
   onSelectCharacter,
   onCreateCharacter,
@@ -293,8 +293,8 @@ export function CharacterLibrarySurface({
   const [isProcessingCover, setIsProcessingCover] = useState(false);
 
   const activeCharacter = useMemo(
-    () => characters.find(character => character.id === activeCharacterId) ?? null,
-    [characters, activeCharacterId]
+    () => characters.find(character => activeCharacterIds.includes(character.id)) ?? null,
+    [characters, activeCharacterIds]
   );
   const editingCharacter = useMemo(
     () => characters.find(character => character.id === editingCharacterId) ?? null,
@@ -304,7 +304,7 @@ export function CharacterLibrarySurface({
   useEffect(() => {
     setMessage(null);
     setError(null);
-  }, [activeCharacterId]);
+  }, [activeCharacterIds]);
 
   const handleFormChange = <K extends keyof CharacterFormState,>(key: K, value: CharacterFormState[K]) => {
     setForm(prev => ({ ...prev, [key]: value }));
@@ -513,7 +513,7 @@ export function CharacterLibrarySurface({
           ) : (
             <div className="character-library-list">
               {characters.map(character => {
-                const isActive = character.id === activeCharacterId;
+                const isActive = activeCharacterIds.includes(character.id);
                 const needsVisualAnchorRepair = characterNeedsVisualAnchorRepair(character);
                 return (
                   <article

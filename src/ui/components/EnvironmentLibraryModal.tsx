@@ -6,7 +6,7 @@ type EnvironmentLibraryModalProps = {
   isOpen: boolean;
   onClose: () => void;
   environments: EnvironmentIdentity[];
-  activeEnvironmentId: string | null;
+  activeEnvironmentIds: string[];
   isLoading?: boolean;
   onSelectEnvironment: (environmentId: string) => void;
   onCreateEnvironment: (input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
@@ -18,7 +18,7 @@ export function EnvironmentLibraryModal({
   isOpen,
   onClose,
   environments,
-  activeEnvironmentId,
+  activeEnvironmentIds,
   isLoading = false,
   onSelectEnvironment,
   onCreateEnvironment,
@@ -34,7 +34,7 @@ export function EnvironmentLibraryModal({
     >
       <EnvironmentLibrarySurface
         environments={environments}
-        activeEnvironmentId={activeEnvironmentId}
+        activeEnvironmentIds={activeEnvironmentIds}
         isLoading={isLoading}
         onSelectEnvironment={onSelectEnvironment}
         onCreateEnvironment={onCreateEnvironment}

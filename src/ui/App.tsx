@@ -3694,7 +3694,7 @@ export function App() {
         isOpen={isCharacterLibraryOpen}
         onClose={() => setIsCharacterLibraryOpen(false)}
         characters={characters}
-        activeCharacterId={activeCharacterIds[0] ?? null}
+        activeCharacterIds={activeCharacterIds}
         isLoading={charactersLoading}
         onSelectCharacter={handleSelectCharacter}
         onCreateCharacter={handleCreateCharacter}
@@ -3705,7 +3705,7 @@ export function App() {
         isOpen={isEnvironmentLibraryOpen}
         onClose={() => setIsEnvironmentLibraryOpen(false)}
         environments={environments}
-        activeEnvironmentId={activeEnvironmentIds[0] ?? null}
+        activeEnvironmentIds={activeEnvironmentIds}
         onSelectEnvironment={handleSelectEnvironment}
         onCreateEnvironment={handleCreateEnvironment}
         onUpdateEnvironment={handleUpdateEnvironment}
@@ -3715,7 +3715,7 @@ export function App() {
         isOpen={isWardrobeOpen}
         onClose={() => setIsWardrobeOpen(false)}
         outfits={outfits}
-        activeOutfitId={activeOutfitIds[0] ?? null}
+        activeOutfitIds={activeOutfitIds}
         onSelectOutfit={handleSelectOutfit}
         onCreateOutfit={handleCreateOutfit}
         onUpdateOutfit={handleUpdateOutfit}
@@ -3725,7 +3725,7 @@ export function App() {
         isOpen={isStyleOpen}
         onClose={() => setIsStyleOpen(false)}
         items={stylePresets}
-        activeItemId={activeStyleIds[0] ?? null}
+        activeItemIds={activeStyleIds}
         onSelectItem={handleSelectStylePreset}
         onCreateItem={handleCreateStylePreset}
         onUpdateItem={handleUpdateStylePreset}
@@ -3735,7 +3735,7 @@ export function App() {
         isOpen={isLightingOpen}
         onClose={() => setIsLightingOpen(false)}
         items={lightingSetups}
-        activeItemId={activeLightingIds[0] ?? null}
+        activeItemIds={activeLightingIds}
         onSelectItem={handleSelectLightingSetup}
         onCreateItem={handleCreateLightingSetup}
         onUpdateItem={handleUpdateLightingSetup}
@@ -3745,7 +3745,7 @@ export function App() {
         isOpen={isCompositionOpen}
         onClose={() => setIsCompositionOpen(false)}
         items={compositionFrames}
-        activeItemId={activeCompositionIds[0] ?? null}
+        activeItemIds={activeCompositionIds}
         onSelectItem={handleSelectCompositionFrame}
         onCreateItem={handleCreateCompositionFrame}
         onUpdateItem={handleUpdateCompositionFrame}
@@ -3755,7 +3755,7 @@ export function App() {
         isOpen={isMoodOpen}
         onClose={() => setIsMoodOpen(false)}
         items={moodPresets}
-        activeItemId={activeMoodIds[0] ?? null}
+        activeItemIds={activeMoodIds}
         onSelectItem={handleSelectMoodPreset}
         onCreateItem={handleCreateMoodPreset}
         onUpdateItem={handleUpdateMoodPreset}

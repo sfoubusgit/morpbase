@@ -6,9 +6,9 @@ type WardrobeModalProps = {
   isOpen: boolean;
   onClose: () => void;
   outfits: OutfitIdentity[];
-  activeOutfitId: string | null;
+  activeOutfitIds: string[];
   isLoading?: boolean;
-  onSelectOutfit: (outfitId: string | null) => void;
+  onSelectOutfit: (outfitId: string) => void;
   onCreateOutfit: (input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onUpdateOutfit: (outfitId: string, input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onDeleteOutfit: (outfitId: string) => Promise<void>;
@@ -18,7 +18,7 @@ export function WardrobeModal({
   isOpen,
   onClose,
   outfits,
-  activeOutfitId,
+  activeOutfitIds,
   isLoading = false,
   onSelectOutfit,
   onCreateOutfit,
@@ -34,7 +34,7 @@ export function WardrobeModal({
     >
       <WardrobeSurface
         outfits={outfits}
-        activeOutfitId={activeOutfitId}
+        activeOutfitIds={activeOutfitIds}
         isLoading={isLoading}
         onSelectOutfit={onSelectOutfit}
         onCreateOutfit={onCreateOutfit}

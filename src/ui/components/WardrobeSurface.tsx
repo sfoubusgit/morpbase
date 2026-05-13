@@ -5,9 +5,9 @@ import './WardrobeSurface.css';
 
 type WardrobeSurfaceProps = {
   outfits: OutfitIdentity[];
-  activeOutfitId: string | null;
+  activeOutfitIds: string[];
   isLoading?: boolean;
-  onSelectOutfit: (outfitId: string | null) => void;
+  onSelectOutfit: (outfitId: string) => void;
   onCreateOutfit: (input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onUpdateOutfit: (outfitId: string, input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onDeleteOutfit: (outfitId: string) => Promise<void>;
@@ -39,7 +39,7 @@ const formToInput = (form: OutfitFormState): OutfitIdentityInput => ({
 
 export function WardrobeSurface({
   outfits,
-  activeOutfitId,
+  activeOutfitIds,
   isLoading = false,
   onSelectOutfit,
   onCreateOutfit,
@@ -74,9 +74,9 @@ export function WardrobeSurface({
   };
 
   const handleApply = (id: string) => {
-    const next = activeOutfitId === id ? null : id;
-    onSelectOutfit(next);
-    if (next !== null) onApplied?.();
+    const isActive = activeOutfitIds.includes(id);
+    onSelectOutfit(id);
+    if (!isActive) onApplied?.();
   };
 
   const handleSave = async (e: FormEvent) => {
@@ -108,7 +108,7 @@ export function WardrobeSurface({
     if (!window.confirm(`Delete "${outfit.name}"? This cannot be undone.`)) return;
     try {
       await onDeleteOutfit(selectedId);
-      if (activeOutfitId === selectedId) onSelectOutfit(null);
+      if (selectedId && activeOutfitIds.includes(selectedId)) onSelectOutfit(selectedId);
       setSelectedId(null);
       setIsCreating(false);
       setForm(EMPTY_FORM);
@@ -185,7 +185,7 @@ export function WardrobeSurface({
           {!isLoading && outfits.length > 0 && (
             <div className="wardrobe-list">
               {outfits.map(outfit => {
-                const isActive = outfit.id === activeOutfitId;
+                const isActive = activeOutfitIds.includes(outfit.id);
                 const isSelected = outfit.id === selectedId;
                 return (
                   <button
@@ -227,10 +227,10 @@ export function WardrobeSurface({
                 {selectedId && !isCreating && (
                   <button
                     type="button"
-                    className={`wardrobe-activate-button ${activeOutfitId === selectedId ? 'wardrobe-activate-button-on' : ''}`}
+                    className={`wardrobe-activate-button ${activeOutfitIds.includes(selectedId) ? 'wardrobe-activate-button-on' : ''}`}
                     onClick={() => handleApply(selectedId)}
                   >
-                    {activeOutfitId === selectedId ? 'Deactivate' : 'Activate'}
+                    {activeOutfitIds.includes(selectedId) ? 'Deactivate' : 'Activate'}
                   </button>
                 )}
               </div>

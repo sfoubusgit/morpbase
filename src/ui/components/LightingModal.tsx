@@ -15,9 +15,9 @@ type LightingModalProps = {
   isOpen: boolean;
   onClose: () => void;
   items: LightingSetup[];
-  activeItemId: string | null;
+  activeItemIds: string[];
   isLoading?: boolean;
-  onSelectItem: (id: string | null) => void;
+  onSelectItem: (id: string) => void;
   onCreateItem: (input: LightingSetupInput) => Promise<LightingSetup>;
   onUpdateItem: (id: string, input: LightingSetupInput) => Promise<LightingSetup>;
   onDeleteItem: (id: string) => Promise<void>;
@@ -27,7 +27,7 @@ export function LightingModal({
   isOpen,
   onClose,
   items,
-  activeItemId,
+  activeItemIds,
   isLoading = false,
   onSelectItem,
   onCreateItem,
@@ -39,7 +39,7 @@ export function LightingModal({
       <IdentityLaneSurface
         config={LIGHTING_CONFIG}
         items={items as LaneItem[]}
-        activeItemId={activeItemId}
+        activeItemIds={activeItemIds}
         isLoading={isLoading}
         onSelectItem={onSelectItem}
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}

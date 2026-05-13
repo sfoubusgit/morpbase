@@ -15,9 +15,9 @@ type MoodModalProps = {
   isOpen: boolean;
   onClose: () => void;
   items: MoodPreset[];
-  activeItemId: string | null;
+  activeItemIds: string[];
   isLoading?: boolean;
-  onSelectItem: (id: string | null) => void;
+  onSelectItem: (id: string) => void;
   onCreateItem: (input: MoodPresetInput) => Promise<MoodPreset>;
   onUpdateItem: (id: string, input: MoodPresetInput) => Promise<MoodPreset>;
   onDeleteItem: (id: string) => Promise<void>;
@@ -27,7 +27,7 @@ export function MoodModal({
   isOpen,
   onClose,
   items,
-  activeItemId,
+  activeItemIds,
   isLoading = false,
   onSelectItem,
   onCreateItem,
@@ -39,7 +39,7 @@ export function MoodModal({
       <IdentityLaneSurface
         config={MOOD_CONFIG}
         items={items as LaneItem[]}
-        activeItemId={activeItemId}
+        activeItemIds={activeItemIds}
         isLoading={isLoading}
         onSelectItem={onSelectItem}
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}

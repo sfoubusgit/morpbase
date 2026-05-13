@@ -15,9 +15,9 @@ type CompositionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   items: CompositionFrame[];
-  activeItemId: string | null;
+  activeItemIds: string[];
   isLoading?: boolean;
-  onSelectItem: (id: string | null) => void;
+  onSelectItem: (id: string) => void;
   onCreateItem: (input: CompositionFrameInput) => Promise<CompositionFrame>;
   onUpdateItem: (id: string, input: CompositionFrameInput) => Promise<CompositionFrame>;
   onDeleteItem: (id: string) => Promise<void>;
@@ -27,7 +27,7 @@ export function CompositionModal({
   isOpen,
   onClose,
   items,
-  activeItemId,
+  activeItemIds,
   isLoading = false,
   onSelectItem,
   onCreateItem,
@@ -39,7 +39,7 @@ export function CompositionModal({
       <IdentityLaneSurface
         config={COMPOSITION_CONFIG}
         items={items as LaneItem[]}
-        activeItemId={activeItemId}
+        activeItemIds={activeItemIds}
         isLoading={isLoading}
         onSelectItem={onSelectItem}
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}

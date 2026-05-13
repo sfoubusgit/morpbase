@@ -15,9 +15,9 @@ type StyleModalProps = {
   isOpen: boolean;
   onClose: () => void;
   items: StylePreset[];
-  activeItemId: string | null;
+  activeItemIds: string[];
   isLoading?: boolean;
-  onSelectItem: (id: string | null) => void;
+  onSelectItem: (id: string) => void;
   onCreateItem: (input: StylePresetInput) => Promise<StylePreset>;
   onUpdateItem: (id: string, input: StylePresetInput) => Promise<StylePreset>;
   onDeleteItem: (id: string) => Promise<void>;
@@ -27,7 +27,7 @@ export function StyleModal({
   isOpen,
   onClose,
   items,
-  activeItemId,
+  activeItemIds,
   isLoading = false,
   onSelectItem,
   onCreateItem,
@@ -39,7 +39,7 @@ export function StyleModal({
       <IdentityLaneSurface
         config={STYLE_CONFIG}
         items={items as LaneItem[]}
-        activeItemId={activeItemId}
+        activeItemIds={activeItemIds}
         isLoading={isLoading}
         onSelectItem={onSelectItem}
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}

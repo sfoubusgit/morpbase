@@ -6,7 +6,7 @@ type CharacterLibraryModalProps = {
   isOpen: boolean;
   onClose: () => void;
   characters: CharacterIdentity[];
-  activeCharacterId: string | null;
+  activeCharacterIds: string[];
   isLoading?: boolean;
   onSelectCharacter: (characterId: string) => void;
   onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
@@ -18,7 +18,7 @@ export function CharacterLibraryModal({
   isOpen,
   onClose,
   characters,
-  activeCharacterId,
+  activeCharacterIds,
   isLoading = false,
   onSelectCharacter,
   onCreateCharacter,
@@ -34,7 +34,7 @@ export function CharacterLibraryModal({
     >
       <CharacterLibrarySurface
         characters={characters}
-        activeCharacterId={activeCharacterId}
+        activeCharacterIds={activeCharacterIds}
         isLoading={isLoading}
         onSelectCharacter={onSelectCharacter}
         onCreateCharacter={onCreateCharacter}

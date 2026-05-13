@@ -52,9 +52,9 @@ const formToInput = (form: FormState): LaneItemInput => ({
 type IdentityLaneSurfaceProps = {
   config: IdentityLaneSurfaceConfig;
   items: LaneItem[];
-  activeItemId: string | null;
+  activeItemIds: string[];
   isLoading?: boolean;
-  onSelectItem: (id: string | null) => void;
+  onSelectItem: (id: string) => void;
   onCreateItem: (input: LaneItemInput) => Promise<LaneItem>;
   onUpdateItem: (id: string, input: LaneItemInput) => Promise<LaneItem>;
   onDeleteItem: (id: string) => Promise<void>;
@@ -64,7 +64,7 @@ type IdentityLaneSurfaceProps = {
 export function IdentityLaneSurface({
   config,
   items,
-  activeItemId,
+  activeItemIds,
   isLoading = false,
   onSelectItem,
   onCreateItem,
@@ -99,9 +99,9 @@ export function IdentityLaneSurface({
   };
 
   const handleApply = (id: string) => {
-    const next = activeItemId === id ? null : id;
-    onSelectItem(next);
-    if (next !== null) onApplied?.();
+    const isActive = activeItemIds.includes(id);
+    onSelectItem(id);
+    if (!isActive) onApplied?.();
   };
 
   const handleSave = async (e: FormEvent) => {
@@ -133,7 +133,7 @@ export function IdentityLaneSurface({
     if (!window.confirm(`Delete "${item.name}"? This cannot be undone.`)) return;
     try {
       await onDeleteItem(selectedId);
-      if (activeItemId === selectedId) onSelectItem(null);
+      if (selectedId && activeItemIds.includes(selectedId)) onSelectItem(selectedId);
       setSelectedId(null);
       setIsCreating(false);
       setForm(EMPTY_FORM);
@@ -208,7 +208,7 @@ export function IdentityLaneSurface({
           {!isLoading && items.length > 0 && (
             <div className="identity-lane-list">
               {items.map(item => {
-                const isActive = item.id === activeItemId;
+                const isActive = activeItemIds.includes(item.id);
                 const isSelected = item.id === selectedId;
                 return (
                   <button
@@ -255,10 +255,10 @@ export function IdentityLaneSurface({
                 {selectedId && !isCreating && (
                   <button
                     type="button"
-                    className={`identity-lane-activate-button ${activeItemId === selectedId ? 'identity-lane-activate-button-on' : ''}`}
+                    className={`identity-lane-activate-button ${activeItemIds.includes(selectedId) ? 'identity-lane-activate-button-on' : ''}`}
                     onClick={() => handleApply(selectedId)}
                   >
-                    {activeItemId === selectedId ? 'Deactivate' : 'Activate'}
+                    {activeItemIds.includes(selectedId) ? 'Deactivate' : 'Activate'}
                   </button>
                 )}
               </div>

@@ -5,7 +5,7 @@ import './EnvironmentLibrarySurface.css';
 
 type EnvironmentLibrarySurfaceProps = {
   environments: EnvironmentIdentity[];
-  activeEnvironmentId: string | null;
+  activeEnvironmentIds: string[];
   isLoading?: boolean;
   onSelectEnvironment: (environmentId: string) => void;
   onCreateEnvironment: (input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
@@ -49,7 +49,7 @@ const formToInput = (form: EnvironmentFormState): EnvironmentIdentityInput => ({
 
 export function EnvironmentLibrarySurface({
   environments,
-  activeEnvironmentId,
+  activeEnvironmentIds,
   isLoading = false,
   onSelectEnvironment,
   onCreateEnvironment,
@@ -206,7 +206,7 @@ export function EnvironmentLibrarySurface({
                   className={[
                     'environment-library-item',
                     selectedId === env.id ? 'environment-library-item-selected' : '',
-                    activeEnvironmentId === env.id ? 'environment-library-item-active' : '',
+                    activeEnvironmentIds.includes(env.id) ? 'environment-library-item-active' : '',
                   ].filter(Boolean).join(' ')}
                   onClick={() => handleSelectItem(env.id)}
                 >
@@ -214,7 +214,7 @@ export function EnvironmentLibrarySurface({
                   {env.summary && (
                     <div className="environment-library-item-summary">{env.summary}</div>
                   )}
-                  {activeEnvironmentId === env.id && (
+                  {activeEnvironmentIds.includes(env.id) && (
                     <div className="environment-library-item-badge">Active</div>
                   )}
                 </button>
