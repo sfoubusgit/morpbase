@@ -21,7 +21,7 @@ const SEED_LANE_SETS: LaneSet[] = [
       mood: { mode: 'fixed', ids: ['mood_seed_weight_of_recognition'] },
       wardrobe: { mode: 'off' },
       environment: { mode: 'fixed', ids: ['environment_seed_ashveil_ridge'] },
-      aura: { mode: 'off' },
+      aura: { mode: 'fixed', id: 'world_seed_dragon_standoff' },
     },
     createdAt: SEED_TS,
     updatedAt: SEED_TS,

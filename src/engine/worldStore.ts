@@ -13,9 +13,11 @@ const KEY = 'promptgen:worlds:v1';
 const BACKUP_KEY = 'promptgen:worlds:backup:v1';
 const WORLD_SEED_FLAG_KEY = 'promptgen:worlds:seeded:v1';
 const WORLD_SEED_FLAG_KEY_V2 = 'promptgen:worlds:seeded:v2';
+const WORLD_SEED_FLAG_KEY_V3 = 'promptgen:worlds:seeded:v3';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
+const WORLD_SEED_TS_V3 = 1748304000000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -101,6 +103,48 @@ const SEED_WORLDS_V2: World[] = [
   },
 ];
 
+const SEED_WORLDS_V3: World[] = [
+  {
+    id: 'world_seed_dragon_standoff',
+    name: 'Dragon Standoff',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_ds_01', text: 'the air between them carrying both charges simultaneously — sulfur and ozone, neither element winning' },
+      { id: 'wp_ds_02', text: 'temperature at a dead equilibrium in the gap — neither the cold of the storm nor the heat of the magma reaching the center' },
+      { id: 'wp_ds_03', text: 'light splitting at the midpoint — blue-white on one side, deep amber-red on the other, no gradation between them' },
+      { id: 'wp_ds_04', text: 'two electromagnetic weather systems pressing against each other without resolution, the boundary visible in the light itself' },
+      { id: 'wp_ds_05', text: 'a faint sulfur taste and a static tingle at the same moment — both signals arriving from opposite directions' },
+      { id: 'wp_ds_06', text: 'basalt cracked into perfect geometric plates by millennia of heat and cold cycling, each plate a record of the same process repeated' },
+      { id: 'wp_ds_07', text: 'volcanic glass veins running through grey stone, catching the red light from the east and holding it' },
+      { id: 'wp_ds_08', text: 'old lava channels carved grey and cold, the flow direction still readable in the surface geometry long after the fire is gone' },
+      { id: 'wp_ds_09', text: 'frost crystals forming at the edge of volcanic ridges in the storm shadow before the heat dissolves them — an hourly cycle, repeated forever' },
+      { id: 'wp_ds_10', text: 'ash settled into every crevice, grey and fine, preserving the negative shape of the last wind that moved through here' },
+      { id: 'wp_ds_11', text: 'the sky divided — storm-grey pressing from one side, volcanic haze diffusing from the other, a seam of clear dark where they meet overhead' },
+      { id: 'wp_ds_12', text: 'deep cobalt and electric blue dominating the left half of the frame, completely absent on the right' },
+      { id: 'wp_ds_13', text: 'ember orange and volcanic crimson rising from the lower right, cooling to nothing before they reach the center' },
+      { id: 'wp_ds_14', text: 'the neutral zone between: absolute grey, neither color reaching, the palette deadened to nothing at the exact midpoint' },
+      { id: 'wp_ds_15', text: 'two rim lights visible on any surface in the gap — one cold edge, one warm edge, neither touching, both present' },
+      { id: 'wp_ds_16', text: 'the geological age of everything — nothing here is young, nothing placed, all of it accumulated over more time than can be held in mind' },
+      { id: 'wp_ds_17', text: 'wind erosion patterns in the stone faces reading the direction of ten thousand years of storm from the same side' },
+      { id: 'wp_ds_18', text: 'heat-fractured stone on the volcanic side, every surface bearing the fine-line scarring of thermal expansion and contraction' },
+      { id: 'wp_ds_19', text: 'the ridge worn smooth at the exact line where the two wind systems grind — a polished seam in the rock, the oldest surface here' },
+      { id: 'wp_ds_20', text: 'stone at the center neither quite matte nor reflective — polished by competing weather until the surface has no decided quality' },
+      { id: 'wp_ds_21', text: 'thin columns of steam rising where cold rain strikes volcanic-warm rock, dissolving in the competing winds before they reach any height' },
+      { id: 'wp_ds_22', text: 'faint blue static filaments visible along the edges of volcanic rock where the storm charge reaches the basalt surface' },
+      { id: 'wp_ds_23', text: 'heat shimmer making the volcanic horizon uncertain, the air above it behaving like liquid, forms on that side softened and wavering' },
+      { id: 'wp_ds_24', text: 'ice forming and melting in the same hour at the boundary — frost at the cold turn, gone before it can accumulate, returned the same evening' },
+      { id: 'wp_ds_25', text: 'two sounds beneath everything — the storm\'s low continuous roar from the west, the volcanic plateau\'s deep subsonic rumble from the east, audible at the same time' },
+      { id: 'wp_ds_26', text: 'the scale of both forms making the ridge itself appear fragile — a thin seam of stone between two things that predate the stone' },
+      { id: 'wp_ds_27', text: 'competing shadows in the gap — each light source casting a shadow that the other partially erases, the darkness between them never quite resolved' },
+      { id: 'wp_ds_28', text: 'the quality of air around mass this enormous — density, a slight atmospheric bend, the space differently pressured in their immediate radius' },
+      { id: 'wp_ds_29', text: 'impact scars in the ancient stone of the ridge — not carved, not placed, struck, each one predating any name for what made it' },
+      { id: 'wp_ds_30', text: 'everything loaded, nothing released — the weight of the moment preserved in the stillness of the rock and the silence of what stands on either side of it' },
+    ],
+    createdAt: WORLD_SEED_TS_V3,
+    updatedAt: WORLD_SEED_TS_V3,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -120,6 +164,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V2, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V2.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V3) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V3, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V3.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);
