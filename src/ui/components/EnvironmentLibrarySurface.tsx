@@ -196,26 +196,42 @@ export function EnvironmentLibrarySurface({
 
           {!isLoading && environments.length > 0 && (
             <div className="environment-library-list">
-              {environments.map(env => (
-                <button
-                  key={env.id}
-                  type="button"
-                  className={[
-                    'environment-library-item',
-                    selectedId === env.id ? 'environment-library-item-selected' : '',
-                    activeEnvironmentIds.includes(env.id) ? 'environment-library-item-active' : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleSelectItem(env.id)}
-                >
-                  <div className="environment-library-item-name">{env.name}</div>
-                  {env.summary && (
-                    <div className="environment-library-item-summary">{env.summary}</div>
-                  )}
-                  {activeEnvironmentIds.includes(env.id) && (
-                    <div className="environment-library-item-badge">Active</div>
-                  )}
-                </button>
-              ))}
+              {environments.map(env => {
+                const isActive = activeEnvironmentIds.includes(env.id);
+                const isSelected = selectedId === env.id;
+                return (
+                  <div
+                    key={env.id}
+                    role="button"
+                    tabIndex={0}
+                    className={[
+                      'environment-library-item',
+                      isSelected ? 'environment-library-item-selected' : '',
+                      isActive ? 'environment-library-item-active' : '',
+                    ].filter(Boolean).join(' ')}
+                    onClick={() => handleSelectItem(env.id)}
+                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelectItem(env.id)}
+                  >
+                    <div className="environment-library-item-main">
+                      <div className="environment-library-item-name">{env.name}</div>
+                      {env.summary && (
+                        <div className="environment-library-item-summary">{env.summary}</div>
+                      )}
+                      {isActive && (
+                        <div className="environment-library-item-badge">Active</div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      className={`environment-library-item-toggle${isActive ? ' environment-library-item-toggle-on' : ''}`}
+                      onClick={e => { e.stopPropagation(); onSelectEnvironment(env.id); }}
+                      title={isActive ? 'Remove' : 'Add to prompt'}
+                    >
+                      {isActive ? '✓' : '+'}
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

@@ -87,7 +87,6 @@ export function IdentityLaneSurface({
     const item = items.find(i => i.id === id);
     if (item) setForm(formFromItem(item));
     setError(null);
-    onSelectItem(id);
   };
 
   const handleStartCreate = () => {
@@ -208,22 +207,34 @@ export function IdentityLaneSurface({
                 const isActive = activeItemIds.includes(item.id);
                 const isSelected = item.id === selectedId;
                 return (
-                  <button
+                  <div
                     key={item.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={[
                       'identity-lane-item',
                       isSelected ? 'identity-lane-item-selected' : '',
                       isActive ? 'identity-lane-item-active' : '',
                     ].filter(Boolean).join(' ')}
                     onClick={() => handleSelectItem(item.id)}
+                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelectItem(item.id)}
                   >
-                    <div className="identity-lane-item-name">{item.name}</div>
-                    {item.summary && (
-                      <div className="identity-lane-item-summary">{item.summary}</div>
-                    )}
-                    {isActive && <div className="identity-lane-item-badge">Active</div>}
-                  </button>
+                    <div className="identity-lane-item-main">
+                      <div className="identity-lane-item-name">{item.name}</div>
+                      {item.summary && (
+                        <div className="identity-lane-item-summary">{item.summary}</div>
+                      )}
+                      {isActive && <div className="identity-lane-item-badge">Active</div>}
+                    </div>
+                    <button
+                      type="button"
+                      className={`identity-lane-item-toggle${isActive ? ' identity-lane-item-toggle-on' : ''}`}
+                      onClick={e => { e.stopPropagation(); onSelectItem(item.id); }}
+                      title={isActive ? 'Remove' : 'Add to prompt'}
+                    >
+                      {isActive ? '✓' : '+'}
+                    </button>
+                  </div>
                 );
               })}
             </div>

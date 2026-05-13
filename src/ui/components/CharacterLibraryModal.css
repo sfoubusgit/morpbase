@@ -44,6 +44,12 @@
   grid-template-columns: minmax(300px, 0.95fr) minmax(0, 1.35fr);
   gap: 18px;
   min-height: 0;
+  align-items: start;
+}
+
+.character-library-list-panel {
+  overflow-y: auto;
+  max-height: calc(88vh - 200px);
 }
 
 .character-library-panel {

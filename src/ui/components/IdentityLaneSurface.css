@@ -99,8 +99,9 @@
 }
 
 .identity-lane-item {
-  display: grid;
-  gap: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 14px;
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.03);
@@ -109,6 +110,13 @@
   cursor: pointer;
   transition: all 0.15s ease;
   color: inherit;
+}
+
+.identity-lane-item-main {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 
 .identity-lane-item:hover {
@@ -154,6 +162,41 @@
   font-weight: var(--font-weight-extrabold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.identity-lane-item-toggle {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(var(--lane-accent-rgb), 0.06);
+  border: 1px solid rgba(var(--lane-accent-rgb), 0.2);
+  color: rgba(var(--lane-accent-rgb), 0.7);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.identity-lane-item-toggle:hover {
+  background: rgba(var(--lane-accent-rgb), 0.16);
+  border-color: rgba(var(--lane-accent-rgb), 0.4);
+  color: var(--lane-accent-text);
+}
+
+.identity-lane-item-toggle-on {
+  background: rgba(var(--lane-accent-rgb), 0.18);
+  border-color: rgba(var(--lane-accent-rgb), 0.5);
+  color: var(--lane-accent-text);
+}
+
+.identity-lane-item-toggle-on:hover {
+  background: rgba(var(--lane-accent-rgb), 0.08);
+  border-color: rgba(var(--lane-accent-rgb), 0.3);
+  color: rgba(var(--lane-accent-rgb), 0.6);
 }
 
 .identity-lane-empty {

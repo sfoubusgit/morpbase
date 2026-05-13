@@ -34,18 +34,11 @@ export function NegativeModal({
   onUpdateItem,
   onDeleteItem,
 }: NegativeModalProps) {
-  const lastActiveId = activeItemIds[activeItemIds.length - 1] ?? null;
-
-  const handleSelectItem = (id: string | null) => {
-    if (!id) {
-      if (lastActiveId) onRemoveItem(lastActiveId);
-      return;
-    }
+  const handleSelectItem = (id: string) => {
     if (activeItemIds.includes(id)) {
       onRemoveItem(id);
     } else {
       onAddItem(id);
-      onClose();
     }
   };
 
@@ -54,7 +47,7 @@ export function NegativeModal({
       <IdentityLaneSurface
         config={NEGATIVE_CONFIG}
         items={items as LaneItem[]}
-        activeItemId={lastActiveId}
+        activeItemIds={activeItemIds}
         onSelectItem={handleSelectItem}
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}

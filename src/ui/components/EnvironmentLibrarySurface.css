@@ -91,8 +91,9 @@
 }
 
 .environment-library-item {
-  display: grid;
-  gap: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 12px 14px;
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.03);
@@ -101,6 +102,13 @@
   cursor: pointer;
   transition: all 0.15s ease;
   color: inherit;
+}
+
+.environment-library-item-main {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
 }
 
 .environment-library-item:hover {
@@ -146,6 +154,41 @@
   font-weight: var(--font-weight-extrabold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.environment-library-item-toggle {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(52, 211, 153, 0.06);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: rgba(52, 211, 153, 0.7);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.environment-library-item-toggle:hover {
+  background: rgba(52, 211, 153, 0.16);
+  border-color: rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+}
+
+.environment-library-item-toggle-on {
+  background: rgba(52, 211, 153, 0.18);
+  border-color: rgba(52, 211, 153, 0.5);
+  color: #6ee7b7;
+}
+
+.environment-library-item-toggle-on:hover {
+  background: rgba(52, 211, 153, 0.08);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: rgba(52, 211, 153, 0.6);
 }
 
 .environment-library-message,

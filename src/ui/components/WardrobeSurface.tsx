@@ -184,22 +184,34 @@ export function WardrobeSurface({
                 const isActive = activeOutfitIds.includes(outfit.id);
                 const isSelected = outfit.id === selectedId;
                 return (
-                  <button
+                  <div
                     key={outfit.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={[
                       'wardrobe-item',
                       isSelected ? 'wardrobe-item-selected' : '',
                       isActive ? 'wardrobe-item-active' : '',
                     ].filter(Boolean).join(' ')}
                     onClick={() => handleSelectItem(outfit.id)}
+                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleSelectItem(outfit.id)}
                   >
-                    <div className="wardrobe-item-name">{outfit.name}</div>
-                    {outfit.summary && (
-                      <div className="wardrobe-item-summary">{outfit.summary}</div>
-                    )}
-                    {isActive && <div className="wardrobe-item-badge">Active</div>}
-                  </button>
+                    <div className="wardrobe-item-main">
+                      <div className="wardrobe-item-name">{outfit.name}</div>
+                      {outfit.summary && (
+                        <div className="wardrobe-item-summary">{outfit.summary}</div>
+                      )}
+                      {isActive && <div className="wardrobe-item-badge">Active</div>}
+                    </div>
+                    <button
+                      type="button"
+                      className={`wardrobe-item-toggle${isActive ? ' wardrobe-item-toggle-on' : ''}`}
+                      onClick={e => { e.stopPropagation(); onSelectOutfit(outfit.id); }}
+                      title={isActive ? 'Remove' : 'Add to prompt'}
+                    >
+                      {isActive ? '✓' : '+'}
+                    </button>
+                  </div>
                 );
               })}
             </div>
