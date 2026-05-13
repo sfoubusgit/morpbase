@@ -15,6 +15,7 @@ const CHARACTER_STORE_BACKUP_KEY = 'promptgen:characters:backup:v1';
 const CHARACTER_SEED_FLAG_KEY = 'promptgen:characters:seeded:v3';
 const CHARACTER_SEED_FLAG_KEY_V4 = 'promptgen:characters:seeded:v4';
 const CHARACTER_SEED_FLAG_KEY_V5 = 'promptgen:characters:seeded:v5';
+const CHARACTER_SEED_FLAG_KEY_V6 = 'promptgen:characters:seeded:v6';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -268,6 +269,7 @@ const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747699200000;
 const SEED_TS_5 = 1747872000000;
+const SEED_TS_6 = 1747958400000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -474,6 +476,45 @@ const V5_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V6_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_vael_and_holt',
+    name: 'Vael & Holt',
+    summary: 'A half-demon scout and her battle-worn guardian — she clings to his back like she belongs there, and he carries her like it\'s the only thing still making sense.',
+    identity: {
+      archetype: 'duo',
+      presentation: 'clothed',
+      ageImpression: 'she — young adult; he — mid-thirties, seasoned',
+      personalityTone: 'tender beneath the tactical; warmth earned through danger',
+      visualAnchors: [
+        { id: 'anchor_vh_1', label: 'Vael — Hair', kind: 'hair', text: 'short dark hair with teal gradient, glowing cyan rim light' },
+        { id: 'anchor_vh_2', label: 'Vael — Face', kind: 'face', text: 'pointed elf ears, soft green eyes, faint blush on cheeks' },
+        { id: 'anchor_vh_3', label: 'Vael — Tail', kind: 'other', text: 'red-tipped demon tail with arrowhead end' },
+        { id: 'anchor_vh_4', label: 'Vael — Clothing', kind: 'clothing', text: 'teal-gray jacket with red armored insignia shoulder plates, torn dark stockings' },
+        { id: 'anchor_vh_5', label: 'Holt — Form', kind: 'silhouette', text: 'broad-shouldered, strong jaw, short brown beard, commanding build' },
+        { id: 'anchor_vh_6', label: 'Holt — Clothing', kind: 'clothing', text: 'dark tactical jacket with chest harness straps' },
+        { id: 'anchor_vh_7', label: 'Pose', kind: 'other', text: 'piggyback carry — she rides on his back, arms wrapped around his neck, cheek close to his' },
+      ],
+      motifs: [
+        { id: 'motif_vh_1', label: 'Guardian Bond', text: 'cyan rimlight, contrast of large and small, armored softness, quiet intimacy earned through danger' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'small demon-eared girl carried piggyback by a broad-shouldered guardian',
+        'her arms wrapped around his neck, cheek close to his, soft blush on her face',
+        'pointed elf ears, short dark teal-gradient hair, red-tipped arrowhead demon tail',
+        'teal-gray jacket with red armored insignia shoulder plates, torn dark stockings',
+        'broad-shouldered man, strong jaw, short brown beard, dark tactical jacket with harness straps',
+        'teal and cyan rimlight against deep blue night city backdrop',
+        'the quiet warmth between a protector and the one who trusts him completely',
+      ],
+    },
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -539,6 +580,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V5_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V6_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
