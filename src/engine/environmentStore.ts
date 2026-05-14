@@ -9,6 +9,7 @@ const ENVIRONMENT_STORE_BACKUP_KEY = 'promptgen:environments:backup:v1';
 const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v3';
 const ENVIRONMENT_SEED_FLAG_KEY_V4 = 'promptgen:environments:seeded:v4';
 const ENVIRONMENT_SEED_FLAG_KEY_V5 = 'promptgen:environments:seeded:v5';
+const ENVIRONMENT_SEED_FLAG_KEY_V6 = 'promptgen:environments:seeded:v6';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -102,6 +103,7 @@ const ENV_SEED_TS_2 = 1746835200000;
 const ENV_SEED_TS_3 = 1747612800000;
 const ENV_SEED_TS_4 = 1747785600000;
 const ENV_SEED_TS_5 = 1748304000000;
+const ENV_SEED_TS_6 = 1748217600000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -435,6 +437,60 @@ const V5_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+const V6_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_wonderland_forest',
+    name: 'The Wonderland Forest',
+    summary: 'A dense impossible forest with mushrooms the size of houses, caterpillar smoke drifting through the undergrowth, and light that has no clear source.',
+    phraseBundle: {
+      core: [
+        'dense impossible forest, trees growing at wrong angles, canopy far above and fractally dense',
+        'mushrooms the size of houses in every direction — red with white spots, pale blue-grey, deep violet, soft orange',
+        'drifts of blue hookah smoke moving through the undergrowth at knee height, smelling of pepper and something floral',
+        'light that has no clear source, soft and even from everywhere at once, casting no shadows',
+        'playing card soldiers visible at intervals, standing at attention before rosebushes being painted red',
+        'the sound of distant music from a direction that changes each time you turn',
+      ],
+    },
+    createdAt: ENV_SEED_TS_6,
+    updatedAt: ENV_SEED_TS_6,
+  },
+  {
+    id: 'environment_seed_tea_party_grounds',
+    name: 'The Tea Party Grounds',
+    summary: 'A long table under an oak tree set for an enormous party that no one is finishing — cups everywhere, uneaten food, it is always six o\'clock.',
+    phraseBundle: {
+      core: [
+        'long oak table stretching further than it has any right to, white linen cloth covered in teacups in every size and pattern',
+        'dozens of mismatched teacups — painted china, cracked bone, plain tin, towers of stacked saucers between them',
+        'bread and butter, untouched jam, a tiered cake stand, scones going stale at the far end',
+        'paper chains and bunting hung between the trees overhead, faded and slightly damp',
+        'enormous gnarled oak tree at the head of the table, a dormouse somewhere inside an upturned teapot',
+        'it is always six o\'clock here, and there is always one more empty seat just beside you',
+      ],
+    },
+    createdAt: ENV_SEED_TS_6,
+    updatedAt: ENV_SEED_TS_6,
+  },
+  {
+    id: 'environment_seed_queens_croquet_ground',
+    name: "The Queen's Croquet Ground",
+    summary: 'An immaculate red-and-white garden — card soldiers at attention, flamingos deployed as mallets, hedgehogs as balls, roses being painted red.',
+    phraseBundle: {
+      core: [
+        'immaculate red-and-white striped croquet lawn under a sky of deep royal blue',
+        'living playing card soldiers standing in rigid rows, spade and heart suits visible on their chests',
+        'pale pink flamingos used as croquet mallets, necks twisted to aim, looking distinctly uncertain about this',
+        'hedgehogs curled into croquet balls, occasionally uncurling to reposition themselves',
+        'white rose bushes with their blossoms hastily painted red, brushes still damp in places',
+        'the Red Queen\'s throne at the far end, red velvet and black hearts, the single focus of the entire lawn',
+      ],
+    },
+    createdAt: ENV_SEED_TS_6,
+    updatedAt: ENV_SEED_TS_6,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -497,6 +553,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V5_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V6_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);
