@@ -21,6 +21,8 @@ type CompositionModalProps = {
   onCreateItem: (input: CompositionFrameInput) => Promise<CompositionFrame>;
   onUpdateItem: (id: string, input: CompositionFrameInput) => Promise<CompositionFrame>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function CompositionModal({
@@ -33,6 +35,8 @@ export function CompositionModal({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: CompositionModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Composition" className="identity-lane-modal">
@@ -45,6 +49,8 @@ export function CompositionModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

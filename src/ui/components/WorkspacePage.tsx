@@ -165,6 +165,9 @@ type WorkspacePageProps = {
   activeIdentityTags?: WallPostIdentityTag[];
   onRandomize?: () => void;
   onOpenLaneSets?: () => void;
+  onOpenUniverses?: () => void;
+  activeUniverseName?: string | null;
+  onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
   onToggleLaneLock?: (lane: string) => void;
   captureCount?: number;
@@ -235,6 +238,9 @@ export function WorkspacePage({
   activeIdentityTags = [],
   onRandomize,
   onOpenLaneSets,
+  onOpenUniverses,
+  activeUniverseName,
+  onDeactivateUniverse,
   lockedLanes,
   onToggleLaneLock,
   captureCount = 0,
@@ -508,6 +514,16 @@ export function WorkspacePage({
                   ☰ Sets
                 </button>
               )}
+              {onOpenUniverses && (
+                <button
+                  type="button"
+                  className={`ws-universes-btn${activeUniverseName ? ' ws-universes-btn-active' : ''}`}
+                  onClick={onOpenUniverses}
+                  title="Browse Universes"
+                >
+                  ◈ Universes
+                </button>
+              )}
               {onRandomize && (
                 <div className="ws-randomize-group">
                   <span className="ws-randomize-hint">lock to roll →</span>
@@ -518,6 +534,24 @@ export function WorkspacePage({
               )}
             </div>
           </div>
+
+          {activeUniverseName && (
+            <div className="ws-universe-indicator">
+              <span className="ws-universe-indicator-dot" />
+              <span className="ws-universe-indicator-name">{activeUniverseName}</span>
+              {onDeactivateUniverse && (
+                <button
+                  type="button"
+                  className="ws-universe-indicator-exit"
+                  onClick={onDeactivateUniverse}
+                  title="Deactivate universe"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="workspace-lane-list">
             <LaneSlot
               label="Character"

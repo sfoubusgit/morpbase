@@ -58,6 +58,8 @@ type IdentityLaneSurfaceProps = {
   onCreateItem: (input: LaneItemInput) => Promise<LaneItem>;
   onUpdateItem: (id: string, input: LaneItemInput) => Promise<LaneItem>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function IdentityLaneSurface({
@@ -69,6 +71,8 @@ export function IdentityLaneSurface({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: IdentityLaneSurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -77,6 +81,10 @@ export function IdentityLaneSurface({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
+
+  const visibleItems = universeFilter && universeFilter.length > 0
+    ? items.filter(i => universeFilter.includes(i.id))
+    : items;
 
   const selectedItem = items.find(i => i.id === selectedId) ?? null;
   const showForm = isCreating || selectedId !== null;
@@ -188,22 +196,31 @@ export function IdentityLaneSurface({
           <div className="identity-lane-panel-header">
             <div className="identity-lane-panel-title">{config.entityLabelPlural}</div>
             <div className="identity-lane-panel-subtitle">
-              {items.length} {items.length === 1 ? config.entityLabel.toLowerCase() : config.entityLabelPlural.toLowerCase()}
+              {universeFilter && universeFilter.length > 0
+                ? `${visibleItems.length} of ${items.length} — ${universeName ?? 'universe'}`
+                : `${items.length} ${items.length === 1 ? config.entityLabel.toLowerCase() : config.entityLabelPlural.toLowerCase()}`}
             </div>
           </div>
 
-          {isLoading && <div className="identity-lane-empty">Loading…</div>}
-
-          {!isLoading && items.length === 0 && (
-            <div className="identity-lane-empty">
-              <strong>No {config.entityLabelPlural.toLowerCase()} yet.</strong>
-              <span>Create one to start building your library.</span>
+          {universeFilter && universeFilter.length > 0 && (
+            <div className="identity-lane-universe-banner">
+              Filtered to {universeName ?? 'active universe'}
             </div>
           )}
 
-          {!isLoading && items.length > 0 && (
+          {isLoading && <div className="identity-lane-empty">Loading…</div>}
+
+          {!isLoading && visibleItems.length === 0 && (
+            <div className="identity-lane-empty">
+              {universeFilter && universeFilter.length > 0
+                ? <span>No {config.entityLabelPlural.toLowerCase()} in this universe yet. Add some in the Lane Sets editor.</span>
+                : <><strong>No {config.entityLabelPlural.toLowerCase()} yet.</strong><span>Create one to start building your library.</span></>}
+            </div>
+          )}
+
+          {!isLoading && visibleItems.length > 0 && (
             <div className="identity-lane-list">
-              {items.map(item => {
+              {visibleItems.map(item => {
                 const isActive = activeItemIds.includes(item.id);
                 const isSelected = item.id === selectedId;
                 return (

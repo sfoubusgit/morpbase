@@ -21,6 +21,8 @@ type MoodModalProps = {
   onCreateItem: (input: MoodPresetInput) => Promise<MoodPreset>;
   onUpdateItem: (id: string, input: MoodPresetInput) => Promise<MoodPreset>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function MoodModal({
@@ -33,6 +35,8 @@ export function MoodModal({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: MoodModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Mood" className="identity-lane-modal">
@@ -45,6 +49,8 @@ export function MoodModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

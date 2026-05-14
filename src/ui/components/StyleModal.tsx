@@ -21,6 +21,8 @@ type StyleModalProps = {
   onCreateItem: (input: StylePresetInput) => Promise<StylePreset>;
   onUpdateItem: (id: string, input: StylePresetInput) => Promise<StylePreset>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function StyleModal({
@@ -33,6 +35,8 @@ export function StyleModal({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: StyleModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Style" className="identity-lane-modal">
@@ -45,6 +49,8 @@ export function StyleModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

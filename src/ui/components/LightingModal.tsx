@@ -21,6 +21,8 @@ type LightingModalProps = {
   onCreateItem: (input: LightingSetupInput) => Promise<LightingSetup>;
   onUpdateItem: (id: string, input: LightingSetupInput) => Promise<LightingSetup>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function LightingModal({
@@ -33,6 +35,8 @@ export function LightingModal({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: LightingModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Lighting" className="identity-lane-modal">
@@ -45,6 +49,8 @@ export function LightingModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

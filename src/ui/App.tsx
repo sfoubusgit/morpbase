@@ -105,11 +105,14 @@ import { NegativeModal } from './components/NegativeModal';
 import { WorldModal } from './components/WorldModal';
 import { InteractionModal } from './components/InteractionModal';
 import { LaneSetsModal } from './components/LaneSetsModal';
+import { UniversesModal } from './components/UniversesModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
-import { listLaneSets, createLaneSet, deleteLaneSet, updateLaneSetUniverse } from '../engine/laneSetStore';
+import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
+import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
 import { initPresence, destroyPresence } from '../engine/presenceStore';
-import type { LaneSet, LaneSetLanes, LaneUniverse } from '../types/laneSets';
+import type { LaneSet, LaneSetLanes } from '../types/laneSets';
+import type { Universe, UniverseInput } from '../types/universe';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -226,6 +229,7 @@ type BuilderSessionSnapshot = {
   envCondition: string | null;
   captureBuffer: string[];
   activeLaneSetId: string | null;
+  activeUniverseId: string | null;
 };
 
 type CharacterPromptProjection = {
@@ -341,6 +345,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
         ? (parsed.captureBuffer as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
       activeLaneSetId: typeof parsed.activeLaneSetId === 'string' ? parsed.activeLaneSetId : null,
+      activeUniverseId: typeof parsed.activeUniverseId === 'string' ? parsed.activeUniverseId : null,
     };
   } catch {
     return null;
@@ -528,6 +533,9 @@ export function App() {
   const [auraVariationMax, setAuraVariationMax] = useState(3);
   const [captureBuffer, setCaptureBuffer] = useState<string[]>(initialBuilderSession?.captureBuffer ?? []);
   const [activeLaneSetId, setActiveLaneSetId] = useState<string | null>(initialBuilderSession?.activeLaneSetId ?? null);
+  const [universes, setUniverses] = useState<Universe[]>(() => listUniverses());
+  const [activeUniverseId, setActiveUniverseId] = useState<string | null>(initialBuilderSession?.activeUniverseId ?? null);
+  const [isUniversesOpen, setIsUniversesOpen] = useState(false);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
@@ -1937,7 +1945,7 @@ export function App() {
     };
     const locked = lockedLanes;
     const rollAll = locked.size === 0;
-    const activeUniverse = activeLaneSetId ? laneSets.find(s => s.id === activeLaneSetId)?.universe : undefined;
+    const activeUniverse = activeUniverseId ? universes.find(u => u.id === activeUniverseId)?.pools : undefined;
 
     const scopeMulti = <T extends { id: string }>(full: T[], uids?: string[]): T[] =>
       uids && uids.length > 0 ? full.filter(x => uids.includes(x.id)) : full;
@@ -1994,7 +2002,7 @@ export function App() {
         setAuraVariationEnabled(false);
       }
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds, activeLaneSetId, laneSets]);
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds, activeUniverseId, universes]);
 
   const handleApplyLaneSet = useCallback((set: LaneSet) => {
     const { lanes } = set;
@@ -2102,9 +2110,28 @@ export function App() {
     setLaneSets(prev => prev.filter(s => s.id !== id));
   }, []);
 
-  const handleUpdateLaneSetUniverse = useCallback((id: string, universe: LaneUniverse) => {
-    const updated = updateLaneSetUniverse(id, universe);
-    if (updated) setLaneSets(prev => prev.map(s => s.id === id ? updated : s));
+  const handleCreateUniverse = useCallback((input: UniverseInput) => {
+    const created = createUniverse(input);
+    setUniverses(prev => [...prev, created]);
+  }, []);
+
+  const handleUpdateUniversePools = useCallback((id: string, pools: Universe['pools']) => {
+    const updated = updateUniversePools(id, pools);
+    if (updated) setUniverses(prev => prev.map(u => u.id === id ? updated : u));
+  }, []);
+
+  const handleDeleteUniverse = useCallback((id: string) => {
+    deleteUniverse(id);
+    setUniverses(prev => prev.filter(u => u.id !== id));
+    setActiveUniverseId(prev => prev === id ? null : prev);
+  }, []);
+
+  const handleActivateUniverse = useCallback((id: string) => {
+    setActiveUniverseId(id);
+  }, []);
+
+  const handleDeactivateUniverse = useCallback(() => {
+    setActiveUniverseId(null);
   }, []);
 
   const refreshNegativePresets = useCallback(async () => {
@@ -2911,6 +2938,7 @@ export function App() {
         envCondition,
         captureBuffer,
         activeLaneSetId,
+        activeUniverseId,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -2951,6 +2979,7 @@ export function App() {
     envCondition,
     captureBuffer,
     activeLaneSetId,
+    activeUniverseId,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -3230,12 +3259,12 @@ export function App() {
     return phrases.join(', ');
   }, [activeNegativeIds, negativePresets]);
 
-  const activeUniverseSet = useMemo(
-    () => activeLaneSetId ? laneSets.find(s => s.id === activeLaneSetId) : undefined,
-    [activeLaneSetId, laneSets]
+  const activeUniverseEntity = useMemo(
+    () => activeUniverseId ? universes.find(u => u.id === activeUniverseId) : undefined,
+    [activeUniverseId, universes]
   );
-  const activeUniverse = activeUniverseSet?.universe;
-  const activeUniverseName = activeUniverseSet?.name;
+  const activeUniverse = activeUniverseEntity?.pools;
+  const activeUniverseName = activeUniverseEntity?.name;
 
   const captureAutoName = useMemo(() => buildAutoName(
     activeCharacterDisplayName,
@@ -3952,6 +3981,9 @@ export function App() {
           activeIdentityTags={activeIdentityTags}
           onRandomize={handleRandomizeLanes}
           onOpenLaneSets={() => setIsLaneSetsOpen(true)}
+          onOpenUniverses={() => setIsUniversesOpen(true)}
+          activeUniverseName={activeUniverseName}
+          onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}
           onToggleLaneLock={handleToggleLaneLock}
           captureCount={captureBuffer.length}
@@ -3993,7 +4025,17 @@ export function App() {
         onApply={handleApplyLaneSet}
         onDelete={handleDeleteLaneSet}
         onSaveCurrent={handleSaveCurrentAsLaneSet}
-        onUpdateUniverse={handleUpdateLaneSetUniverse}
+      />
+      <UniversesModal
+        isOpen={isUniversesOpen}
+        onClose={() => setIsUniversesOpen(false)}
+        universes={universes}
+        activeUniverseId={activeUniverseId}
+        onActivate={handleActivateUniverse}
+        onDeactivate={handleDeactivateUniverse}
+        onCreateUniverse={handleCreateUniverse}
+        onUpdatePools={handleUpdateUniversePools}
+        onDeleteUniverse={handleDeleteUniverse}
         libraryData={{
           characters,
           environments,

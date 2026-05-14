@@ -22,6 +22,19 @@ export type LaneSetLanes = {
   aura: SingleLaneConfig;
 };
 
+export type LaneUniverse = {
+  character?: string[];
+  wardrobe?: string[];
+  style?: string[];
+  lighting?: string[];
+  composition?: string[];
+  mood?: string[];
+  environment?: string[];
+  object?: string[];
+  negative?: string[];
+  aura?: string[];
+};
+
 export type LaneSet = {
   id: string;
   name: string;

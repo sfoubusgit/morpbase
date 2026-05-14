@@ -1,4 +1,4 @@
-import type { LaneSet, LaneSetInput, LaneUniverse } from '../types/laneSets';
+import type { LaneSet, LaneSetInput } from '../types/laneSets';
 
 const KEY = 'promptgen:lanesets:v1';
 const BACKUP_KEY = 'promptgen:lanesets:backup:v1';
@@ -153,16 +153,6 @@ export function updateLaneSet(id: string, input: LaneSetInput): LaneSet | null {
     lanes: input.lanes,
     updatedAt: Date.now(),
   };
-  sets[index] = updated;
-  save(sets);
-  return updated;
-}
-
-export function updateLaneSetUniverse(id: string, universe: LaneUniverse | undefined): LaneSet | null {
-  const sets = load();
-  const index = sets.findIndex(s => s.id === id);
-  if (index === -1) return null;
-  const updated: LaneSet = { ...sets[index], universe, updatedAt: Date.now() };
   sets[index] = updated;
   save(sets);
   return updated;

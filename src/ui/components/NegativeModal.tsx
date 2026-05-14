@@ -21,6 +21,8 @@ type NegativeModalProps = {
   onCreateItem: (input: NegativePresetInput) => Promise<NegativePreset>;
   onUpdateItem: (id: string, input: NegativePresetInput) => Promise<NegativePreset | null>;
   onDeleteItem: (id: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function NegativeModal({
@@ -33,6 +35,8 @@ export function NegativeModal({
   onCreateItem,
   onUpdateItem,
   onDeleteItem,
+  universeFilter,
+  universeName,
 }: NegativeModalProps) {
   const handleSelectItem = (id: string) => {
     if (activeItemIds.includes(id)) {
@@ -52,6 +56,8 @@ export function NegativeModal({
         onCreateItem={onCreateItem as (input: LaneItemInput) => Promise<LaneItem>}
         onUpdateItem={onUpdateItem as (id: string, input: LaneItemInput) => Promise<LaneItem>}
         onDeleteItem={onDeleteItem}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );
