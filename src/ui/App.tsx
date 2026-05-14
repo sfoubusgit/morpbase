@@ -3167,6 +3167,19 @@ export function App() {
       .join(', ');
   }, [promptAdditionEntries, activeChipTexts]);
 
+  // When the generated prompt changes (lane/aura/chip edits), discard any
+  // manual free-edit so the new content is visible instead of being hidden
+  // behind a stale override. Skip the very first render so a persisted edit
+  // survives a page reload.
+  const isFirstWorkspaceRender = useRef(true);
+  useEffect(() => {
+    if (isFirstWorkspaceRender.current) {
+      isFirstWorkspaceRender.current = false;
+      return;
+    }
+    setEditedPositiveOutput(null);
+  }, [workspacePrompt]);
+
   const workspaceNegativePrompt = useMemo(() => {
     const phrases = activeNegativeIds.flatMap(id => {
       const preset = negativePresets.find(n => n.id === id);
