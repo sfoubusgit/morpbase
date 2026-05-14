@@ -64,12 +64,15 @@ export function WorldModal({
     return result;
   }, [hubEntries, isOpen]);
 
-  const universeWorlds = useMemo(
-    () => universeFilter && universeFilter.length > 0
-      ? worlds.filter(w => universeFilter.includes(w.id))
-      : worlds,
-    [worlds, universeFilter]
-  );
+  const universeWorlds = useMemo(() => {
+    if (!universeFilter || universeFilter.length === 0) return worlds;
+    return worlds.filter(w => {
+      const rawId = w.id.startsWith('user:') ? w.id.slice(5)
+        : w.id.startsWith('hub:') ? w.id.slice(4)
+        : w.id;
+      return universeFilter.includes(rawId) || universeFilter.includes(w.id);
+    });
+  }, [worlds, universeFilter]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();

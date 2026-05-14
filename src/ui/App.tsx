@@ -107,9 +107,9 @@ import { InteractionModal } from './components/InteractionModal';
 import { LaneSetsModal } from './components/LaneSetsModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
-import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
+import { listLaneSets, createLaneSet, deleteLaneSet, updateLaneSetUniverse } from '../engine/laneSetStore';
 import { initPresence, destroyPresence } from '../engine/presenceStore';
-import type { LaneSet, LaneSetLanes } from '../types/laneSets';
+import type { LaneSet, LaneSetLanes, LaneUniverse } from '../types/laneSets';
 import {
   changeUserPassword,
   deleteCurrentUser,
@@ -2102,6 +2102,11 @@ export function App() {
     setLaneSets(prev => prev.filter(s => s.id !== id));
   }, []);
 
+  const handleUpdateLaneSetUniverse = useCallback((id: string, universe: LaneUniverse) => {
+    const updated = updateLaneSetUniverse(id, universe);
+    if (updated) setLaneSets(prev => prev.map(s => s.id === id ? updated : s));
+  }, []);
+
   const refreshNegativePresets = useCallback(async () => {
     try {
       const next = await listNegativePresets();
@@ -3988,6 +3993,17 @@ export function App() {
         onApply={handleApplyLaneSet}
         onDelete={handleDeleteLaneSet}
         onSaveCurrent={handleSaveCurrentAsLaneSet}
+        onUpdateUniverse={handleUpdateLaneSetUniverse}
+        libraryData={{
+          characters,
+          environments,
+          wardrobe: outfits,
+          styles: stylePresets,
+          lighting: lightingSetups,
+          composition: compositionFrames,
+          mood: moodPresets,
+          negative: negativePresets,
+        }}
       />
       <EnvironmentLibraryModal
         isOpen={isEnvironmentLibraryOpen}
