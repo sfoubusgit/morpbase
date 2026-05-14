@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   type ObjectIdentity,
   type ObjectIdentityInput,
@@ -15,6 +15,8 @@ type ObjectLibraryModalProps = {
   activeObjectIds: string[];
   onAdd: (id: string, name: string, phrases: string[]) => void;
   onRemove: (id: string) => void;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function ObjectLibraryModal({
@@ -23,6 +25,8 @@ export function ObjectLibraryModal({
   activeObjectIds,
   onAdd,
   onRemove,
+  universeFilter,
+  universeName,
 }: ObjectLibraryModalProps) {
   const [objects, setObjects] = useState<ObjectIdentity[]>([]);
   const [newName, setNewName] = useState('');
@@ -66,16 +70,29 @@ export function ObjectLibraryModal({
     reload();
   };
 
+  const universeObjects = useMemo(
+    () => universeFilter && universeFilter.length > 0
+      ? objects.filter(o => universeFilter.includes(o.id))
+      : objects,
+    [objects, universeFilter]
+  );
+
   const filtered = search.trim()
-    ? objects.filter(o =>
+    ? universeObjects.filter(o =>
         o.name.toLowerCase().includes(search.toLowerCase()) ||
         o.summary?.toLowerCase().includes(search.toLowerCase())
       )
-    : objects;
+    : universeObjects;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Objects" className="obj-modal-container">
       <div className="obj-modal">
+
+        {universeFilter && universeFilter.length > 0 && (
+          <div className="identity-lane-universe-banner">
+            {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated object{universeFilter.length === 1 ? '' : 's'}
+          </div>
+        )}
 
         <div className="obj-modal-toolbar">
           <input

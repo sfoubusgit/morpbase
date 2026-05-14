@@ -12,6 +12,8 @@ type EnvironmentLibraryModalProps = {
   onCreateEnvironment: (input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onUpdateEnvironment: (environmentId: string, input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onDeleteEnvironment: (environmentId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function EnvironmentLibraryModal({
@@ -24,6 +26,8 @@ export function EnvironmentLibraryModal({
   onCreateEnvironment,
   onUpdateEnvironment,
   onDeleteEnvironment,
+  universeFilter,
+  universeName,
 }: EnvironmentLibraryModalProps) {
   return (
     <Modal
@@ -40,6 +44,8 @@ export function EnvironmentLibraryModal({
         onCreateEnvironment={onCreateEnvironment}
         onUpdateEnvironment={onUpdateEnvironment}
         onDeleteEnvironment={onDeleteEnvironment}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

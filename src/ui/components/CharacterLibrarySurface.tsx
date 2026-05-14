@@ -11,6 +11,8 @@ type CharacterLibrarySurfaceProps = {
   onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onUpdateCharacter: (characterId: string, input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onDeleteCharacter: (characterId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 type CharacterFormState = {
@@ -282,6 +284,8 @@ export function CharacterLibrarySurface({
   onCreateCharacter,
   onUpdateCharacter,
   onDeleteCharacter,
+  universeFilter,
+  universeName,
 }: CharacterLibrarySurfaceProps) {
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const coverImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -462,9 +466,12 @@ export function CharacterLibrarySurface({
   }, [characters]);
 
   const filteredCharacters = useMemo(() => {
-    if (!activeTagFilter) return characters;
-    return characters.filter(c => c.tags?.includes(activeTagFilter));
-  }, [characters, activeTagFilter]);
+    let result = universeFilter && universeFilter.length > 0
+      ? characters.filter(c => universeFilter.includes(c.id))
+      : characters;
+    if (activeTagFilter) result = result.filter(c => c.tags?.includes(activeTagFilter));
+    return result;
+  }, [characters, activeTagFilter, universeFilter]);
 
   const handleAddTag = (tag: string) => {
     const trimmed = tag.trim().toLowerCase().replace(/\s+/g, '-');
@@ -526,9 +533,17 @@ export function CharacterLibrarySurface({
           <div className="character-library-panel-header">
             <div className="character-library-panel-title">Character Library</div>
             <div className="character-library-panel-subtitle">
-              {characters.length} reusable character{characters.length === 1 ? ' identity' : ' identities'}
+              {universeFilter && universeFilter.length > 0
+                ? `${universeFilter.length} of ${characters.length} character${characters.length === 1 ? ' identity' : ' identities'}`
+                : `${characters.length} reusable character${characters.length === 1 ? ' identity' : ' identities'}`}
             </div>
           </div>
+
+          {universeFilter && universeFilter.length > 0 && (
+            <div className="identity-lane-universe-banner">
+              {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated character{universeFilter.length === 1 ? '' : 's'}
+            </div>
+          )}
 
           {allTags.length > 0 && (
             <div className="character-tag-filter-bar">

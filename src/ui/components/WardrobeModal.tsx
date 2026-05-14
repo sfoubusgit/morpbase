@@ -12,6 +12,8 @@ type WardrobeModalProps = {
   onCreateOutfit: (input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onUpdateOutfit: (outfitId: string, input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onDeleteOutfit: (outfitId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function WardrobeModal({
@@ -24,6 +26,8 @@ export function WardrobeModal({
   onCreateOutfit,
   onUpdateOutfit,
   onDeleteOutfit,
+  universeFilter,
+  universeName,
 }: WardrobeModalProps) {
   return (
     <Modal
@@ -40,6 +44,8 @@ export function WardrobeModal({
         onCreateOutfit={onCreateOutfit}
         onUpdateOutfit={onUpdateOutfit}
         onDeleteOutfit={onDeleteOutfit}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );

@@ -225,6 +225,7 @@ type BuilderSessionSnapshot = {
   envScale: string | null;
   envCondition: string | null;
   captureBuffer: string[];
+  activeLaneSetId: string | null;
 };
 
 type CharacterPromptProjection = {
@@ -339,6 +340,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       captureBuffer: Array.isArray(parsed.captureBuffer)
         ? (parsed.captureBuffer as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
+      activeLaneSetId: typeof parsed.activeLaneSetId === 'string' ? parsed.activeLaneSetId : null,
     };
   } catch {
     return null;
@@ -525,6 +527,7 @@ export function App() {
   const [auraVariationMin, setAuraVariationMin] = useState(1);
   const [auraVariationMax, setAuraVariationMax] = useState(3);
   const [captureBuffer, setCaptureBuffer] = useState<string[]>(initialBuilderSession?.captureBuffer ?? []);
+  const [activeLaneSetId, setActiveLaneSetId] = useState<string | null>(initialBuilderSession?.activeLaneSetId ?? null);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
@@ -1934,40 +1937,44 @@ export function App() {
     };
     const locked = lockedLanes;
     const rollAll = locked.size === 0;
+    const activeUniverse = activeLaneSetId ? laneSets.find(s => s.id === activeLaneSetId)?.universe : undefined;
+
+    const scopeMulti = <T extends { id: string }>(full: T[], uids?: string[]): T[] =>
+      uids && uids.length > 0 ? full.filter(x => uids.includes(x.id)) : full;
 
     if (rollAll || locked.has('character')) {
       const n = Math.max(1, activeCharacterIds.length);
-      setActiveCharacterIds(pickN(characters, n));
+      setActiveCharacterIds(pickN(scopeMulti(characters, activeUniverse?.character), n));
     }
 
     if (rollAll || locked.has('environment')) {
       const n = Math.max(1, activeEnvironmentIds.length);
-      setActiveEnvironmentIds(pickN(environments, n));
+      setActiveEnvironmentIds(pickN(scopeMulti(environments, activeUniverse?.environment), n));
     }
 
     if (rollAll || locked.has('wardrobe')) {
       const n = Math.max(1, activeOutfitIds.length);
-      setActiveOutfitIds(pickN(outfits, n));
+      setActiveOutfitIds(pickN(scopeMulti(outfits, activeUniverse?.wardrobe), n));
     }
 
     if (rollAll || locked.has('style')) {
       const n = Math.max(1, activeStyleIds.length);
-      setActiveStyleIds(pickN(stylePresets, n));
+      setActiveStyleIds(pickN(scopeMulti(stylePresets, activeUniverse?.style), n));
     }
 
     if (rollAll || locked.has('lighting')) {
       const n = Math.max(1, activeLightingIds.length);
-      setActiveLightingIds(pickN(lightingSetups, n));
+      setActiveLightingIds(pickN(scopeMulti(lightingSetups, activeUniverse?.lighting), n));
     }
 
     if (rollAll || locked.has('composition')) {
       const n = Math.max(1, activeCompositionIds.length);
-      setActiveCompositionIds(pickN(compositionFrames, n));
+      setActiveCompositionIds(pickN(scopeMulti(compositionFrames, activeUniverse?.composition), n));
     }
 
     if (rollAll || locked.has('mood')) {
       const n = Math.max(1, activeMoodIds.length);
-      setActiveMoodIds(pickN(moodPresets, n));
+      setActiveMoodIds(pickN(scopeMulti(moodPresets, activeUniverse?.mood), n));
     }
 
     if (rollAll || locked.has('dynamics')) {
@@ -1978,14 +1985,16 @@ export function App() {
     }
 
     if (rollAll || locked.has('aura')) {
-      if (worlds.length > 0) {
-        const picked = worlds[Math.floor(Math.random() * worlds.length)];
+      const auraPool = scopeMulti(worlds, activeUniverse?.aura);
+      const pool = auraPool.length > 0 ? auraPool : worlds;
+      if (pool.length > 0) {
+        const picked = pool[Math.floor(Math.random() * pool.length)];
         setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
         setActiveChipTexts([]);
         setAuraVariationEnabled(false);
       }
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds]);
+  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds, activeLaneSetId, laneSets]);
 
   const handleApplyLaneSet = useCallback((set: LaneSet) => {
     const { lanes } = set;
@@ -2050,6 +2059,7 @@ export function App() {
       setActiveChipTexts([]);
       setAuraVariationEnabled(false);
     }
+    setActiveLaneSetId(set.id);
   }, [characters, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, environments, worlds]);
 
   const handleClearAllLanes = useCallback(() => {
@@ -2068,6 +2078,7 @@ export function App() {
     setWorldVariationEnabled(false);
     setWorldVariationPhrases([]);
     setAuraVariationEnabled(false);
+    setActiveLaneSetId(null);
   }, []);
 
   const handleSaveCurrentAsLaneSet = useCallback((name: string, description?: string) => {
@@ -2894,6 +2905,7 @@ export function App() {
         envScale,
         envCondition,
         captureBuffer,
+        activeLaneSetId,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -2933,6 +2945,7 @@ export function App() {
     envScale,
     envCondition,
     captureBuffer,
+    activeLaneSetId,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -3211,6 +3224,13 @@ export function App() {
     });
     return phrases.join(', ');
   }, [activeNegativeIds, negativePresets]);
+
+  const activeUniverseSet = useMemo(
+    () => activeLaneSetId ? laneSets.find(s => s.id === activeLaneSetId) : undefined,
+    [activeLaneSetId, laneSets]
+  );
+  const activeUniverse = activeUniverseSet?.universe;
+  const activeUniverseName = activeUniverseSet?.name;
 
   const captureAutoName = useMemo(() => buildAutoName(
     activeCharacterDisplayName,
@@ -3952,6 +3972,8 @@ export function App() {
         onCreateCharacter={handleCreateCharacter}
         onUpdateCharacter={handleUpdateCharacter}
         onDeleteCharacter={handleDeleteCharacter}
+        universeFilter={activeUniverse?.character}
+        universeName={activeUniverseName}
       />
       <InteractionModal
         isOpen={isInteractionOpen}
@@ -3976,6 +3998,8 @@ export function App() {
         onCreateEnvironment={handleCreateEnvironment}
         onUpdateEnvironment={handleUpdateEnvironment}
         onDeleteEnvironment={handleDeleteEnvironment}
+        universeFilter={activeUniverse?.environment}
+        universeName={activeUniverseName}
       />
       <WardrobeModal
         isOpen={isWardrobeOpen}
@@ -3986,6 +4010,8 @@ export function App() {
         onCreateOutfit={handleCreateOutfit}
         onUpdateOutfit={handleUpdateOutfit}
         onDeleteOutfit={handleDeleteOutfit}
+        universeFilter={activeUniverse?.wardrobe}
+        universeName={activeUniverseName}
       />
       <StyleModal
         isOpen={isStyleOpen}
@@ -3996,6 +4022,8 @@ export function App() {
         onCreateItem={handleCreateStylePreset}
         onUpdateItem={handleUpdateStylePreset}
         onDeleteItem={handleDeleteStylePreset}
+        universeFilter={activeUniverse?.style}
+        universeName={activeUniverseName}
       />
       <LightingModal
         isOpen={isLightingOpen}
@@ -4006,6 +4034,8 @@ export function App() {
         onCreateItem={handleCreateLightingSetup}
         onUpdateItem={handleUpdateLightingSetup}
         onDeleteItem={handleDeleteLightingSetup}
+        universeFilter={activeUniverse?.lighting}
+        universeName={activeUniverseName}
       />
       <CompositionModal
         isOpen={isCompositionOpen}
@@ -4016,6 +4046,8 @@ export function App() {
         onCreateItem={handleCreateCompositionFrame}
         onUpdateItem={handleUpdateCompositionFrame}
         onDeleteItem={handleDeleteCompositionFrame}
+        universeFilter={activeUniverse?.composition}
+        universeName={activeUniverseName}
       />
       <MoodModal
         isOpen={isMoodOpen}
@@ -4026,6 +4058,8 @@ export function App() {
         onCreateItem={handleCreateMoodPreset}
         onUpdateItem={handleUpdateMoodPreset}
         onDeleteItem={handleDeleteMoodPreset}
+        universeFilter={activeUniverse?.mood}
+        universeName={activeUniverseName}
       />
       <NegativeModal
         isOpen={isNegativeOpen}
@@ -4037,6 +4071,8 @@ export function App() {
         onCreateItem={handleCreateNegativePreset}
         onUpdateItem={handleUpdateNegativePreset}
         onDeleteItem={handleDeleteNegativePreset}
+        universeFilter={activeUniverse?.negative}
+        universeName={activeUniverseName}
       />
       <ObjectLibraryModal
         isOpen={isObjectOpen}
@@ -4044,6 +4080,8 @@ export function App() {
         activeObjectIds={activeObjectIds}
         onAdd={handleAddObject}
         onRemove={handleRemoveObject}
+        universeFilter={activeUniverse?.object}
+        universeName={activeUniverseName}
       />
       <WorldModal
         isOpen={isWorldOpen}
@@ -4051,6 +4089,8 @@ export function App() {
         activeWorldId={activeWorld?.id ?? null}
         onSelectWorld={(id, name, phrases) => { setActiveWorld({ id, name, phrases }); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
         onDeactivate={() => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
+        universeFilter={activeUniverse?.aura}
+        universeName={activeUniverseName}
       />
       <Modal
         isOpen={isFeedbackModalOpen}

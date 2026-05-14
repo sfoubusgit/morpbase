@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { EnvironmentIdentity, EnvironmentIdentityInput } from '../../types';
 import { processCoverImage } from '../utils/coverImageUtils';
 import './EnvironmentLibrarySurface.css';
@@ -11,6 +11,8 @@ type EnvironmentLibrarySurfaceProps = {
   onCreateEnvironment: (input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onUpdateEnvironment: (environmentId: string, input: EnvironmentIdentityInput) => Promise<EnvironmentIdentity>;
   onDeleteEnvironment: (environmentId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 type EnvironmentFormState = {
@@ -54,6 +56,8 @@ export function EnvironmentLibrarySurface({
   onCreateEnvironment,
   onUpdateEnvironment,
   onDeleteEnvironment,
+  universeFilter,
+  universeName,
 }: EnvironmentLibrarySurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -147,6 +151,13 @@ export function EnvironmentLibrarySurface({
     }
   };
 
+  const visibleEnvironments = useMemo(
+    () => universeFilter && universeFilter.length > 0
+      ? environments.filter(e => universeFilter.includes(e.id))
+      : environments,
+    [environments, universeFilter]
+  );
+
   const showForm = isCreating || selectedId !== null;
 
   return (
@@ -184,6 +195,12 @@ export function EnvironmentLibrarySurface({
             </button>
           </div>
 
+          {universeFilter && universeFilter.length > 0 && (
+            <div className="identity-lane-universe-banner">
+              {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated environment{universeFilter.length === 1 ? '' : 's'}
+            </div>
+          )}
+
           {isLoading && (
             <div className="environment-library-message">Loading…</div>
           )}
@@ -196,7 +213,7 @@ export function EnvironmentLibrarySurface({
 
           {!isLoading && environments.length > 0 && (
             <div className="environment-library-list">
-              {environments.map(env => {
+              {visibleEnvironments.map(env => {
                 const isActive = activeEnvironmentIds.includes(env.id);
                 const isSelected = selectedId === env.id;
                 return (

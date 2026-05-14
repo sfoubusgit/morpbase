@@ -20,6 +20,8 @@ type WorldModalProps = {
   activeWorldId: string | null;
   onSelectWorld: (id: string, name: string, phrases: string[]) => void;
   onDeactivate: () => void;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function WorldModal({
@@ -28,6 +30,8 @@ export function WorldModal({
   activeWorldId,
   onSelectWorld,
   onDeactivate,
+  universeFilter,
+  universeName,
 }: WorldModalProps) {
   const [search, setSearch] = useState('');
   const [hubEntries] = useState<PoolHubEntry[]>(() => listHubEntries());
@@ -60,14 +64,21 @@ export function WorldModal({
     return result;
   }, [hubEntries, isOpen]);
 
+  const universeWorlds = useMemo(
+    () => universeFilter && universeFilter.length > 0
+      ? worlds.filter(w => universeFilter.includes(w.id))
+      : worlds,
+    [worlds, universeFilter]
+  );
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return worlds;
-    return worlds.filter(w =>
+    if (!term) return universeWorlds;
+    return universeWorlds.filter(w =>
       w.name.toLowerCase().includes(term) ||
       w.summary?.toLowerCase().includes(term)
     );
-  }, [worlds, search]);
+  }, [universeWorlds, search]);
 
   const handleSelect = (world: WorldEntry) => {
     onSelectWorld(world.id, world.name, world.phrases);
@@ -85,6 +96,11 @@ export function WorldModal({
         <div className="world-modal-description">
           Activate an aura to reshape your inspiration field with its phrases instead of the default pool.
         </div>
+        {universeFilter && universeFilter.length > 0 && (
+          <div className="identity-lane-universe-banner">
+            {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated aura{universeFilter.length === 1 ? '' : 's'}
+          </div>
+        )}
         <div className="world-modal-toolbar">
           <input
             type="text"
@@ -100,7 +116,7 @@ export function WorldModal({
           )}
         </div>
 
-        {worlds.length === 0 ? (
+        {universeWorlds.length === 0 ? (
           <div className="world-modal-empty">
             No auras yet. Go to Auras to create one, then activate it here.
           </div>

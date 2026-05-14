@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import type { OutfitIdentity, OutfitIdentityInput } from '../../types';
 import { processCoverImage } from '../utils/coverImageUtils';
 import './WardrobeSurface.css';
@@ -11,6 +11,8 @@ type WardrobeSurfaceProps = {
   onCreateOutfit: (input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onUpdateOutfit: (outfitId: string, input: OutfitIdentityInput) => Promise<OutfitIdentity>;
   onDeleteOutfit: (outfitId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 type OutfitFormState = {
@@ -44,6 +46,8 @@ export function WardrobeSurface({
   onCreateOutfit,
   onUpdateOutfit,
   onDeleteOutfit,
+  universeFilter,
+  universeName,
 }: WardrobeSurfaceProps) {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -52,6 +56,13 @@ export function WardrobeSurface({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
+
+  const visibleOutfits = useMemo(
+    () => universeFilter && universeFilter.length > 0
+      ? outfits.filter(o => universeFilter.includes(o.id))
+      : outfits,
+    [outfits, universeFilter]
+  );
 
   const selectedOutfit = outfits.find(o => o.id === selectedId) ?? null;
   const showForm = isCreating || selectedId !== null;
@@ -165,9 +176,17 @@ export function WardrobeSurface({
           <div className="wardrobe-panel-header">
             <div className="wardrobe-panel-title">Wardrobe Library</div>
             <div className="wardrobe-panel-subtitle">
-              {outfits.length} outfit{outfits.length === 1 ? '' : 's'}
+              {universeFilter && universeFilter.length > 0
+                ? `${universeFilter.length} of ${outfits.length} outfit${outfits.length === 1 ? '' : 's'}`
+                : `${outfits.length} outfit${outfits.length === 1 ? '' : 's'}`}
             </div>
           </div>
+
+          {universeFilter && universeFilter.length > 0 && (
+            <div className="identity-lane-universe-banner">
+              {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated outfit{universeFilter.length === 1 ? '' : 's'}
+            </div>
+          )}
 
           {isLoading && <div className="wardrobe-empty">Loading…</div>}
 
@@ -180,7 +199,7 @@ export function WardrobeSurface({
 
           {!isLoading && outfits.length > 0 && (
             <div className="wardrobe-list">
-              {outfits.map(outfit => {
+              {visibleOutfits.map(outfit => {
                 const isActive = activeOutfitIds.includes(outfit.id);
                 const isSelected = outfit.id === selectedId;
                 return (

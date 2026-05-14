@@ -12,6 +12,8 @@ type CharacterLibraryModalProps = {
   onCreateCharacter: (input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onUpdateCharacter: (characterId: string, input: CharacterIdentityInput) => Promise<CharacterIdentity>;
   onDeleteCharacter: (characterId: string) => Promise<void>;
+  universeFilter?: string[];
+  universeName?: string;
 };
 
 export function CharacterLibraryModal({
@@ -24,6 +26,8 @@ export function CharacterLibraryModal({
   onCreateCharacter,
   onUpdateCharacter,
   onDeleteCharacter,
+  universeFilter,
+  universeName,
 }: CharacterLibraryModalProps) {
   return (
     <Modal
@@ -40,6 +44,8 @@ export function CharacterLibraryModal({
         onCreateCharacter={onCreateCharacter}
         onUpdateCharacter={onUpdateCharacter}
         onDeleteCharacter={onDeleteCharacter}
+        universeFilter={universeFilter}
+        universeName={universeName}
       />
     </Modal>
   );
