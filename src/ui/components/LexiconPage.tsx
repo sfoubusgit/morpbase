@@ -30,6 +30,10 @@ const SECTIONS: Section[] = [
         term: 'Negative Prompt',
         body: 'A separate output that lists what the model should avoid. Populated by activating a Negative preset from the identity panel. Copy it into the negative prompt field of your generation tool.',
       },
+      {
+        term: 'Capture',
+        body: 'Saves a snapshot of the current assembled prompt into a temporary batch. Capture several variations in a session, then save the whole batch as a named set. Each capture is independent — changing lanes afterwards does not affect what you already captured.',
+      },
     ],
   },
   {
@@ -42,6 +46,10 @@ const SECTIONS: Section[] = [
       {
         term: 'Character',
         body: 'A named person or figure with defined visual traits — appearance, expression, presence. Activating a character anchors the prompt around a consistent identity.',
+      },
+      {
+        term: 'Dynamics',
+        body: 'An interaction phrase between two or more active characters. Only available when two or more characters are selected. Describes how they relate or what they are doing together. Can be rolled randomly or browsed.',
       },
       {
         term: 'Environment',
@@ -68,12 +76,37 @@ const SECTIONS: Section[] = [
         body: 'The emotional tone or atmosphere of the image. Adds a layer of feeling that sits across everything else in the prompt.',
       },
       {
+        term: 'Objects',
+        body: 'Specific props or items to include in the scene. Unlike other lanes, Objects is additive — you can select multiple items at once and they all contribute to the prompt.',
+      },
+      {
         term: 'Negative',
         body: 'A reusable preset of exclusion phrases. One negative preset can be active at a time. Its phrases populate the negative prompt output.',
       },
       {
-        term: 'World',
-        body: 'A named collection of phrases that reshapes the Starting Points field. When a World is active, its phrases replace the default inspiration pool. Changing worlds clears your active starting points.',
+        term: 'Aura',
+        body: 'A named phrase collection that reshapes the Starting Points field. When an Aura is active, its phrases replace the default inspiration pool. Changing auras clears your active starting points.',
+      },
+    ],
+  },
+  {
+    title: 'Configuration',
+    entries: [
+      {
+        term: 'Lane Sets',
+        body: 'Named snapshots of your current lane configuration. Save a combination of character, environment, wardrobe, style, and other active lanes as a set, then restore it in one click. Useful for switching between recurring setups.',
+      },
+      {
+        term: 'Universes',
+        body: 'Creative worlds that scope the entire workspace to a curated pool of items per lane. When a Universe is active, every picker and the randomizer only draws from the items you assigned to that universe. Deactivating returns the workspace to the full library.',
+      },
+      {
+        term: 'Randomize',
+        body: 'Fills all unlocked identity lanes with random items drawn from your library — or from the active Universe\'s pools if one is active. Locked lanes are left untouched.',
+      },
+      {
+        term: 'Lock',
+        body: 'Click any identity lane to lock it. Locked lanes are skipped by the randomizer, so their content is preserved across rolls. Click again to unlock. Locked lanes glow to indicate their state.',
       },
     ],
   },
@@ -88,14 +121,6 @@ const SECTIONS: Section[] = [
         term: 'Character Identity',
         body: 'A complete, named definition of a character — their appearance, traits, and visual language. Built once, reused across any number of prompts without repetition.',
       },
-      {
-        term: 'Proof Lineage',
-        body: 'A record of how a character identity was derived or evolved. Tracks the chain of decisions that produced the current character definition, so it can be understood, reproduced, or refined.',
-      },
-      {
-        term: 'Projection',
-        body: 'The output of a character identity in a specific context — what that character looks like in a given environment, outfit, or lighting. A projection is a controlled combination of identity layers.',
-      },
     ],
   },
   {
@@ -103,7 +128,7 @@ const SECTIONS: Section[] = [
     entries: [
       {
         term: 'Worlds',
-        body: 'Named phrase collections you build yourself. Each world is a list of text phrases. Activating a world in the workspace reshapes the starting points field with those phrases.',
+        body: 'Named phrase collections you build yourself. Each world is a list of text phrases. Activating a world as an Aura in the workspace reshapes the starting points field with those phrases.',
       },
       {
         term: 'Prompt Library',
