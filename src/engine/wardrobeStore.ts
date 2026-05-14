@@ -3,6 +3,7 @@ import type { OutfitIdentity, OutfitIdentityInput, WardrobeStore } from '../type
 const WARDROBE_STORE_KEY = 'promptgen:wardrobe:v1';
 const WARDROBE_STORE_BACKUP_KEY = 'promptgen:wardrobe:backup:v1';
 const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v3';
+const WARDROBE_SEED_FLAG_KEY_V4 = 'promptgen:wardrobe:seeded:v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -85,6 +86,7 @@ const sanitizeOutfit = (value: unknown): OutfitIdentity | null => {
 const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
+const SEED_TS_4 = 1748304000000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -228,6 +230,87 @@ const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+const V4_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_aiw_alice_blue_pinafore',
+    name: "Alice's Blue Pinafore Dress",
+    summary: 'The classic: pale blue dress with white pinafore apron, puffed sleeves, black strap shoes, white knee socks.',
+    phrases: [
+      'pale blue dress with short puffed sleeves, fitted through the bodice',
+      'white pinafore apron tied at the back in a large bow',
+      'white knee socks and black strap shoes, worn and slightly dusty from travel',
+      'neat but increasingly dishevelled — the pinafore still white, the dress not quite where it started',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'outfit_aiw_playing_card_uniform',
+    name: 'Playing Card Soldier Uniform',
+    summary: 'Flat painted uniform in the manner of a playing card — suit emblems on the chest, stiff posture implied by the geometry.',
+    phrases: [
+      'flat painted playing card soldier uniform, suit emblem prominent on the chest',
+      'red and white colour division, the geometry of a card face applied to a standing figure',
+      'stiff vertical posture, the uniform suggesting a two-dimensional object choosing to occupy three dimensions',
+      'no expression visible — the suit is the identity',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'outfit_aiw_red_queen_regalia',
+    name: "Red Queen's Regalia",
+    summary: 'Full court dress in deep crimson and black — crown, stiff collar, the geometric authority of someone who has never once considered being wrong.',
+    phrases: [
+      'deep crimson court dress, structured bodice and full skirt, black heart embroidery throughout',
+      'high stiff collar framing the face, crown fixed above it — both immovable',
+      'wide silhouette, the skirt held to shape by unseen structure, the effect monumental',
+      'black gloves to the elbow, the red and black palette absolute and unrelieved',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'outfit_aiw_mad_hatter_ensemble',
+    name: "Mad Hatter's Ensemble",
+    summary: 'A formal suit that has been through several entirely different fashion periods simultaneously — too much hat, price tag intact, every layer competing.',
+    phrases: [
+      'tall stovepipe hat with a price tag attached to the band, slightly tilted, enormous',
+      'layered formal coat in clashing fabrics — plaid waistcoat, striped trousers, spotted cravat knotted large',
+      'too many buttons, each a different size and colour, none of them matching the buttonholes they serve',
+      'formally chaotic — everything a deliberate choice, the choices in complete disagreement with each other',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'outfit_aiw_white_queen_gown',
+    name: "White Queen's Gown",
+    summary: 'Disordered white gown on a figure who cannot quite keep herself arranged — hair escaping, crown askew, everything white and increasingly approximate.',
+    phrases: [
+      'white gown in soft unstructured fabric, layers slightly misaligned',
+      'hair in a state of active escape from whatever arrangement it was in, a crown sitting at an angle it was not placed at',
+      'everything white — gown, gloves, hair, complexion — the whiteness both regal and slightly alarming',
+      'the impression of a woman whose clothes cannot keep up with her and has stopped concerning herself with this',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'outfit_aiw_victorian_visitor',
+    name: 'Victorian Visitor',
+    summary: 'Neat Victorian child\'s day dress — proper for the surface world, increasingly inappropriate for this one.',
+    phrases: [
+      'neat Victorian child\'s day dress, appropriate for afternoon visits in the world above',
+      'high collar, long sleeves, sensible shoes, the whole ensemble constructed for propriety',
+      'visibly out of place — the dress correct for a world where the rules still apply',
+      'slightly too tidy for the current environment, the contrast part of the point',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -235,14 +318,29 @@ const writeOutfits = (outfits: OutfitIdentity[]) => {
 };
 
 const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
-  if (readStorageItem(WARDROBE_SEED_FLAG_KEY) !== null) return outfits;
-  writeStorageItem(WARDROBE_SEED_FLAG_KEY, true);
-  const existingIds = new Set(outfits.map(o => o.id));
-  const toAdd = DEFAULT_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
-  if (toAdd.length === 0) return outfits;
-  const merged = sortOutfits([...outfits, ...toAdd]);
-  writeOutfits(merged);
-  return merged;
+  let result = outfits;
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = DEFAULT_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V4_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  return result;
 };
 
 const readOutfits = (): OutfitIdentity[] => {

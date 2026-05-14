@@ -14,10 +14,12 @@ const BACKUP_KEY = 'promptgen:worlds:backup:v1';
 const WORLD_SEED_FLAG_KEY = 'promptgen:worlds:seeded:v1';
 const WORLD_SEED_FLAG_KEY_V2 = 'promptgen:worlds:seeded:v2';
 const WORLD_SEED_FLAG_KEY_V3 = 'promptgen:worlds:seeded:v3';
+const WORLD_SEED_FLAG_KEY_V4 = 'promptgen:worlds:seeded:v4';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
 const WORLD_SEED_TS_V3 = 1748304000000;
+const WORLD_SEED_TS_V4 = 1748304000000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -145,6 +147,43 @@ const SEED_WORLDS_V3: World[] = [
   },
 ];
 
+const SEED_WORLDS_V4: World[] = [
+  {
+    id: 'world_seed_alice_in_wonderland',
+    name: 'Alice in Wonderland',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_aiw_01', text: 'a corridor of impossible length, the door at the far end the wrong size, the key in your hand also the wrong size' },
+      { id: 'wp_aiw_02', text: 'blue hookah smoke drifting at knee height through the mushroom forest, smelling of pepper and something impossible to name' },
+      { id: 'wp_aiw_03', text: 'white roses on a bush, three playing card soldiers crouched at its base painting them red with broad brushes and guilty speed' },
+      { id: 'wp_aiw_04', text: 'a pocket watch open and ticking, the hands in no agreement with any clock you have seen, the rabbit already gone' },
+      { id: 'wp_aiw_05', text: 'long oak table stretching into the distance, mismatched teacups stacked and scattered, the party in full session with nowhere to sit' },
+      { id: 'wp_aiw_06', text: 'a grin visible in the space between branches — present before the cat, remaining after the cat, occupying the interval where a face should be' },
+      { id: 'wp_aiw_07', text: 'a courtroom where every bench is full, the evidence is a dish of tarts, and the verdict was written before anyone arrived' },
+      { id: 'wp_aiw_08', text: 'a small bottle with a paper label tied at the neck: DRINK ME — hand lettered, the ink slightly smudged, the instruction absolute' },
+      { id: 'wp_aiw_09', text: 'a cake on a white plate, the words EAT ME spelled out in currants across its surface, precise and patient' },
+      { id: 'wp_aiw_10', text: 'a looking glass on the far wall showing the same room and not the same room — the clock on the mantelpiece showing different hands' },
+      { id: 'wp_aiw_11', text: 'a large mushroom in a clearing, one side of the cap producing one result and the other producing another, the caterpillar unbothered by either' },
+      { id: 'wp_aiw_12', text: 'flamingos deployed as croquet mallets, necks bent in uncertain arcs, the hedgehogs curled as balls and occasionally uncurling to investigate their situation' },
+      { id: 'wp_aiw_13', text: 'a garden where the flowers have faces and opinions, the tiger lilies direct, the roses watchful, the daisies conferring until observed' },
+      { id: 'wp_aiw_14', text: 'card soldiers standing in precise rows, their flat suits visible, their posture rigid, their interest in events around them carefully managed' },
+      { id: 'wp_aiw_15', text: 'a small house at the end of a path, its windows at the right height for a specific occupant who has recently and abruptly vacated' },
+      { id: 'wp_aiw_16', text: 'a large inland sea that should not exist in this space, its company treading water without discussing how they arrived or why the water is warm' },
+      { id: 'wp_aiw_17', text: 'a chess landscape visible from above — each square its own distinct world, the pieces in the distance moving with the patience of things that have all the time there is' },
+      { id: 'wp_aiw_18', text: 'a very long fall past a very furnished tunnel — jam jars, bookshelves, a clock with no hands, none of it accelerating, all of it noticed' },
+      { id: 'wp_aiw_19', text: 'a door at the base of a tree, the tree scale and the door scale belonging to entirely different agreements about size' },
+      { id: 'wp_aiw_20', text: 'a dense dark wood where the trees fork at wrong angles and something has moved through recently, the undergrowth still recording its direction' },
+      { id: 'wp_aiw_21', text: 'a kitchen where pepper is the primary medium — surfaces, air, visibility all in agreement that pepper is the correct approach to everything' },
+      { id: 'wp_aiw_22', text: 'a large ornate mirror in a tarnished frame, the reflection extending further than the room allows, lit from a source with no counterpart on this side' },
+      { id: 'wp_aiw_23', text: 'a dormouse somewhere inside an upturned teapot, occasionally surfacing to contribute to a conversation and then subsiding again' },
+      { id: 'wp_aiw_24', text: 'a croquet lawn in red and white, precisely maintained, the queen\'s throne at the far end the only fixed point of reference in the activity' },
+      { id: 'wp_aiw_25', text: 'a hookah of considerable ornament, unattended but still lit, the smoke forming shapes that do not quite resolve into anything identifiable' },
+    ],
+    createdAt: WORLD_SEED_TS_V4,
+    updatedAt: WORLD_SEED_TS_V4,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -174,6 +213,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V3, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V3.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V4) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V4, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V4.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

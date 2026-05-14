@@ -10,6 +10,7 @@ const ENVIRONMENT_SEED_FLAG_KEY = 'promptgen:environments:seeded:v3';
 const ENVIRONMENT_SEED_FLAG_KEY_V4 = 'promptgen:environments:seeded:v4';
 const ENVIRONMENT_SEED_FLAG_KEY_V5 = 'promptgen:environments:seeded:v5';
 const ENVIRONMENT_SEED_FLAG_KEY_V6 = 'promptgen:environments:seeded:v6';
+const ENVIRONMENT_SEED_FLAG_KEY_V7 = 'promptgen:environments:seeded:v7';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -104,6 +105,7 @@ const ENV_SEED_TS_3 = 1747612800000;
 const ENV_SEED_TS_4 = 1747785600000;
 const ENV_SEED_TS_5 = 1748304000000;
 const ENV_SEED_TS_6 = 1748217600000;
+const ENV_SEED_TS_7 = 1748304000000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -491,6 +493,179 @@ const V6_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+const V7_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_rabbit_hole_descent',
+    name: 'The Rabbit Hole Descent',
+    summary: 'A vertical fall through a cylindrical tunnel lined with bookshelves, jam jars, and furniture in slow suspension — long enough to notice things.',
+    phraseBundle: {
+      core: [
+        'a cylindrical vertical tunnel, walls lined floor to ceiling with bookshelves, cupboards, jam jars, and framed maps',
+        'objects drifting past in slow suspension — a lamp, an armchair, a jar of orange marmalade with a legible label',
+        'warm amber light from no identifiable source, even distribution, no shadows cast in any direction',
+        'no floor visible below, no ceiling above, the tunnel curving so the end is always just out of view',
+        'dust motes suspended mid-fall alongside the falling furniture, a clock on one shelf with no hands',
+        'the quality of a very long fall through a very furnished space — neither urgent nor alarming',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_pool_of_tears',
+    name: 'The Pool of Tears',
+    summary: 'A shallow inland sea that shouldn\'t exist — flat, salt, and warm, its strange company treading water without discussing its origin.',
+    phraseBundle: {
+      core: [
+        'a shallow inland sea extending further than the space should allow, the surface perfectly flat and still',
+        'strange mixed company treading water — a large mouse, a dodo, a creature with an uncertain neck',
+        'pale pebble shore curving away in both directions, the waterline too precise, the sea too still',
+        'floating debris: a thimble, a length of blue ribbon, a small sealed bottle, drifting without direction',
+        'the water salt and slightly warm, its origin not discussed by those currently in it',
+        'flat even overcast light, no wind, the sound of water with no particular wave producing it',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_court_of_hearts',
+    name: 'The Court of Hearts',
+    summary: 'A courtroom assembled from playing card soldiers, with a tart as evidence and a verdict already written somewhere before the proceedings began.',
+    phraseBundle: {
+      core: [
+        'a courtroom assembled entirely from playing card soldiers — all four suits standing as walls, jury, and guard',
+        'a throne at the far end, oversized, a velvet cushion bearing a dish of tarts as the central evidence',
+        'painted rose trees flanking the entrance, the brushes still wet and leaned against the trunks',
+        'high painted ceiling in red and gold heart patterns, no windows, institutional formal illumination',
+        'every bench occupied, every face turned to the same fixed point, the formality absolute',
+        'the verdict is already written — the proceedings are the architecture of a foregone conclusion',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_tulgey_wood',
+    name: 'The Tulgey Wood',
+    summary: 'A dense dark forest where the trees fork wrong and the undergrowth moves — Jabberwock country, or recently was.',
+    phraseBundle: {
+      core: [
+        'dense dark forest, trees with trunks that fork at wrong angles and bark that faces inward',
+        'the undergrowth full of creatures that are combinations of other creatures, moving between the roots',
+        'thin whistling sound from no fixed direction, leaves that orient toward movement and then away',
+        'light that never reaches the floor fully — filtered, grey-green, arriving at the wrong angle',
+        'no path visible but clear evidence that something large has moved through recently',
+        'the Jabberwock is here, or was, or will be — the wood holds the information and will not share it',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_white_rabbit_house',
+    name: "The White Rabbit's House",
+    summary: 'A small precise English cottage recently fled by its owner — gloves on the hall table, correspondence in progress, everything in its place except him.',
+    phraseBundle: {
+      core: [
+        'a small precise English cottage, tidy garden gate ajar, path recently used, a boot scraper outside the white door',
+        'a pair of white gloves visible through the hall window, interior low-ceilinged and carefully arranged',
+        'a writing desk with correspondence in progress, a pen still wet, the letter unfinished',
+        'rooms that were the exact right size for one specific occupant and are demonstrably no longer',
+        'a garden with careful beds, one end recently and significantly disturbed',
+        'the calm of the recently vacated — everything in its place except the reason things were placed',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_garden_live_flowers',
+    name: 'The Garden of Live Flowers',
+    summary: 'A formal garden where the flowers have faces and opinions — tiger lilies sharp, roses watchful, daisies whispering until observed.',
+    phraseBundle: {
+      core: [
+        'a formal garden where the flowers have faces — tiger lilies with striped petals and direct expressions',
+        'roses in red and white fully upright and watching the path, attentive without moving',
+        'daisies in a cluster with heads close together — they stop when observed',
+        'box hedges trimmed into shapes that almost form letters and then, looked at directly, do not',
+        'diffuse warm garden light, even across all beds, every petal fully and clearly visible',
+        'a garden that should be peaceful, and would be, if you could not tell it was evaluating you',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_chess_landscape',
+    name: 'The Looking-Glass Chess Landscape',
+    summary: 'A landscape divided into a precise chess grid where each square is its own world — tall pieces moving in the distance, a train crossing one square, the path always one square ahead.',
+    phraseBundle: {
+      core: [
+        'a rolling landscape divided into a precise chess grid by hedges, streams, and low wooden fences',
+        'each square its own distinct character — some in shadow, some in full light, the transition instant at the boundary',
+        'a train crossing one of the far squares, full scale and enormous, briefly present and then not',
+        'tall chess pieces visible in the distance in full slow motion — a White Knight, a Red Castle',
+        'hills in the distance that read as hills and also as a chess diagram when viewed from above',
+        'the path always leads to the adjacent square, the destination always one square further than arrived',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_mushroom_glade',
+    name: "The Caterpillar's Mushroom Glade",
+    summary: 'A clearing where the mushrooms stand as large as trees — flat caps at canopy height, blue hookah smoke drifting at mid-level, arranged entirely for one occupant.',
+    phraseBundle: {
+      core: [
+        'a forest clearing where the mushrooms stand as large as trees, flat caps forming a second canopy',
+        'the undersides of the largest caps at eye level when standing, gills pink and clearly visible from below',
+        'deep blue hookah smoke drifting between the stems at mid-height, slow and slightly directional',
+        'pale diffuse light above the caps, the floor of the glade in soft perpetual half-shadow',
+        'ground covered in perfect circles where smaller mushrooms were, recently gone or taken',
+        'the atmosphere of a space that has had one occupant for a very long time and is arranged for him alone',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_duchess_kitchen',
+    name: "The Duchess's Kitchen",
+    summary: 'A large smoky kitchen drowning in pepper — crockery at dangerous angles, a cauldron boiling violently, visibility poor above chest height.',
+    phraseBundle: {
+      core: [
+        'a large smoky kitchen, every surface dusted black with pepper — counters, pots, floor, and air equally coated',
+        'enormous open fireplace, a cauldron of something boiling violently at its center, steam and pepper combined',
+        'crockery in stacks at dangerous heights, some units already mid-arc, some having recently landed',
+        'visibility poor above chest height from combined smoke and pepper, the air physically thick',
+        'a broad table with nothing on it except a deep layer of pepper and a salt cellar at the center',
+        'the chaos of a kitchen that has always operated this way and sees no reason to examine it',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+  {
+    id: 'environment_seed_looking_glass_room',
+    name: 'The Looking-Glass Room',
+    summary: 'A Victorian drawing room and its mirror twin — the reflection extends further than the room allows, and the mantelpiece clock shows a different time.',
+    phraseBundle: {
+      core: [
+        'a Victorian drawing room, fireplace on the left, chessboard-patterned floor, winter light from a window on the right',
+        'a large wall mirror in an elaborately tarnished ornate frame occupying the center of the far wall',
+        'the reflection showing the same room but with the mantelpiece clock face showing different hands',
+        'a corridor visible in the glass extending further than the room allows, lit from no matching source',
+        'soft winter light from the window — the mirror\'s version has light from no clear origin, slightly warmer',
+        'a room that has a copy of itself, and the question of which one is the original is not resolved',
+      ],
+    },
+    createdAt: ENV_SEED_TS_7,
+    updatedAt: ENV_SEED_TS_7,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -563,6 +738,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V6_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V7_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

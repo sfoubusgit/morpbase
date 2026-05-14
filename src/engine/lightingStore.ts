@@ -4,6 +4,7 @@ const LIGHTING_STORE_KEY = 'promptgen:lightings:v1';
 const LIGHTING_STORE_BACKUP_KEY = 'promptgen:lightings:backup:v1';
 const LIGHTING_SEED_FLAG_KEY = 'promptgen:lightings:seeded:v2';
 const LIGHTING_SEED_FLAG_KEY_V3 = 'promptgen:lightings:seeded:v3';
+const LIGHTING_SEED_FLAG_KEY_V4 = 'promptgen:lightings:seeded:v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,6 +88,48 @@ const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
+
+const V4_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_aiw_wonderland_sourceless',
+    name: 'Wonderland Sourceless Light',
+    summary: 'Even, directionless illumination with no identifiable origin — everything visible, nothing casting a shadow, the light present like weather.',
+    phrases: [
+      'even directionless illumination, no identifiable source, no cast shadows anywhere',
+      'every surface equally lit from all angles simultaneously',
+      'the light present like weather — ambient, total, and without explanation',
+      'no highlights, no shadow pools — only the flat completeness of a world that forgot to have a sun',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'lighting_aiw_phosphorescent_undergrowth',
+    name: 'Phosphorescent Undergrowth',
+    summary: 'Cold soft glow rising from below — mushrooms and roots emitting their own pale light, blue-green and sourceless, the forest floor brighter than the canopy.',
+    phrases: [
+      'cold soft phosphorescent glow rising from the ground level — mushrooms and root networks emitting pale blue-green light',
+      'the forest floor brighter than the canopy above, light direction inverted',
+      'faces lit from below by diffuse bioluminescent fill, no warmth anywhere in the spectrum',
+      'shadows pointing upward, canopy dark, the underground the source of all visible light',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'lighting_aiw_court_candlelight',
+    name: 'Court Candlelight',
+    summary: 'Dense warm candlelight from the throne end — hundreds of small sources pooling into a single amber direction, deep shadow behind.',
+    phrases: [
+      'dense warm candlelight from the throne end of the room — hundreds of small sources combining into one amber direction',
+      'warm gold illumination on all surfaces facing the source, deep shadow on everything turned away',
+      'candle flicker visible in the slight unevenness of the light — nothing is perfectly still',
+      'faces half-lit, the lit half warm and specific, the shadow half lost to rich dark',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
 
 const V3_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -268,6 +311,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V3, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V3_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V4_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

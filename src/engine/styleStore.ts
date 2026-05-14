@@ -5,6 +5,7 @@ const STYLE_STORE_BACKUP_KEY = 'promptgen:styles:backup:v1';
 const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v2';
 const STYLE_SEED_FLAG_KEY_V3 = 'promptgen:styles:seeded:v3';
 const STYLE_SEED_FLAG_KEY_V4 = 'promptgen:styles:seeded:v4';
+const STYLE_SEED_FLAG_KEY_V5 = 'promptgen:styles:seeded:v5';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -247,6 +248,93 @@ const V4_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+const V5_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_aiw_storybook_illustration',
+    name: 'Victorian Storybook Illustration',
+    summary: 'Fine pen linework with flat watercolour washes, hatched shadows, decorative border elements — the visual language of Carroll\'s original era.',
+    phrases: [
+      'Victorian storybook illustration style, fine pen linework with flat watercolour washes',
+      'hatched cross-hatched shadows, clean ink outlines throughout',
+      'warm aged paper tone underlying the colour, slightly muted palette',
+      'decorative chapter-header framing elements at the image border',
+      'the visual weight and precision of late nineteenth century children\'s book printing',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'style_aiw_dark_fairy_tale',
+    name: 'Dark Fairy Tale Illustration',
+    summary: 'Deep saturated ink and watercolour with expressionistic shadow — whimsy pushed until the edges curdle.',
+    phrases: [
+      'dark fairy tale illustration, deep saturated ink and watercolour',
+      'expressionistic shadow pools, forms dissolving at their dark edges',
+      'slightly wrong proportions — heads too large, spaces too deep, perspective tilted just past comfort',
+      'rich jewel-toned palette: deep teal, crimson, gold, violet — nothing pale',
+      'whimsy on the surface, unease in the structure',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'style_aiw_handpainted_storybook',
+    name: 'Handpainted Storybook Watercolour',
+    summary: 'Loose wet-on-wet watercolour, visible brushwork, soft bloomed edges — the deliberate imprecision of a handmade picture book.',
+    phrases: [
+      'loose handpainted watercolour illustration, wet-on-wet bleed at the edges',
+      'visible brushstroke direction, pigment pooling at the wet margins',
+      'soft bloomed boundaries between colour zones, forms suggested more than defined',
+      'white paper showing through in the light areas, luminous and unworked',
+      'the deliberate imprecision of a handmade picture book, warmth over precision',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'style_aiw_tenniel_woodcut',
+    name: 'Tenniel Woodcut Engraving',
+    summary: 'John Tenniel\'s original Alice illustrations — dense hatching, high contrast monochrome, the particular weight of Victorian wood engraving.',
+    phrases: [
+      'John Tenniel-style Victorian wood engraving, monochrome pen and ink',
+      'dense parallel hatching building tonal value, no flat blacks',
+      'high contrast, thick outlines, characters slightly caricatured but precisely rendered',
+      'the specific visual authority of nineteenth century illustrated children\'s books',
+      'white background, no atmospheric wash — pure line and hatch',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'style_aiw_animated_storybook',
+    name: 'Animated Storybook',
+    summary: 'Flat cel-shaded colour with visible ink outlines — the visual register of animated fairy tale features.',
+    phrases: [
+      'animated storybook style, flat cel-shaded colour with clean ink outlines',
+      'simplified forms, no texture — colour fills bounded by decisive line',
+      'bright saturated palette, characters slightly stylised but expressive',
+      'background painted in a looser register than the characters, depth from simplification',
+      'the visual warmth of hand-drawn animation from the classic feature era',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'style_aiw_victorian_oil_portrait',
+    name: 'Victorian Oil Portrait',
+    summary: 'Formal sitting-room portraiture — dark background, precise rendering of fabric and face, the institutional weight of Victorian court painting.',
+    phrases: [
+      'Victorian formal oil portrait, dark studio background',
+      'precise rendering of fabric texture and jewellery, face lit from upper left',
+      'rich warm shadow tones, academic glazing technique',
+      'the composed stillness of a formal commissioned sitting',
+      'institutional gravity — painted to record status and presence, not feeling',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
+
 const V3_SEED_STYLES: StylePreset[] = [
   {
     id: 'style_seed_beksinski',
@@ -299,6 +387,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V4_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V5_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

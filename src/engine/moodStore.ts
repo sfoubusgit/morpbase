@@ -4,6 +4,7 @@ const MOOD_STORE_KEY = 'promptgen:moods:v1';
 const MOOD_STORE_BACKUP_KEY = 'promptgen:moods:backup:v1';
 const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v2';
 const MOOD_SEED_FLAG_KEY_V3 = 'promptgen:moods:seeded:v3';
+const MOOD_SEED_FLAG_KEY_V4 = 'promptgen:moods:seeded:v4';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -245,6 +246,87 @@ const V3_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+const V4_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_aiw_uncanny_whimsy',
+    name: 'Uncanny Whimsy',
+    summary: 'Charming on the surface, slightly wrong underneath — something in the proportion or logic that presses gently against comfort.',
+    phrases: [
+      'charming surface with a pressure underneath it — nothing quite wrong enough to name',
+      'delight and unease occupying the same space without resolving',
+      'the specific quality of a smile that is two degrees too wide',
+      'bright colours, friendly forms, and something in the arrangement that does not add up',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'mood_aiw_victorian_dark',
+    name: 'Victorian Dark',
+    summary: 'The politeness is real but the darkness underneath it is older — severity dressed in propriety.',
+    phrases: [
+      'propriety maintained over something older and considerably darker',
+      'the particular severity of an era that expressed cruelty through procedure',
+      'formal, correct, and genuinely threatening — the rules are the danger',
+      'deep shadow and warm lamplight, both immaculate and cold',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'mood_aiw_absurdist_calm',
+    name: 'Absurdist Calm',
+    summary: 'The rules stopped applying long ago and everyone has made their peace with it — a deep unruffled acceptance of the inexplicable.',
+    phrases: [
+      'the deep calm of a world where the rules stopped applying and no one minds',
+      'inexplicable things treated with complete matter-of-factness',
+      'no anxiety about the impossible — only mild interest, mild impatience, mild tea',
+      'the atmosphere of a situation that has always been like this and sees no reason to change',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'mood_aiw_childlike_wonder',
+    name: 'Childlike Wonder',
+    summary: 'Genuinely open to the strange — curiosity before caution, the world large and interesting and not yet required to make sense.',
+    phrases: [
+      'genuinely open to the strange — curiosity arriving well before caution',
+      'the world large, interesting, and not yet required to make sense',
+      'delight in the specific, absorption in the detail, no impatience for the meaning',
+      'wonder without naivety — attentive, present, and ready for the next impossible thing',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'mood_aiw_dream_logic',
+    name: 'Dream Logic',
+    summary: 'The internal consistency is perfect while you are in it — each thing following from the last by rules that cannot be examined directly.',
+    phrases: [
+      'internal consistency perfect while you are inside it',
+      'each thing following from the last by rules that shift if examined too directly',
+      'no gap between cause and consequence — only the sequence, and the certainty that it is right',
+      'the particular confidence of a dream that has not yet noticed it is one',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'mood_aiw_judgment_weight',
+    name: 'The Weight of Judgment',
+    summary: 'Under evaluation — the verdict is already written and the proceedings are its architecture.',
+    phrases: [
+      'under evaluation, every surface observed, every gesture recorded',
+      'the verdict already written — the proceedings are its formal architecture',
+      'formality as pressure, procedure as sentence',
+      'the specific weight of being judged by a court that has already decided',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -268,6 +350,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V3, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V3_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V4_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

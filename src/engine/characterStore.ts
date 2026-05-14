@@ -19,6 +19,7 @@ const CHARACTER_SEED_FLAG_KEY_V6 = 'promptgen:characters:seeded:v6';
 const CHARACTER_SEED_FLAG_KEY_V7 = 'promptgen:characters:seeded:v7';
 const CHARACTER_SEED_FLAG_KEY_V8 = 'promptgen:characters:seeded:v8';
 const CHARACTER_SEED_FLAG_KEY_V9 = 'promptgen:characters:seeded:v9';
+const CHARACTER_SEED_FLAG_KEY_V10 = 'promptgen:characters:seeded:v10';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -279,6 +280,7 @@ const SEED_TS_6 = 1747958400000;
 const SEED_TS_7 = 1748044800000;
 const SEED_TS_8 = 1748131200000;
 const SEED_TS_9 = 1748217600000;
+const SEED_TS_10 = 1748304000000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -787,6 +789,280 @@ const V9_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V10_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_march_hare',
+    name: 'The March Hare',
+    summary: 'The other half of the tea party — not mad in the Hatter\'s way, but frantic, grass-stained, and perpetually one cup behind.',
+    tags: ['solo', 'classic'],
+    identity: {
+      archetype: 'frenetic host',
+      presentation: 'clothed',
+      ageImpression: 'indeterminate adult',
+      personalityTone: 'high-strung hospitality; strong opinions held briefly; the urgency of someone who has been at tea since before you arrived',
+      visualAnchors: [
+        { id: 'anchor_mhare_1', label: 'Form', kind: 'silhouette', text: 'upright brown hare, humanoid posture, lean and angular build, limbs slightly too long for the waistcoat' },
+        { id: 'anchor_mhare_2', label: 'Ears', kind: 'other', text: 'long ears with frizzed fur at the tips, one bent back, both angled differently from each other' },
+        { id: 'anchor_mhare_3', label: 'Clothing', kind: 'clothing', text: 'battered rust-brown tweed waistcoat with a missing button, no shirt beneath, straw visible in the lapel' },
+        { id: 'anchor_mhare_4', label: 'Eyes', kind: 'eyes', text: 'wide pale eyes rimmed slightly pink, the expression of someone perpetually one cup behind on tea' },
+        { id: 'anchor_mhare_5', label: 'Hands', kind: 'other', text: 'clutching a cracked teacup in both front paws, tea cooling, entirely unconcerned' },
+        { id: 'anchor_mhare_6', label: 'Face', kind: 'face', text: 'coarse brown fur, paler at the muzzle and chest, long whiskers, prominent angular hare face' },
+      ],
+      motifs: [
+        { id: 'motif_mhare_1', label: 'The Wrong Kind of Late', text: 'the frantic energy of someone who has been on time for nothing and has given up trying' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'upright brown hare, humanoid posture, lean and angular build, limbs too long for the waistcoat',
+        'long ears with frizzed fur at the tips, one bent back, both angled differently',
+        'battered rust-brown tweed waistcoat with a missing button, straw visible in the lapel',
+        'wide pale eyes rimmed slightly pink, the look of someone perpetually one cup behind',
+        'clutching a cracked teacup in both front paws, tea cooling, unconcerned',
+        'coarse brown fur, paler at the muzzle and chest, long whiskers, angular hare face',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_caterpillar',
+    name: 'The Caterpillar',
+    summary: 'A large blue-grey caterpillar coiled on a mushroom cap, hookah in hand, smoke in slow shapes around him — ancient, unhurried, insufferable.',
+    tags: ['solo', 'creature', 'classic'],
+    identity: {
+      archetype: 'oracle',
+      presentation: 'creature',
+      ageImpression: 'ageless',
+      personalityTone: 'total composure; mild contempt; the certainty of something that has been itself for a very long time',
+      visualAnchors: [
+        { id: 'anchor_cat_1', label: 'Form', kind: 'silhouette', text: 'large blue-grey caterpillar, soft segmented body coiled into a stable throne-like arrangement on a broad flat mushroom cap' },
+        { id: 'anchor_cat_2', label: 'Hookah', kind: 'accessory', text: 'hookah mouthpiece held in the foremost pair of limbs, pipe looping down through the lower coils' },
+        { id: 'anchor_cat_3', label: 'Smoke', kind: 'other', text: 'deep sapphire-blue smoke curling upward in slow deliberate shapes, one shape becoming another' },
+        { id: 'anchor_cat_4', label: 'Eyes', kind: 'eyes', text: 'large compound eyes, faceted, the expression of complete certainty about himself and mild doubt about you' },
+        { id: 'anchor_cat_5', label: 'Skin', kind: 'other', text: 'pale blue-grey ventral segments, deeper slate-blue dorsal surface, smooth and slightly iridescent' },
+        { id: 'anchor_cat_6', label: 'Limbs', kind: 'other', text: 'many small paired limbs folded neatly along the lower coils, the overall posture absolutely composed' },
+      ],
+      motifs: [
+        { id: 'motif_cat_1', label: 'Who Are You', text: 'the smoke, the stillness, the certainty of a creature that has resolved the question and finds your uncertainty tedious' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'large blue-grey caterpillar, segmented body coiled into a throne-like arrangement on a broad flat mushroom cap',
+        'hookah mouthpiece held in the foremost limbs, pipe looping through the lower coils',
+        'deep sapphire-blue smoke curling upward in slow deliberate shapes',
+        'large compound eyes, faceted, the gaze of complete certainty about himself',
+        'pale blue-grey ventral segments, deeper slate-blue dorsal surface, smooth and slightly iridescent',
+        'many small paired limbs folded neatly, the posture of something that has nowhere to be',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_dormouse',
+    name: 'The Dormouse',
+    summary: 'Tiny, rust-brown, perpetually asleep inside a teacup — occasionally woken, briefly outraged, immediately back under.',
+    tags: ['solo', 'creature', 'classic'],
+    identity: {
+      archetype: 'sleeper',
+      presentation: 'creature',
+      ageImpression: 'ageless',
+      personalityTone: 'deeply asleep; briefly fierce when disturbed; the indignation of something woken from something important',
+      visualAnchors: [
+        { id: 'anchor_dorm_1', label: 'Form', kind: 'silhouette', text: 'tiny rust-brown dormouse, round plump body, short blunt muzzle, rounded ears' },
+        { id: 'anchor_dorm_2', label: 'Position', kind: 'other', text: 'curled tight inside an oversized teacup, tail looped around itself, body filling the cup completely' },
+        { id: 'anchor_dorm_3', label: 'Detail', kind: 'other', text: 'soft pale grey belly fur visible at the cup rim, one small paw hanging over the edge' },
+        { id: 'anchor_dorm_4', label: 'Eyes', kind: 'eyes', text: 'one dark eye barely open, half-moon of dark iris visible, the expression of something briefly woken that intends to correct this' },
+        { id: 'anchor_dorm_5', label: 'Face', kind: 'face', text: 'very fine rust-brown fur, paler patches at the ears and muzzle, whiskers pressed flat from sleep' },
+      ],
+      motifs: [
+        { id: 'motif_dorm_1', label: 'The Smallest Fury', text: 'the authority of something that was asleep and has very clear feelings about being woken' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tiny rust-brown dormouse, round plump body, short blunt muzzle, rounded ears',
+        'curled tight inside an oversized teacup, tail looped around itself, filling the cup',
+        'pale grey belly fur visible at the cup rim, one small paw hanging over the edge',
+        'one dark eye barely open, the expression of something briefly woken that will correct this',
+        'very fine rust-brown fur, paler at the ears and muzzle, whiskers pressed flat from sleep',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_tweedledee_tweedledum',
+    name: 'Tweedledee & Tweedledum',
+    summary: 'Two identical rotund men in matching schoolboy collars who have never agreed on anything and never will, and are completely fine about it.',
+    tags: ['duo', 'classic'],
+    identity: {
+      archetype: 'duo',
+      presentation: 'clothed',
+      ageImpression: 'indeterminate adult',
+      personalityTone: 'the absolute certainty of two people who have been disagreeing since before the question existed',
+      visualAnchors: [
+        { id: 'anchor_tw_1', label: 'Form', kind: 'silhouette', text: 'two identical rotund men, same height, same build, same stance — the disagreement is in the gesture' },
+        { id: 'anchor_tw_2', label: 'Face', kind: 'face', text: 'round ruddy faces, small upturned noses, bright wide eyes set slightly too close, absolutely identical' },
+        { id: 'anchor_tw_3', label: 'Clothing', kind: 'clothing', text: 'matching dark grey-blue schoolboy suits, stiff white collars with TWEEDLEDEE and TWEEDLEDUM embroidered at the throat' },
+        { id: 'anchor_tw_4', label: 'Pose', kind: 'other', text: 'facing each other at close range, round bellies nearly touching, one arm gesturing left, one right' },
+        { id: 'anchor_tw_5', label: 'Stance', kind: 'other', text: 'short legs, wide planted stances, each exactly where he has always been' },
+      ],
+      motifs: [
+        { id: 'motif_tw_1', label: 'Contrairiwise', text: 'the argument is structural, the positions permanent, the disagreement is how they confirm they exist' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'two identical rotund men, same height, same build, facing each other at close range',
+        'round ruddy faces, small upturned noses, bright wide eyes — absolutely identical',
+        'matching dark grey-blue schoolboy suits, stiff white collars labeled TWEEDLEDEE and TWEEDLEDUM',
+        'one arm gesturing left, one right, round bellies nearly touching, both entirely certain',
+        'short legs, wide planted stances, the argument geometric and permanent',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_white_queen',
+    name: 'The White Queen',
+    summary: 'Tall, pale, and flowing — everything about her is slightly displaced from where it should be, and she is perfectly at ease with this.',
+    tags: ['solo', 'classic'],
+    identity: {
+      archetype: 'gentle sovereign',
+      presentation: 'clothed',
+      ageImpression: 'ageless adult',
+      personalityTone: 'mild helpful bewilderment; warm and scattered; the benevolence of someone operating on a different schedule',
+      visualAnchors: [
+        { id: 'anchor_wq_1', label: 'Form', kind: 'silhouette', text: 'tall slender woman in flowing white silk robes, the layers of fabric slightly displaced from their original arrangement' },
+        { id: 'anchor_wq_2', label: 'Hair', kind: 'hair', text: 'pale gold hair escaping from elaborate pinning in multiple directions, several hairpins at wrong angles' },
+        { id: 'anchor_wq_3', label: 'Crown', kind: 'accessory', text: 'small white crown tilted forward and to the left, as if placed and not corrected' },
+        { id: 'anchor_wq_4', label: 'Face', kind: 'face', text: 'pale almost translucent skin, large grey eyes, expression of mild helpful bewilderment' },
+        { id: 'anchor_wq_5', label: 'Hands', kind: 'other', text: 'ink stains on the right fingertips, an unidentified smear on the left palm' },
+        { id: 'anchor_wq_6', label: 'Gown', kind: 'clothing', text: 'white silk robes trailing, a shawl beginning to slide from one shoulder, nothing quite where it should be' },
+      ],
+      motifs: [
+        { id: 'motif_wq_1', label: 'Living Backwards', text: 'the white of snow, of surrender, of something that remembers tomorrow — and has forgotten to pin her crown' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tall slender woman in flowing white silk robes, fabric slightly displaced from its original arrangement',
+        'pale gold hair escaping elaborate pinning in multiple directions, hairpins at wrong angles',
+        'small white crown tilted forward and left, placed and not corrected',
+        'pale near-translucent skin, large grey eyes, expression of mild helpful bewilderment',
+        'ink stains on the right fingertips, a shawl beginning to slide from one shoulder',
+        'everything white and everything slightly misaligned — a different misalignment each time you look',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_knave_of_hearts',
+    name: 'The Knave of Hearts',
+    summary: 'A playing card soldier at formal attention — the livery is immaculate, the face above it knows what the verdict will be.',
+    tags: ['solo', 'classic'],
+    identity: {
+      archetype: 'herald',
+      presentation: 'clothed',
+      ageImpression: 'young adult',
+      personalityTone: 'formal composure over quiet dread; the bearing of the accused who has chosen to behave correctly anyway',
+      visualAnchors: [
+        { id: 'anchor_kh_1', label: 'Livery', kind: 'clothing', text: 'white tunic with the hearts suit printed in red and black, stiff white ruff collar standing away from the neck' },
+        { id: 'anchor_kh_2', label: 'Crown', kind: 'accessory', text: 'flat heraldic hearts crown worn as regulation headgear, precisely centered' },
+        { id: 'anchor_kh_3', label: 'Face', kind: 'face', text: 'pale worried face above the rigid uniform, the expression of someone who knows how this ends' },
+        { id: 'anchor_kh_4', label: 'Hands', kind: 'other', text: 'gloved hands held precisely at the sides, one fractionally less still than the other' },
+      ],
+      motifs: [
+        { id: 'motif_kh_1', label: 'The Accused', text: 'immaculate livery, a face that did not manage the same composure, the verdict arriving before the evidence' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'tall upright figure in white playing card livery, red and black hearts suit across the tunic',
+        'stiff white ruff collar standing away from the neck in sharp folds',
+        'flat heraldic hearts crown worn as regulation headgear, precisely centered',
+        'pale worried face above the immaculate uniform, knowing how this ends',
+        'gloved hands at the sides, one fractionally less still than the other',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_duchess',
+    name: 'The Duchess',
+    summary: 'A large imperious woman in an enormous Tudor hat — sharp face, several chins, always presiding, always about to deliver a moral.',
+    tags: ['solo', 'classic'],
+    identity: {
+      archetype: 'authority figure',
+      presentation: 'clothed',
+      ageImpression: 'imperious adult',
+      personalityTone: 'the authority of someone who has always been in charge and has opinions; prone to morals; unapologetically present',
+      visualAnchors: [
+        { id: 'anchor_duch_1', label: 'Hat', kind: 'accessory', text: 'wide flat-brimmed Tudor-style hat draped with dark veiling, the scale overwhelming the doorframe' },
+        { id: 'anchor_duch_2', label: 'Clothing', kind: 'clothing', text: 'heavy embroidered skirts in deep plum and black, enormous padded sleeves, a silhouette of absolute presence' },
+        { id: 'anchor_duch_3', label: 'Face', kind: 'face', text: 'sharp angular face, prominent cheekbones, several chins, a nose that indicates direction' },
+        { id: 'anchor_duch_4', label: 'Complexion', kind: 'other', text: 'high cheeks flushed from pepper, small dark eyes that have formed a judgment and are keeping it' },
+        { id: 'anchor_duch_5', label: 'Posture', kind: 'silhouette', text: 'seated as if enthroned regardless of actual furniture, the posture of someone who always presides' },
+      ],
+      motifs: [
+        { id: 'motif_duch_1', label: 'Everything Has a Moral', text: 'the enormous hat, the pepper, the certainty — the Duchess finds the lesson in everything and is going to share it' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'a large imperious woman in a wide flat-brimmed Tudor hat draped with dark veiling',
+        'heavy embroidered skirts in deep plum and black, enormous padded sleeves',
+        'sharp angular face, prominent cheekbones, several chins, a directional nose',
+        'high cheeks flushed from pepper, small dark eyes that have formed a judgment',
+        'seated as if enthroned regardless of what she is actually sitting on',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'character_seed_gryphon',
+    name: 'The Gryphon',
+    summary: 'An elderly gryphon — lion haunches, eagle forebody — sitting upright with the dignity of something that was once impressive and is still mostly that.',
+    tags: ['solo', 'creature', 'classic'],
+    identity: {
+      archetype: 'elder creature',
+      presentation: 'creature',
+      ageImpression: 'ancient adult',
+      personalityTone: 'the patience of the old and experienced; boisterous but tired; fond of stories about better days',
+      visualAnchors: [
+        { id: 'anchor_gry_1', label: 'Form', kind: 'silhouette', text: 'gryphon — lion hindquarters and eagle forebody, seated upright with the posture of old authority' },
+        { id: 'anchor_gry_2', label: 'Coat', kind: 'other', text: 'tawny gold leonine haunches merging into golden-brown chest feathers, the seam worn at the join' },
+        { id: 'anchor_gry_3', label: 'Beak', kind: 'face', text: 'large curved beak, slightly hooked at the tip, slightly open, the expression of something with experience' },
+        { id: 'anchor_gry_4', label: 'Wings', kind: 'other', text: 'folded wings with primary feathers showing gaps at the outer edges, moth-eaten at the tips' },
+        { id: 'anchor_gry_5', label: 'Eyes', kind: 'eyes', text: 'large amber eagle eyes, steady and unsurprised, the gaze of something that has seen most things' },
+        { id: 'anchor_gry_6', label: 'Claws', kind: 'other', text: 'massive eagle foretarsi with curved talons resting on stone, patient and at rest' },
+      ],
+      motifs: [
+        { id: 'motif_gry_1', label: 'Old Glory', text: 'tawny gold, moth-eaten wing edges, the dignity of something that was magnificent and knows it' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'gryphon — lion hindquarters and eagle forebody, seated upright in the posture of old authority',
+        'tawny gold leonine haunches merging into golden-brown chest feathers, the seam worn at the join',
+        'large curved beak, slightly hooked at the tip, the expression of something with accumulated experience',
+        'folded wings with primary feathers gapped at the outer edges, moth-eaten at the tips',
+        'large amber eagle eyes, steady and unsurprised',
+        'massive eagle foretarsi with curved talons resting on stone, patient and at rest',
+      ],
+    },
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -892,6 +1168,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V9_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V10_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
