@@ -496,43 +496,51 @@ export function WorkspacePage({
         {/* Right column: identity lane panel */}
         <aside className="workspace-panel">
           <div className="workspace-panel-header">
-            <span className="workspace-panel-title">Identities</span>
-            <div className="ws-panel-header-actions">
-              {onClearAllLanes && (
-                <button
-                  type="button"
-                  className="ws-clear-lanes-btn"
-                  onClick={onClearAllLanes}
-                  disabled={!hasAnyActiveLane}
-                  title="Clear all lanes and reset the prompt"
-                >
-                  Clear All
-                </button>
-              )}
-              {onOpenLaneSets && (
-                <button type="button" className="ws-lane-sets-btn" onClick={onOpenLaneSets} title="Browse Lane Sets">
-                  ☰ Sets
-                </button>
-              )}
-              {onOpenUniverses && (
-                <button
-                  type="button"
-                  className={`ws-universes-btn${activeUniverseName ? ' ws-universes-btn-active' : ''}`}
-                  onClick={onOpenUniverses}
-                  title="Browse Universes"
-                >
-                  ◈ Universes
-                </button>
-              )}
-              {onRandomize && (
-                <div className="ws-randomize-group">
-                  <span className="ws-randomize-hint">lock to roll →</span>
-                  <button type="button" className="ws-randomize-btn" onClick={onRandomize} title="Randomize unlocked lanes">
+            <div className="ws-panel-header-top">
+              <span className="workspace-panel-title">Identities</span>
+              <div className="ws-panel-header-pickers">
+                {onOpenLaneSets && (
+                  <button type="button" className="ws-lane-sets-btn" onClick={onOpenLaneSets} title="Browse Lane Sets">
+                    ☰ Sets
+                  </button>
+                )}
+                {onOpenUniverses && (
+                  <button
+                    type="button"
+                    className={`ws-universes-btn${activeUniverseName ? ' ws-universes-btn-active' : ''}`}
+                    onClick={onOpenUniverses}
+                    title="Browse Universes"
+                  >
+                    ◈ Universes
+                  </button>
+                )}
+              </div>
+            </div>
+            {(onClearAllLanes || onRandomize) && (
+              <div className="ws-panel-header-bottom">
+                {onClearAllLanes ? (
+                  <button
+                    type="button"
+                    className="ws-clear-lanes-btn"
+                    onClick={onClearAllLanes}
+                    disabled={!hasAnyActiveLane}
+                    title="Clear all lanes"
+                  >
+                    Clear All
+                  </button>
+                ) : <span />}
+                {onRandomize && (
+                  <button
+                    type="button"
+                    className="ws-randomize-btn"
+                    onClick={onRandomize}
+                    title="Lock a lane to keep it — randomize fills the rest"
+                  >
                     ⚄ Randomize
                   </button>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
           {activeUniverseName && (
