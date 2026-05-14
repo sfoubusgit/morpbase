@@ -3897,6 +3897,8 @@ export function App() {
           onCapture={handleCapture}
           onSaveSet={handleSaveSet}
           onClearCapture={handleClearCapture}
+          editedPrompt={editedPositiveOutput}
+          onEditPrompt={setEditedPositiveOutput}
         />
       )}
       </>

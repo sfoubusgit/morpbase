@@ -172,6 +172,8 @@ type WorkspacePageProps = {
   onCapture?: () => void;
   onSaveSet?: (name: string) => void;
   onClearCapture?: () => void;
+  editedPrompt?: string | null;
+  onEditPrompt?: (v: string | null) => void;
 };
 
 export function WorkspacePage({
@@ -239,16 +241,38 @@ export function WorkspacePage({
   onCapture,
   onSaveSet,
   onClearCapture,
+  editedPrompt = null,
+  onEditPrompt,
 }: WorkspacePageProps) {
   const [wallComposerOpen, setWallComposerOpen] = useState(false);
   const [saveSetOpen, setSaveSetOpen] = useState(false);
   const [setName, setSetName] = useState('');
   const [savedSetMessage, setSavedSetMessage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+
+  const displayPrompt = editedPrompt ?? assembledPrompt;
+  const isEdited = editedPrompt !== null && editedPrompt !== undefined;
+
+  const handleStartEdit = useCallback(() => {
+    setEditValue(displayPrompt);
+    setIsEditing(true);
+  }, [displayPrompt]);
+
+  const handleDoneEdit = useCallback(() => {
+    onEditPrompt?.(editValue);
+    setIsEditing(false);
+  }, [editValue, onEditPrompt]);
+
+  const handleResetEdit = useCallback(() => {
+    onEditPrompt?.(null);
+    setIsEditing(false);
+  }, [onEditPrompt]);
 
   const handleCopy = useCallback(() => {
-    if (!assembledPrompt) return;
-    void navigator.clipboard.writeText(assembledPrompt);
-  }, [assembledPrompt]);
+    if (!displayPrompt) return;
+    void navigator.clipboard.writeText(displayPrompt);
+  }, [displayPrompt]);
 
   const handleCopyNegative = useCallback(() => {
     if (!assembledNegativePrompt) return;
@@ -266,10 +290,20 @@ export function WorkspacePage({
         <div className="workspace-main">
           <div className="workspace-main-inner">
           <div className="workspace-field workspace-field-grow">
-            <div className="workspace-field-label">Assembled Prompt</div>
-            <div className="workspace-output">
-              {assembledPrompt ? (
-                <p className="workspace-output-text">{assembledPrompt}</p>
+            <div className="workspace-field-label">
+              Assembled Prompt
+              {isEdited && !isEditing && <span className="ws-edited-badge">edited</span>}
+            </div>
+            <div className={`workspace-output${isEditing ? ' workspace-output--editing' : ''}`}>
+              {isEditing ? (
+                <textarea
+                  className="workspace-edit-textarea"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  autoFocus
+                />
+              ) : displayPrompt ? (
+                <p className="workspace-output-text">{displayPrompt}</p>
               ) : (
                 <p className="workspace-output-empty">
                   Select starting points or activate an identity lane to build your prompt.
@@ -277,42 +311,66 @@ export function WorkspacePage({
               )}
             </div>
             <div className="workspace-output-actions">
-              <button
-                type="button"
-                className="workspace-action-primary"
-                onClick={handleCopy}
-                disabled={!assembledPrompt}
-              >
-                Copy Prompt
-              </button>
-              {onSavePrompt && (
-                <button
-                  type="button"
-                  className="workspace-action-secondary"
-                  onClick={onSavePrompt}
-                  disabled={!assembledPrompt}
-                >
-                  Save to Memory
-                </button>
-              )}
-              {authUid && userId && userName && assembledPrompt && !wallComposerOpen && (
-                <button
-                  type="button"
-                  className="workspace-action-wall"
-                  onClick={() => setWallComposerOpen(true)}
-                >
-                  Post to Wall
-                </button>
-              )}
-              {onCapture && (
-                <button
-                  type="button"
-                  className="workspace-action-capture"
-                  onClick={onCapture}
-                  disabled={!assembledPrompt}
-                >
-                  {captureCount > 0 ? `+ Capture (${captureCount})` : '+ Capture'}
-                </button>
+              {isEditing ? (
+                <>
+                  <button type="button" className="workspace-action-primary" onClick={handleDoneEdit}>
+                    Done
+                  </button>
+                  <button type="button" className="workspace-action-secondary" onClick={handleResetEdit}>
+                    Reset to Generated
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    className="workspace-action-primary"
+                    onClick={handleCopy}
+                    disabled={!displayPrompt}
+                  >
+                    Copy Prompt
+                  </button>
+                  {onSavePrompt && (
+                    <button
+                      type="button"
+                      className="workspace-action-secondary"
+                      onClick={onSavePrompt}
+                      disabled={!displayPrompt}
+                    >
+                      Save to Memory
+                    </button>
+                  )}
+                  {authUid && userId && userName && displayPrompt && !wallComposerOpen && (
+                    <button
+                      type="button"
+                      className="workspace-action-wall"
+                      onClick={() => setWallComposerOpen(true)}
+                    >
+                      Post to Wall
+                    </button>
+                  )}
+                  {onCapture && (
+                    <button
+                      type="button"
+                      className="workspace-action-capture"
+                      onClick={onCapture}
+                      disabled={!displayPrompt}
+                    >
+                      {captureCount > 0 ? `+ Capture (${captureCount})` : '+ Capture'}
+                    </button>
+                  )}
+                  {onEditPrompt && (
+                    <button
+                      type="button"
+                      className="workspace-action-edit"
+                      onClick={handleStartEdit}
+                      disabled={!displayPrompt}
+                      title="Free-edit the prompt"
+                    >
+                      ✎ Edit
+                    </button>
+                  )}
+                </>
               )}
             </div>
 
