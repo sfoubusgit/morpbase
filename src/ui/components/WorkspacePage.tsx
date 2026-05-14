@@ -174,6 +174,7 @@ type WorkspacePageProps = {
   onClearCapture?: () => void;
   editedPrompt?: string | null;
   onEditPrompt?: (v: string | null) => void;
+  onClearAllLanes?: () => void;
 };
 
 export function WorkspacePage({
@@ -243,6 +244,7 @@ export function WorkspacePage({
   onClearCapture,
   editedPrompt = null,
   onEditPrompt,
+  onClearAllLanes,
 }: WorkspacePageProps) {
   const [wallComposerOpen, setWallComposerOpen] = useState(false);
   const [saveSetOpen, setSaveSetOpen] = useState(false);
@@ -279,8 +281,20 @@ export function WorkspacePage({
     void navigator.clipboard.writeText(assembledNegativePrompt);
   }, [assembledNegativePrompt]);
 
-  // Use the first active character name for InspirationField
   const activeCharacterName = activeCharacterItems[0]?.name ?? null;
+
+  const hasAnyActiveLane =
+    activeCharacterItems.length > 0 ||
+    activeInteractionPhrase !== null ||
+    activeEnvironmentItems.length > 0 ||
+    activeOutfitItems.length > 0 ||
+    activeStyleItems.length > 0 ||
+    activeLightingItems.length > 0 ||
+    activeCompositionItems.length > 0 ||
+    activeMoodItems.length > 0 ||
+    activeNegativeItems.length > 0 ||
+    activeObjectItems.length > 0 ||
+    activeWorldName !== null;
 
   return (
     <div className="workspace-page">
@@ -478,6 +492,17 @@ export function WorkspacePage({
           <div className="workspace-panel-header">
             <span className="workspace-panel-title">Identities</span>
             <div className="ws-panel-header-actions">
+              {onClearAllLanes && (
+                <button
+                  type="button"
+                  className="ws-clear-lanes-btn"
+                  onClick={onClearAllLanes}
+                  disabled={!hasAnyActiveLane}
+                  title="Clear all lanes and reset the prompt"
+                >
+                  Clear All
+                </button>
+              )}
               {onOpenLaneSets && (
                 <button type="button" className="ws-lane-sets-btn" onClick={onOpenLaneSets} title="Browse Lane Sets">
                   ☰ Sets

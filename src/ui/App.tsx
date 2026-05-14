@@ -224,6 +224,7 @@ type BuilderSessionSnapshot = {
   envWeather: string | null;
   envScale: string | null;
   envCondition: string | null;
+  captureBuffer: string[];
 };
 
 type CharacterPromptProjection = {
@@ -335,6 +336,9 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       envWeather: typeof parsed.envWeather === 'string' ? parsed.envWeather : null,
       envScale: typeof parsed.envScale === 'string' ? parsed.envScale : null,
       envCondition: typeof parsed.envCondition === 'string' ? parsed.envCondition : null,
+      captureBuffer: Array.isArray(parsed.captureBuffer)
+        ? (parsed.captureBuffer as unknown[]).filter((x): x is string => typeof x === 'string')
+        : [],
     };
   } catch {
     return null;
@@ -520,7 +524,7 @@ export function App() {
   const [auraVariationEnabled, setAuraVariationEnabled] = useState(false);
   const [auraVariationMin, setAuraVariationMin] = useState(1);
   const [auraVariationMax, setAuraVariationMax] = useState(3);
-  const [captureBuffer, setCaptureBuffer] = useState<string[]>([]);
+  const [captureBuffer, setCaptureBuffer] = useState<string[]>(initialBuilderSession?.captureBuffer ?? []);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
     () => new Map(initialBuilderSession?.poolOutputOverrides ?? [])
@@ -2048,6 +2052,24 @@ export function App() {
     }
   }, [characters, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, environments, worlds]);
 
+  const handleClearAllLanes = useCallback(() => {
+    setActiveCharacterIds([]);
+    setActiveOutfitIds([]);
+    setActiveStyleIds([]);
+    setActiveLightingIds([]);
+    setActiveCompositionIds([]);
+    setActiveMoodIds([]);
+    setActiveNegativeIds([]);
+    setActiveObjectIds([]);
+    setActiveEnvironmentIds([]);
+    setActiveInteractionPhraseId(null);
+    setActiveWorld(null);
+    setActiveChipTexts([]);
+    setWorldVariationEnabled(false);
+    setWorldVariationPhrases([]);
+    setAuraVariationEnabled(false);
+  }, []);
+
   const handleSaveCurrentAsLaneSet = useCallback((name: string, description?: string) => {
     const lanes: LaneSetLanes = {
       character: activeCharacterIds.length > 0 ? { mode: 'fixed', ids: activeCharacterIds } : { mode: 'off' },
@@ -2871,6 +2893,7 @@ export function App() {
         envWeather,
         envScale,
         envCondition,
+        captureBuffer,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -2909,6 +2932,7 @@ export function App() {
     envWeather,
     envScale,
     envCondition,
+    captureBuffer,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -3912,6 +3936,7 @@ export function App() {
           onClearCapture={handleClearCapture}
           editedPrompt={editedPositiveOutput}
           onEditPrompt={setEditedPositiveOutput}
+          onClearAllLanes={handleClearAllLanes}
         />
       )}
       </>
