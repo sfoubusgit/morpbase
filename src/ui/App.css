@@ -351,6 +351,11 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   flex-shrink: 0;
 }
 
+.nav-user-avatar--img {
+  object-fit: cover;
+  background: none;
+}
+
 .nav-user-name {
   font-size: 12px;
   font-weight: 600;

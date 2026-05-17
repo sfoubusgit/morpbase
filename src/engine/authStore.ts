@@ -5,6 +5,7 @@ export type AuthUser = {
   authUid: string;
   name: string;
   email: string;
+  avatarUrl: string | null;
 };
 
 type ProfileRow = {
@@ -14,11 +15,12 @@ type ProfileRow = {
   display_name: string;
 };
 
-const toAuthUser = (profile: ProfileRow, authUid: string): AuthUser => ({
+const toAuthUser = (profile: ProfileRow, authUid: string, avatarUrl: string | null = null): AuthUser => ({
   id: profile.id,
   authUid,
   name: profile.display_name,
   email: profile.email,
+  avatarUrl,
 });
 
 const ensurePublicProfile = async (profile: ProfileRow): Promise<void> => {
@@ -92,7 +94,13 @@ const ensureProfile = async (): Promise<AuthUser> => {
 
   if (existing) {
     await ensurePublicProfile(existing as ProfileRow);
-    return toAuthUser(existing as ProfileRow, user.id);
+    const { data: pub } = await supabase
+      .from('public_profiles')
+      .select('avatar_url')
+      .eq('user_id', (existing as ProfileRow).id)
+      .maybeSingle();
+    const avatarUrl = (pub as { avatar_url: string | null } | null)?.avatar_url ?? null;
+    return toAuthUser(existing as ProfileRow, user.id, avatarUrl);
   }
 
   const displayName =

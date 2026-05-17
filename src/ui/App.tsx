@@ -3824,7 +3824,11 @@ export function App() {
                 title={authUser.email}
                 onClick={handleOpenAccount}
               >
-                <span className="nav-user-avatar">{authUser.name[0]?.toUpperCase() ?? '?'}</span>
+                {authUser.avatarUrl ? (
+                  <img src={authUser.avatarUrl} alt={authUser.name} className="nav-user-avatar nav-user-avatar--img" />
+                ) : (
+                  <span className="nav-user-avatar">{authUser.name[0]?.toUpperCase() ?? '?'}</span>
+                )}
                 <span className="nav-user-name">{authUser.name}</span>
               </button>
               <button type="button" className="nav-logout-btn" onClick={handleLogout}>Log out</button>
