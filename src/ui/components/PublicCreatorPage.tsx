@@ -45,7 +45,6 @@ import { followUser, unfollowUser, isFollowing, getFollowerCount } from '../../e
 import { getTitleForXp } from '../../data/communityTitles';
 import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
 import { TitleBadge } from './shared/TitleBadge';
-import { BadgeStrip } from './shared/BadgeStrip';
 import { OnlineIndicator } from './shared/OnlineIndicator';
 import './PublicCreatorPage.css';
 
@@ -308,11 +307,6 @@ export function PublicCreatorPage({
             </div>
             {creatorXp !== null && (
               <div className="pub-profile-xp">{creatorXp.toLocaleString()} XP</div>
-            )}
-            {creatorBadges.length > 0 && (
-              <div className="pub-profile-badges">
-                <BadgeStrip badges={creatorBadges} max={8} />
-              </div>
             )}
             {profile?.bio && (
               <p className="pub-profile-bio">{profile.bio}</p>
