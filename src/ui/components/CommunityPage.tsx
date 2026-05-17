@@ -26,6 +26,7 @@ import { WallFeed } from './wall/WallFeed';
 import { CreatorGrid } from './creators/CreatorGrid';
 import { ChallengesPanel } from './challenges/ChallengesPanel';
 import { DMInbox } from './dm/DMInbox';
+import { PulsePanel } from './wall/PulsePanel';
 import type { WallPostIdentityTag } from '../../types/community';
 import './CommunityPage.css';
 
@@ -114,7 +115,7 @@ type DisplayIdentity = {
   remixCount: number;
 };
 
-type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges' | 'messages';
+type CommunitySection = 'wall' | 'pulse' | 'identities' | 'creators' | 'challenges' | 'messages';
 
 type CommunityPageProps = {
   userId: string | null;
@@ -294,14 +295,14 @@ export function CommunityPage({
           </div>
 
           <div className="community-section-tabs">
-            {(['wall', 'identities', 'creators', 'challenges', 'messages'] as CommunitySection[]).map(s => (
+            {(['wall', 'pulse', 'identities', 'creators', 'challenges', 'messages'] as CommunitySection[]).map(s => (
               <button
                 key={s}
                 type="button"
                 className={`community-section-tab${activeSection === s ? ' community-section-tab--active' : ''}`}
                 onClick={() => setActiveSection(s)}
               >
-                {s === 'creators' ? 'Users' : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'creators' ? 'Users' : s === 'pulse' ? 'Pulse' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
@@ -316,6 +317,10 @@ export function CommunityPage({
             currentPromptText={currentPromptText}
             onViewAuthor={onViewCreator}
           />
+        )}
+
+        {activeSection === 'pulse' && (
+          <PulsePanel onViewAuthor={onViewCreator} />
         )}
 
         {activeSection === 'creators' && (

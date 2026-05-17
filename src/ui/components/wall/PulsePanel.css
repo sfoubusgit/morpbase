@@ -1,0 +1,104 @@
+.pulse-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pulse-empty {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 36px 0;
+}
+
+/* ── Day group ── */
+
+.pulse-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pulse-day-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 0 4px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 4px;
+}
+
+/* ── Activity row ── */
+
+.pulse-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: var(--radius-md);
+  transition: background 0.1s;
+}
+
+.pulse-item:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.pulse-item-icon {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+.pulse-item[data-type="share_event"] .pulse-item-icon {
+  color: #6ee7b7;
+}
+
+.pulse-item[data-type="response"] .pulse-item-icon {
+  color: #93c5fd;
+}
+
+.pulse-item-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pulse-item-author {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color 0.12s;
+  white-space: nowrap;
+}
+
+.pulse-item-author:hover {
+  color: #c4b5fd;
+}
+
+.pulse-item-action {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.pulse-item-time {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: auto;
+}
