@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { createNotification } from './notificationStore';
 
 export const REACTION_EMOJIS = ['thumbs_up', 'heart', 'laugh', 'sad'] as const;
 export type ReactionEmoji = typeof REACTION_EMOJIS[number];
@@ -55,11 +56,20 @@ export async function addReaction(
   postId: string,
   authUid: string,
   emoji: string,
+  opts?: { postAuthorAuthUid?: string; reactorName?: string },
 ): Promise<void> {
   try {
     await supabase
       .from('post_reactions')
       .insert({ post_id: postId, auth_uid: authUid, emoji });
+    if (opts?.postAuthorAuthUid && opts.postAuthorAuthUid !== authUid) {
+      void createNotification(opts.postAuthorAuthUid, 'wall_post_liked', {
+        reactorAuthUid: authUid,
+        reactorName: opts.reactorName ?? 'Someone',
+        emoji,
+        postId,
+      });
+    }
   } catch {
     // unique constraint violation = already reacted, ignore
   }

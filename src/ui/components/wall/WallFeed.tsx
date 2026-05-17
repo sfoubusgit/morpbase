@@ -135,9 +135,10 @@ export function WallFeed({
     if (alreadyReacted) {
       await removeReaction(postId, authUid, emoji);
     } else {
-      await addReaction(postId, authUid, emoji);
+      const postAuthorAuthUid = posts.find(p => p.id === postId)?.authUid;
+      await addReaction(postId, authUid, emoji, { postAuthorAuthUid, reactorName: userName ?? undefined });
     }
-  }, [authUid, myReactionMap]);
+  }, [authUid, myReactionMap, posts, userName]);
 
   const handleDelete = useCallback(async (postId: string) => {
     await deleteWallPost(postId);

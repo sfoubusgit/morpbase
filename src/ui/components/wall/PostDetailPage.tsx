@@ -126,9 +126,12 @@ export function PostDetailPage({
     if (alreadyReacted) {
       await removeReaction(targetPostId, authUid, emoji);
     } else {
-      await addReaction(targetPostId, authUid, emoji);
+      const postAuthorAuthUid = targetPostId === post?.id
+        ? post?.authUid
+        : replies.find(r => r.id === targetPostId)?.authUid;
+      await addReaction(targetPostId, authUid, emoji, { postAuthorAuthUid, reactorName: userName ?? undefined });
     }
-  }, [authUid, myReactionMap]);
+  }, [authUid, myReactionMap, post, replies, userName]);
 
   const handleReplied = useCallback(() => {
     setComposerOpen(false);
