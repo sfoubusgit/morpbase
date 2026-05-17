@@ -109,6 +109,54 @@ export function IdentityDetailPage({
     });
   }, [identity.authorId, identity.name, identity.type, authUid]);
 
+  const ensureDiscussionPost = async (): Promise<WallPost | null> => {
+    if (discussionPost) return discussionPost;
+    if (!authUid || !userId || !userName || !identity.authorId) return null;
+    try {
+      const post = await createWallPost(
+        {
+          promptText: identity.phrases.slice(0, 3).join(' · ') || identity.summary || identity.name,
+          identityTags: [{ name: identity.name, type: identity.type }],
+          postType: 'share_event',
+        },
+        authUid, userId, userName,
+      );
+      setDiscussionPost(post);
+      return post;
+    } catch { return null; }
+  };
+
+  const handleReactOnRoot = useCallback(async (emoji: string) => {
+    if (!authUid) return;
+    let post = discussionPost;
+    if (!post) {
+      post = await ensureDiscussionPost();
+      if (!post) return;
+    }
+    const targetPostId = post.id;
+    const alreadyReacted = myReactionMap[targetPostId]?.has(emoji);
+    setMyReactionMap(prev => {
+      const next = { ...prev };
+      const set = new Set(prev[targetPostId] ?? []);
+      if (alreadyReacted) set.delete(emoji); else set.add(emoji);
+      next[targetPostId] = set;
+      return next;
+    });
+    setReactionMap(prev => {
+      const next = { ...prev };
+      const counts = { ...(prev[targetPostId] ?? {}) };
+      counts[emoji] = Math.max(0, (counts[emoji] ?? 0) + (alreadyReacted ? -1 : 1));
+      next[targetPostId] = counts;
+      return next;
+    });
+    if (alreadyReacted) {
+      await removeReaction(targetPostId, authUid, emoji);
+    } else {
+      await addReaction(targetPostId, authUid, emoji, { postAuthorAuthUid: post.authUid, reactorName: userName ?? undefined });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUid, myReactionMap, discussionPost, userName]);
+
   const handleReact = useCallback(async (targetPostId: string, emoji: string) => {
     if (!authUid) return;
     const alreadyReacted = myReactionMap[targetPostId]?.has(emoji);
@@ -126,22 +174,22 @@ export function IdentityDetailPage({
       next[targetPostId] = counts;
       return next;
     });
-    const postAuthorAuthUid = targetPostId === discussionPost?.id
-      ? discussionPost?.authUid
-      : replies.find(r => r.id === targetPostId)?.authUid;
+    const postAuthorAuthUid = replies.find(r => r.id === targetPostId)?.authUid;
     if (alreadyReacted) {
       await removeReaction(targetPostId, authUid, emoji);
     } else {
       await addReaction(targetPostId, authUid, emoji, { postAuthorAuthUid, reactorName: userName ?? undefined });
     }
-  }, [authUid, myReactionMap, discussionPost, replies, userName]);
+  }, [authUid, myReactionMap, replies, userName]);
 
   const handleSubmitComment = async () => {
-    if (!authUid || !userId || !userName || !commentText.trim() || !discussionPost) return;
+    if (!authUid || !userId || !userName || !commentText.trim()) return;
     setSubmitting(true);
     try {
+      const post = await ensureDiscussionPost();
+      if (!post) return;
       const reply = await createWallPost(
-        { promptText: commentText.trim(), identityTags: [], parentPostId: discussionPost.id },
+        { promptText: commentText.trim(), identityTags: [], parentPostId: post.id },
         authUid, userId, userName,
       );
       setReplies(prev => [...prev, reply]);
@@ -228,19 +276,19 @@ export function IdentityDetailPage({
           <div className="identity-detail-discussion">
             {discussionLoading ? (
               <p className="identity-detail-discuss-loading">Loading…</p>
-            ) : discussionPost ? (
+            ) : (
               <>
                 {/* Reactions */}
                 <div className="identity-detail-reactions">
                   {REACTION_EMOJIS.map(key => {
-                    const count = (reactionMap[discussionPost.id] ?? {})[key] ?? 0;
-                    const active = myReactionMap[discussionPost.id]?.has(key) ?? false;
+                    const count = discussionPost ? ((reactionMap[discussionPost.id] ?? {})[key] ?? 0) : 0;
+                    const active = discussionPost ? (myReactionMap[discussionPost.id]?.has(key) ?? false) : false;
                     return (
                       <button
                         key={key}
                         type="button"
                         className={`identity-detail-reaction${active ? ' identity-detail-reaction--active' : ''}`}
-                        onClick={() => void handleReact(discussionPost.id, key)}
+                        onClick={() => void handleReactOnRoot(key)}
                         disabled={!authUid}
                         title={authUid ? (active ? 'Remove reaction' : 'React') : 'Log in to react'}
                       >
@@ -340,8 +388,6 @@ export function IdentityDetailPage({
                   )}
                 </div>
               </>
-            ) : (
-              <p className="identity-detail-no-comments">No discussion yet for this identity.</p>
             )}
           </div>
         )}
