@@ -1,4 +1,19 @@
-import type { WallPostIdentityTag } from '../../../types/community';
+import { useCallback, useEffect, useState } from 'react';
+import type { WallPost, WallPostIdentityTag } from '../../../types/community';
+import {
+  getIdentityDiscussionPost,
+  getPostReplies,
+  createWallPost,
+} from '../../../engine/wallStore';
+import {
+  getReactionsForPosts,
+  getMyReactions,
+  addReaction,
+  removeReaction,
+  REACTION_EMOJIS,
+  type PostReactions,
+} from '../../../engine/reactionStore';
+import { ReactionIcon } from '../shared/ReactionIcon';
 import './IdentityDetailPage.css';
 
 export type SharedIdentityData = {
@@ -31,6 +46,16 @@ function formatDate(ts: number): string {
   return new Date(ts).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
+function formatTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
 type IdentityDetailPageProps = {
   identity: SharedIdentityData;
   authUid: string | null;
@@ -43,6 +68,9 @@ type IdentityDetailPageProps = {
 
 export function IdentityDetailPage({
   identity,
+  authUid,
+  userId,
+  userName,
   activeIdentityTags,
   onBack,
   onViewAuthor,
@@ -51,6 +79,78 @@ export function IdentityDetailPage({
   const alreadyAdded = activeIdentityTags.some(
     t => t.name === identity.name && t.type === identity.type,
   );
+
+  const [discussionPost, setDiscussionPost] = useState<WallPost | null>(null);
+  const [replies, setReplies] = useState<WallPost[]>([]);
+  const [reactionMap, setReactionMap] = useState<Record<string, PostReactions>>({});
+  const [myReactionMap, setMyReactionMap] = useState<Record<string, Set<string>>>({});
+  const [discussionLoading, setDiscussionLoading] = useState(!!identity.authorId);
+  const [commentText, setCommentText] = useState('');
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!identity.authorId) return;
+    setDiscussionLoading(true);
+    void getIdentityDiscussionPost(identity.authorId, identity.name, identity.type).then(async post => {
+      setDiscussionPost(post);
+      if (post) {
+        const postReplies = await getPostReplies(post.id);
+        setReplies(postReplies);
+        const allIds = [post.id, ...postReplies.map(r => r.id)];
+        const reactions = await getReactionsForPosts(allIds);
+        setReactionMap(reactions);
+        if (authUid) {
+          const myR = await getMyReactions(authUid, allIds);
+          setMyReactionMap(myR);
+        }
+      }
+      setDiscussionLoading(false);
+    });
+  }, [identity.authorId, identity.name, identity.type, authUid]);
+
+  const handleReact = useCallback(async (targetPostId: string, emoji: string) => {
+    if (!authUid) return;
+    const alreadyReacted = myReactionMap[targetPostId]?.has(emoji);
+    setMyReactionMap(prev => {
+      const next = { ...prev };
+      const set = new Set(prev[targetPostId] ?? []);
+      if (alreadyReacted) set.delete(emoji); else set.add(emoji);
+      next[targetPostId] = set;
+      return next;
+    });
+    setReactionMap(prev => {
+      const next = { ...prev };
+      const counts = { ...(prev[targetPostId] ?? {}) };
+      counts[emoji] = Math.max(0, (counts[emoji] ?? 0) + (alreadyReacted ? -1 : 1));
+      next[targetPostId] = counts;
+      return next;
+    });
+    const postAuthorAuthUid = targetPostId === discussionPost?.id
+      ? discussionPost?.authUid
+      : replies.find(r => r.id === targetPostId)?.authUid;
+    if (alreadyReacted) {
+      await removeReaction(targetPostId, authUid, emoji);
+    } else {
+      await addReaction(targetPostId, authUid, emoji, { postAuthorAuthUid, reactorName: userName ?? undefined });
+    }
+  }, [authUid, myReactionMap, discussionPost, replies, userName]);
+
+  const handleSubmitComment = async () => {
+    if (!authUid || !userId || !userName || !commentText.trim() || !discussionPost) return;
+    setSubmitting(true);
+    try {
+      const reply = await createWallPost(
+        { promptText: commentText.trim(), identityTags: [], parentPostId: discussionPost.id },
+        authUid, userId, userName,
+      );
+      setReplies(prev => [...prev, reply]);
+      setCommentText('');
+      setComposerOpen(false);
+    } catch { /* non-fatal */ } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="identity-detail-page">
@@ -120,8 +220,129 @@ export function IdentityDetailPage({
         </div>
 
         {alreadyAdded && (
-          <div className="identity-detail-added">
-            ✓ In your {identity.type}
+          <div className="identity-detail-added">✓ In your {identity.type}</div>
+        )}
+
+        {/* Reactions + Comments */}
+        {identity.authorId && (
+          <div className="identity-detail-discussion">
+            {discussionLoading ? (
+              <p className="identity-detail-discuss-loading">Loading…</p>
+            ) : discussionPost ? (
+              <>
+                {/* Reactions */}
+                <div className="identity-detail-reactions">
+                  {REACTION_EMOJIS.map(key => {
+                    const count = (reactionMap[discussionPost.id] ?? {})[key] ?? 0;
+                    const active = myReactionMap[discussionPost.id]?.has(key) ?? false;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`identity-detail-reaction${active ? ' identity-detail-reaction--active' : ''}`}
+                        onClick={() => void handleReact(discussionPost.id, key)}
+                        disabled={!authUid}
+                        title={authUid ? (active ? 'Remove reaction' : 'React') : 'Log in to react'}
+                      >
+                        <ReactionIcon type={key} size={16} />
+                        {count > 0 && <span className="identity-detail-reaction-count">{count}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Comments */}
+                <div className="identity-detail-comments">
+                  <div className="identity-detail-section-label">
+                    Comments{replies.length > 0 ? ` (${replies.length})` : ''}
+                  </div>
+
+                  {replies.length === 0 && !composerOpen && (
+                    <p className="identity-detail-no-comments">No comments yet. Be the first.</p>
+                  )}
+
+                  {replies.map(reply => (
+                    <div key={reply.id} className="identity-detail-comment">
+                      <div className="identity-detail-comment-header">
+                        <button
+                          type="button"
+                          className="identity-detail-comment-author"
+                          onClick={() => onViewAuthor?.(reply.authUid, reply.authorName)}
+                        >
+                          {reply.authorName}
+                        </button>
+                        <span className="identity-detail-comment-time">{formatTime(reply.createdAt)}</span>
+                      </div>
+                      <p className="identity-detail-comment-body">{reply.promptText}</p>
+                      <div className="identity-detail-comment-reactions">
+                        {REACTION_EMOJIS.map(key => {
+                          const count = (reactionMap[reply.id] ?? {})[key] ?? 0;
+                          const active = myReactionMap[reply.id]?.has(key) ?? false;
+                          if (count === 0 && !authUid) return null;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              className={`identity-detail-reaction identity-detail-reaction--sm${active ? ' identity-detail-reaction--active' : ''}`}
+                              onClick={() => void handleReact(reply.id, key)}
+                              disabled={!authUid}
+                            >
+                              <ReactionIcon type={key} size={13} />
+                              {count > 0 && <span className="identity-detail-reaction-count">{count}</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  {authUid && userId && userName && (
+                    composerOpen ? (
+                      <div className="identity-detail-composer">
+                        <textarea
+                          className="identity-detail-composer-input"
+                          placeholder="Write a comment…"
+                          value={commentText}
+                          onChange={e => setCommentText(e.target.value)}
+                          rows={3}
+                        />
+                        <div className="identity-detail-composer-actions">
+                          <button
+                            type="button"
+                            className="identity-detail-composer-cancel"
+                            onClick={() => { setComposerOpen(false); setCommentText(''); }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="identity-detail-composer-submit"
+                            disabled={!commentText.trim() || submitting}
+                            onClick={() => void handleSubmitComment()}
+                          >
+                            {submitting ? 'Posting…' : 'Post'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        className="identity-detail-add-comment"
+                        onClick={() => setComposerOpen(true)}
+                      >
+                        Add a comment…
+                      </button>
+                    )
+                  )}
+
+                  {!authUid && (
+                    <p className="identity-detail-no-comments">Log in to react and comment.</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <p className="identity-detail-no-comments">No discussion yet for this identity.</p>
+            )}
           </div>
         )}
       </div>

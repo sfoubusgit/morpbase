@@ -111,6 +111,28 @@ export async function getPostReplies(parentPostId: string): Promise<WallPost[]> 
   }
 }
 
+export async function getIdentityDiscussionPost(
+  authorAuthUid: string,
+  identityName: string,
+  identityType: string,
+): Promise<WallPost | null> {
+  try {
+    const { data, error } = await supabase
+      .from('wall_posts')
+      .select('*')
+      .eq('auth_uid', authorAuthUid)
+      .eq('post_type', 'share_event')
+      .contains('identity_tags', [{ name: identityName, type: identityType }])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error || !data) return null;
+    return toWallPost(data as WallPostRow);
+  } catch {
+    return null;
+  }
+}
+
 export async function deleteWallPost(id: string): Promise<void> {
   const { error } = await supabase
     .from('wall_posts')
