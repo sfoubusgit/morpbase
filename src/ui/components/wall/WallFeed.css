@@ -61,6 +61,29 @@
   box-shadow: 0 4px 12px rgba(110, 86, 249, 0.22);
 }
 
+/* ── New posts banner ── */
+
+.wall-feed-new-banner {
+  display: block;
+  width: 100%;
+  padding: 9px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(110, 86, 249, 0.35);
+  background: rgba(110, 86, 249, 0.1);
+  color: #c4b5fd;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.wall-feed-new-banner:hover {
+  background: rgba(110, 86, 249, 0.18);
+  border-color: rgba(110, 86, 249, 0.5);
+}
+
 /* ── Onboarding banner ── */
 
 .wall-onboarding {

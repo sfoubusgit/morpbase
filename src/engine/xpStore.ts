@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
-import { XP_PER_EVENT } from '../data/communityTitles';
+import { XP_PER_EVENT, getTitleForXp } from '../data/communityTitles';
 import type { XPEventType } from '../types/community';
+import { createNotification } from './notificationStore';
 
 export async function getUserXP(authUid: string): Promise<number> {
   try {
@@ -40,6 +41,12 @@ export async function awardXP(authUid: string, eventType: XPEventType): Promise<
   if (!amount) return;
   try {
     await supabase.rpc('award_xp', { p_auth_uid: authUid, p_amount: amount });
+    const newXp = await getUserXP(authUid);
+    const prevTitle = getTitleForXp(Math.max(0, newXp - amount));
+    const newTitle = getTitleForXp(newXp);
+    if (newTitle.slug !== prevTitle.slug) {
+      void createNotification(authUid, 'xp_milestone', { title: newTitle.label, xp: newXp });
+    }
   } catch {
     // non-fatal
   }

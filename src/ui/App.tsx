@@ -46,6 +46,7 @@ import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
 import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
+import { getUnreadDMCount } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
@@ -2242,6 +2243,7 @@ export function App() {
   }, []);
 
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
+  const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   const handleOpenPost = useCallback((postId: string) => {
@@ -2251,8 +2253,20 @@ export function App() {
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
     setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
+    setDmUnreadCount(0);
     setActivePage('messages');
   }, []);
+
+  useEffect(() => {
+    if (!authUser) { setDmUnreadCount(0); return; }
+    if (activePage === 'messages') { setDmUnreadCount(0); return; }
+    const uid = authUser.authUid;
+    void getUnreadDMCount(uid).then(setDmUnreadCount);
+    const timer = setInterval(() => {
+      void getUnreadDMCount(uid).then(setDmUnreadCount);
+    }, 30_000);
+    return () => clearInterval(timer);
+  }, [authUser, activePage]);
 
   const handleNotificationNavigate = useCallback((n: Notification) => {
     const p = n.payload;
@@ -3793,13 +3807,16 @@ export function App() {
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
               <button
                 type="button"
-                className={`nav-icon-btn${activePage === 'messages' ? ' active' : ''}`}
+                className={`nav-icon-btn nav-icon-btn--badge${activePage === 'messages' ? ' active' : ''}`}
                 title="Messages"
-                onClick={() => setActivePage('messages')}
+                onClick={() => { setDmUnreadCount(0); setActivePage('messages'); }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
+                {dmUnreadCount > 0 && (
+                  <span className="nav-icon-badge">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>
+                )}
               </button>
               <button
                 type="button"
@@ -3865,6 +3882,7 @@ export function App() {
             authUid={authUser.authUid}
             authName={authUser.name}
             initialRecipient={dmInitialRecipient}
+            currentPrompt={workspacePrompt || null}
           />
         ) : (
           <div className="app-messages-login">Log in to send and receive messages.</div>

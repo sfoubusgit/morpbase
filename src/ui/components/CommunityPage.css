@@ -108,6 +108,43 @@
   color: var(--text-tertiary);
 }
 
+/* ── Wall section sub-tabs ───────────────────────── */
+
+.wall-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wall-section-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.wall-section-tab {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 5px 14px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-tertiary);
+  transition: all 0.12s;
+}
+
+.wall-section-tab:hover {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.wall-section-tab--active {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-medium);
+}
+
 /* ── Tabs ────────────────────────────────────────── */
 
 .community-tabs {

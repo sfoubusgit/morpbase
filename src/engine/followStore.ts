@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import { checkAndAwardFollowerBadges } from './badgeStore';
 import { createNotification } from './notificationStore';
+import { awardXP } from './xpStore';
 
 export async function followUser(followerAuthUid: string, followingAuthUid: string, followerName?: string): Promise<void> {
   const { error } = await supabase
@@ -9,6 +10,7 @@ export async function followUser(followerAuthUid: string, followingAuthUid: stri
 
   if (error && error.code !== '23505') throw new Error(error.message);
   void checkAndAwardFollowerBadges(followingAuthUid);
+  void awardXP(followingAuthUid, 'got_followed');
   void createNotification(followingAuthUid, 'new_follower', {
     followerAuthUid,
     followerName: followerName ?? null,

@@ -25,16 +25,21 @@ function notifMessage(n: Notification): string {
       return p.remixerName
         ? `${p.remixerName} remixed your "${p.identityName}".`
         : `Your identity "${p.identityName}" was remixed.`;
-    case 'wall_post_liked':
-      return 'Your wall post got a like.';
+    case 'wall_post_liked': {
+      const who = p.reactorName ?? 'Someone';
+      const what = p.emoji ? ` ${p.emoji}` : '';
+      return `${who} reacted${what} to your wall post.`;
+    }
     case 'dm_received':
       return p.senderName
         ? `New message from ${p.senderName}.`
         : 'You have a new message.';
-    case 'badge_earned':
+    case 'badge_earned': {
+      const icon = p.badgeIcon ? `${p.badgeIcon} ` : '';
       return p.badgeLabel
-        ? `You earned the "${p.badgeLabel}" badge!`
+        ? `${icon}You earned the "${p.badgeLabel}" badge!`
         : 'You earned a new badge!';
+    }
     case 'xp_milestone':
       return p.title
         ? `You reached the "${p.title}" title!`

@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient';
+import { awardXP } from './xpStore';
 
 export async function logIdentityUsage(params: {
   identityId: string;
@@ -15,6 +16,7 @@ export async function logIdentityUsage(params: {
       author_auth_uid: params.authorAuthUid,
       user_auth_uid:   params.userAuthUid,
     });
+    void awardXP(params.authorAuthUid, 'identity_added_by_other');
   } catch {
     // non-fatal — usage tracking must never block the add flow
   }

@@ -1,5 +1,7 @@
 import { supabase } from './supabaseClient';
 import type { BadgeId, EarnedBadge } from '../types/community';
+import { BADGE_REGISTRY } from '../data/communityBadges';
+import { createNotification } from './notificationStore';
 
 export async function getEarnedBadges(authUid: string): Promise<EarnedBadge[]> {
   try {
@@ -55,9 +57,17 @@ async function hasBadge(authUid: string, badgeId: BadgeId): Promise<boolean> {
 
 async function grantBadge(authUid: string, badgeId: BadgeId): Promise<void> {
   try {
-    await supabase
+    const { error } = await supabase
       .from('user_badges')
       .insert({ auth_uid: authUid, badge_id: badgeId });
+    if (!error) {
+      const def = BADGE_REGISTRY[badgeId];
+      void createNotification(authUid, 'badge_earned', {
+        badgeId,
+        badgeLabel: def?.label ?? badgeId,
+        badgeIcon: def?.icon ?? '',
+      });
+    }
   } catch {
     // unique constraint means duplicate = already earned, ignore
   }

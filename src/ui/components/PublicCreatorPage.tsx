@@ -43,6 +43,7 @@ import { listWallPosts } from '../../engine/wallStore';
 import { getLastSeenAt } from '../../engine/presenceStore';
 import { followUser, unfollowUser, isFollowing, getFollowerCount } from '../../engine/followStore';
 import { getTitleForXp } from '../../data/communityTitles';
+import { BADGE_REGISTRY } from '../../data/communityBadges';
 import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
 import { TitleBadge } from './shared/TitleBadge';
 import { OnlineIndicator } from './shared/OnlineIndicator';
@@ -347,6 +348,27 @@ export function PublicCreatorPage({
 
       {/* Body */}
       <div className="pub-profile-body">
+
+        {creatorBadges.length > 0 && (
+          <section className="pub-profile-section">
+            <div className="pub-profile-section-head">
+              <h2>Badges</h2>
+              <span className="pub-profile-section-meta">{creatorBadges.length} earned</span>
+            </div>
+            <div className="pub-profile-badges">
+              {creatorBadges.map(b => {
+                const def = BADGE_REGISTRY[b.badgeId];
+                if (!def) return null;
+                return (
+                  <div key={b.badgeId} className={`pub-profile-badge pub-profile-badge--${def.rarity}`} title={def.description}>
+                    <span className="pub-profile-badge-icon">{def.icon}</span>
+                    <span className="pub-profile-badge-label">{def.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
         {creatorAuthUid && wallPosts.length > 0 && (
           <section className="pub-profile-section">

@@ -7,6 +7,7 @@ type DMInboxProps = {
   authUid: string;
   authName: string;
   initialRecipient?: { authUid: string; name: string } | null;
+  currentPrompt?: string | null;
 };
 
 function formatTime(ts: number): string {
@@ -21,13 +22,14 @@ function formatTime(ts: number): string {
 
 type ActiveThread = { authUid: string; name: string };
 
-export function DMInbox({ authUid, authName, initialRecipient }: DMInboxProps) {
+export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: DMInboxProps) {
   const [threads, setThreads] = useState<DMThread[]>([]);
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [active, setActive] = useState<ActiveThread | null>(initialRecipient ?? null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [body, setBody] = useState('');
+  const [attachPrompt, setAttachPrompt] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -45,19 +47,26 @@ export function DMInbox({ authUid, authName, initialRecipient }: DMInboxProps) {
     if (initialRecipient) setActive(initialRecipient);
   }, [initialRecipient?.authUid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load messages when active thread changes
+  // Load messages when active thread changes, then poll for new ones
   useEffect(() => {
     if (!active) { setMessages([]); return; }
     setLoadingMessages(true);
-    void listMessages(authUid, active.authUid).then(msgs => {
+    const otherUid = active.authUid;
+    void listMessages(authUid, otherUid).then(msgs => {
       setMessages(msgs);
       setLoadingMessages(false);
     });
-    void markThreadRead(authUid, active.authUid).then(() => {
+    void markThreadRead(authUid, otherUid).then(() => {
       setThreads(prev => prev.map(t =>
-        t.otherAuthUid === active.authUid ? { ...t, unreadCount: 0 } : t,
+        t.otherAuthUid === otherUid ? { ...t, unreadCount: 0 } : t,
       ));
     });
+    const poll = setInterval(async () => {
+      const msgs = await listMessages(authUid, otherUid);
+      setMessages(msgs);
+      void markThreadRead(authUid, otherUid);
+    }, 10_000);
+    return () => clearInterval(poll);
   }, [authUid, active?.authUid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom when new messages arrive
@@ -74,10 +83,11 @@ export function DMInbox({ authUid, authName, initialRecipient }: DMInboxProps) {
     setSending(true);
     setSendError(null);
     try {
-      const msg = await sendDM(authUid, authName, active.authUid, active.name, body.trim());
+      const snapshot = attachPrompt && currentPrompt ? currentPrompt : null;
+      const msg = await sendDM(authUid, authName, active.authUid, active.name, body.trim(), snapshot);
       setMessages(prev => [...prev, msg]);
       setBody('');
-      // Refresh threads so the new message shows as last message
+      setAttachPrompt(false);
       void loadThreads();
     } catch (e) {
       setSendError(e instanceof Error ? e.message : 'Failed to send.');
@@ -127,24 +137,44 @@ export function DMInbox({ authUid, authName, initialRecipient }: DMInboxProps) {
         </div>
 
         <div className="dm-compose">
-          <textarea
-            className="dm-compose-input"
-            placeholder={`Message ${active.name}… (Enter to send)`}
-            value={body}
-            rows={2}
-            onChange={e => setBody(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={sending}
-          />
-          {sendError && <p className="dm-send-error">{sendError}</p>}
-          <button
-            type="button"
-            className="dm-send-btn"
-            disabled={!body.trim() || sending}
-            onClick={() => void handleSend()}
-          >
-            {sending ? '…' : 'Send'}
-          </button>
+          {attachPrompt && currentPrompt && (
+            <div className="dm-compose-snapshot">
+              <span className="dm-compose-snapshot-label">Prompt attached</span>
+              <span className="dm-compose-snapshot-preview">{currentPrompt.slice(0, 120)}{currentPrompt.length > 120 ? '…' : ''}</span>
+            </div>
+          )}
+          <div className="dm-compose-row">
+            <textarea
+              className="dm-compose-input"
+              placeholder={`Message ${active.name}… (Enter to send)`}
+              value={body}
+              rows={2}
+              onChange={e => setBody(e.target.value)}
+              onKeyDown={handleKeyDown}
+              disabled={sending}
+            />
+            <button
+              type="button"
+              className="dm-send-btn"
+              disabled={!body.trim() || sending}
+              onClick={() => void handleSend()}
+            >
+              {sending ? '…' : 'Send'}
+            </button>
+          </div>
+          <div className="dm-compose-footer">
+            {currentPrompt && (
+              <button
+                type="button"
+                className={`dm-attach-btn${attachPrompt ? ' dm-attach-btn--active' : ''}`}
+                onClick={() => setAttachPrompt(p => !p)}
+                title={attachPrompt ? 'Remove prompt attachment' : 'Attach current workspace prompt'}
+              >
+                {attachPrompt ? '✕ Detach prompt' : '+ Attach prompt'}
+              </button>
+            )}
+            {sendError && <span className="dm-send-error">{sendError}</span>}
+          </div>
         </div>
       </div>
     );

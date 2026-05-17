@@ -44,6 +44,7 @@ export function WallFeed({
   onOpenPost,
 }: WallFeedProps) {
   const [posts, setPosts] = useState<WallPost[]>([]);
+  const [newPostCount, setNewPostCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [reactionMap, setReactionMap] = useState<Record<string, PostReactions>>({});
   const [myReactionMap, setMyReactionMap] = useState<Record<string, Set<string>>>({});
@@ -59,10 +60,19 @@ export function WallFeed({
   const lastVisitedRef = useRef<number>(0);
   const onlineUids = useOnlineAuthUids();
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (isPoll = false) => {
     const data = await listWallPosts({ limit: 60 });
-    setPosts(data);
-    setLoading(false);
+    if (isPoll) {
+      setPosts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const incoming = data.filter(p => !existingIds.has(p.id)).length;
+        if (incoming > 0) setNewPostCount(n => n + incoming);
+        return prev;
+      });
+    } else {
+      setPosts(data);
+      setLoading(false);
+    }
     const postIds = data.map(p => p.id);
     const authorUids = [...new Set(data.map(p => p.authUid))];
     const [xpMap, reactions] = await Promise.all([
@@ -97,7 +107,7 @@ export function WallFeed({
     })();
     void fetchFollowing();
     pollRef.current = setInterval(async () => {
-      const postIds = await fetchPosts();
+      const postIds = await fetchPosts(true);
       await fetchMyReactions(postIds);
     }, POLL_INTERVAL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
@@ -107,6 +117,24 @@ export function WallFeed({
     localStorage.setItem(ONBOARDED_KEY, '1');
     setShowOnboarding(false);
   }, []);
+
+  const handleLoadNew = useCallback(async () => {
+    setNewPostCount(0);
+    const data = await listWallPosts({ limit: 60 });
+    setPosts(data);
+    const postIds = data.map(p => p.id);
+    const authorUids = [...new Set(data.map(p => p.authUid))];
+    const [xpMap, reactions] = await Promise.all([
+      getXPMap(authorUids),
+      getReactionsForPosts(postIds),
+    ]);
+    setAuthorXpMap(xpMap);
+    setReactionMap(reactions);
+    if (authUid) {
+      const mine = await getMyReactions(authUid, postIds);
+      setMyReactionMap(mine);
+    }
+  }, [authUid]);
 
   const handlePosted = useCallback(() => {
     setComposerOpen(false);
@@ -190,6 +218,12 @@ export function WallFeed({
           </button>
         )}
       </div>
+
+      {newPostCount > 0 && (
+        <button type="button" className="wall-feed-new-banner" onClick={() => void handleLoadNew()}>
+          ↑ {newPostCount} new {newPostCount === 1 ? 'post' : 'posts'} — click to load
+        </button>
+      )}
 
       {showOnboarding && !composerOpen && (
         <div className="wall-onboarding">

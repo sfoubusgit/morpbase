@@ -1,8 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile } from '../../types';
-import type { WallPost } from '../../types/community';
+import type { WallPost, EarnedBadge } from '../../types/community';
 import { getMyPublicProfile, upsertMyPublicProfile } from '../../engine/profileStore';
 import { listWallPosts } from '../../engine/wallStore';
+import { getUserXP } from '../../engine/xpStore';
+import { getEarnedBadges } from '../../engine/badgeStore';
+import { getTitleForXp } from '../../data/communityTitles';
+import { BADGE_REGISTRY } from '../../data/communityBadges';
 import './MyProfilePage.css';
 
 type MyProfilePageProps = {
@@ -61,10 +65,14 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
   });
 
   const [myWallPosts, setMyWallPosts] = useState<WallPost[]>([]);
+  const [myXp, setMyXp] = useState<number | null>(null);
+  const [myBadges, setMyBadges] = useState<EarnedBadge[]>([]);
 
   useEffect(() => {
-    if (!authUid) { setMyWallPosts([]); return; }
+    if (!authUid) { setMyWallPosts([]); setMyXp(null); setMyBadges([]); return; }
     void listWallPosts({ authorAuthUid: authUid, limit: 50 }).then(setMyWallPosts);
+    void getUserXP(authUid).then(setMyXp);
+    void getEarnedBadges(authUid).then(setMyBadges);
   }, [authUid]);
 
   const myDna = useMemo(() => {
@@ -558,6 +566,33 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
                   </div>
                 )}
               </>
+            )}
+          </div>
+
+          {/* XP & Badges */}
+          <div className="profile-panel">
+            <span className="profile-panel-kicker">Reputation</span>
+            {myXp !== null && (
+              <div className="profile-xp-row">
+                <span className="profile-xp-amount">{myXp.toLocaleString()} XP</span>
+                <span className="profile-xp-title">{getTitleForXp(myXp).label}</span>
+              </div>
+            )}
+            {myBadges.length === 0 ? (
+              <p className="profile-signal-empty">No badges yet — post to the Wall, share identities, and enter challenges to earn them.</p>
+            ) : (
+              <div className="profile-badges">
+                {myBadges.map(b => {
+                  const def = BADGE_REGISTRY[b.badgeId];
+                  if (!def) return null;
+                  return (
+                    <div key={b.badgeId} className={`profile-badge profile-badge--${def.rarity}`} title={def.description}>
+                      <span className="profile-badge-icon">{def.icon}</span>
+                      <span className="profile-badge-label">{def.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
             )}
           </div>
 

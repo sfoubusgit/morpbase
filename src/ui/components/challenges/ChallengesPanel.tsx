@@ -6,6 +6,8 @@ import {
   getChallengeEntryCount,
   getUserChallengeEntry,
   enterChallenge,
+  listChallengeEntries,
+  type ChallengeEntryWithPost,
 } from '../../../engine/challengeStore';
 import './ChallengesPanel.css';
 
@@ -52,6 +54,9 @@ function ActiveChallengeCard({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [entriesOpen, setEntriesOpen] = useState(false);
+  const [entriesLoading, setEntriesLoading] = useState(false);
+  const [entries, setEntries] = useState<ChallengeEntryWithPost[]>([]);
 
   useEffect(() => {
     void getChallengeEntryCount(challenge.id).then(setEntryCount);
@@ -86,6 +91,17 @@ function ActiveChallengeCard({
   };
 
   const hasEntered = myEntry !== null || done;
+
+  const handleToggleEntries = async () => {
+    if (entriesOpen) { setEntriesOpen(false); return; }
+    setEntriesOpen(true);
+    if (entries.length === 0) {
+      setEntriesLoading(true);
+      const list = await listChallengeEntries(challenge.id);
+      setEntries(list);
+      setEntriesLoading(false);
+    }
+  };
 
   return (
     <div className="challenge-card challenge-card--active">
@@ -143,6 +159,34 @@ function ActiveChallengeCard({
         )
       ) : (
         <p className="challenge-card-login-hint">Log in to enter this challenge.</p>
+      )}
+
+      {entryCount > 0 && (
+        <div className="challenge-card-entries">
+          <button
+            type="button"
+            className="challenge-card-entries-toggle"
+            onClick={handleToggleEntries}
+          >
+            {entriesOpen ? '▲ Hide entries' : `▼ See ${entryCount} ${entryCount === 1 ? 'entry' : 'entries'}`}
+          </button>
+          {entriesOpen && (
+            <div className="challenge-card-entries-list">
+              {entriesLoading && <p className="challenge-entries-loading">Loading…</p>}
+              {!entriesLoading && entries.map(e => (
+                <div key={e.entryId} className="challenge-entry-row">
+                  <span className="challenge-entry-author">{e.authorName}</span>
+                  <p className="challenge-entry-text">
+                    {e.promptText.length > 120 ? e.promptText.slice(0, 120) + '…' : e.promptText}
+                  </p>
+                </div>
+              ))}
+              {!entriesLoading && entries.length === 0 && (
+                <p className="challenge-entries-loading">No entries yet.</p>
+              )}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

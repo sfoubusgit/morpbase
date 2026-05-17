@@ -42,6 +42,8 @@ export function AdminPage({ userName }: AdminPageProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [activeTab, setActiveTab] = useState<'users' | 'analytics' | 'challenges' | 'system'>('users');
+
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [challengesLoading, setChallengesLoading] = useState(true);
   const [challengeForm, setChallengeForm] = useState({
@@ -187,375 +189,422 @@ export function AdminPage({ userName }: AdminPageProps) {
     }
   };
 
+  const maxPageCount = analyticsPageBreakdown.reduce((m, e) => Math.max(m, e.eventCount), 1);
+
   return (
     <div className="admin-page">
-      <header className="admin-page-header">
-        <div>
-          <h1>Admin</h1>
-          <p>Inspect users, public-profile status, and Pool Hub visibility without leaving MorpBase.</p>
-        </div>
-        <div className="admin-page-admin-name">
-          Signed in as {userName ?? 'Admin'}
-        </div>
-      </header>
+      <div className="admin-inner">
 
-      <div className="admin-summary-grid">
-        <div className="admin-summary-card">
-          <span>Total users</span>
-          <strong>{summary.totalUsers}</strong>
-        </div>
-        <div className="admin-summary-card">
-          <span>Missing public profiles</span>
-          <strong>{summary.missingProfiles}</strong>
-        </div>
-        <div className="admin-summary-card">
-          <span>Pool Hub visible</span>
-          <strong>{summary.hubVisible}</strong>
-        </div>
-        <div className="admin-summary-card">
-          <span>Users with uploads</span>
-          <strong>{summary.usersWithUploads}</strong>
-        </div>
-      </div>
-
-      <div className="admin-actions">
-        <button type="button" onClick={handleBackfill} disabled={actionLoading}>
-          {actionLoading ? 'Running...' : 'Backfill Missing Public Profiles'}
-        </button>
-        <button type="button" className="admin-secondary" onClick={refreshUsers} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh Users'}
-        </button>
-        <button type="button" className="admin-secondary" onClick={refreshAnalytics} disabled={analyticsLoading}>
-          {analyticsLoading ? 'Refreshing analytics...' : 'Refresh Analytics'}
-        </button>
-      </div>
-
-      {message && <div className="admin-message">{message}</div>}
-      {error && <div className="admin-error">{error}</div>}
-
-      <div className="admin-layout">
-        <section className="admin-panel admin-panel-list">
-          <div className="admin-panel-header">
-            <h2>Users</h2>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={event => setSearchTerm(event.target.value)}
-              placeholder="Search name or email"
-            />
+        {/* ── Header ── */}
+        <header className="admin-header">
+          <div className="admin-header-left">
+            <h1 className="admin-title">Admin</h1>
+            <span className="admin-internal-badge">INTERNAL</span>
           </div>
-          {loading ? (
-            <div className="admin-empty">Loading users...</div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="admin-empty">No users match that search.</div>
-          ) : (
-            <div className="admin-user-list">
-              {filteredUsers.map(user => (
-                <button
-                  type="button"
-                  key={user.userId}
-                  className={`admin-user-row ${selectedUser?.userId === user.userId ? 'active' : ''}`}
-                  onClick={() => setSelectedUserId(user.userId)}
-                >
-                  <div>
-                    <div className="admin-user-name">{user.displayName}</div>
-                    <div className="admin-user-email">{user.email}</div>
-                  </div>
-                  <div className="admin-user-meta">
-                    <span>{user.hasPublicProfile ? 'Profile' : 'No profile'}</span>
-                    <span>{user.uploadCount} uploads</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
+          <span className="admin-signed-in">Signed in as {userName ?? 'Admin'}</span>
+        </header>
 
-        <section className="admin-panel admin-panel-detail">
-          <div className="admin-panel-header">
-            <h2>User Details</h2>
-          </div>
-          {!selectedUser ? (
-            <div className="admin-empty">Select a user to inspect their status.</div>
-          ) : (
-            <div className="admin-user-detail">
-              <div className="admin-detail-grid">
-                <div>
-                  <span>Name</span>
-                  <strong>{selectedUser.displayName}</strong>
-                </div>
-                <div>
-                  <span>Email</span>
-                  <strong>{selectedUser.email}</strong>
-                </div>
-                <div>
-                  <span>Joined</span>
-                  <strong>{formatDate(selectedUser.createdAt)}</strong>
-                </div>
-                <div>
-                  <span>User ID</span>
-                  <strong className="admin-mono">{selectedUser.userId}</strong>
-                </div>
-                <div>
-                  <span>Public profile</span>
-                  <strong>{selectedUser.hasPublicProfile ? 'Yes' : 'No'}</strong>
-                </div>
-                <div>
-                  <span>Pool Hub visible</span>
-                  <strong>{selectedUser.poolHubVisible ? 'Yes' : 'No'}</strong>
-                </div>
-                <div>
-                  <span>Hub uploads</span>
-                  <strong>{selectedUser.uploadCount}</strong>
-                </div>
+        {/* ── Tab nav ── */}
+        <div className="admin-tabs">
+          {(['users', 'analytics', 'challenges', 'system'] as const).map(tab => (
+            <button
+              key={tab}
+              type="button"
+              className={`admin-tab${activeTab === tab ? ' admin-tab--active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {message && <div className="admin-message">{message}</div>}
+        {error && <div className="admin-error">{error}</div>}
+
+        {/* ══ USERS TAB ══ */}
+        {activeTab === 'users' && (
+          <div className="admin-tab-content">
+            <div className="admin-stat-grid">
+              <div className="admin-stat-card">
+                <span className="admin-stat-label">Total users</span>
+                <strong className="admin-stat-value">{summary.totalUsers}</strong>
               </div>
-
-              <div className="admin-detail-actions">
-                <button
-                  type="button"
-                  disabled={selectedUser.hasPublicProfile || actionLoading}
-                  onClick={() => handleCreateProfile(selectedUser)}
-                >
-                  Create Public Profile
-                </button>
+              <div className={`admin-stat-card${summary.missingProfiles > 0 ? ' admin-stat-card--warn' : ''}`}>
+                <span className="admin-stat-label">Missing profiles</span>
+                <strong className="admin-stat-value">{summary.missingProfiles}</strong>
+              </div>
+              <div className="admin-stat-card">
+                <span className="admin-stat-label">Pool Hub visible</span>
+                <strong className="admin-stat-value">{summary.hubVisible}</strong>
+              </div>
+              <div className="admin-stat-card">
+                <span className="admin-stat-label">Users with uploads</span>
+                <strong className="admin-stat-value">{summary.usersWithUploads}</strong>
               </div>
             </div>
-          )}
-        </section>
-      </div>
 
-      <section className="admin-analytics">
-        <div className="admin-panel-header">
-          <h2>Analytics</h2>
-          <span className="admin-analytics-meta">Internal, Google-free event tracking</span>
-        </div>
-        <div className="admin-analytics-grid">
-          <div className="admin-panel admin-analytics-summary-panel">
-            <div className="admin-panel-header">
-              <h3>Usage Summary</h3>
-            </div>
-            {analyticsLoading || !analyticsSummary ? (
-              <div className="admin-empty">Loading analytics...</div>
-            ) : (
-              <div className="admin-summary-grid admin-summary-grid-analytics">
-                <div className="admin-summary-card">
-                  <span>Total events</span>
-                  <strong>{analyticsSummary.totalEvents}</strong>
+            <div className="admin-users-layout">
+              <section className="admin-panel admin-users-list-panel">
+                <div className="admin-panel-head">
+                  <span className="admin-panel-title">Users</span>
+                  <button type="button" className="admin-ghost-btn" onClick={refreshUsers} disabled={loading}>
+                    {loading ? '…' : 'Refresh'}
+                  </button>
                 </div>
-                <div className="admin-summary-card">
-                  <span>Unique sessions</span>
-                  <strong>{analyticsSummary.uniqueSessions}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Identified users</span>
-                  <strong>{analyticsSummary.identifiedUsers}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Last 24h</span>
-                  <strong>{analyticsSummary.last24hEvents}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Page views</span>
-                  <strong>{analyticsSummary.pageViews}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Prompt saves</span>
-                  <strong>{analyticsSummary.promptSaves}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Territory activations</span>
-                  <strong>{analyticsSummary.territoryActivations}</strong>
-                </div>
-                <div className="admin-summary-card">
-                  <span>Pool opens</span>
-                  <strong>{analyticsSummary.poolOpens}</strong>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="admin-panel admin-analytics-breakdown-panel">
-            <div className="admin-panel-header">
-              <h3>Top Pages</h3>
-            </div>
-            {analyticsLoading ? (
-              <div className="admin-empty">Loading page breakdown...</div>
-            ) : analyticsPageBreakdown.length === 0 ? (
-              <div className="admin-empty">No analytics page data yet.</div>
-            ) : (
-              <div className="admin-analytics-page-list">
-                {analyticsPageBreakdown.map(entry => (
-                  <div key={entry.pageKey} className="admin-analytics-page-row">
-                    <span>{entry.pageKey}</span>
-                    <strong>{entry.eventCount}</strong>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="admin-panel admin-analytics-events-panel">
-          <div className="admin-panel-header">
-            <h3>Recent Events</h3>
-          </div>
-          {analyticsLoading ? (
-            <div className="admin-empty">Loading recent events...</div>
-          ) : recentEvents.length === 0 ? (
-            <div className="admin-empty">No analytics events yet.</div>
-          ) : (
-            <div className="admin-analytics-event-list">
-              {recentEvents.map(event => (
-                <div key={event.id} className="admin-analytics-event-card">
-                  <div className="admin-analytics-event-top">
-                    <div>
-                      <div className="admin-analytics-event-type">{event.eventType}</div>
-                      <div className="admin-analytics-event-meta">
-                        {event.pageKey ?? 'unknown'} {event.path ? `• ${event.path}` : ''}
-                      </div>
-                    </div>
-                    <div className="admin-analytics-event-time">
-                      {formatDateTime(event.createdAt)}
-                    </div>
-                  </div>
-                  <div className="admin-analytics-event-details">
-                    <span>User: {event.userId ?? 'anonymous'}</span>
-                    <span>Session: {event.sessionId.slice(0, 12)}...</span>
-                    <span>Referrer: {event.referrerHost ?? 'direct'}</span>
-                  </div>
-                  {event.metadata && Object.keys(event.metadata).length > 0 && (
-                    <pre className="admin-analytics-event-payload">
-                      {JSON.stringify(event.metadata, null, 2)}
-                    </pre>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="admin-challenges">
-        <div className="admin-panel-header">
-          <h2>Challenges</h2>
-          <span className="admin-analytics-meta">Create and manage community challenges</span>
-        </div>
-
-        <div className="admin-challenges-layout">
-          <div className="admin-panel admin-challenge-form-panel">
-            <div className="admin-panel-header"><h3>New Challenge</h3></div>
-            <div className="admin-challenge-form">
-              <label className="admin-form-label">
-                Type
-                <div className="admin-challenge-type-row">
-                  {(['weekly', 'monthly', 'flash'] as const).map(t => (
-                    <button
-                      key={t}
-                      type="button"
-                      className={`admin-challenge-type-btn${challengeForm.type === t ? ' active' : ''}`}
-                      onClick={() => {
-                        const days = t === 'weekly' ? 7 : t === 'monthly' ? 30 : 3;
-                        const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
-                        setChallengeForm(prev => ({ ...prev, type: t, endDate: end }));
-                      }}
-                    >
-                      {t}
-                    </button>
-                  ))}
-                </div>
-              </label>
-              <label className="admin-form-label">
-                Title
                 <input
                   type="text"
-                  className="admin-form-input"
-                  placeholder="e.g. The Stranger in the City"
-                  value={challengeForm.title}
-                  onChange={e => setChallengeForm(prev => ({ ...prev, title: e.target.value }))}
+                  className="admin-search"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  placeholder="Search name or email…"
                 />
-              </label>
-              <label className="admin-form-label">
-                Constraint
-                <textarea
-                  className="admin-form-input"
-                  rows={3}
-                  placeholder="The rule builders must follow — e.g. 'Use at least one Environment tag from an urban pool.'"
-                  value={challengeForm.constraintText}
-                  onChange={e => setChallengeForm(prev => ({ ...prev, constraintText: e.target.value }))}
-                />
-              </label>
-              <label className="admin-form-label">
-                Description (optional)
-                <textarea
-                  className="admin-form-input"
-                  rows={2}
-                  placeholder="Extra context or thematic framing"
-                  value={challengeForm.description}
-                  onChange={e => setChallengeForm(prev => ({ ...prev, description: e.target.value }))}
-                />
-              </label>
-              <div className="admin-challenge-dates">
-                <label className="admin-form-label">
-                  Starts
-                  <input
-                    type="datetime-local"
-                    className="admin-form-input"
-                    value={challengeForm.startDate}
-                    onChange={e => setChallengeForm(prev => ({ ...prev, startDate: e.target.value }))}
-                  />
-                </label>
-                <label className="admin-form-label">
-                  Ends
-                  <input
-                    type="datetime-local"
-                    className="admin-form-input"
-                    value={challengeForm.endDate}
-                    onChange={e => setChallengeForm(prev => ({ ...prev, endDate: e.target.value }))}
-                  />
-                </label>
-              </div>
-              <button
-                type="button"
-                className="admin-challenge-create-btn"
-                disabled={challengeSaving || !challengeForm.title.trim() || !challengeForm.constraintText.trim()}
-                onClick={() => void handleCreateChallenge()}
-              >
-                {challengeSaving ? 'Creating…' : 'Create Challenge'}
-              </button>
-            </div>
-          </div>
+                {loading ? (
+                  <div className="admin-empty">Loading users…</div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="admin-empty">No users match that search.</div>
+                ) : (
+                  <div className="admin-user-list">
+                    {filteredUsers.map(user => (
+                      <button
+                        type="button"
+                        key={user.userId}
+                        className={`admin-user-row${selectedUser?.userId === user.userId ? ' admin-user-row--active' : ''}`}
+                        onClick={() => setSelectedUserId(user.userId)}
+                      >
+                        <div className="admin-user-avatar">
+                          {user.displayName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="admin-user-body">
+                          <div className="admin-user-name">{user.displayName}</div>
+                          <div className="admin-user-email">{user.email}</div>
+                        </div>
+                        <div className="admin-user-flags">
+                          {!user.hasPublicProfile && <span className="admin-flag admin-flag--warn">No profile</span>}
+                          {user.uploadCount > 0 && <span className="admin-flag">{user.uploadCount} uploads</span>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </section>
 
-          <div className="admin-panel admin-challenge-list-panel">
-            <div className="admin-panel-header"><h3>All Challenges</h3></div>
-            {challengesLoading ? (
-              <div className="admin-empty">Loading…</div>
-            ) : challenges.length === 0 ? (
-              <div className="admin-empty">No challenges yet.</div>
-            ) : (
-              <div className="admin-challenge-list">
-                {challenges.map(c => {
-                  const now = Date.now();
-                  const status = now < c.startsAt ? 'upcoming' : now > c.endsAt ? 'ended' : 'active';
-                  return (
-                    <div key={c.id} className={`admin-challenge-row admin-challenge-row--${status}`}>
-                      <div className="admin-challenge-row-top">
-                        <span className="admin-challenge-num">#{c.number}</span>
-                        <span className={`admin-challenge-type-badge admin-challenge-type-badge--${c.type}`}>{c.type}</span>
-                        <span className={`admin-challenge-status admin-challenge-status--${status}`}>{status}</span>
+              <section className="admin-panel admin-users-detail-panel">
+                <div className="admin-panel-head">
+                  <span className="admin-panel-title">User Details</span>
+                </div>
+                {!selectedUser ? (
+                  <div className="admin-empty">Select a user to inspect.</div>
+                ) : (
+                  <div className="admin-detail">
+                    <div className="admin-detail-grid">
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Name</span>
+                        <strong className="admin-detail-value">{selectedUser.displayName}</strong>
                       </div>
-                      <div className="admin-challenge-title">{c.title}</div>
-                      <div className="admin-challenge-constraint">{c.constraintText}</div>
-                      <div className="admin-challenge-dates-info">
-                        {new Date(c.startsAt).toLocaleDateString()} → {new Date(c.endsAt).toLocaleDateString()}
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Email</span>
+                        <strong className="admin-detail-value">{selectedUser.email}</strong>
+                      </div>
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Joined</span>
+                        <strong className="admin-detail-value">{formatDate(selectedUser.createdAt)}</strong>
+                      </div>
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Public profile</span>
+                        <strong className={`admin-detail-value${selectedUser.hasPublicProfile ? '' : ' admin-detail-value--warn'}`}>
+                          {selectedUser.hasPublicProfile ? 'Yes' : 'No'}
+                        </strong>
+                      </div>
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Pool Hub visible</span>
+                        <strong className="admin-detail-value">{selectedUser.poolHubVisible ? 'Yes' : 'No'}</strong>
+                      </div>
+                      <div className="admin-detail-field">
+                        <span className="admin-detail-label">Hub uploads</span>
+                        <strong className="admin-detail-value">{selectedUser.uploadCount}</strong>
+                      </div>
+                      <div className="admin-detail-field admin-detail-field--full">
+                        <span className="admin-detail-label">User ID</span>
+                        <strong className="admin-detail-value admin-mono">{selectedUser.userId}</strong>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                    <div className="admin-detail-actions">
+                      <button
+                        type="button"
+                        className="admin-action-btn"
+                        disabled={selectedUser.hasPublicProfile || actionLoading}
+                        onClick={() => handleCreateProfile(selectedUser)}
+                      >
+                        Create Public Profile
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
+        )}
+
+        {/* ══ ANALYTICS TAB ══ */}
+        {activeTab === 'analytics' && (
+          <div className="admin-tab-content">
+            <div className="admin-panel-head admin-section-head">
+              <span className="admin-panel-title">Analytics</span>
+              <button type="button" className="admin-ghost-btn" onClick={refreshAnalytics} disabled={analyticsLoading}>
+                {analyticsLoading ? '…' : 'Refresh'}
+              </button>
+            </div>
+
+            {analyticsLoading || !analyticsSummary ? (
+              <div className="admin-empty">Loading analytics…</div>
+            ) : (
+              <>
+                <div className="admin-stat-grid admin-stat-grid--8">
+                  {([
+                    ['Total events',          analyticsSummary.totalEvents],
+                    ['Unique sessions',        analyticsSummary.uniqueSessions],
+                    ['Identified users',       analyticsSummary.identifiedUsers],
+                    ['Last 24h',               analyticsSummary.last24hEvents],
+                    ['Page views',             analyticsSummary.pageViews],
+                    ['Prompt saves',           analyticsSummary.promptSaves],
+                    ['Territory activations',  analyticsSummary.territoryActivations],
+                    ['Pool opens',             analyticsSummary.poolOpens],
+                  ] as [string, number][]).map(([label, value]) => (
+                    <div key={label} className="admin-stat-card admin-stat-card--sm">
+                      <span className="admin-stat-label">{label}</span>
+                      <strong className="admin-stat-value">{value}</strong>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="admin-analytics-columns">
+                  <div className="admin-panel">
+                    <div className="admin-panel-head">
+                      <span className="admin-panel-title">Top Pages</span>
+                    </div>
+                    {analyticsPageBreakdown.length === 0 ? (
+                      <div className="admin-empty">No page data yet.</div>
+                    ) : (
+                      <div className="admin-page-list">
+                        {analyticsPageBreakdown.map(entry => (
+                          <div key={entry.pageKey} className="admin-page-row">
+                            <span className="admin-page-key">{entry.pageKey}</span>
+                            <div className="admin-page-bar-wrap">
+                              <div
+                                className="admin-page-bar"
+                                style={{ width: `${(entry.eventCount / maxPageCount) * 100}%` }}
+                              />
+                            </div>
+                            <strong className="admin-page-count">{entry.eventCount}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-panel">
+                    <div className="admin-panel-head">
+                      <span className="admin-panel-title">Recent Events</span>
+                    </div>
+                    {recentEvents.length === 0 ? (
+                      <div className="admin-empty">No events yet.</div>
+                    ) : (
+                      <div className="admin-event-list">
+                        {recentEvents.map(event => (
+                          <div key={event.id} className="admin-event-row">
+                            <span className={`admin-event-type-pill admin-event-type-pill--${event.eventType.split('_')[0]}`}>
+                              {event.eventType}
+                            </span>
+                            <div className="admin-event-meta">
+                              <span>{event.pageKey ?? 'unknown'}{event.path ? ` · ${event.path}` : ''}</span>
+                              <span>{event.userId ?? 'anon'} · {event.sessionId.slice(0, 8)}</span>
+                            </div>
+                            <span className="admin-event-time">{formatDateTime(event.createdAt)}</span>
+                            {event.metadata && Object.keys(event.metadata).length > 0 && (
+                              <pre className="admin-analytics-event-payload">
+                                {JSON.stringify(event.metadata, null, 2)}
+                              </pre>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
-        </div>
-      </section>
+        )}
+
+        {/* ══ CHALLENGES TAB ══ */}
+        {activeTab === 'challenges' && (
+          <div className="admin-tab-content">
+            <div className="admin-challenges-layout">
+              <div className="admin-panel">
+                <div className="admin-panel-head">
+                  <span className="admin-panel-title">New Challenge</span>
+                </div>
+                <div className="admin-challenge-form">
+                  <label className="admin-form-label">
+                    Type
+                    <div className="admin-challenge-type-row">
+                      {(['weekly', 'monthly', 'flash'] as const).map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          className={`admin-challenge-type-btn${challengeForm.type === t ? ' active' : ''}`}
+                          onClick={() => {
+                            const days = t === 'weekly' ? 7 : t === 'monthly' ? 30 : 3;
+                            const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+                            setChallengeForm(prev => ({ ...prev, type: t, endDate: end }));
+                          }}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </label>
+                  <label className="admin-form-label">
+                    Title
+                    <input
+                      type="text"
+                      className="admin-form-input"
+                      placeholder="e.g. The Stranger in the City"
+                      value={challengeForm.title}
+                      onChange={e => setChallengeForm(prev => ({ ...prev, title: e.target.value }))}
+                    />
+                  </label>
+                  <label className="admin-form-label">
+                    Constraint
+                    <textarea
+                      className="admin-form-input"
+                      rows={3}
+                      placeholder="The rule builders must follow…"
+                      value={challengeForm.constraintText}
+                      onChange={e => setChallengeForm(prev => ({ ...prev, constraintText: e.target.value }))}
+                    />
+                  </label>
+                  <label className="admin-form-label">
+                    Description (optional)
+                    <textarea
+                      className="admin-form-input"
+                      rows={2}
+                      placeholder="Extra context or thematic framing"
+                      value={challengeForm.description}
+                      onChange={e => setChallengeForm(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </label>
+                  <div className="admin-challenge-dates">
+                    <label className="admin-form-label">
+                      Starts
+                      <input
+                        type="datetime-local"
+                        className="admin-form-input"
+                        value={challengeForm.startDate}
+                        onChange={e => setChallengeForm(prev => ({ ...prev, startDate: e.target.value }))}
+                      />
+                    </label>
+                    <label className="admin-form-label">
+                      Ends
+                      <input
+                        type="datetime-local"
+                        className="admin-form-input"
+                        value={challengeForm.endDate}
+                        onChange={e => setChallengeForm(prev => ({ ...prev, endDate: e.target.value }))}
+                      />
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-challenge-create-btn"
+                    disabled={challengeSaving || !challengeForm.title.trim() || !challengeForm.constraintText.trim()}
+                    onClick={() => void handleCreateChallenge()}
+                  >
+                    {challengeSaving ? 'Creating…' : 'Create Challenge'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="admin-panel">
+                <div className="admin-panel-head">
+                  <span className="admin-panel-title">All Challenges</span>
+                </div>
+                {challengesLoading ? (
+                  <div className="admin-empty">Loading…</div>
+                ) : challenges.length === 0 ? (
+                  <div className="admin-empty">No challenges yet.</div>
+                ) : (
+                  <div className="admin-challenge-list">
+                    {challenges.map(c => {
+                      const now = Date.now();
+                      const status = now < c.startsAt ? 'upcoming' : now > c.endsAt ? 'ended' : 'active';
+                      return (
+                        <div key={c.id} className={`admin-challenge-row admin-challenge-row--${status}`}>
+                          <div className="admin-challenge-row-top">
+                            <span className="admin-challenge-num">#{c.number}</span>
+                            <span className={`admin-challenge-type-badge admin-challenge-type-badge--${c.type}`}>{c.type}</span>
+                            <span className={`admin-challenge-status admin-challenge-status--${status}`}>{status}</span>
+                          </div>
+                          <div className="admin-challenge-title">{c.title}</div>
+                          <div className="admin-challenge-constraint">{c.constraintText}</div>
+                          <div className="admin-challenge-dates-info">
+                            {new Date(c.startsAt).toLocaleDateString()} → {new Date(c.endsAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ══ SYSTEM TAB ══ */}
+        {activeTab === 'system' && (
+          <div className="admin-tab-content">
+            <div className="admin-panel admin-system-panel">
+              <div className="admin-panel-head">
+                <span className="admin-panel-title">Maintenance</span>
+              </div>
+              <p className="admin-system-desc">
+                These operations affect all users. Confirm before running.
+              </p>
+              <div className="admin-system-actions">
+                <div className="admin-system-action">
+                  <div className="admin-system-action-info">
+                    <strong>Backfill Missing Public Profiles</strong>
+                    <span>Creates a public profile for every user who is missing one. Safe to run multiple times.</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-action-btn"
+                    onClick={handleBackfill}
+                    disabled={actionLoading}
+                  >
+                    {actionLoading ? 'Running…' : 'Run Backfill'}
+                  </button>
+                </div>
+                <div className="admin-system-action">
+                  <div className="admin-system-action-info">
+                    <strong>Refresh User List</strong>
+                    <span>Re-fetches the full user list from the database.</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="admin-ghost-btn admin-ghost-btn--lg"
+                    onClick={refreshUsers}
+                    disabled={loading}
+                  >
+                    {loading ? 'Refreshing…' : 'Refresh Users'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

@@ -156,6 +156,39 @@ export async function createChallenge(input: {
   return toChallenge(data as ChallengeRow);
 }
 
+export type ChallengeEntryWithPost = {
+  entryId: string;
+  authUid: string;
+  authorName: string;
+  promptText: string;
+  createdAt: number;
+};
+
+export async function listChallengeEntries(challengeId: string): Promise<ChallengeEntryWithPost[]> {
+  try {
+    const { data, error } = await supabase
+      .from('challenge_entries')
+      .select('id, auth_uid, created_at, wall_posts(prompt_text, author_name)')
+      .eq('challenge_id', challengeId)
+      .order('created_at', { ascending: false })
+      .limit(40);
+
+    if (error || !data) return [];
+
+    return (data as any[])
+      .filter(row => row.wall_posts)
+      .map(row => ({
+        entryId: row.id as string,
+        authUid: row.auth_uid as string,
+        authorName: (row.wall_posts as any).author_name as string,
+        promptText: (row.wall_posts as any).prompt_text as string,
+        createdAt: new Date(row.created_at as string).getTime(),
+      }));
+  } catch {
+    return [];
+  }
+}
+
 export async function enterChallenge(
   challenge: Challenge,
   authUid: string,

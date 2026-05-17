@@ -215,11 +215,43 @@
 /* ── Compose ── */
 .dm-compose {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  padding: 12px 16px;
+  padding: 10px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dm-compose-snapshot {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 10px;
+  background: rgba(110, 86, 249, 0.08);
+  border: 1px solid rgba(110, 86, 249, 0.2);
+  border-radius: 6px;
+}
+
+.dm-compose-snapshot-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(167, 139, 250, 0.7);
+}
+
+.dm-compose-snapshot-preview {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  font-style: italic;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.dm-compose-row {
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  flex-shrink: 0;
 }
 
 .dm-compose-input {
@@ -261,6 +293,37 @@
 .dm-send-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.dm-compose-footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 20px;
+}
+
+.dm-attach-btn {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.dm-attach-btn:hover {
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dm-attach-btn--active {
+  color: #c4b5fd;
+  border-color: rgba(110, 86, 249, 0.4);
+  background: rgba(110, 86, 249, 0.1);
 }
 
 .dm-send-error {

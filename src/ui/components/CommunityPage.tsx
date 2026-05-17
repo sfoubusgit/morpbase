@@ -23,6 +23,7 @@ import { createObject } from '../../engine/objectStore';
 import { logIdentityUsage } from '../../engine/identityUsageStore';
 import { ShareModal } from './ShareModal';
 import { WallFeed } from './wall/WallFeed';
+import { PulsePanel } from './wall/PulsePanel';
 import { CreatorGrid } from './creators/CreatorGrid';
 import { ChallengesPanel } from './challenges/ChallengesPanel';
 import type { WallPostIdentityTag } from '../../types/community';
@@ -137,6 +138,7 @@ export function CommunityPage({
   currentPromptText = '',
 }: CommunityPageProps) {
   const [activeSection, setActiveSection] = useState<CommunitySection>('wall');
+  const [wallView, setWallView] = useState<'feed' | 'pulse'>('feed');
   const [activeTab, setActiveTab] = useState<CommunityIdentityType | 'all'>('all');
   const [search, setSearch] = useState('');
   const [sharedItems, setSharedItems] = useState<CommunitySharedIdentity[]>([]);
@@ -303,15 +305,38 @@ export function CommunityPage({
         </div>
 
         {activeSection === 'wall' && (
-          <WallFeed
-            authUid={authUid}
-            userId={userId}
-            userName={userName}
-            activeIdentityTags={activeIdentityTags}
-            currentPromptText={currentPromptText}
-            onViewAuthor={onViewCreator}
-          onOpenPost={onOpenPost}
-          />
+          <div className="wall-section">
+            <div className="wall-section-tabs">
+              <button
+                type="button"
+                className={`wall-section-tab${wallView === 'feed' ? ' wall-section-tab--active' : ''}`}
+                onClick={() => setWallView('feed')}
+              >
+                Feed
+              </button>
+              <button
+                type="button"
+                className={`wall-section-tab${wallView === 'pulse' ? ' wall-section-tab--active' : ''}`}
+                onClick={() => setWallView('pulse')}
+              >
+                Activity
+              </button>
+            </div>
+
+            {wallView === 'feed' ? (
+              <WallFeed
+                authUid={authUid}
+                userId={userId}
+                userName={userName}
+                activeIdentityTags={activeIdentityTags}
+                currentPromptText={currentPromptText}
+                onViewAuthor={onViewCreator}
+                onOpenPost={onOpenPost}
+              />
+            ) : (
+              <PulsePanel onViewAuthor={onViewCreator} />
+            )}
+          </div>
         )}
 
         {activeSection === 'creators' && (
