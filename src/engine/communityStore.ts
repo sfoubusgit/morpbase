@@ -89,6 +89,11 @@ export async function shareIdentity(
   const authUid = session?.user?.id;
   if (!authUid) throw new Error('No active session.');
 
+  const isUuid = (s: string | null | undefined): boolean =>
+    !!s && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
+
+  const parentId = isUuid(input.parentId) ? (input.parentId ?? null) : null;
+
   const { data, error } = await supabase
     .from('community_identities')
     .insert({
@@ -100,7 +105,7 @@ export async function shareIdentity(
       author_name: authorName.trim() || 'Anonymous',
       author_cover_image_url: input.authorCoverImageUrl?.trim() || null,
       featured: false,
-      parent_id: input.parentId ?? null,
+      parent_id: parentId,
     })
     .select()
     .single();
@@ -108,9 +113,9 @@ export async function shareIdentity(
   if (error) throw new Error(error.message);
 
   // If this is a remix, increment the parent's remix_count (non-fatal)
-  if (input.parentId) {
+  if (parentId) {
     try {
-      await supabase.rpc('increment_remix_count', { identity_id: input.parentId });
+      await supabase.rpc('increment_remix_count', { identity_id: parentId });
     } catch {
       // remix_count is a convenience cache — failure here is non-fatal
     }
@@ -130,12 +135,12 @@ export async function shareIdentity(
 
   void awardXP(authUid, 'share_identity');
   void checkAndAwardShareBadges(authUid);
-  if (input.parentId) {
+  if (parentId) {
     // Look up the original author's auth_uid so we can award them the remix-received badge and notify them
     supabase
       .from('community_identities')
       .select('author_id, name')
-      .eq('id', input.parentId)
+      .eq('id', parentId)
       .maybeSingle()
       .then(({ data: parentRow }) => {
         if (parentRow?.author_id) {
