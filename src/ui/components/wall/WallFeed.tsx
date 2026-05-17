@@ -49,6 +49,7 @@ export function WallFeed({
   const [authorXpMap, setAuthorXpMap] = useState<Map<string, number>>(new Map());
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<{ postId: string; authorName: string } | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(
     () => !!authUid && !localStorage.getItem(ONBOARDED_KEY),
   );
@@ -141,9 +142,28 @@ export function WallFeed({
     setPosts(prev => prev.filter(p => p.id !== postId));
   }, []);
 
+  const handleReply = useCallback((postId: string, authorName: string) => {
+    setReplyingTo({ postId, authorName });
+    setComposerOpen(false);
+  }, []);
+
+  const handleReplied = useCallback(() => {
+    setReplyingTo(null);
+    void fetchPosts();
+  }, [fetchPosts]);
+
   const visible = filter === 'following'
-    ? posts.filter(p => followingUids.has(p.authUid))
-    : posts;
+    ? posts.filter(p => followingUids.has(p.authUid) && !p.parentPostId)
+    : posts.filter(p => !p.parentPostId);
+
+  const repliesMap = new Map<string, WallPost[]>();
+  for (const post of posts) {
+    if (post.parentPostId) {
+      const arr = repliesMap.get(post.parentPostId) ?? [];
+      arr.push(post);
+      repliesMap.set(post.parentPostId, arr);
+    }
+  }
 
   return (
     <div className="wall-feed">
@@ -228,26 +248,66 @@ export function WallFeed({
       ) : visible.length === 0 ? (
         <div className="wall-feed-empty">
           {filter === 'following'
-            ? 'No posts from people you follow yet. Follow some creators in the Creators tab.'
+            ? 'No posts from people you follow yet. Follow some users in the Users tab.'
             : 'Nothing on the Wall yet. Be the first to post something.'}
         </div>
       ) : (
         <div className="wall-feed-list">
           {visible.map(post => (
-            <WallPostCard
-              key={post.id}
-              post={post}
-              isOwnPost={post.authUid === authUid}
-              isNew={post.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
-              reactions={reactionMap[post.id] ?? {}}
-              myReactions={myReactionMap[post.id] ?? new Set()}
-              canReact={!!authUid}
-              authorXp={authorXpMap.get(post.authUid)}
-              isAuthorOnline={onlineUids.has(post.authUid)}
-              onReact={handleReact}
-              onDelete={handleDelete}
-              onViewAuthor={onViewAuthor}
-            />
+            <div key={post.id} className="wall-thread">
+              <WallPostCard
+                post={post}
+                isOwnPost={post.authUid === authUid}
+                isNew={post.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
+                reactions={reactionMap[post.id] ?? {}}
+                myReactions={myReactionMap[post.id] ?? new Set()}
+                canReact={!!authUid}
+                canReply={!!authUid}
+                authorXp={authorXpMap.get(post.authUid)}
+                isAuthorOnline={onlineUids.has(post.authUid)}
+                onReact={handleReact}
+                onReply={handleReply}
+                onDelete={handleDelete}
+                onViewAuthor={onViewAuthor}
+              />
+
+              {(repliesMap.get(post.id) ?? []).map(reply => (
+                <div key={reply.id} className="wall-thread-reply">
+                  <WallPostCard
+                    post={reply}
+                    isOwnPost={reply.authUid === authUid}
+                    isNew={reply.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
+                    reactions={reactionMap[reply.id] ?? {}}
+                    myReactions={myReactionMap[reply.id] ?? new Set()}
+                    canReact={!!authUid}
+                    canReply={false}
+                    authorXp={authorXpMap.get(reply.authUid)}
+                    isAuthorOnline={onlineUids.has(reply.authUid)}
+                    onReact={handleReact}
+                    onReply={handleReply}
+                    onDelete={handleDelete}
+                    onViewAuthor={onViewAuthor}
+                  />
+                </div>
+              ))}
+
+              {replyingTo?.postId === post.id && authUid && userId && userName && (
+                <div className="wall-thread-composer">
+                  <WallPostComposer
+                    authUid={authUid}
+                    userId={userId}
+                    userName={userName}
+                    availableIdentityTags={[]}
+                    promptText=""
+                    parentPostId={post.id}
+                    replyToName={replyingTo.authorName}
+                    onPosted={handleReplied}
+                    onCancel={() => setReplyingTo(null)}
+                    compact
+                  />
+                </div>
+              )}
+            </div>
           ))}
         </div>
       )}

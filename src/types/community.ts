@@ -18,6 +18,7 @@ export type WallPost = {
   promptText: string;
   identityTags: WallPostIdentityTag[];
   postType: WallPostType;
+  parentPostId: string | null;
   likeCount: number;
   createdAt: number;
   isLikedByMe?: boolean;
@@ -28,6 +29,7 @@ export type CreateWallPostInput = {
   promptText: string;
   identityTags: WallPostIdentityTag[];
   postType?: WallPostType;
+  parentPostId?: string | null;
 };
 
 // ── Follows ───────────────────────────────────────────────────────────────────

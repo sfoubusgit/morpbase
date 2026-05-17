@@ -12,6 +12,8 @@ type WallPostComposerProps = {
   onPosted: () => void;
   onCancel?: () => void;
   compact?: boolean;
+  parentPostId?: string | null;
+  replyToName?: string | null;
 };
 
 export function WallPostComposer({
@@ -23,8 +25,12 @@ export function WallPostComposer({
   onPosted,
   onCancel,
   compact = false,
+  parentPostId = null,
+  replyToName = null,
 }: WallPostComposerProps) {
+  const isReply = !!parentPostId;
   const [caption, setCaption] = useState('');
+  const [replyBody, setReplyBody] = useState('');
   const [selectedTags, setSelectedTags] = useState<Set<string>>(
     () => new Set(availableIdentityTags.map(t => `${t.type}:${t.name}`)),
   );
@@ -41,20 +47,26 @@ export function WallPostComposer({
   };
 
   const handleSubmit = async () => {
-    if (!promptText.trim()) {
-      setError('Nothing to post — generate a prompt first.');
-      return;
+    if (isReply) {
+      if (!replyBody.trim()) { setError('Write something before replying.'); return; }
+    } else {
+      if (!promptText.trim()) { setError('Nothing to post — generate a prompt first.'); return; }
     }
     setSubmitting(true);
     setError(null);
     try {
-      const tags = availableIdentityTags.filter(t => selectedTags.has(`${t.type}:${t.name}`));
-      await createWallPost(
-        { caption: caption.trim() || null, promptText, identityTags: tags },
-        authUid,
-        userId,
-        userName,
-      );
+      if (isReply) {
+        await createWallPost(
+          { promptText: replyBody.trim(), identityTags: [], postType: 'response', parentPostId },
+          authUid, userId, userName,
+        );
+      } else {
+        const tags = availableIdentityTags.filter(t => selectedTags.has(`${t.type}:${t.name}`));
+        await createWallPost(
+          { caption: caption.trim() || null, promptText, identityTags: tags },
+          authUid, userId, userName,
+        );
+      }
       onPosted();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to post. Try again.');
@@ -64,36 +76,50 @@ export function WallPostComposer({
   };
 
   return (
-    <div className={`wall-composer${compact ? ' wall-composer--compact' : ''}`}>
-      <textarea
-        className="wall-composer-caption"
-        placeholder="Add a caption… or post without one"
-        value={caption}
-        onChange={e => setCaption(e.target.value)}
-        maxLength={200}
-        rows={compact ? 2 : 3}
-      />
+    <div className={`wall-composer${compact ? ' wall-composer--compact' : ''}${isReply ? ' wall-composer--reply' : ''}`}>
+      {isReply ? (
+        <textarea
+          className="wall-composer-caption"
+          placeholder={replyToName ? `Reply to ${replyToName}…` : 'Write a reply…'}
+          value={replyBody}
+          onChange={e => setReplyBody(e.target.value)}
+          maxLength={500}
+          rows={2}
+          autoFocus
+        />
+      ) : (
+        <>
+          <textarea
+            className="wall-composer-caption"
+            placeholder="Add a caption… or post without one"
+            value={caption}
+            onChange={e => setCaption(e.target.value)}
+            maxLength={200}
+            rows={compact ? 2 : 3}
+          />
 
-      {availableIdentityTags.length > 0 && (
-        <div className="wall-composer-tags">
-          <span className="wall-composer-tags-label">Tag identities</span>
-          <div className="wall-composer-tags-list">
-            {availableIdentityTags.map(tag => {
-              const key = `${tag.type}:${tag.name}`;
-              const active = selectedTags.has(key);
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  className={`wall-composer-tag${active ? ' wall-composer-tag--active' : ''}`}
-                  onClick={() => toggleTag(key)}
-                >
-                  {tag.name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+          {availableIdentityTags.length > 0 && (
+            <div className="wall-composer-tags">
+              <span className="wall-composer-tags-label">Tag identities</span>
+              <div className="wall-composer-tags-list">
+                {availableIdentityTags.map(tag => {
+                  const key = `${tag.type}:${tag.name}`;
+                  const active = selectedTags.has(key);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`wall-composer-tag${active ? ' wall-composer-tag--active' : ''}`}
+                      onClick={() => toggleTag(key)}
+                    >
+                      {tag.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {error && <div className="wall-composer-error">{error}</div>}
@@ -107,10 +133,10 @@ export function WallPostComposer({
         <button
           type="button"
           className="wall-composer-submit"
-          disabled={submitting || !promptText.trim()}
+          disabled={submitting || (isReply ? !replyBody.trim() : !promptText.trim())}
           onClick={() => void handleSubmit()}
         >
-          {submitting ? 'Posting…' : 'Post to Wall'}
+          {submitting ? (isReply ? 'Replying…' : 'Posting…') : (isReply ? 'Reply' : 'Post to Wall')}
         </button>
       </div>
     </div>

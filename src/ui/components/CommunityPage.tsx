@@ -301,7 +301,7 @@ export function CommunityPage({
                 className={`community-section-tab${activeSection === s ? ' community-section-tab--active' : ''}`}
                 onClick={() => setActiveSection(s)}
               >
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'creators' ? 'Users' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>

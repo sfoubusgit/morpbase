@@ -40,9 +40,11 @@ type WallPostCardProps = {
   reactions: PostReactions;
   myReactions: Set<string>;
   canReact: boolean;
+  canReply: boolean;
   authorXp?: number;
   isAuthorOnline?: boolean;
   onReact: (postId: string, emoji: string) => void;
+  onReply: (postId: string, authorName: string) => void;
   onDelete: (postId: string) => void;
   onViewAuthor?: (authUid: string, name: string) => void;
 };
@@ -54,9 +56,11 @@ export function WallPostCard({
   reactions,
   myReactions,
   canReact,
+  canReply,
   authorXp,
   isAuthorOnline,
   onReact,
+  onReply,
   onDelete,
   onViewAuthor,
 }: WallPostCardProps) {
@@ -151,6 +155,17 @@ export function WallPostCard({
           })}
           {totalReactions === 0 && !canReact && null}
         </div>
+
+        {canReply && post.postType !== 'response' && (
+          <button
+            type="button"
+            className="wall-card-reply"
+            onClick={() => onReply(post.id, post.authorName)}
+            title="Reply"
+          >
+            Reply
+          </button>
+        )}
 
         {isOwnPost && (
           <button
