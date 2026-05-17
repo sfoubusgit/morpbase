@@ -153,22 +153,16 @@
 /* ── List + Threading ── */
 
 .wall-feed-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 10px;
-  align-items: start;
+  column-width: 280px;
+  column-gap: 10px;
 }
 
 .wall-thread {
+  break-inside: avoid;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.wall-thread-reply {
-  margin-left: 24px;
-  padding-left: 12px;
-  border-left: 2px solid rgba(255, 255, 255, 0.06);
 }
 
 .wall-thread-composer {
