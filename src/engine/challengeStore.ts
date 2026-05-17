@@ -109,6 +109,53 @@ export async function getUserChallengeEntry(
   }
 }
 
+export async function listAllChallenges(): Promise<Challenge[]> {
+  try {
+    const { data, error } = await supabase
+      .from('challenges')
+      .select('*')
+      .order('number', { ascending: false });
+    if (error) return [];
+    return (data ?? []).map(row => toChallenge(row as ChallengeRow));
+  } catch {
+    return [];
+  }
+}
+
+export async function createChallenge(input: {
+  title: string;
+  constraintText: string;
+  description?: string | null;
+  type: 'weekly' | 'monthly' | 'flash';
+  startsAt: Date;
+  endsAt: Date;
+}): Promise<Challenge> {
+  const { data: maxRow } = await supabase
+    .from('challenges')
+    .select('number')
+    .order('number', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const nextNumber = ((maxRow as { number: number } | null)?.number ?? 0) + 1;
+
+  const { data, error } = await supabase
+    .from('challenges')
+    .insert({
+      number: nextNumber,
+      title: input.title.trim(),
+      constraint_text: input.constraintText.trim(),
+      description: input.description?.trim() || null,
+      type: input.type,
+      starts_at: input.startsAt.toISOString(),
+      ends_at: input.endsAt.toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return toChallenge(data as ChallengeRow);
+}
+
 export async function enterChallenge(
   challenge: Challenge,
   authUid: string,

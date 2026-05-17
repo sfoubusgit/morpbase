@@ -318,6 +318,180 @@
   overflow-x: auto;
 }
 
+/* ── Challenges ── */
+
+.admin-challenges {
+  margin-top: 24px;
+}
+
+.admin-challenges-layout {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 16px;
+  margin-top: 16px;
+  align-items: start;
+}
+
+.admin-challenge-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.admin-form-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.admin-form-input {
+  font-family: inherit;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.admin-form-input:focus {
+  outline: none;
+  border-color: rgba(110, 231, 183, 0.3);
+}
+
+.admin-challenge-type-row {
+  display: flex;
+  gap: 6px;
+}
+
+.admin-challenge-type-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: none;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  text-transform: capitalize;
+  transition: border-color 0.1s, color 0.1s, background 0.1s;
+}
+
+.admin-challenge-type-btn.active {
+  border-color: rgba(110, 231, 183, 0.4);
+  color: #6ee7b7;
+  background: rgba(110, 231, 183, 0.08);
+}
+
+.admin-challenge-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-challenge-create-btn {
+  padding: 9px 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(110, 231, 183, 0.35);
+  background: rgba(110, 231, 183, 0.1);
+  color: #6ee7b7;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.admin-challenge-create-btn:hover:not(:disabled) {
+  background: rgba(110, 231, 183, 0.18);
+}
+
+.admin-challenge-create-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.admin-challenge-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-challenge-row {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-challenge-row--active   { border-color: rgba(110, 231, 183, 0.2); }
+.admin-challenge-row--upcoming { border-color: rgba(110, 86, 249, 0.2); }
+
+.admin-challenge-row-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-challenge-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+}
+
+.admin-challenge-type-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-tertiary);
+}
+
+.admin-challenge-type-badge--weekly  { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+.admin-challenge-type-badge--monthly { background: rgba(110, 86, 249, 0.15); color: #a78bfa; }
+.admin-challenge-type-badge--flash   { background: rgba(234, 179, 8, 0.15);  color: #fbbf24; }
+
+.admin-challenge-status {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-left: auto;
+}
+
+.admin-challenge-status--active   { color: #4ade80; }
+.admin-challenge-status--upcoming { color: #a78bfa; }
+.admin-challenge-status--ended    { color: var(--text-muted); }
+
+.admin-challenge-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.admin-challenge-constraint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.admin-challenge-dates-info {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
 @media (max-width: 1100px) {
   .admin-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -328,6 +502,10 @@
   }
 
   .admin-analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-challenges-layout {
     grid-template-columns: 1fr;
   }
 }

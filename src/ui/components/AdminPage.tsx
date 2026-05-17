@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { AdminUserRecord } from '../../types';
+import type { Challenge } from '../../types/community';
 import {
   backfillMissingPublicProfiles,
   createMissingPublicProfile,
   listAdminUsers,
 } from '../../engine/adminStore';
+import { listAllChallenges, createChallenge } from '../../engine/challengeStore';
 import {
   getAdminAnalyticsSummary,
   listAdminAnalyticsPageBreakdown,
@@ -40,6 +42,53 @@ export function AdminPage({ userName }: AdminPageProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [challengesLoading, setChallengesLoading] = useState(true);
+  const [challengeForm, setChallengeForm] = useState({
+    title: '',
+    constraintText: '',
+    description: '',
+    type: 'weekly' as 'weekly' | 'monthly' | 'flash',
+    startDate: new Date().toISOString().slice(0, 16),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+  });
+  const [challengeSaving, setChallengeSaving] = useState(false);
+
+  const refreshChallenges = async () => {
+    setChallengesLoading(true);
+    try {
+      setChallenges(await listAllChallenges());
+    } finally {
+      setChallengesLoading(false);
+    }
+  };
+
+  const handleCreateChallenge = async () => {
+    if (!challengeForm.title.trim() || !challengeForm.constraintText.trim()) {
+      setError('Title and constraint are required.');
+      return;
+    }
+    setChallengeSaving(true);
+    setError(null);
+    try {
+      await createChallenge({
+        title: challengeForm.title,
+        constraintText: challengeForm.constraintText,
+        description: challengeForm.description || null,
+        type: challengeForm.type,
+        startsAt: new Date(challengeForm.startDate),
+        endsAt: new Date(challengeForm.endDate),
+      });
+      setMessage('Challenge created.');
+      setChallengeForm(prev => ({ ...prev, title: '', constraintText: '', description: '' }));
+      await refreshChallenges();
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to create challenge.');
+    } finally {
+      setChallengeSaving(false);
+    }
+  };
+
   const refreshUsers = async () => {
     setLoading(true);
     try {
@@ -56,6 +105,7 @@ export function AdminPage({ userName }: AdminPageProps) {
 
   useEffect(() => {
     refreshUsers();
+    void refreshChallenges();
   }, []);
 
   const refreshAnalytics = async () => {
@@ -382,6 +432,128 @@ export function AdminPage({ userName }: AdminPageProps) {
               ))}
             </div>
           )}
+        </div>
+      </section>
+
+      <section className="admin-challenges">
+        <div className="admin-panel-header">
+          <h2>Challenges</h2>
+          <span className="admin-analytics-meta">Create and manage community challenges</span>
+        </div>
+
+        <div className="admin-challenges-layout">
+          <div className="admin-panel admin-challenge-form-panel">
+            <div className="admin-panel-header"><h3>New Challenge</h3></div>
+            <div className="admin-challenge-form">
+              <label className="admin-form-label">
+                Type
+                <div className="admin-challenge-type-row">
+                  {(['weekly', 'monthly', 'flash'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      className={`admin-challenge-type-btn${challengeForm.type === t ? ' active' : ''}`}
+                      onClick={() => {
+                        const days = t === 'weekly' ? 7 : t === 'monthly' ? 30 : 3;
+                        const end = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+                        setChallengeForm(prev => ({ ...prev, type: t, endDate: end }));
+                      }}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </label>
+              <label className="admin-form-label">
+                Title
+                <input
+                  type="text"
+                  className="admin-form-input"
+                  placeholder="e.g. The Stranger in the City"
+                  value={challengeForm.title}
+                  onChange={e => setChallengeForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </label>
+              <label className="admin-form-label">
+                Constraint
+                <textarea
+                  className="admin-form-input"
+                  rows={3}
+                  placeholder="The rule builders must follow — e.g. 'Use at least one Environment tag from an urban pool.'"
+                  value={challengeForm.constraintText}
+                  onChange={e => setChallengeForm(prev => ({ ...prev, constraintText: e.target.value }))}
+                />
+              </label>
+              <label className="admin-form-label">
+                Description (optional)
+                <textarea
+                  className="admin-form-input"
+                  rows={2}
+                  placeholder="Extra context or thematic framing"
+                  value={challengeForm.description}
+                  onChange={e => setChallengeForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </label>
+              <div className="admin-challenge-dates">
+                <label className="admin-form-label">
+                  Starts
+                  <input
+                    type="datetime-local"
+                    className="admin-form-input"
+                    value={challengeForm.startDate}
+                    onChange={e => setChallengeForm(prev => ({ ...prev, startDate: e.target.value }))}
+                  />
+                </label>
+                <label className="admin-form-label">
+                  Ends
+                  <input
+                    type="datetime-local"
+                    className="admin-form-input"
+                    value={challengeForm.endDate}
+                    onChange={e => setChallengeForm(prev => ({ ...prev, endDate: e.target.value }))}
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                className="admin-challenge-create-btn"
+                disabled={challengeSaving || !challengeForm.title.trim() || !challengeForm.constraintText.trim()}
+                onClick={() => void handleCreateChallenge()}
+              >
+                {challengeSaving ? 'Creating…' : 'Create Challenge'}
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-panel admin-challenge-list-panel">
+            <div className="admin-panel-header"><h3>All Challenges</h3></div>
+            {challengesLoading ? (
+              <div className="admin-empty">Loading…</div>
+            ) : challenges.length === 0 ? (
+              <div className="admin-empty">No challenges yet.</div>
+            ) : (
+              <div className="admin-challenge-list">
+                {challenges.map(c => {
+                  const now = Date.now();
+                  const status = now < c.startsAt ? 'upcoming' : now > c.endsAt ? 'ended' : 'active';
+                  return (
+                    <div key={c.id} className={`admin-challenge-row admin-challenge-row--${status}`}>
+                      <div className="admin-challenge-row-top">
+                        <span className="admin-challenge-num">#{c.number}</span>
+                        <span className={`admin-challenge-type-badge admin-challenge-type-badge--${c.type}`}>{c.type}</span>
+                        <span className={`admin-challenge-status admin-challenge-status--${status}`}>{status}</span>
+                      </div>
+                      <div className="admin-challenge-title">{c.title}</div>
+                      <div className="admin-challenge-constraint">{c.constraintText}</div>
+                      <div className="admin-challenge-dates-info">
+                        {new Date(c.startsAt).toLocaleDateString()} → {new Date(c.endsAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>
