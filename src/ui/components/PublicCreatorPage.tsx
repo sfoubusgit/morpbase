@@ -1,6 +1,37 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CreatorStats, PublicProfile, SavedPrompt } from '../../types';
-import type { WallPost, EarnedBadge } from '../../types/community';
+import type { WallPost, EarnedBadge, WallPostIdentityTag } from '../../types/community';
+
+type CreativeDna = {
+  topTags: { type: string; name: string; count: number }[];
+  recentPosts: number;
+  previousPosts: number;
+  totalPosts: number;
+};
+
+function computeCreativeDna(posts: WallPost[]): CreativeDna {
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const tagCounts = new Map<string, { tag: WallPostIdentityTag; count: number }>();
+  for (const post of posts) {
+    for (const tag of post.identityTags) {
+      const key = `${tag.type}\x00${tag.name}`;
+      const entry = tagCounts.get(key);
+      if (entry) entry.count++;
+      else tagCounts.set(key, { tag, count: 1 });
+    }
+  }
+  const topTags = [...tagCounts.values()]
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+    .map(({ tag, count }) => ({ type: tag.type, name: tag.name, count }));
+  const recentPosts = posts.filter(p => now - p.createdAt < thirtyDays).length;
+  const previousPosts = posts.filter(p => {
+    const age = now - p.createdAt;
+    return age >= thirtyDays && age < 2 * thirtyDays;
+  }).length;
+  return { topTags, recentPosts, previousPosts, totalPosts: posts.length };
+}
 import { getPublicProfileByUserId, getPublicProfileByAuthUid } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
 import { listHubEntriesByCreator } from '../../engine/poolHubStore';
@@ -150,7 +181,7 @@ export function PublicCreatorPage({
   useEffect(() => {
     if (!creatorAuthUid) { setWallPosts([]); return; }
     setLoadingWall(true);
-    void listWallPosts({ authorAuthUid: creatorAuthUid, limit: 12 }).then(posts => {
+    void listWallPosts({ authorAuthUid: creatorAuthUid, limit: 30 }).then(posts => {
       setWallPosts(posts);
       setLoadingWall(false);
     });
@@ -176,6 +207,7 @@ export function PublicCreatorPage({
   );
 
   const title = creatorXp !== null ? getTitleForXp(creatorXp) : null;
+  const creativeDna = useMemo(() => computeCreativeDna(wallPosts), [wallPosts]);
 
   const profileStateItems = useMemo(() => ([
     {
@@ -337,7 +369,7 @@ export function PublicCreatorPage({
               <div className="public-creator-empty">No wall posts yet.</div>
             ) : (
               <div className="public-creator-wall-list">
-                {wallPosts.map(post => (
+                {wallPosts.slice(0, 8).map(post => (
                   <div key={post.id} className="public-creator-wall-card">
                     {post.caption && (
                       <div className="public-creator-wall-caption">{post.caption}</div>
@@ -364,6 +396,28 @@ export function PublicCreatorPage({
                 ))}
               </div>
             )}
+          </section>
+        )}
+
+        {creativeDna.totalPosts >= 2 && creativeDna.topTags.length > 0 && (
+          <section className="public-creator-section">
+            <div className="public-creator-section-head">
+              <h2>Creative DNA</h2>
+              <p>
+                Identity patterns across {creativeDna.totalPosts} wall {creativeDna.totalPosts === 1 ? 'post' : 'posts'}
+                {creativeDna.recentPosts > 0 && ` · ${creativeDna.recentPosts} this month`}
+                {creativeDna.recentPosts > creativeDna.previousPosts && ' ↑'}
+              </p>
+            </div>
+            <div className="public-creator-dna-grid">
+              {creativeDna.topTags.map(tag => (
+                <div key={`${tag.type}_${tag.name}`} className={`public-creator-dna-tag public-creator-dna-tag--${tag.type}`}>
+                  <span className="public-creator-dna-type">{tag.type}</span>
+                  <span className="public-creator-dna-name">{tag.name}</span>
+                  <span className="public-creator-dna-count">{tag.count}×</span>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 

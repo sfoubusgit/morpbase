@@ -3903,6 +3903,7 @@ export function App() {
       ) : activePage === 'my-profile' ? (
         <MyProfilePage
           isLoggedIn={true}
+          authUid={authUser?.authUid ?? null}
           userName={authUser?.name ?? null}
           onRequestLogin={handleOpenAuth}
         />

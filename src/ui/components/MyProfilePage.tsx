@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile } from '../../types';
+import type { WallPost } from '../../types/community';
 import { getMyPublicProfile, upsertMyPublicProfile } from '../../engine/profileStore';
+import { listWallPosts } from '../../engine/wallStore';
 import './MyProfilePage.css';
 
 type MyProfilePageProps = {
   isLoggedIn?: boolean;
+  authUid?: string | null;
   userName?: string | null;
   onRequestLogin?: () => void;
 };
@@ -37,7 +40,7 @@ const TOGGLE_FIELDS = [
   { key: 'showLinksPublicly'   as const, title: 'Show links publicly',      desc: 'Display your external links on your public creator page.' },
 ];
 
-export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: MyProfilePageProps) {
+export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequestLogin }: MyProfilePageProps) {
   const [profile, setProfile]           = useState<PublicProfile | null>(null);
   const [loading, setLoading]           = useState(true);
   const [saving, setSaving]             = useState(false);
@@ -56,6 +59,36 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
     discoverableInSearch: true,
     showLinksPublicly: true,
   });
+
+  const [myWallPosts, setMyWallPosts] = useState<WallPost[]>([]);
+
+  useEffect(() => {
+    if (!authUid) { setMyWallPosts([]); return; }
+    void listWallPosts({ authorAuthUid: authUid, limit: 50 }).then(setMyWallPosts);
+  }, [authUid]);
+
+  const myDna = useMemo(() => {
+    const now = Date.now();
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+    const tagCounts = new Map<string, { type: string; name: string; count: number }>();
+    for (const post of myWallPosts) {
+      for (const tag of post.identityTags) {
+        const key = `${tag.type}\x00${tag.name}`;
+        const entry = tagCounts.get(key);
+        if (entry) entry.count++;
+        else tagCounts.set(key, { type: tag.type, name: tag.name, count: 1 });
+      }
+    }
+    const topTags = [...tagCounts.values()]
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 4);
+    const recentPosts = myWallPosts.filter(p => now - p.createdAt < thirtyDays).length;
+    const previousPosts = myWallPosts.filter(p => {
+      const age = now - p.createdAt;
+      return age >= thirtyDays && age < 2 * thirtyDays;
+    }).length;
+    return { topTags, recentPosts, previousPosts, totalPosts: myWallPosts.length };
+  }, [myWallPosts]);
 
   useEffect(() => {
     let isActive = true;
@@ -486,6 +519,45 @@ export function MyProfilePage({ isLoggedIn = false, userName, onRequestLogin }: 
                   hour: '2-digit', minute: '2-digit',
                 })}
               </div>
+            )}
+          </div>
+
+          {/* Your Signal */}
+          <div className="profile-panel">
+            <span className="profile-panel-kicker">Your Signal</span>
+            {myDna.totalPosts === 0 ? (
+              <p className="profile-signal-empty">Share prompts on the Wall to build your Creative DNA.</p>
+            ) : (
+              <>
+                <div className="profile-signal-stats">
+                  <div className="profile-signal-stat">
+                    <strong>{myDna.totalPosts}</strong>
+                    <span>Wall posts</span>
+                  </div>
+                  <div className="profile-signal-stat">
+                    <strong>
+                      {myDna.recentPosts}
+                      {myDna.recentPosts > myDna.previousPosts && (
+                        <span className="profile-signal-up"> ↑</span>
+                      )}
+                    </strong>
+                    <span>This month</span>
+                  </div>
+                </div>
+                {myDna.topTags.length > 0 && (
+                  <div className="profile-signal-tags">
+                    {myDna.topTags.map(tag => (
+                      <span
+                        key={`${tag.type}_${tag.name}`}
+                        className={`profile-signal-tag profile-signal-tag--${tag.type}`}
+                        title={`${tag.type} · ${tag.count}×`}
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
