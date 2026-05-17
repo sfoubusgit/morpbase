@@ -41,6 +41,7 @@ import { getUserXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
 import { listWallPosts } from '../../engine/wallStore';
 import { getLastSeenAt } from '../../engine/presenceStore';
+import { followUser, unfollowUser, isFollowing, getFollowerCount } from '../../engine/followStore';
 import { getTitleForXp } from '../../data/communityTitles';
 import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
 import { TitleBadge } from './shared/TitleBadge';
@@ -84,6 +85,9 @@ export function PublicCreatorPage({
   const [wallPosts, setWallPosts] = useState<WallPost[]>([]);
   const [loadingWall, setLoadingWall] = useState(false);
   const [lastSeenAt, setLastSeenAt] = useState<number | null>(null);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCreator, setFollowingCreator] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false);
 
   const onlineUids = useOnlineAuthUids();
   const isOnline = creatorAuthUid ? onlineUids.has(creatorAuthUid) : false;
@@ -176,6 +180,35 @@ export function PublicCreatorPage({
     if (!effectiveCreatorId) return;
     void getLastSeenAt(effectiveCreatorId).then(setLastSeenAt);
   }, [effectiveCreatorId]);
+
+  // Load follow state
+  useEffect(() => {
+    if (!creatorAuthUid) return;
+    void getFollowerCount(creatorAuthUid).then(setFollowerCount);
+    if (viewerAuthUid && viewerAuthUid !== creatorAuthUid) {
+      void isFollowing(viewerAuthUid, creatorAuthUid).then(setFollowingCreator);
+    }
+  }, [creatorAuthUid, viewerAuthUid]);
+
+  const handleFollowToggle = async () => {
+    if (!viewerAuthUid || !creatorAuthUid || followLoading) return;
+    setFollowLoading(true);
+    const wasFollowing = followingCreator;
+    setFollowingCreator(!wasFollowing);
+    setFollowerCount(c => wasFollowing ? Math.max(0, c - 1) : c + 1);
+    try {
+      if (wasFollowing) {
+        await unfollowUser(viewerAuthUid, creatorAuthUid);
+      } else {
+        await followUser(viewerAuthUid, creatorAuthUid, displayName);
+      }
+    } catch {
+      setFollowingCreator(wasFollowing);
+      setFollowerCount(c => wasFollowing ? c + 1 : Math.max(0, c - 1));
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   // Load wall posts
   useEffect(() => {
@@ -275,13 +308,23 @@ export function PublicCreatorPage({
           >
             Copy Link
           </button>
+          {viewerAuthUid && creatorAuthUid && viewerAuthUid !== creatorAuthUid && (
+            <button
+              type="button"
+              className={`public-creator-follow-btn${followingCreator ? ' following' : ''}`}
+              onClick={() => void handleFollowToggle()}
+              disabled={followLoading}
+            >
+              {followingCreator ? 'Following' : 'Follow'}
+            </button>
+          )}
           {onMessage && viewerAuthUid && creatorAuthUid && viewerAuthUid !== creatorAuthUid && (
             <button
               type="button"
               className="public-creator-message-btn"
               onClick={() => onMessage(creatorAuthUid, displayName)}
             >
-              Send Message
+              Message
             </button>
           )}
         </div>
@@ -331,16 +374,16 @@ export function PublicCreatorPage({
 
         <div className="public-creator-stats">
           <div>
+            <strong>{followerCount}</strong>
+            <span>Followers</span>
+          </div>
+          <div>
+            <strong>{wallPosts.length > 0 ? wallPosts.length : creatorSummary.promptCount}</strong>
+            <span>Wall posts</span>
+          </div>
+          <div>
             <strong>{creatorSummary.uploads}</strong>
-            <span>Public pools</span>
-          </div>
-          <div>
-            <strong>{creatorSummary.promptCount}</strong>
-            <span>Public prompts</span>
-          </div>
-          <div>
-            <strong>{wallPosts.length > 0 ? wallPosts.length : creatorSummary.totalDownloads}</strong>
-            <span>{wallPosts.length > 0 ? 'Wall posts' : 'Downloads'}</span>
+            <span>Pools</span>
           </div>
           <div>
             <strong>{creatorBadges.length}</strong>

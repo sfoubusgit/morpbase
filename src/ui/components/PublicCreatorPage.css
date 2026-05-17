@@ -42,6 +42,41 @@
   cursor: pointer;
 }
 
+.public-creator-follow-btn {
+  border: 1px solid rgba(110, 231, 183, 0.35);
+  border-radius: var(--radius-pill);
+  background: rgba(110, 231, 183, 0.1);
+  color: #6ee7b7;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.public-creator-follow-btn:hover {
+  background: rgba(110, 231, 183, 0.18);
+  border-color: rgba(110, 231, 183, 0.55);
+}
+
+.public-creator-follow-btn.following {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(229, 231, 235, 0.5);
+}
+
+.public-creator-follow-btn.following:hover {
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+}
+
+.public-creator-follow-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .public-creator-message-btn {
   border: 1px solid rgba(110, 86, 249, 0.4);
   border-radius: var(--radius-pill);
