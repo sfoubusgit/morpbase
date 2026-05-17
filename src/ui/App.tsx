@@ -3742,38 +3742,58 @@ export function App() {
         <LandingPage manualUrl={manualUrl} onEnter={handleEnterApp} />
       ) : (
       <>
-      <div className="app-page-toggle">
-        <div className="app-page-toggle-left">
+      <nav className="nav" aria-label="Main navigation">
+
+        {/* Brand */}
+        <button
+          type="button"
+          className="nav-brand"
+          aria-label="Go to builder start"
+          onClick={handleGoToBuilderStart}
+        >
+          <span className="nav-brand-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
+          <span className="nav-brand-text">MORPBASE</span>
+        </button>
+
+        {/* Center navigation */}
+        <div className="nav-center">
+          <div className="nav-tabs">
+            <button type="button" className={`nav-tab${activePage === 'generator' ? ' active' : ''}`} onClick={() => setActivePage('generator')}>Workspace</button>
+            <button type="button" className={`nav-tab${activePage === 'identity-systems' ? ' active' : ''}`} onClick={() => setActivePage('identity-systems')}>Lexicon</button>
+            <button type="button" className={`nav-tab${activePage === 'prompts' ? ' active' : ''}`} onClick={() => setActivePage('prompts')}>Memory</button>
+            <button type="button" className={`nav-tab${activePage === 'user-pools' ? ' active' : ''}`} onClick={() => setActivePage('user-pools')}>Auras</button>
+            <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
+            <button type="button" className={`nav-tab${activePage === 'my-profile' ? ' active' : ''}`} onClick={() => setActivePage('my-profile')}>Profile</button>
+            {isAdmin && (
+              <button type="button" className={`nav-tab${activePage === 'admin' ? ' active' : ''}`} onClick={() => setActivePage('admin')}>Admin</button>
+            )}
+          </div>
+        </div>
+
+        {/* Right zone */}
+        <div className="nav-right">
+          <a className="nav-action-link" href={manualLink('quick-start')} target="_blank" rel="noreferrer">Manual</a>
           <button
             type="button"
-            className="app-page-brand"
-            aria-label="Go to builder start"
-            onClick={handleGoToBuilderStart}
+            className="nav-action-link"
+            onClick={() => { setFeedbackCopied(false); setIsFeedbackModalOpen(true); }}
           >
-            <span className="app-page-brand-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <span className="app-page-brand-text">MORPBASE</span>
+            Feedback
           </button>
+          <div className="nav-divider" aria-hidden="true" />
           {authReady && authUser ? (
             <>
-              <button
-                type="button"
-                className="app-page-toggle-action-button"
-                title={authUser.email}
-                onClick={handleOpenAccount}
-              >
-                {authUser.name}
-              </button>
               <OnlinePresenceBadge selfAuthUid={authUser.authUid} onViewUser={handleViewCreator} />
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
               <button
                 type="button"
-                className={`app-nav-messages-btn${activePage === 'messages' ? ' active' : ''}`}
+                className={`nav-icon-btn${activePage === 'messages' ? ' active' : ''}`}
                 title="Messages"
                 onClick={() => setActivePage('messages')}
               >
@@ -3783,115 +3803,23 @@ export function App() {
               </button>
               <button
                 type="button"
-                className="app-page-toggle-action-button"
-                onClick={handleLogout}
+                className="nav-user-chip"
+                title={authUser.email}
+                onClick={handleOpenAccount}
               >
-                Log out
+                <span className="nav-user-avatar">{authUser.name[0]?.toUpperCase() ?? '?'}</span>
+                <span className="nav-user-name">{authUser.name}</span>
               </button>
+              <button type="button" className="nav-logout-btn" onClick={handleLogout}>Log out</button>
             </>
+          ) : authReady ? (
+            <button type="button" className="nav-login-btn" onClick={handleOpenAuth}>Beta Login</button>
           ) : (
-            <div className="app-page-toggle-auth-hint">
-              {authReady ? (
-                <>
-                  <button
-                    type="button"
-                    className="app-page-toggle-action-button"
-                    onClick={handleOpenAuth}
-                  >
-                    Beta login
-                  </button>
-                  <span>(beta)</span>
-                </>
-              ) : (
-                <span>Checking session...</span>
-              )}
-            </div>
+            <span className="nav-checking">Checking…</span>
           )}
-          <a
-            className="app-page-toggle-action-button"
-            href={manualLink('quick-start')}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Manual
-          </a>
-          <button
-            type="button"
-            className="app-page-toggle-action-button"
-            onClick={() => {
-              setFeedbackCopied(false);
-              setIsFeedbackModalOpen(true);
-            }}
-          >
-            Feedback
-          </button>
         </div>
-        <div className="app-page-toggle-nav" aria-label="App sections">
-          <div className="app-page-toggle-cluster app-page-toggle-cluster-primary">
-            <span className="app-page-toggle-section-label">Core Realm</span>
-            <button
-              type="button"
-              className={`app-page-toggle-btn app-page-toggle-btn-primary ${activePage === 'generator' ? 'active' : ''}`}
-              onClick={() => setActivePage('generator')}
-            >
-              Workspace
-            </button>
-          </div>
-          <div className="app-page-toggle-cluster">
-            <div className="app-page-toggle-group">
-              <button
-                type="button"
-                className={`app-page-toggle-btn ${activePage === 'identity-systems' ? 'active' : ''}`}
-                onClick={() => setActivePage('identity-systems')}
-              >
-                Lexicon
-              </button>
-            </div>
-          </div>
-          <div className="app-page-toggle-cluster">
-            <span className="app-page-toggle-section-label">Support Realms</span>
-            <div className="app-page-toggle-group">
-              <button
-                type="button"
-                className={`app-page-toggle-btn ${activePage === 'prompts' ? 'active' : ''}`}
-                onClick={() => setActivePage('prompts')}
-              >
-                Memory
-              </button>
-              <button
-                type="button"
-                className={`app-page-toggle-btn ${activePage === 'user-pools' ? 'active' : ''}`}
-                onClick={() => setActivePage('user-pools')}
-              >
-                Auras
-              </button>
-              <button
-                type="button"
-                className={`app-page-toggle-btn ${activePage === 'community' ? 'active' : ''}`}
-                onClick={() => setActivePage('community')}
-              >
-                Community
-              </button>
-              <button
-                type="button"
-                className={`app-page-toggle-btn ${activePage === 'my-profile' ? 'active' : ''}`}
-                onClick={() => setActivePage('my-profile')}
-              >
-                Profile
-              </button>
-              {isAdmin && (
-                <button
-                  type="button"
-                  className={`app-page-toggle-btn ${activePage === 'admin' ? 'active' : ''}`}
-                  onClick={() => setActivePage('admin')}
-                >
-                  Admin
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+
+      </nav>
       {activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />
       ) : activePage === 'identity-systems' ? (
