@@ -69,7 +69,7 @@ function LaneSlot({
     <div
       className={`ws-lane-slot ws-lane-slot-${variant}${isActive ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}${entryPoint ? ' ws-lane-slot-entry' : ''}`}
       onClick={onToggleLock}
-      title={onToggleLock ? (locked ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+      title={onToggleLock ? (locked ? 'Locked — click to unlock this lane' : 'Click to lock — this lane will change on randomize') : undefined}
       role={onToggleLock ? 'button' : undefined}
     >
       <div className="ws-lane-label">{label}</div>
