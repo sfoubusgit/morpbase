@@ -3,6 +3,7 @@ import type { CommunityIdentityType } from '../data/communityIdentities';
 import { awardXP } from './xpStore';
 import { checkAndAwardShareBadges, checkAndAwardRemixBadges } from './badgeStore';
 import { createNotification } from './notificationStore';
+import { createWallPost } from './wallStore';
 
 export type CommunitySharedIdentity = {
   id: string;
@@ -81,7 +82,7 @@ export async function listCommunityIdentities(
 
 export async function shareIdentity(
   input: ShareIdentityInput,
-  _userId: string,
+  userId: string,
   authorName: string,
 ): Promise<CommunitySharedIdentity> {
   const { data: { session } } = await supabase.auth.getSession();
@@ -114,6 +115,18 @@ export async function shareIdentity(
       // remix_count is a convenience cache — failure here is non-fatal
     }
   }
+
+  // Auto-post a share event to the wall (non-fatal)
+  void createWallPost(
+    {
+      promptText: input.phrases.slice(0, 3).join(' · ') || input.summary,
+      identityTags: [{ name: input.name, type: input.type }],
+      postType: 'share_event',
+    },
+    authUid,
+    userId,
+    authorName,
+  );
 
   void awardXP(authUid, 'share_identity');
   void checkAndAwardShareBadges(authUid);

@@ -128,6 +128,16 @@
   color: #c4b5fd;
 }
 
+/* ── Share event label ── */
+
+.wall-card-event-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #6ee7b7;
+  text-transform: uppercase;
+}
+
 /* ── Identity tags (moved above body — author's creative signature) ── */
 
 .wall-card-tags {

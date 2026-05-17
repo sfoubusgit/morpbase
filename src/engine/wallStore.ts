@@ -11,6 +11,7 @@ type WallPostRow = {
   caption: string | null;
   prompt_text: string;
   identity_tags: Array<{ name: string; type: string }>;
+  post_type: string;
   like_count: number;
   created_at: string;
 };
@@ -23,6 +24,7 @@ const toWallPost = (row: WallPostRow): WallPost => ({
   caption: row.caption ?? null,
   promptText: row.prompt_text,
   identityTags: Array.isArray(row.identity_tags) ? row.identity_tags as WallPost['identityTags'] : [],
+  postType: (row.post_type as WallPost['postType']) ?? 'standard',
   likeCount: row.like_count ?? 0,
   createdAt: new Date(row.created_at).getTime(),
 });
@@ -65,6 +67,7 @@ export async function createWallPost(
       caption: input.caption?.trim() || null,
       prompt_text: input.promptText.trim(),
       identity_tags: input.identityTags,
+      post_type: input.postType ?? 'standard',
       like_count: 0,
     })
     .select()

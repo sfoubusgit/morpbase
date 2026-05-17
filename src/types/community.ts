@@ -7,6 +7,8 @@ export type WallPostIdentityTag = {
   type: CommunityIdentityType;
 };
 
+export type WallPostType = 'standard' | 'share_event' | 'response';
+
 export type WallPost = {
   id: string;
   authUid: string;
@@ -15,6 +17,7 @@ export type WallPost = {
   caption: string | null;
   promptText: string;
   identityTags: WallPostIdentityTag[];
+  postType: WallPostType;
   likeCount: number;
   createdAt: number;
   isLikedByMe?: boolean;
@@ -24,6 +27,7 @@ export type CreateWallPostInput = {
   caption?: string | null;
   promptText: string;
   identityTags: WallPostIdentityTag[];
+  postType?: WallPostType;
 };
 
 // ── Follows ───────────────────────────────────────────────────────────────────

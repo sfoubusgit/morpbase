@@ -93,6 +93,10 @@ export function WallPostCard({
         </div>
       </div>
 
+      {post.postType === 'share_event' && (
+        <div className="wall-card-event-label">shared an identity</div>
+      )}
+
       {post.identityTags.length > 0 && (
         <div className="wall-card-tags">
           {post.identityTags.map(tag => (
