@@ -11,6 +11,7 @@ import {
 } from '../../../engine/reactionStore';
 import { getXPMap } from '../../../engine/xpStore';
 import { getTitleForXp } from '../../../data/communityTitles';
+import { ReactionIcon } from '../shared/ReactionIcon';
 import { TitleBadge } from '../shared/TitleBadge';
 import { WallPostComposer } from './WallPostComposer';
 import './PostDetailPage.css';
@@ -209,19 +210,19 @@ export function PostDetailPage({
 
         {/* ── Reactions ── */}
         <div className="post-detail-reactions">
-          {REACTION_EMOJIS.map(emoji => {
-            const count = (reactionMap[post.id] ?? {})[emoji] ?? 0;
-            const active = myReactionMap[post.id]?.has(emoji) ?? false;
+          {REACTION_EMOJIS.map(key => {
+            const count = (reactionMap[post.id] ?? {})[key] ?? 0;
+            const active = myReactionMap[post.id]?.has(key) ?? false;
             return (
               <button
-                key={emoji}
+                key={key}
                 type="button"
                 className={`post-detail-reaction${active ? ' post-detail-reaction--active' : ''}`}
-                onClick={() => authUid && handleReact(post.id, emoji)}
+                onClick={() => authUid && handleReact(post.id, key)}
                 disabled={!authUid}
-                title={authUid ? (active ? `Remove ${emoji}` : `React with ${emoji}`) : 'Log in to react'}
+                title={authUid ? (active ? 'Remove' : 'React') : 'Log in to react'}
               >
-                <span>{emoji}</span>
+                <ReactionIcon type={key} size={16} />
                 {count > 0 && <span className="post-detail-reaction-count">{count}</span>}
               </button>
             );
@@ -255,19 +256,19 @@ export function PostDetailPage({
                 </div>
                 <p className="post-detail-comment-body">{reply.promptText}</p>
                 <div className="post-detail-comment-reactions">
-                  {REACTION_EMOJIS.map(emoji => {
-                    const count = (reactionMap[reply.id] ?? {})[emoji] ?? 0;
-                    const active = myReactionMap[reply.id]?.has(emoji) ?? false;
+                  {REACTION_EMOJIS.map(key => {
+                    const count = (reactionMap[reply.id] ?? {})[key] ?? 0;
+                    const active = myReactionMap[reply.id]?.has(key) ?? false;
                     if (count === 0 && !authUid) return null;
                     return (
                       <button
-                        key={emoji}
+                        key={key}
                         type="button"
                         className={`post-detail-reaction post-detail-reaction--sm${active ? ' post-detail-reaction--active' : ''}`}
-                        onClick={() => authUid && handleReact(reply.id, emoji)}
+                        onClick={() => authUid && handleReact(reply.id, key)}
                         disabled={!authUid}
                       >
-                        <span>{emoji}</span>
+                        <ReactionIcon type={key} size={13} />
                         {count > 0 && <span className="post-detail-reaction-count">{count}</span>}
                       </button>
                     );

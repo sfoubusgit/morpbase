@@ -3,6 +3,7 @@ import { TitleBadge } from '../shared/TitleBadge';
 import { OnlineIndicator } from '../shared/OnlineIndicator';
 import { getTitleForXp } from '../../../data/communityTitles';
 import { REACTION_EMOJIS, type PostReactions } from '../../../engine/reactionStore';
+import { ReactionIcon } from '../shared/ReactionIcon';
 import './WallPostCard.css';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -127,19 +128,19 @@ export function WallPostCard({
 
       <div className="wall-card-footer">
         <div className="wall-card-reactions">
-          {REACTION_EMOJIS.map(emoji => {
-            const count = reactions[emoji] ?? 0;
-            const active = myReactions.has(emoji);
+          {REACTION_EMOJIS.map(key => {
+            const count = reactions[key] ?? 0;
+            const active = myReactions.has(key);
             return (
               <button
-                key={emoji}
+                key={key}
                 type="button"
                 className={`wall-card-reaction${active ? ' wall-card-reaction--active' : ''}`}
-                onClick={() => canReact && onReact(post.id, emoji)}
-                title={canReact ? (active ? `Remove ${emoji}` : `React with ${emoji}`) : 'Log in to react'}
+                onClick={() => canReact && onReact(post.id, key)}
+                title={canReact ? (active ? 'Remove' : 'React') : 'Log in to react'}
                 disabled={!canReact}
               >
-                <span className="wall-card-reaction-emoji">{emoji}</span>
+                <ReactionIcon type={key} size={14} />
                 {count > 0 && <span className="wall-card-reaction-count">{count}</span>}
               </button>
             );

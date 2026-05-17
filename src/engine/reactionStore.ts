@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient';
 
-export const REACTION_EMOJIS = ['🔥', '💜', '✨', '👁', '🎨'] as const;
+export const REACTION_EMOJIS = ['thumbs_up', 'heart', 'laugh', 'sad'] as const;
 export type ReactionEmoji = typeof REACTION_EMOJIS[number];
 
 export type PostReactions = Record<string, number>; // emoji → count
