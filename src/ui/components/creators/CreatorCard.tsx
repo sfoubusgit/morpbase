@@ -8,6 +8,7 @@ import './CreatorCard.css';
 type CreatorCardProps = {
   creator: CreatorSummary;
   authorXp?: number;
+  reach?: number;
   authUid: string | null;
   followingSet: Set<string>;
   isOnline?: boolean;
@@ -18,6 +19,7 @@ type CreatorCardProps = {
 export function CreatorCard({
   creator,
   authorXp,
+  reach = 0,
   authUid,
   followingSet,
   isOnline,
@@ -57,6 +59,11 @@ export function CreatorCard({
           {creator.identityCount > 0 && (
             <span className="creator-card-stat">
               {creator.identityCount} {creator.identityCount === 1 ? 'identity' : 'identities'}
+            </span>
+          )}
+          {reach > 0 && (
+            <span className="creator-card-stat creator-card-stat--reach" title="Reach — number of creators who added one of their identities">
+              👁 {reach}
             </span>
           )}
         </div>

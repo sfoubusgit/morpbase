@@ -20,6 +20,7 @@ import { createStylePreset } from '../../engine/styleStore';
 import { createOutfit } from '../../engine/wardrobeStore';
 import { createWorld, addWorldPhrase } from '../../engine/worldStore';
 import { createObject } from '../../engine/objectStore';
+import { logIdentityUsage } from '../../engine/identityUsageStore';
 import { ShareModal } from './ShareModal';
 import { WallFeed } from './wall/WallFeed';
 import { CreatorGrid } from './creators/CreatorGrid';
@@ -223,6 +224,16 @@ export function CommunityPage({
     try {
       await addToLibrary(item.type, item.name, item.summary, item.phrases);
       await onIdentityAdded?.();
+      // Log usage for Reach reputation — only for community identities with a real author
+      if (authUid && item.authorId && item.authorId !== authUid) {
+        void logIdentityUsage({
+          identityId:     item.id,
+          identityName:   item.name,
+          identityType:   item.type,
+          authorAuthUid:  item.authorId,
+          userAuthUid:    authUid,
+        });
+      }
       setCardStates(prev => ({ ...prev, [item.id]: 'done' }));
       setTimeout(() => setCardStates(prev => ({ ...prev, [item.id]: 'idle' })), 2200);
     } catch {

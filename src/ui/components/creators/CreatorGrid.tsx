@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { listCreators, type CreatorSummary } from '../../../engine/creatorFeedStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
 import { getXPMap } from '../../../engine/xpStore';
+import { getReachScores } from '../../../engine/identityUsageStore';
 import { useOnlineAuthUids } from '../../hooks/useOnlineAuthUids';
 import { CreatorCard } from './CreatorCard';
 import './CreatorGrid.css';
@@ -16,6 +17,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
   const [loading, setLoading] = useState(true);
   const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());
   const [xpMap, setXpMap] = useState<Map<string, number>>(new Map());
+  const [reachMap, setReachMap] = useState<Map<string, number>>(new Map());
   const onlineUids = useOnlineAuthUids();
 
   const load = useCallback(async () => {
@@ -27,8 +29,9 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
     setCreators(creatorsData);
     setFollowingSet(new Set(followingUids));
     const uids = creatorsData.map(c => c.authUid);
-    const map = await getXPMap(uids);
-    setXpMap(map);
+    const [xp, reach] = await Promise.all([getXPMap(uids), getReachScores(uids)]);
+    setXpMap(xp);
+    setReachMap(reach);
     setLoading(false);
   }, [authUid]);
 
@@ -62,6 +65,7 @@ export function CreatorGrid({ authUid, onViewCreator }: CreatorGridProps) {
           key={creator.authUid}
           creator={creator}
           authorXp={xpMap.get(creator.authUid)}
+          reach={reachMap.get(creator.authUid) ?? 0}
           authUid={authUid}
           followingSet={followingSet}
           isOnline={onlineUids.has(creator.authUid)}

@@ -81,3 +81,7 @@
   font-size: 11px;
   color: var(--text-tertiary);
 }
+
+.creator-card-stat--reach {
+  color: rgba(110, 231, 183, 0.7);
+}
