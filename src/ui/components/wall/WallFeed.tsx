@@ -20,6 +20,7 @@ import './WallFeed.css';
 
 const POLL_INTERVAL_MS = 45_000;
 const LAST_VISITED_KEY = 'morpbase:community:last_visited';
+const ONBOARDED_KEY = 'morpbase:community:onboarded';
 
 type WallFeedProps = {
   authUid: string | null;
@@ -48,6 +49,9 @@ export function WallFeed({
   const [authorXpMap, setAuthorXpMap] = useState<Map<string, number>>(new Map());
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !!authUid && !localStorage.getItem(ONBOARDED_KEY),
+  );
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastVisitedRef = useRef<number>(0);
   const onlineUids = useOnlineAuthUids();
@@ -96,10 +100,16 @@ export function WallFeed({
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [fetchPosts, fetchMyReactions, fetchFollowing]);
 
+  const dismissOnboarding = useCallback(() => {
+    localStorage.setItem(ONBOARDED_KEY, '1');
+    setShowOnboarding(false);
+  }, []);
+
   const handlePosted = useCallback(() => {
     setComposerOpen(false);
+    dismissOnboarding();
     void fetchPosts();
-  }, [fetchPosts]);
+  }, [fetchPosts, dismissOnboarding]);
 
   const handleReact = useCallback(async (postId: string, emoji: string) => {
     if (!authUid) return;
@@ -166,6 +176,34 @@ export function WallFeed({
           </button>
         )}
       </div>
+
+      {showOnboarding && !composerOpen && (
+        <div className="wall-onboarding">
+          <div className="wall-onboarding-body">
+            <p className="wall-onboarding-title">Welcome to the Wall</p>
+            <p className="wall-onboarding-text">
+              This is where creators share prompts and identities. Post something — your work inspires others.
+            </p>
+            {authUid && userId && userName && (
+              <button
+                type="button"
+                className="wall-onboarding-cta"
+                onClick={() => { setComposerOpen(true); }}
+              >
+                Post your first prompt
+              </button>
+            )}
+          </div>
+          <button
+            type="button"
+            className="wall-onboarding-dismiss"
+            onClick={dismissOnboarding}
+            title="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {composerOpen && authUid && userId && userName && (
         <WallPostComposer
