@@ -159,15 +159,6 @@ export function WallFeed({
     ? posts.filter(p => followingUids.has(p.authUid) && !p.parentPostId)
     : posts.filter(p => !p.parentPostId);
 
-  const repliesMap = new Map<string, WallPost[]>();
-  for (const post of posts) {
-    if (post.parentPostId) {
-      const arr = repliesMap.get(post.parentPostId) ?? [];
-      arr.push(post);
-      repliesMap.set(post.parentPostId, arr);
-    }
-  }
-
   return (
     <div className="wall-feed">
 
@@ -274,26 +265,6 @@ export function WallFeed({
                 onViewAuthor={onViewAuthor}
                 onOpenPost={onOpenPost}
               />
-
-              {(repliesMap.get(post.id) ?? []).map(reply => (
-                <div key={reply.id} className="wall-thread-reply">
-                  <WallPostCard
-                    post={reply}
-                    isOwnPost={reply.authUid === authUid}
-                    isNew={reply.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
-                    reactions={reactionMap[reply.id] ?? {}}
-                    myReactions={myReactionMap[reply.id] ?? new Set()}
-                    canReact={!!authUid}
-                    canReply={false}
-                    authorXp={authorXpMap.get(reply.authUid)}
-                    isAuthorOnline={onlineUids.has(reply.authUid)}
-                    onReact={handleReact}
-                    onReply={handleReply}
-                    onDelete={handleDelete}
-                    onViewAuthor={onViewAuthor}
-                  />
-                </div>
-              ))}
 
               {replyingTo?.postId === post.id && authUid && userId && userName && (
                 <div className="wall-thread-composer">
