@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useOnlineAuthUids } from '../../hooks/useOnlineAuthUids';
-import { getNamesByAuthUids } from '../../../engine/presenceStore';
+import { usePresenceStates } from '../../hooks/usePresenceStates';
 import './OnlinePresenceBadge.css';
 
 type Props = {
@@ -9,17 +8,11 @@ type Props = {
 };
 
 export function OnlinePresenceBadge({ selfAuthUid, onViewUser }: Props) {
-  const onlineUids = useOnlineAuthUids();
-  const [nameMap, setNameMap] = useState<Map<string, string>>(new Map());
+  const states = usePresenceStates();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  const others = [...onlineUids].filter(uid => uid !== selfAuthUid);
-
-  useEffect(() => {
-    if (others.length === 0) { setNameMap(new Map()); return; }
-    void getNamesByAuthUids(others).then(setNameMap);
-  }, [others.join(',')]);
+  const others = [...states.entries()].filter(([uid]) => uid !== selfAuthUid);
 
   useEffect(() => {
     if (!open) return;
@@ -31,8 +24,6 @@ export function OnlinePresenceBadge({ selfAuthUid, onViewUser }: Props) {
   }, [open]);
 
   if (others.length === 0) return null;
-
-  const names = others.map(uid => ({ uid, name: nameMap.get(uid) ?? '…' }));
 
   return (
     <div className="presence-badge" ref={ref}>
@@ -49,18 +40,21 @@ export function OnlinePresenceBadge({ selfAuthUid, onViewUser }: Props) {
       {open && (
         <div className="presence-dropdown">
           <div className="presence-dropdown-label">Building now</div>
-          {names.slice(0, 8).map(({ uid, name }) => (
+          {others.slice(0, 8).map(([uid, state]) => (
             <button
               key={uid}
               type="button"
               className="presence-dropdown-user"
-              onClick={() => { onViewUser?.(uid, name); setOpen(false); }}
+              onClick={() => { onViewUser?.(uid, state.name); setOpen(false); }}
             >
-              {name}
+              <span className="presence-dropdown-name">{state.name}</span>
+              {state.studio && (
+                <span className="presence-dropdown-studio">{state.studio}</span>
+              )}
             </button>
           ))}
-          {names.length > 8 && (
-            <div className="presence-dropdown-more">+{names.length - 8} more</div>
+          {others.length > 8 && (
+            <div className="presence-dropdown-more">+{others.length - 8} more</div>
           )}
         </div>
       )}

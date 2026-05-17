@@ -66,7 +66,9 @@
 }
 
 .presence-dropdown-user {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
   text-align: left;
   padding: 6px 14px;
@@ -83,6 +85,14 @@
 .presence-dropdown-user:hover {
   color: var(--text-primary);
   background: rgba(255, 255, 255, 0.04);
+}
+
+.presence-dropdown-studio {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  margin-top: 1px;
 }
 
 .presence-dropdown-more {

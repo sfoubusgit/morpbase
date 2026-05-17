@@ -113,7 +113,7 @@ import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
 import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
 import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
-import { initPresence, destroyPresence } from '../engine/presenceStore';
+import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
 import type { Universe, UniverseInput } from '../types/universe';
 import {
@@ -848,6 +848,10 @@ export function App() {
     }
   }, [activeTerritoryId]);
 
+  useEffect(() => {
+    void updateStudioState(activeTerritory?.name);
+  }, [activeTerritory]);
+
   // Helper: Get first subcategory node ID for a category, or the category root if no subcategories
   const getFirstSubcategoryNodeId = (categoryId: string, nodes: QuestionNode[]): string | null => {
     const categoryItems = CATEGORY_MAP[categoryId];
@@ -1485,7 +1489,7 @@ export function App() {
       .then(user => {
         if (!isMounted) return;
         setAuthUser(user);
-        if (user) void initPresence(user.authUid, user.id);
+        if (user) void initPresence(user.authUid, user.id, user.name);
         setAuthReady(true);
       })
       .catch(() => {
@@ -1502,7 +1506,7 @@ export function App() {
     try {
       const user = await loginUser(email, password);
       setAuthUser(user);
-      void initPresence(user.authUid, user.id);
+      void initPresence(user.authUid, user.id, user.name);
       setAuthError(null);
       setIsAuthModalOpen(false);
       return true;
@@ -1516,7 +1520,7 @@ export function App() {
     try {
       const user = await registerUser(name, email, password);
       setAuthUser(user);
-      void initPresence(user.authUid, user.id);
+      void initPresence(user.authUid, user.id, user.name);
       setAuthError(null);
       setIsAuthModalOpen(false);
       return true;
