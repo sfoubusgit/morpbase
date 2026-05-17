@@ -13,6 +13,15 @@
   border-color: var(--border-medium);
 }
 
+.wall-card--clickable {
+  cursor: pointer;
+}
+
+.wall-card--clickable:hover {
+  border-color: var(--border-medium);
+  background: rgba(255, 255, 255, 0.03);
+}
+
 /* ── Author meta (bottom of card) ── */
 
 .wall-card-meta {
@@ -85,15 +94,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.wall-card-body--clickable {
-  cursor: pointer;
-  border-radius: var(--radius-md);
-  transition: background 0.12s;
-}
-
-.wall-card-body--clickable:hover {
-  background: rgba(255, 255, 255, 0.03);
-}
 
 /* ── Caption ── */
 

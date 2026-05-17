@@ -73,7 +73,13 @@ export function WallPostCard({
   const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
 
   return (
-    <div className="wall-card">
+    <div
+      className={`wall-card${onOpenPost ? ' wall-card--clickable' : ''}`}
+      onClick={() => onOpenPost?.(post.id)}
+      role={onOpenPost ? 'button' : undefined}
+      tabIndex={onOpenPost ? 0 : undefined}
+      onKeyDown={onOpenPost ? (e) => { if (e.key === 'Enter') onOpenPost(post.id); } : undefined}
+    >
 
       {/* Content first */}
       {post.postType === 'share_event' && (
@@ -94,13 +100,7 @@ export function WallPostCard({
         </div>
       )}
 
-      <div
-        className={`wall-card-body${onOpenPost ? ' wall-card-body--clickable' : ''}`}
-        onClick={() => onOpenPost?.(post.id)}
-        role={onOpenPost ? 'button' : undefined}
-        tabIndex={onOpenPost ? 0 : undefined}
-        onKeyDown={onOpenPost ? (e) => { if (e.key === 'Enter') onOpenPost(post.id); } : undefined}
-      >
+      <div className="wall-card-body">
         {post.caption && (
           <div className="wall-card-caption">{post.caption}</div>
         )}
@@ -113,7 +113,7 @@ export function WallPostCard({
           <button
             type="button"
             className="wall-card-author-name"
-            onClick={() => onViewAuthor?.(post.authUid, post.authorName)}
+            onClick={(e) => { e.stopPropagation(); onViewAuthor?.(post.authUid, post.authorName); }}
           >
             {post.authorName}
           </button>
@@ -126,7 +126,7 @@ export function WallPostCard({
         </div>
       </div>
 
-      <div className="wall-card-footer">
+      <div className="wall-card-footer" onClick={(e) => e.stopPropagation()}>
         <div className="wall-card-reactions">
           {REACTION_EMOJIS.map(key => {
             const count = reactions[key] ?? 0;
