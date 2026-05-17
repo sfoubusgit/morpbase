@@ -1950,49 +1950,49 @@ export function App() {
     const scopeMulti = <T extends { id: string }>(full: T[], uids?: string[]): T[] =>
       uids && uids.length > 0 ? full.filter(x => uids.includes(x.id)) : full;
 
-    if (rollAll || !locked.has('character')) {
+    if (rollAll || locked.has('character')) {
       const n = Math.max(1, activeCharacterIds.length);
       setActiveCharacterIds(pickN(scopeMulti(characters, activeUniverse?.character), n));
     }
 
-    if (rollAll || !locked.has('environment')) {
+    if (rollAll || locked.has('environment')) {
       const n = Math.max(1, activeEnvironmentIds.length);
       setActiveEnvironmentIds(pickN(scopeMulti(environments, activeUniverse?.environment), n));
     }
 
-    if (rollAll || !locked.has('wardrobe')) {
+    if (rollAll || locked.has('wardrobe')) {
       const n = Math.max(1, activeOutfitIds.length);
       setActiveOutfitIds(pickN(scopeMulti(outfits, activeUniverse?.wardrobe), n));
     }
 
-    if (rollAll || !locked.has('style')) {
+    if (rollAll || locked.has('style')) {
       const n = Math.max(1, activeStyleIds.length);
       setActiveStyleIds(pickN(scopeMulti(stylePresets, activeUniverse?.style), n));
     }
 
-    if (rollAll || !locked.has('lighting')) {
+    if (rollAll || locked.has('lighting')) {
       const n = Math.max(1, activeLightingIds.length);
       setActiveLightingIds(pickN(scopeMulti(lightingSetups, activeUniverse?.lighting), n));
     }
 
-    if (rollAll || !locked.has('composition')) {
+    if (rollAll || locked.has('composition')) {
       const n = Math.max(1, activeCompositionIds.length);
       setActiveCompositionIds(pickN(scopeMulti(compositionFrames, activeUniverse?.composition), n));
     }
 
-    if (rollAll || !locked.has('mood')) {
+    if (rollAll || locked.has('mood')) {
       const n = Math.max(1, activeMoodIds.length);
       setActiveMoodIds(pickN(scopeMulti(moodPresets, activeUniverse?.mood), n));
     }
 
-    if (rollAll || !locked.has('dynamics')) {
+    if (rollAll || locked.has('dynamics')) {
       const others = INTERACTION_PHRASES.filter(p => p.id !== activeInteractionPhraseId);
       const pool = others.length > 0 ? others : INTERACTION_PHRASES;
       const picked = pool[Math.floor(Math.random() * pool.length)];
       setActiveInteractionPhraseId(picked.id);
     }
 
-    if (rollAll || !locked.has('aura')) {
+    if (rollAll || locked.has('aura')) {
       const auraPool = scopeMulti(worlds, activeUniverse?.aura);
       const pool = auraPool.length > 0 ? auraPool : worlds;
       if (pool.length > 0) {
