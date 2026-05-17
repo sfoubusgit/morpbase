@@ -73,11 +73,9 @@ export function PublicCreatorPage({
   onMessage,
 }: PublicCreatorPageProps) {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [loadingProfile, setLoadingProfile] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const [publicPrompts, setPublicPrompts] = useState<SavedPrompt[]>([]);
   const [loadingPrompts, setLoadingPrompts] = useState(false);
-  const [promptsError, setPromptsError] = useState<string | null>(null);
   const [creatorStats, setCreatorStats] = useState<CreatorStats | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [creatorXp, setCreatorXp] = useState<number | null>(null);
@@ -107,7 +105,6 @@ export function PublicCreatorPage({
     }
 
     const loadProfile = async () => {
-      setLoadingProfile(true);
       setProfileError(null);
       try {
         const nextProfile = idToFetch
@@ -119,8 +116,6 @@ export function PublicCreatorPage({
         }
       } catch (err: any) {
         if (isActive) setProfileError(err?.message ?? 'Failed to load creator profile.');
-      } finally {
-        if (isActive) setLoadingProfile(false);
       }
     };
 
@@ -149,17 +144,15 @@ export function PublicCreatorPage({
     let isActive = true;
     if (!effectiveCreatorId || !profile?.showPublicPrompts) {
       setPublicPrompts([]);
-      setPromptsError(null);
       return () => { isActive = false; };
     }
     const loadPrompts = async () => {
       setLoadingPrompts(true);
-      setPromptsError(null);
       try {
         const prompts = await listPublicPromptsByUser(effectiveCreatorId);
         if (isActive) setPublicPrompts(prompts);
-      } catch (err: any) {
-        if (isActive) setPromptsError(err?.message ?? 'Failed to load public prompts.');
+      } catch {
+        // non-fatal
       } finally {
         if (isActive) setLoadingPrompts(false);
       }
@@ -242,44 +235,6 @@ export function PublicCreatorPage({
   const title = creatorXp !== null ? getTitleForXp(creatorXp) : null;
   const creativeDna = useMemo(() => computeCreativeDna(wallPosts), [wallPosts]);
 
-  const profileStateItems = useMemo(() => ([
-    {
-      label: 'Bio',
-      state: profile?.bio?.trim() ? 'complete' : 'missing',
-      detail: profile?.bio?.trim() ? 'Creator added a public bio.' : 'No public bio yet.',
-    },
-    {
-      label: 'Links',
-      state: profile?.showLinksPublicly && profile?.links && Object.keys(profile.links).length > 0 ? 'complete' : 'hidden',
-      detail: profile?.showLinksPublicly
-        ? (profile?.links && Object.keys(profile.links).length > 0 ? 'Public links are visible.' : 'No public links yet.')
-        : 'Links are hidden on this page.',
-    },
-    {
-      label: 'Pools',
-      state: profile?.showPublicPools ? (creatorSummary.uploads > 0 ? 'complete' : 'empty') : 'hidden',
-      detail: profile?.showPublicPools
-        ? (creatorSummary.uploads > 0 ? 'Public pools are visible.' : 'No public pools published yet.')
-        : 'Pools are hidden on this page.',
-    },
-    {
-      label: 'Prompts',
-      state: profile?.showPublicPrompts ? (creatorSummary.promptCount > 0 ? 'complete' : 'empty') : 'hidden',
-      detail: profile?.showPublicPrompts
-        ? (creatorSummary.promptCount > 0 ? 'Public prompts are visible.' : 'No public prompts published yet.')
-        : 'Prompts are hidden on this page.',
-    },
-  ]), [profile, creatorSummary]);
-
-  const profileStateSummary = useMemo(() => {
-    const visibleCount = profileStateItems.filter(item => item.state === 'complete').length;
-    const hiddenCount = profileStateItems.filter(item => item.state === 'hidden').length;
-    if (visibleCount === 0 && hiddenCount >= 2) return 'This creator is keeping most public profile sections private right now.';
-    if (visibleCount === 0) return 'This creator has only partially set up their public profile so far.';
-    if (visibleCount >= 3) return 'This creator has a strong public profile presence on MorpBase.';
-    return 'This public creator page is partially filled out and still growing.';
-  }, [profileStateItems]);
-
   const shareUrl = useMemo(() => {
     const params = new URLSearchParams();
     if (creatorId) params.set('user', creatorId);
@@ -291,19 +246,21 @@ export function PublicCreatorPage({
   }, [creatorId, creatorAuthUid, creatorName]);
 
   return (
-    <div className="public-creator-page">
-      <div className="public-creator-hero">
-        <div className="public-creator-hero-actions">
-          <button type="button" className="public-creator-back" onClick={onBack}>
-            Back
-          </button>
+    <div className="pub-profile">
+
+      {/* Top bar */}
+      <div className="pub-profile-topbar">
+        <button type="button" className="pub-profile-back" onClick={onBack}>
+          ← Back
+        </button>
+        <div className="pub-profile-topbar-actions">
           <button
             type="button"
-            className="public-creator-share"
+            className="pub-profile-action-btn"
             onClick={() => {
               navigator.clipboard.writeText(shareUrl)
-                .then(() => setShareMessage('Creator link copied.'))
-                .catch(() => setShareMessage('Could not copy creator link.'));
+                .then(() => setShareMessage('Link copied.'))
+                .catch(() => setShareMessage('Could not copy link.'));
             }}
           >
             Copy Link
@@ -311,7 +268,7 @@ export function PublicCreatorPage({
           {viewerAuthUid && creatorAuthUid && viewerAuthUid !== creatorAuthUid && (
             <button
               type="button"
-              className={`public-creator-follow-btn${followingCreator ? ' following' : ''}`}
+              className={`pub-profile-follow-btn${followingCreator ? ' following' : ''}`}
               onClick={() => void handleFollowToggle()}
               disabled={followLoading}
             >
@@ -321,119 +278,111 @@ export function PublicCreatorPage({
           {onMessage && viewerAuthUid && creatorAuthUid && viewerAuthUid !== creatorAuthUid && (
             <button
               type="button"
-              className="public-creator-message-btn"
+              className="pub-profile-action-btn pub-profile-action-btn--message"
               onClick={() => onMessage(creatorAuthUid, displayName)}
             >
               Message
             </button>
           )}
         </div>
+      </div>
 
-        <div className="public-creator-hero-main">
+      {shareMessage && <div className="pub-profile-share-toast">{shareMessage}</div>}
+      {profileError && <div className="pub-profile-error-banner">{profileError}</div>}
+
+      {/* Hero */}
+      <div className="pub-profile-hero">
+        <div className="pub-profile-hero-main">
           {profile?.avatarUrl ? (
-            <img src={profile.avatarUrl} alt={displayName} className="public-creator-avatar" />
+            <img src={profile.avatarUrl} alt={displayName} className="pub-profile-avatar" />
           ) : (
-            <div className="public-creator-avatar public-creator-avatar-fallback">
+            <div className="pub-profile-avatar pub-profile-avatar--fallback">
               {displayName.charAt(0).toUpperCase()}
             </div>
           )}
-          <div className="public-creator-identity">
-            <div className="public-creator-eyebrow">Community Presence</div>
-            <div className="public-creator-name-row">
-              <h1>{displayName}</h1>
+          <div className="pub-profile-identity">
+            <div className="pub-profile-name-row">
+              <h1 className="pub-profile-name">{displayName}</h1>
               {title && <TitleBadge title={title} size="md" />}
               <OnlineIndicator isOnline={isOnline} lastSeenAt={lastSeenAt} showLastSeen />
             </div>
             {creatorXp !== null && (
-              <div className="public-creator-xp">{creatorXp.toLocaleString()} XP</div>
+              <div className="pub-profile-xp">{creatorXp.toLocaleString()} XP</div>
             )}
             {creatorBadges.length > 0 && (
-              <div className="public-creator-badges">
+              <div className="pub-profile-badges">
                 <BadgeStrip badges={creatorBadges} max={8} />
               </div>
             )}
-            {profile?.bio ? (
-              <p>{profile.bio}</p>
-            ) : (
-              <p className="public-creator-empty-copy">This creator has not added a public bio yet.</p>
+            {profile?.bio && (
+              <p className="pub-profile-bio">{profile.bio}</p>
             )}
-            {profile?.showLinksPublicly && profile.links && (
-              <div className="public-creator-links">
-                {Object.entries(profile.links).map(([label, url]) => (
-                  <a key={label} href={url} target="_blank" rel="noreferrer">{label}</a>
+            {(profile?.showLinksPublicly && profile.links) || (profile?.tags && profile.tags.length > 0) ? (
+              <div className="pub-profile-meta-chips">
+                {profile?.showLinksPublicly && profile.links && Object.entries(profile.links).map(([label, url]) => (
+                  <a key={label} href={url} target="_blank" rel="noreferrer" className="pub-profile-chip pub-profile-chip--link">{label}</a>
+                ))}
+                {profile?.tags && profile.tags.map(tag => (
+                  <span key={tag} className="pub-profile-chip">{tag}</span>
                 ))}
               </div>
-            )}
-            {profile?.tags && profile.tags.length > 0 && (
-              <div className="public-creator-tags">
-                {profile.tags.map(tag => <span key={tag}>{tag}</span>)}
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
 
-        <div className="public-creator-stats">
-          <div>
+        <div className="pub-profile-stats">
+          <div className="pub-profile-stat">
             <strong>{followerCount}</strong>
             <span>Followers</span>
           </div>
-          <div>
-            <strong>{wallPosts.length > 0 ? wallPosts.length : creatorSummary.promptCount}</strong>
+          <div className="pub-profile-stat">
+            <strong>{wallPosts.length > 0 ? wallPosts.length : '—'}</strong>
             <span>Wall posts</span>
           </div>
-          <div>
-            <strong>{creatorSummary.uploads}</strong>
+          <div className="pub-profile-stat">
+            <strong>{creatorSummary.uploads > 0 ? creatorSummary.uploads : '—'}</strong>
             <span>Pools</span>
           </div>
-          <div>
-            <strong>{creatorBadges.length}</strong>
+          <div className="pub-profile-stat">
+            <strong>{creatorBadges.length > 0 ? creatorBadges.length : '—'}</strong>
             <span>Badges</span>
           </div>
         </div>
-
-        {shareMessage && <div className="public-creator-share-message">{shareMessage}</div>}
       </div>
 
-      {loadingProfile && <div className="public-creator-callout">Loading creator profile…</div>}
-      {profileError && <div className="public-creator-callout public-creator-error">{profileError}</div>}
+      {/* Body */}
+      <div className="pub-profile-body">
 
-      <div className="public-creator-layout">
-
-        {/* Wall Posts — shown when we have community data */}
-        {creatorAuthUid && (
-          <section className="public-creator-section">
-            <div className="public-creator-section-head">
+        {creatorAuthUid && wallPosts.length > 0 && (
+          <section className="pub-profile-section">
+            <div className="pub-profile-section-head">
               <h2>Wall Posts</h2>
-              <p>Prompts this creator has shared on the community wall.</p>
             </div>
             {loadingWall ? (
-              <div className="public-creator-empty">Loading wall posts…</div>
-            ) : wallPosts.length === 0 ? (
-              <div className="public-creator-empty">No wall posts yet.</div>
+              <div className="pub-profile-empty">Loading…</div>
             ) : (
-              <div className="public-creator-wall-list">
+              <div className="pub-profile-wall-grid">
                 {wallPosts.slice(0, 8).map(post => (
-                  <div key={post.id} className="public-creator-wall-card">
+                  <div key={post.id} className="pub-profile-wall-card">
                     {post.caption && (
-                      <div className="public-creator-wall-caption">{post.caption}</div>
+                      <div className="pub-profile-wall-caption">{post.caption}</div>
                     )}
-                    <p className="public-creator-wall-text">
-                      {post.promptText.length > 220
-                        ? post.promptText.slice(0, 220) + '…'
+                    <p className="pub-profile-wall-text">
+                      {post.promptText.length > 160
+                        ? post.promptText.slice(0, 160) + '…'
                         : post.promptText}
                     </p>
                     {post.identityTags.length > 0 && (
-                      <div className="public-creator-wall-tags">
-                        {post.identityTags.map(tag => (
-                          <span key={tag.name} className={`public-creator-wall-tag public-creator-wall-tag--${tag.type}`}>
+                      <div className="pub-profile-wall-tags">
+                        {post.identityTags.slice(0, 4).map(tag => (
+                          <span key={tag.name} className={`pub-profile-wall-tag pub-profile-wall-tag--${tag.type}`}>
                             {tag.name}
                           </span>
                         ))}
                       </div>
                     )}
-                    <div className="public-creator-wall-meta">
+                    <div className="pub-profile-wall-meta">
                       <span>{formatDate(post.createdAt)}</span>
-                      {post.likeCount > 0 && <span>{post.likeCount} {post.likeCount === 1 ? 'like' : 'likes'}</span>}
                     </div>
                   </div>
                 ))}
@@ -443,122 +392,80 @@ export function PublicCreatorPage({
         )}
 
         {creativeDna.totalPosts >= 2 && creativeDna.topTags.length > 0 && (
-          <section className="public-creator-section">
-            <div className="public-creator-section-head">
+          <section className="pub-profile-section">
+            <div className="pub-profile-section-head">
               <h2>Creative DNA</h2>
-              <p>
-                Identity patterns across {creativeDna.totalPosts} wall {creativeDna.totalPosts === 1 ? 'post' : 'posts'}
-                {creativeDna.recentPosts > 0 && ` · ${creativeDna.recentPosts} this month`}
-                {creativeDna.recentPosts > creativeDna.previousPosts && ' ↑'}
-              </p>
+              <span className="pub-profile-section-meta">
+                {creativeDna.totalPosts} posts{creativeDna.recentPosts > 0 && ` · ${creativeDna.recentPosts} this month`}{creativeDna.recentPosts > creativeDna.previousPosts && ' ↑'}
+              </span>
             </div>
-            <div className="public-creator-dna-grid">
+            <div className="pub-profile-dna-grid">
               {creativeDna.topTags.map(tag => (
-                <div key={`${tag.type}_${tag.name}`} className={`public-creator-dna-tag public-creator-dna-tag--${tag.type}`}>
-                  <span className="public-creator-dna-type">{tag.type}</span>
-                  <span className="public-creator-dna-name">{tag.name}</span>
-                  <span className="public-creator-dna-count">{tag.count}×</span>
+                <div key={`${tag.type}_${tag.name}`} className={`pub-profile-dna-tag pub-profile-dna-tag--${tag.type}`}>
+                  <span className="pub-profile-dna-type">{tag.type}</span>
+                  <span className="pub-profile-dna-name">{tag.name}</span>
+                  <span className="pub-profile-dna-count">{tag.count}×</span>
                 </div>
               ))}
             </div>
           </section>
         )}
 
-        <section className="public-creator-section public-creator-section-overview">
-          <div className="public-creator-section-head">
-            <h2>Community Presence</h2>
-            <p>{profileStateSummary}</p>
-          </div>
-          <div className="public-creator-state-grid">
-            {profileStateItems.map(item => (
-              <div key={item.label} className={`public-creator-state-card state-${item.state}`}>
-                <div className="public-creator-state-top">
-                  <span className="public-creator-state-label">{item.label}</span>
-                  <span className="public-creator-state-badge">
-                    {item.state === 'complete' ? 'Visible' : item.state === 'hidden' ? 'Hidden' : 'Empty'}
-                  </span>
-                </div>
-                <div className="public-creator-state-detail">{item.detail}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="public-creator-section">
-          <div className="public-creator-section-head">
-            <h2>Shared Pools</h2>
-            <p>
-              {effectiveCreatorId && profile && !profile.showPublicPools
-                ? 'This creator keeps shared pools private on their community surface.'
-                : 'Pools this creator has chosen to share through MorpBase.'}
-            </p>
-          </div>
-          {visiblePools.length === 0 ? (
-            <div className="public-creator-empty">
-              {effectiveCreatorId && profile && !profile.showPublicPools
-                ? 'No shared pools are visible.'
-                : 'No shared pools yet.'}
+        {visiblePools.length > 0 && (
+          <section className="pub-profile-section">
+            <div className="pub-profile-section-head">
+              <h2>Pools</h2>
             </div>
-          ) : (
-            <div className="public-creator-pool-grid">
+            <div className="pub-profile-pool-grid">
               {visiblePools.map(entry => (
                 <button
                   key={entry.id}
                   type="button"
-                  className="public-creator-pool-card"
+                  className="pub-profile-pool-card"
                   onClick={() => onOpenPool?.(entry.id)}
                 >
-                  <div className="public-creator-pool-card-head">
+                  <div className="pub-profile-pool-head">
                     <span>{entry.category}</span>
                     <span>{entry.ratingAvg.toFixed(1)}</span>
                   </div>
-                  <div className="public-creator-pool-title">{entry.title}</div>
-                  <div className="public-creator-pool-summary">{entry.summary}</div>
-                  <div className="public-creator-pool-meta">
+                  <div className="pub-profile-pool-title">{entry.title}</div>
+                  <div className="pub-profile-pool-summary">{entry.summary}</div>
+                  <div className="pub-profile-pool-meta">
                     <span>{entry.downloads} downloads</span>
                     <span>{entry.payload.items.length} items</span>
                   </div>
                 </button>
               ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className="public-creator-section">
-          <div className="public-creator-section-head">
-            <h2>Shared Prompts</h2>
-            <p>
-              {profile?.showPublicPrompts
-                ? 'Prompt work this creator has chosen to share through MorpBase.'
-                : 'This creator keeps prompt work private on their community surface.'}
-            </p>
-          </div>
-          {!profile?.showPublicPrompts ? (
-            <div className="public-creator-empty">No shared prompts are visible.</div>
-          ) : loadingPrompts ? (
-            <div className="public-creator-empty">Loading shared prompts…</div>
-          ) : promptsError ? (
-            <div className="public-creator-callout public-creator-error">{promptsError}</div>
-          ) : publicPrompts.length === 0 ? (
-            <div className="public-creator-empty">No shared prompts yet.</div>
-          ) : (
-            <div className="public-creator-prompt-list">
-              {publicPrompts.map(prompt => (
-                <div key={prompt.id} className="public-creator-prompt-card">
-                  <div className="public-creator-prompt-title">{prompt.name}</div>
-                  <div className="public-creator-prompt-text">{prompt.positive}</div>
-                  {(prompt.model || prompt.purpose || prompt.tags?.length) && (
-                    <div className="public-creator-prompt-meta">
-                      {prompt.model && <span>Model: {prompt.model}</span>}
-                      {prompt.purpose && <span>Purpose: {prompt.purpose}</span>}
-                      {prompt.tags && prompt.tags.length > 0 && <span>{prompt.tags.join(', ')}</span>}
-                    </div>
-                  )}
-                </div>
-              ))}
+        {profile?.showPublicPrompts && publicPrompts.length > 0 && (
+          <section className="pub-profile-section">
+            <div className="pub-profile-section-head">
+              <h2>Prompts</h2>
             </div>
-          )}
-        </section>
+            {loadingPrompts ? (
+              <div className="pub-profile-empty">Loading…</div>
+            ) : (
+              <div className="pub-profile-prompt-list">
+                {publicPrompts.map(prompt => (
+                  <div key={prompt.id} className="pub-profile-prompt-card">
+                    <div className="pub-profile-prompt-title">{prompt.name}</div>
+                    <div className="pub-profile-prompt-text">{prompt.positive}</div>
+                    {(prompt.model || prompt.purpose || prompt.tags?.length) && (
+                      <div className="pub-profile-prompt-meta">
+                        {prompt.model && <span>{prompt.model}</span>}
+                        {prompt.purpose && <span>{prompt.purpose}</span>}
+                        {prompt.tags && prompt.tags.length > 0 && <span>{prompt.tags.join(', ')}</span>}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
       </div>
     </div>
