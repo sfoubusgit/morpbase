@@ -85,6 +85,16 @@
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
+.wall-card-body--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background 0.12s;
+}
+
+.wall-card-body--clickable:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
 /* ── Caption ── */
 
 .wall-card-caption {

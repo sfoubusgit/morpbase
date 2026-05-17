@@ -29,6 +29,7 @@ type WallFeedProps = {
   activeIdentityTags: WallPostIdentityTag[];
   currentPromptText: string;
   onViewAuthor?: (authUid: string, name: string) => void;
+  onOpenPost?: (postId: string) => void;
 };
 
 type FilterMode = 'all' | 'following';
@@ -40,6 +41,7 @@ export function WallFeed({
   activeIdentityTags,
   currentPromptText,
   onViewAuthor,
+  onOpenPost,
 }: WallFeedProps) {
   const [posts, setPosts] = useState<WallPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -269,6 +271,7 @@ export function WallFeed({
                 onReply={handleReply}
                 onDelete={handleDelete}
                 onViewAuthor={onViewAuthor}
+                onOpenPost={onOpenPost}
               />
 
               {(repliesMap.get(post.id) ?? []).map(reply => (

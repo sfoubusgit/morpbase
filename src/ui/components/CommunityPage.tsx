@@ -121,6 +121,7 @@ type CommunityPageProps = {
   userName: string | null;
   onIdentityAdded?: () => Promise<void>;
   onViewCreator?: (authUid: string, name: string) => void;
+  onOpenPost?: (postId: string) => void;
   activeIdentityTags?: WallPostIdentityTag[];
   currentPromptText?: string;
 };
@@ -131,6 +132,7 @@ export function CommunityPage({
   userName,
   onIdentityAdded,
   onViewCreator,
+  onOpenPost,
   activeIdentityTags = [],
   currentPromptText = '',
 }: CommunityPageProps) {
@@ -308,6 +310,7 @@ export function CommunityPage({
             activeIdentityTags={activeIdentityTags}
             currentPromptText={currentPromptText}
             onViewAuthor={onViewCreator}
+          onOpenPost={onOpenPost}
           />
         )}
 

@@ -83,6 +83,34 @@ export async function createWallPost(
   return post;
 }
 
+export async function getWallPost(id: string): Promise<WallPost | null> {
+  try {
+    const { data, error } = await supabase
+      .from('wall_posts')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error || !data) return null;
+    return toWallPost(data as WallPostRow);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPostReplies(parentPostId: string): Promise<WallPost[]> {
+  try {
+    const { data, error } = await supabase
+      .from('wall_posts')
+      .select('*')
+      .eq('parent_post_id', parentPostId)
+      .order('created_at', { ascending: true });
+    if (error) return [];
+    return (data ?? []).map(row => toWallPost(row as WallPostRow));
+  } catch {
+    return [];
+  }
+}
+
 export async function deleteWallPost(id: string): Promise<void> {
   const { error } = await supabase
     .from('wall_posts')

@@ -45,6 +45,7 @@ import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
 import { DMInbox } from './components/dm/DMInbox';
+import { PostDetailPage } from './components/wall/PostDetailPage';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
@@ -353,7 +354,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'admin';
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'admin';
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
@@ -364,6 +365,7 @@ const PAGE_TO_PARAM: Record<PageId, string> = {
   'messages': 'messages',
   'my-profile': 'profile',
   'creator-profile': '',
+  'post-detail': '',
   'admin': 'admin',
 };
 
@@ -2235,6 +2237,12 @@ export function App() {
   }, []);
 
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+
+  const handleOpenPost = useCallback((postId: string) => {
+    setSelectedPostId(postId);
+    setActivePage('post-detail');
+  }, []);
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
     setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
@@ -3907,6 +3915,15 @@ export function App() {
           }}
           onMessage={handleStartDM}
         />
+      ) : activePage === 'post-detail' && selectedPostId ? (
+        <PostDetailPage
+          postId={selectedPostId}
+          authUid={authUser?.authUid ?? null}
+          userId={authUser?.id ?? null}
+          userName={authUser?.name ?? null}
+          onBack={() => setActivePage('community')}
+          onViewAuthor={handleViewCreator}
+        />
       ) : activePage === 'messages' ? (
         authUser ? (
           <DMInbox
@@ -3924,6 +3941,7 @@ export function App() {
           userName={authUser?.name ?? null}
           onIdentityAdded={handleCommunityIdentityAdded}
           onViewCreator={handleViewCreator}
+          onOpenPost={handleOpenPost}
           currentPromptText={workspacePrompt}
           activeIdentityTags={activeIdentityTags}
         />

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { WallPost } from '../../../types/community';
 import { TitleBadge } from '../shared/TitleBadge';
 import { OnlineIndicator } from '../shared/OnlineIndicator';
@@ -47,6 +46,7 @@ type WallPostCardProps = {
   onReply: (postId: string, authorName: string) => void;
   onDelete: (postId: string) => void;
   onViewAuthor?: (authUid: string, name: string) => void;
+  onOpenPost?: (postId: string) => void;
 };
 
 export function WallPostCard({
@@ -63,13 +63,11 @@ export function WallPostCard({
   onReply,
   onDelete,
   onViewAuthor,
+  onOpenPost,
 }: WallPostCardProps) {
-  const [expanded, setExpanded] = useState(false);
-
-  const isLong = post.promptText.length > PROMPT_PREVIEW_LENGTH;
-  const displayText = expanded || !isLong
-    ? post.promptText
-    : post.promptText.slice(0, PROMPT_PREVIEW_LENGTH) + '…';
+  const displayText = post.promptText.length > PROMPT_PREVIEW_LENGTH
+    ? post.promptText.slice(0, PROMPT_PREVIEW_LENGTH) + '…'
+    : post.promptText;
 
   const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
 
@@ -95,22 +93,17 @@ export function WallPostCard({
         </div>
       )}
 
-      <div className="wall-card-body">
+      <div
+        className={`wall-card-body${onOpenPost ? ' wall-card-body--clickable' : ''}`}
+        onClick={() => onOpenPost?.(post.id)}
+        role={onOpenPost ? 'button' : undefined}
+        tabIndex={onOpenPost ? 0 : undefined}
+        onKeyDown={onOpenPost ? (e) => { if (e.key === 'Enter') onOpenPost(post.id); } : undefined}
+      >
         {post.caption && (
           <div className="wall-card-caption">{post.caption}</div>
         )}
-        <div className="wall-card-prompt">
-          {displayText}
-          {isLong && (
-            <button
-              type="button"
-              className="wall-card-expand"
-              onClick={() => setExpanded(e => !e)}
-            >
-              {expanded ? 'Show less' : 'Show more'}
-            </button>
-          )}
-        </div>
+        <div className="wall-card-prompt">{displayText}</div>
       </div>
 
       {/* Author + meta at the bottom */}
