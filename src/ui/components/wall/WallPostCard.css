@@ -55,12 +55,30 @@
   color: #c4b5fd;
 }
 
+.wall-card-time-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding-top: 3px;
+}
+
 .wall-card-time {
   font-size: 11px;
   color: var(--text-tertiary);
   white-space: nowrap;
-  flex-shrink: 0;
-  padding-top: 3px;
+}
+
+.wall-card-new {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.12);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 4px;
+  padding: 1px 5px;
+  white-space: nowrap;
 }
 
 /* ── Body (caption + prompt) ── */

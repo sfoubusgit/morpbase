@@ -36,6 +36,7 @@ type WallPostCardProps = {
   post: WallPost;
   isOwnPost: boolean;
   isLiked: boolean;
+  isNew?: boolean;
   authorXp?: number;
   isAuthorOnline?: boolean;
   onLike: (postId: string) => void;
@@ -48,6 +49,7 @@ export function WallPostCard({
   post,
   isOwnPost,
   isLiked,
+  isNew,
   authorXp,
   isAuthorOnline,
   onLike,
@@ -94,7 +96,10 @@ export function WallPostCard({
           </div>
           {title && <TitleBadge title={title} size="sm" />}
         </div>
-        <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
+        <div className="wall-card-time-row">
+          {isNew && <span className="wall-card-new">NEW</span>}
+          <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
+        </div>
       </div>
 
       {post.identityTags.length > 0 && (

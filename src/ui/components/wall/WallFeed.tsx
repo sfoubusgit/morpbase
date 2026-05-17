@@ -15,6 +15,7 @@ import { WallPostComposer } from './WallPostComposer';
 import './WallFeed.css';
 
 const POLL_INTERVAL_MS = 45_000;
+const LAST_VISITED_KEY = 'morpbase:community:last_visited';
 
 type WallFeedProps = {
   authUid: string | null;
@@ -43,6 +44,7 @@ export function WallFeed({
   const [filter, setFilter] = useState<FilterMode>('all');
   const [composerOpen, setComposerOpen] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastVisitedRef = useRef<number>(0);
   const onlineUids = useOnlineAuthUids();
 
   const fetchPosts = useCallback(async () => {
@@ -67,6 +69,10 @@ export function WallFeed({
   }, [authUid]);
 
   useEffect(() => {
+    const stored = localStorage.getItem(LAST_VISITED_KEY);
+    lastVisitedRef.current = stored ? parseInt(stored, 10) : 0;
+    localStorage.setItem(LAST_VISITED_KEY, String(Date.now()));
+
     void fetchPosts();
     void fetchLikes();
     void fetchFollowing();
@@ -166,6 +172,7 @@ export function WallFeed({
               post={post}
               isOwnPost={post.authUid === authUid}
               isLiked={likedIds.has(post.id)}
+              isNew={post.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
               authorXp={authorXpMap.get(post.authUid)}
               isAuthorOnline={onlineUids.has(post.authUid)}
               onLike={handleLike}
