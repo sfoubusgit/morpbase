@@ -27,26 +27,25 @@ function MultiLaneSlot({ label, variant, items, onChoose, onRemove }: MultiLaneS
   return (
     <div className={`ws-lane-slot ws-lane-slot-${variant}${items.length > 0 ? ' ws-lane-slot-active' : ''}`}>
       <div className="ws-lane-label">{label}</div>
-      {items.length === 0 ? (
-        <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
-      ) : (
-        <div className="ws-multi-tags">
-          {items.map(item => (
-            <span key={item.id} className="ws-multi-tag">
-              {item.name}
-              <button
-                type="button"
-                className="ws-multi-tag-remove"
-                onClick={() => onRemove(item.id)}
-                title={`Remove ${item.name}`}
-              >×</button>
-            </span>
-          ))}
-        </div>
-      )}
-      <div className="ws-lane-actions">
-        <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChoose}>
-          {items.length > 0 ? '+ Add' : 'Choose'}
+      <div className="ws-multi-tags">
+        {items.map(item => (
+          <span key={item.id} className="ws-multi-tag">
+            {item.name}
+            <button
+              type="button"
+              className="ws-multi-tag-remove"
+              onClick={() => onRemove(item.id)}
+              title={`Remove ${item.name}`}
+            >×</button>
+          </span>
+        ))}
+        <button
+          type="button"
+          className={`ws-multi-tag-add${items.length === 0 ? ' ws-multi-tag-add-empty' : ''}`}
+          onClick={onChoose}
+          title={items.length > 0 ? 'Add another' : 'Choose'}
+        >
+          {items.length > 0 ? '+' : '+ Add'}
         </button>
       </div>
     </div>
@@ -76,25 +75,24 @@ function LaneSlot({
       {entryPoint && (
         <div className="ws-lane-entry-hint">Start here — who's in your scene?</div>
       )}
-      {activeItems.length === 0 ? (
-        <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
-      ) : (
-        <div className="ws-multi-tags">
-          {activeItems.map(item => (
-            <span key={item.id} className="ws-multi-tag">
-              {item.name}
-              <button
-                type="button"
-                className="ws-multi-tag-remove"
-                onClick={e => { e.stopPropagation(); onRemoveItem(item.id); }}
-              >×</button>
-            </span>
-          ))}
-        </div>
-      )}
-      <div className="ws-lane-actions" onClick={onToggleLock ? e => e.stopPropagation() : undefined}>
-        <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChoose}>
-          {isActive ? '+ Add' : 'Choose'}
+      <div className="ws-multi-tags">
+        {activeItems.map(item => (
+          <span key={item.id} className="ws-multi-tag">
+            {item.name}
+            <button
+              type="button"
+              className="ws-multi-tag-remove"
+              onClick={e => { e.stopPropagation(); onRemoveItem(item.id); }}
+            >×</button>
+          </span>
+        ))}
+        <button
+          type="button"
+          className={`ws-multi-tag-add${!isActive ? ' ws-multi-tag-add-empty' : ''}`}
+          onClick={e => { e.stopPropagation(); onChoose(); }}
+          title={isActive ? 'Add another' : 'Choose'}
+        >
+          {isActive ? '+' : '+ Add'}
         </button>
       </div>
     </div>
@@ -648,25 +646,24 @@ export function WorkspacePage({
               role={onToggleLaneLock ? 'button' : undefined}
             >
               <div className="ws-lane-label">Environment</div>
-              {activeEnvironmentItems.length === 0 ? (
-                <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
-              ) : (
-                <div className="ws-multi-tags">
-                  {activeEnvironmentItems.map(item => (
-                    <span key={item.id} className="ws-multi-tag">
-                      {item.name}
-                      <button
-                        type="button"
-                        className="ws-multi-tag-remove"
-                        onClick={e => { e.stopPropagation(); onRemoveEnvironment(item.id); }}
-                      >×</button>
-                    </span>
-                  ))}
-                </div>
-              )}
-              <div className="ws-lane-actions" onClick={onToggleLaneLock ? e => e.stopPropagation() : undefined}>
-                <button type="button" className="ws-lane-btn ws-lane-btn-choose" onClick={onChooseEnvironment}>
-                  {activeEnvironmentItems.length > 0 ? '+ Add' : 'Choose'}
+              <div className="ws-multi-tags">
+                {activeEnvironmentItems.map(item => (
+                  <span key={item.id} className="ws-multi-tag">
+                    {item.name}
+                    <button
+                      type="button"
+                      className="ws-multi-tag-remove"
+                      onClick={e => { e.stopPropagation(); onRemoveEnvironment(item.id); }}
+                    >×</button>
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  className={`ws-multi-tag-add${activeEnvironmentItems.length === 0 ? ' ws-multi-tag-add-empty' : ''}`}
+                  onClick={e => { e.stopPropagation(); onChooseEnvironment(); }}
+                  title={activeEnvironmentItems.length > 0 ? 'Add another' : 'Choose'}
+                >
+                  {activeEnvironmentItems.length > 0 ? '+' : '+ Add'}
                 </button>
               </div>
               {activeEnvironmentItems.length > 0 && (
