@@ -81,35 +81,20 @@ export function WallPostCard({
   return (
     <div className="wall-card">
       <div className="wall-card-header">
-        <div className="wall-card-author-row">
-          <button
-            type="button"
-            className="wall-card-author-name"
-            onClick={() => onViewAuthor?.(post.authUid, post.authorName)}
-          >
-            {post.authorName}
-          </button>
-          <OnlineIndicator isOnline={!!isAuthorOnline} />
+        <div className="wall-card-author-block">
+          <div className="wall-card-author-row">
+            <button
+              type="button"
+              className="wall-card-author-name"
+              onClick={() => onViewAuthor?.(post.authUid, post.authorName)}
+            >
+              {post.authorName}
+            </button>
+            <OnlineIndicator isOnline={!!isAuthorOnline} />
+          </div>
           {title && <TitleBadge title={title} size="sm" />}
         </div>
         <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
-      </div>
-
-      {post.caption && (
-        <div className="wall-card-caption">{post.caption}</div>
-      )}
-
-      <div className="wall-card-prompt">
-        {displayText}
-        {isLong && (
-          <button
-            type="button"
-            className="wall-card-expand"
-            onClick={() => setExpanded(e => !e)}
-          >
-            {expanded ? 'Show less' : 'Show more'}
-          </button>
-        )}
       </div>
 
       {post.identityTags.length > 0 && (
@@ -125,6 +110,25 @@ export function WallPostCard({
           ))}
         </div>
       )}
+
+      <div className="wall-card-body">
+        {post.caption && (
+          <div className="wall-card-caption">{post.caption}</div>
+        )}
+
+        <div className="wall-card-prompt">
+          {displayText}
+          {isLong && (
+            <button
+              type="button"
+              className="wall-card-expand"
+              onClick={() => setExpanded(e => !e)}
+            >
+              {expanded ? 'Show less' : 'Show more'}
+            </button>
+          )}
+        </div>
+      </div>
 
       <div className="wall-card-footer">
         <button
