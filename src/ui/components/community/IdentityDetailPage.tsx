@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { CommunitySharedIdentity } from '../../../engine/communityStore';
-import { getIdentityByName } from '../../../engine/communityStore';
+import { getIdentityById } from '../../../engine/communityStore';
 import type { WallPostIdentityTag } from '../../../types/community';
 import './IdentityDetailPage.css';
 
@@ -22,8 +22,7 @@ function formatDate(ts: number): string {
 }
 
 type IdentityDetailPageProps = {
-  identityName: string;
-  identityType: string;
+  identityId: string;
   authUid: string | null;
   userId: string | null;
   userName: string | null;
@@ -34,8 +33,7 @@ type IdentityDetailPageProps = {
 };
 
 export function IdentityDetailPage({
-  identityName,
-  identityType,
+  identityId,
   activeIdentityTags,
   onBack,
   onViewAuthor,
@@ -46,16 +44,16 @@ export function IdentityDetailPage({
 
   useEffect(() => {
     setLoading(true);
-    void getIdentityByName(identityName, identityType).then(result => {
+    void getIdentityById(identityId).then(result => {
       setIdentity(result);
       setLoading(false);
     });
-  }, [identityName, identityType]);
+  }, [identityId]);
 
-  const color = TYPE_COLORS[identityType] ?? '#a78bfa';
-  const alreadyAdded = activeIdentityTags.some(
-    t => t.name === identityName && t.type === identityType,
-  );
+  const color = TYPE_COLORS[identity?.type ?? ''] ?? '#a78bfa';
+  const alreadyAdded = identity
+    ? activeIdentityTags.some(t => t.name === identity.name && t.type === identity.type)
+    : false;
 
   return (
     <div className="identity-detail-page">
@@ -66,91 +64,84 @@ export function IdentityDetailPage({
 
         {loading ? (
           <div className="identity-detail-loading">Loading…</div>
-        ) : (
+        ) : identity ? (
           <>
             <div className="identity-detail-hero">
               <span className="identity-detail-dot" style={{ background: color }} />
               <div className="identity-detail-hero-text">
-                <h1 className="identity-detail-name">{identityName}</h1>
+                <h1 className="identity-detail-name">{identity.name}</h1>
                 <span className="identity-detail-type-badge" style={{ color, borderColor: `${color}44`, background: `${color}14` }}>
-                  {identityType}
+                  {identity.type}
                 </span>
               </div>
             </div>
 
-            {identity ? (
-              <>
-                {identity.summary && (
-                  <p className="identity-detail-summary">{identity.summary}</p>
-                )}
+            {identity.summary && (
+              <p className="identity-detail-summary">{identity.summary}</p>
+            )}
 
-                {identity.phrases.length > 0 && (
-                  <div className="identity-detail-section">
-                    <div className="identity-detail-section-label">Phrases</div>
-                    <div className="identity-detail-phrases">
-                      {identity.phrases.map((phrase, i) => (
-                        <span key={i} className="identity-detail-phrase">{phrase}</span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="identity-detail-meta">
-                  <div className="identity-detail-meta-row">
-                    <span className="identity-detail-meta-label">By</span>
-                    {identity.authorId && onViewAuthor ? (
-                      <button
-                        type="button"
-                        className="identity-detail-author-btn"
-                        onClick={() => onViewAuthor(identity.authorId!, identity.authorName)}
-                      >
-                        {identity.authorName}
-                      </button>
-                    ) : (
-                      <span className="identity-detail-meta-value">{identity.authorName}</span>
-                    )}
-                  </div>
-                  <div className="identity-detail-meta-row">
-                    <span className="identity-detail-meta-label">Shared</span>
-                    <span className="identity-detail-meta-value">{formatDate(identity.createdAt)}</span>
-                  </div>
-                  {identity.remixCount > 0 && (
-                    <div className="identity-detail-meta-row">
-                      <span className="identity-detail-meta-label">Remixes</span>
-                      <span className="identity-detail-meta-value">{identity.remixCount}</span>
-                    </div>
-                  )}
-                  {identity.parentId && (
-                    <div className="identity-detail-meta-row">
-                      <span className="identity-detail-meta-label">Origin</span>
-                      <span className="identity-detail-meta-value identity-detail-meta-remix">Remixed identity</span>
-                    </div>
-                  )}
+            {identity.phrases.length > 0 && (
+              <div className="identity-detail-section">
+                <div className="identity-detail-section-label">Phrases</div>
+                <div className="identity-detail-phrases">
+                  {identity.phrases.map((phrase, i) => (
+                    <span key={i} className="identity-detail-phrase">{phrase}</span>
+                  ))}
                 </div>
-
-                {onAddIdentity && (
-                  alreadyAdded ? (
-                    <div className="identity-detail-added">
-                      ✓ In your {identityType}
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="identity-detail-add-btn"
-                      onClick={() => onAddIdentity(identity)}
-                    >
-                      Add to my {identityType}
-                    </button>
-                  )
-                )}
-              </>
-            ) : (
-              <div className="identity-detail-not-shared">
-                <p>This identity hasn't been shared to the community yet.</p>
-                <p className="identity-detail-not-shared-sub">It may be a personal identity or a local preset.</p>
               </div>
             )}
+
+            <div className="identity-detail-meta">
+              <div className="identity-detail-meta-row">
+                <span className="identity-detail-meta-label">By</span>
+                {identity.authorId && onViewAuthor ? (
+                  <button
+                    type="button"
+                    className="identity-detail-author-btn"
+                    onClick={() => onViewAuthor(identity.authorId!, identity.authorName)}
+                  >
+                    {identity.authorName}
+                  </button>
+                ) : (
+                  <span className="identity-detail-meta-value">{identity.authorName}</span>
+                )}
+              </div>
+              <div className="identity-detail-meta-row">
+                <span className="identity-detail-meta-label">Shared</span>
+                <span className="identity-detail-meta-value">{formatDate(identity.createdAt)}</span>
+              </div>
+              {identity.remixCount > 0 && (
+                <div className="identity-detail-meta-row">
+                  <span className="identity-detail-meta-label">Remixes</span>
+                  <span className="identity-detail-meta-value">{identity.remixCount}</span>
+                </div>
+              )}
+              {identity.parentId && (
+                <div className="identity-detail-meta-row">
+                  <span className="identity-detail-meta-label">Origin</span>
+                  <span className="identity-detail-meta-value identity-detail-meta-remix">Remixed identity</span>
+                </div>
+              )}
+            </div>
+
+            {onAddIdentity && (
+              alreadyAdded ? (
+                <div className="identity-detail-added">
+                  ✓ In your {identity.type}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="identity-detail-add-btn"
+                  onClick={() => onAddIdentity(identity)}
+                >
+                  Add to my {identity.type}
+                </button>
+              )
+            )}
           </>
+        ) : (
+          <div className="identity-detail-loading">Identity not found.</div>
         )}
       </div>
     </div>

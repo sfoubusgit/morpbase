@@ -2247,15 +2247,15 @@ export function App() {
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [selectedIdentity, setSelectedIdentity] = useState<{ name: string; type: string } | null>(null);
+  const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
 
   const handleOpenPost = useCallback((postId: string) => {
     setSelectedPostId(postId);
     setActivePage('post-detail');
   }, []);
 
-  const handleOpenIdentity = useCallback((name: string, type: string) => {
-    setSelectedIdentity({ name, type });
+  const handleOpenIdentity = useCallback((id: string) => {
+    setSelectedIdentityId(id);
     setActivePage('identity-detail');
   }, []);
 
@@ -3879,10 +3879,9 @@ export function App() {
           }}
           onMessage={handleStartDM}
         />
-      ) : activePage === 'identity-detail' && selectedIdentity ? (
+      ) : activePage === 'identity-detail' && selectedIdentityId ? (
         <IdentityDetailPage
-          identityName={selectedIdentity.name}
-          identityType={selectedIdentity.type}
+          identityId={selectedIdentityId}
           authUid={authUser?.authUid ?? null}
           userId={authUser?.id ?? null}
           userName={authUser?.name ?? null}

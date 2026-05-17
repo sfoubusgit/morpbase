@@ -80,18 +80,14 @@ export async function listCommunityIdentities(
   }
 }
 
-export async function getIdentityByName(
-  name: string,
-  type: string,
+export async function getIdentityById(
+  id: string,
 ): Promise<CommunitySharedIdentity | null> {
   try {
     const { data, error } = await supabase
       .from('community_identities')
       .select('*')
-      .eq('name', name)
-      .eq('type', type)
-      .order('created_at', { ascending: true })
-      .limit(1)
+      .eq('id', id)
       .maybeSingle();
     if (error || !data) return null;
     return toIdentity(data as Row);
