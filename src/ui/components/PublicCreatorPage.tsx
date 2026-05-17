@@ -245,6 +245,7 @@ export function PublicCreatorPage({
   }, [creatorId, creatorAuthUid, creatorName]);
 
   return (
+    <div className="pub-profile-page">
     <div className="pub-profile">
 
       {/* Top bar */}
@@ -462,6 +463,7 @@ export function PublicCreatorPage({
         )}
 
       </div>
+    </div>
     </div>
   );
 }
