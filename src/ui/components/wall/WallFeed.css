@@ -154,8 +154,7 @@
 
 .wall-feed-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 280px);
-  justify-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 10px;
   align-items: start;
 }
