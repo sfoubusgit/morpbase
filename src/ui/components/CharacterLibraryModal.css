@@ -127,6 +127,11 @@
   box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.1);
 }
 
+.character-library-card.preview-selected:not(.active) {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .character-library-card-header {
   display: flex;
   align-items: flex-start;
@@ -337,6 +342,15 @@
 .character-library-danger-button:hover:not(:disabled) {
   border-color: rgba(248, 113, 113, 0.4);
   background: rgba(72, 23, 32, 0.92);
+}
+
+button.character-library-active-indicator,
+button.character-library-active-indicator:hover {
+  border-color: rgba(167, 139, 250, 0.35);
+  color: #c4b5fd;
+  background: rgba(167, 139, 250, 0.08);
+  cursor: default;
+  transform: none;
 }
 
 .character-library-primary-button:disabled,

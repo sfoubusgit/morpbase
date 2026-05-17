@@ -299,6 +299,7 @@ export function CharacterLibrarySurface({
   const [isProcessingCover, setIsProcessingCover] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
+  const [previewCharacterId, setPreviewCharacterId] = useState<string | null>(null);
 
   const activeCharacter = useMemo(
     () => characters.find(character => activeCharacterIds.includes(character.id)) ?? null,
@@ -307,6 +308,10 @@ export function CharacterLibrarySurface({
   const editingCharacter = useMemo(
     () => characters.find(character => character.id === editingCharacterId) ?? null,
     [characters, editingCharacterId]
+  );
+  const previewCharacter = useMemo(
+    () => previewCharacterId ? characters.find(c => c.id === previewCharacterId) ?? null : null,
+    [characters, previewCharacterId]
   );
 
   useEffect(() => {
@@ -327,6 +332,7 @@ export function CharacterLibrarySurface({
   const handleBeginCreate = () => {
     setIsCreating(true);
     setEditingCharacterId(null);
+    setPreviewCharacterId(null);
     setForm(EMPTY_FORM);
     setMessage(null);
     setError(null);
@@ -336,6 +342,7 @@ export function CharacterLibrarySurface({
   const handleBeginEdit = (character: CharacterIdentity) => {
     setIsCreating(false);
     setEditingCharacterId(character.id);
+    setPreviewCharacterId(null);
     setForm(formFromCharacter(character));
     setMessage(null);
     setError(null);
@@ -394,6 +401,7 @@ export function CharacterLibrarySurface({
 
   const handleUseCharacter = (character: CharacterIdentity) => {
     onSelectCharacter(character.id);
+    setPreviewCharacterId(null);
     setMessage(null);
     setError(null);
   };
@@ -458,6 +466,8 @@ export function CharacterLibrarySurface({
     [form.corePhrases]
   );
   const isEditorOpen = isCreating || Boolean(editingCharacterId);
+  const displayCharacter = previewCharacter ?? activeCharacter;
+  const displayCharacterIsActive = displayCharacter ? activeCharacterIds.includes(displayCharacter.id) : false;
 
   const allTags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -587,8 +597,8 @@ export function CharacterLibrarySurface({
                 return (
                   <article
                     key={character.id}
-                    className={`character-library-card ${isActive ? 'active' : ''}`}
-                    onClick={() => handleUseCharacter(character)}
+                    className={`character-library-card ${isActive ? 'active' : ''} ${previewCharacterId === character.id ? 'preview-selected' : ''}`}
+                    onClick={() => setPreviewCharacterId(character.id)}
                     style={{ cursor: 'pointer' }}
                   >
                     <div className="character-library-card-header">
@@ -634,9 +644,13 @@ export function CharacterLibrarySurface({
                       </div>
                     )}
                     <div className="character-library-card-actions">
-                      <span className={`character-library-secondary-button${isActive ? ' character-library-active-indicator' : ''}`}>
+                      <button
+                        type="button"
+                        className={`character-library-secondary-button${isActive ? ' character-library-active-indicator' : ''}`}
+                        onClick={e => { e.stopPropagation(); if (!isActive) handleUseCharacter(character); }}
+                      >
                         {isActive ? '✓ Active' : '+ Add'}
-                      </span>
+                      </button>
                       <button
                         type="button"
                         className="character-library-secondary-button"
@@ -662,14 +676,16 @@ export function CharacterLibrarySurface({
         <section className="character-library-panel character-library-editor-panel">
           <div className="character-library-panel-header">
             <div className="character-library-panel-title">
-              {editingCharacter ? `Editing ${editingCharacter.name}` : isCreating ? 'Create Character' : 'Workflow Character'}
+              {editingCharacter ? `Editing ${editingCharacter.name}` : isCreating ? 'Create Character' : displayCharacter ? (displayCharacterIsActive ? 'Active Character' : 'Character Preview') : 'Workflow Character'}
             </div>
             <div className="character-library-panel-subtitle">
               {isEditorOpen
                 ? 'Keep this small and identity-focused.'
-                : activeCharacter
-                  ? 'The character identity currently applied to this workflow appears here.'
-                  : 'Select or create a character identity to begin.'}
+                : displayCharacter && !displayCharacterIsActive
+                  ? 'Click Apply to add this character to the current workflow.'
+                  : displayCharacter
+                    ? 'The character identity currently applied to this workflow appears here.'
+                    : 'Select a character or create one to begin.'}
             </div>
           </div>
 
@@ -907,63 +923,72 @@ export function CharacterLibrarySurface({
                 </button>
               </div>
             </form>
-          ) : activeCharacter ? (
+          ) : displayCharacter ? (
             <div className="character-library-details">
               <div className="character-library-details-header">
                 <CharacterAvatarTile
-                  name={activeCharacter.name}
-                  avatar={activeCharacter.avatar}
+                  name={displayCharacter.name}
+                  avatar={displayCharacter.avatar}
                   size="large"
                 />
                 <div>
-                  <div className="character-library-details-name">{activeCharacter.name}</div>
-                  {activeCharacter.summary && (
-                    <p className="character-library-details-summary">{activeCharacter.summary}</p>
+                  <div className="character-library-details-name">{displayCharacter.name}</div>
+                  {displayCharacter.summary && (
+                    <p className="character-library-details-summary">{displayCharacter.summary}</p>
                   )}
                 </div>
               </div>
-              {characterNeedsVisualAnchorRepair(activeCharacter) && (
+              {characterNeedsVisualAnchorRepair(displayCharacter) && (
                 <div className="character-library-warning-note">
                   This legacy character is still usable, but it needs at least one visual anchor before it can be saved again.
                 </div>
               )}
               <div className="character-library-details-grid">
-                {activeCharacter.identity.archetype && (
+                {displayCharacter.identity.archetype && (
                   <div className="character-library-detail-item">
                     <span>Archetype</span>
-                    <strong>{activeCharacter.identity.archetype}</strong>
+                    <strong>{displayCharacter.identity.archetype}</strong>
                   </div>
                 )}
-                {activeCharacter.identity.role && (
+                {displayCharacter.identity.role && (
                   <div className="character-library-detail-item">
                     <span>Role</span>
-                    <strong>{activeCharacter.identity.role}</strong>
+                    <strong>{displayCharacter.identity.role}</strong>
                   </div>
                 )}
-                {activeCharacter.identity.personalityTone && (
+                {displayCharacter.identity.personalityTone && (
                   <div className="character-library-detail-item">
                     <span>Tone</span>
-                    <strong>{activeCharacter.identity.personalityTone}</strong>
+                    <strong>{displayCharacter.identity.personalityTone}</strong>
                   </div>
                 )}
               </div>
               <div className="character-library-detail-section">
                 <div className="character-library-detail-heading">Core Identity Phrases</div>
                 <div className="character-editor-preview-chips">
-                  {activeCharacter.phraseBundle.core.map((phrase, index) => (
-                    <span key={`${activeCharacter.id}-core-${index}`} className="character-library-phrase-chip">
+                  {displayCharacter.phraseBundle.core.map((phrase, index) => (
+                    <span key={`${displayCharacter.id}-core-${index}`} className="character-library-phrase-chip">
                       {phrase}
                     </span>
                   ))}
                 </div>
               </div>
               <div className="character-library-card-actions">
+                {!displayCharacterIsActive && (
+                  <button
+                    type="button"
+                    className="character-library-primary-button"
+                    onClick={() => handleUseCharacter(displayCharacter)}
+                  >
+                    Apply to Workflow
+                  </button>
+                )}
                 <button
                   type="button"
                   className="character-library-secondary-button"
-                  onClick={() => handleBeginEdit(activeCharacter)}
+                  onClick={() => handleBeginEdit(displayCharacter)}
                 >
-                  Edit Active Character
+                  {displayCharacterIsActive ? 'Edit Active Character' : 'Edit'}
                 </button>
               </div>
             </div>
