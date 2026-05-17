@@ -1,0 +1,92 @@
+.presence-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.presence-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: none;
+  color: rgba(229, 231, 235, 0.55);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+
+.presence-badge-btn:hover,
+.presence-badge-btn.open {
+  border-color: rgba(110, 231, 183, 0.3);
+  color: rgba(229, 231, 235, 0.85);
+  background: rgba(110, 231, 183, 0.06);
+}
+
+.presence-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6ee7b7;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(110, 231, 183, 0.6);
+}
+
+.presence-count {
+  line-height: 1;
+}
+
+/* ── Dropdown ── */
+
+.presence-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 160px;
+  padding: 8px 0;
+  background: rgba(18, 18, 24, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  z-index: 200;
+}
+
+.presence-dropdown-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 2px 14px 8px;
+}
+
+.presence-dropdown-user {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+}
+
+.presence-dropdown-user:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.presence-dropdown-more {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  padding: 4px 14px 2px;
+}

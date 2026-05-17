@@ -44,6 +44,7 @@ import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
+import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import type { Notification } from '../types/community';
@@ -3764,6 +3765,7 @@ export function App() {
               >
                 {authUser.name}
               </button>
+              <OnlinePresenceBadge selfAuthUid={authUser.authUid} onViewUser={handleViewCreator} />
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
               <button
                 type="button"

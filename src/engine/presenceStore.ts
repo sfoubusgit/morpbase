@@ -71,6 +71,23 @@ export function destroyPresence(): void {
   notify();
 }
 
+export async function getNamesByAuthUids(uids: string[]): Promise<Map<string, string>> {
+  if (uids.length === 0) return new Map();
+  try {
+    const { data } = await supabase
+      .from('wall_posts')
+      .select('auth_uid, author_name')
+      .in('auth_uid', uids);
+    const map = new Map<string, string>();
+    for (const row of data ?? []) {
+      if (!map.has(row.auth_uid)) map.set(row.auth_uid, row.author_name ?? 'Anonymous');
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 export async function getLastSeenAt(userId: string): Promise<number | null> {
   const { data } = await supabase
     .from('public_profiles')
