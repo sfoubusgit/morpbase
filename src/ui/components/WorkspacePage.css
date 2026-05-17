@@ -691,6 +691,30 @@
   user-select: none;
 }
 
+/* Dynamics announcement — one-time flash when second character is activated */
+.ws-lane-slot-dynamics-announced {
+  animation: ws-dynamics-announce 0.4s ease-out forwards;
+  box-shadow: 0 0 0 1px rgba(196,181,253,0.7), 0 0 24px rgba(196,181,253,0.25);
+}
+
+@keyframes ws-dynamics-announce {
+  0%   { box-shadow: 0 0 0 2px rgba(196,181,253,0.9), 0 0 32px rgba(196,181,253,0.4); }
+  100% { box-shadow: 0 0 0 1px rgba(196,181,253,0.7), 0 0 24px rgba(196,181,253,0.25); }
+}
+
+.ws-dynamics-unlocked-badge {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(196,181,253,0.9);
+  background: rgba(196,181,253,0.12);
+  border: 1px solid rgba(196,181,253,0.3);
+  border-radius: 3px;
+  padding: 1px 5px;
+  margin-left: 6px;
+}
+
 /* Entry point treatment — character slot when nothing is active */
 .ws-lane-slot-entry {
   box-shadow: 0 0 0 1px rgba(147,197,253,0.5), 0 0 20px rgba(147,197,253,0.15);

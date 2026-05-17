@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { InspirationField } from './InspirationField';
 import { WallPostComposer } from './wall/WallPostComposer';
 import type { WallPostIdentityTag } from '../../types/community';
@@ -263,6 +263,22 @@ export function WorkspacePage({
   const [savedSetMessage, setSavedSetMessage] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const [dynamicsAnnounced, setDynamicsAnnounced] = useState(false);
+  const prevCharCountRef = useRef(activeCharacterItems.length);
+
+  useEffect(() => {
+    const prev = prevCharCountRef.current;
+    const curr = activeCharacterItems.length;
+    prevCharCountRef.current = curr;
+    if (prev < 2 && curr >= 2) {
+      const seen = localStorage.getItem('morpbase:dynamics:announced');
+      if (!seen) {
+        localStorage.setItem('morpbase:dynamics:announced', 'true');
+        setDynamicsAnnounced(true);
+        setTimeout(() => setDynamicsAnnounced(false), 4000);
+      }
+    }
+  }, [activeCharacterItems.length]);
 
   const displayPrompt = editedPrompt ?? assembledPrompt;
   const isEdited = editedPrompt !== null && editedPrompt !== undefined;
@@ -580,12 +596,17 @@ export function WorkspacePage({
               const needsMoreChars = activeCharacterItems.length < 2;
               return (
                 <div
-                  className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase && !needsMoreChars ? ' ws-lane-slot-active' : ''}${needsMoreChars ? ' ws-lane-slot-inactive' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock && !needsMoreChars ? ' ws-lane-slot-lockable' : ''}`}
+                  className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase && !needsMoreChars ? ' ws-lane-slot-active' : ''}${needsMoreChars ? ' ws-lane-slot-inactive' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock && !needsMoreChars ? ' ws-lane-slot-lockable' : ''}${dynamicsAnnounced ? ' ws-lane-slot-dynamics-announced' : ''}`}
                   onClick={onToggleLaneLock && !needsMoreChars ? () => onToggleLaneLock('dynamics') : undefined}
                   role={onToggleLaneLock && !needsMoreChars ? 'button' : undefined}
                   title={onToggleLaneLock && !needsMoreChars ? (lockedLanes?.has('dynamics') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
                 >
-                  <div className="ws-lane-label">Dynamics</div>
+                  <div className="ws-lane-label">
+                    Dynamics
+                    {dynamicsAnnounced && (
+                      <span className="ws-dynamics-unlocked-badge">unlocked</span>
+                    )}
+                  </div>
                   {needsMoreChars ? (
                     <div className="ws-lane-name"><span className="ws-lane-name-empty">Needs 2+ characters</span></div>
                   ) : activeInteractionPhrase ? (
