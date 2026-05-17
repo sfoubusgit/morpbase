@@ -503,6 +503,20 @@
   background: rgba(248, 113, 113, 0.1);
 }
 
+.ws-randomize-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ws-roll-hint {
+  font-size: 10px;
+  color: rgba(118, 255, 201, 0.38);
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
 .ws-randomize-btn {
   font-size: 11px;
   font-weight: 600;

@@ -551,14 +551,23 @@ export function WorkspacePage({
                   </button>
                 ) : <span />}
                 {onRandomize && (
-                  <button
-                    type="button"
-                    className="ws-randomize-btn"
-                    onClick={onRandomize}
-                    title="Lock a lane to keep it — randomize fills the rest"
-                  >
-                    ⚄ Randomize
-                  </button>
+                  <div className="ws-randomize-wrap">
+                    <button
+                      type="button"
+                      className="ws-randomize-btn"
+                      onClick={onRandomize}
+                      title={lockedLanes && lockedLanes.size > 0 ? `Rolling ${lockedLanes.size} targeted lane${lockedLanes.size === 1 ? '' : 's'}` : 'Click any lane to target it for rolling'}
+                    >
+                      {lockedLanes && lockedLanes.size > 0
+                        ? `⚄ Roll ${lockedLanes.size} Lane${lockedLanes.size === 1 ? '' : 's'}`
+                        : '⚄ Roll All'}
+                    </button>
+                    <div className="ws-roll-hint">
+                      {lockedLanes && lockedLanes.size > 0
+                        ? `${lockedLanes.size} lane${lockedLanes.size === 1 ? '' : 's'} targeted`
+                        : 'click a lane to target it'}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
