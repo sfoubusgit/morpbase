@@ -313,6 +313,39 @@ input[type="range"][disabled]:focus-visible::-moz-range-thumb {
   background: linear-gradient(135deg, rgba(123, 101, 255, 1), rgba(139, 117, 255, 1));
 }
 
+.app-nav-messages-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  background: none;
+  color: rgba(229, 231, 235, 0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.app-nav-messages-btn:hover {
+  color: #fff;
+  background: rgba(110, 86, 249, 0.2);
+}
+
+.app-nav-messages-btn.active {
+  color: #c4b5fd;
+  border-color: rgba(110, 86, 249, 0.4);
+  background: rgba(110, 86, 249, 0.15);
+}
+
+.app-messages-login {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: 48px 0;
+}
+
 @media (max-width: 720px) {
   .app-page-toggle {
     flex-direction: column;

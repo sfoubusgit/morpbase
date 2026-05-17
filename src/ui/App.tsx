@@ -44,6 +44,7 @@ import { AdminPage } from './components/AdminPage';
 import { MyProfilePage } from './components/MyProfilePage';
 import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
+import { DMInbox } from './components/dm/DMInbox';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
@@ -352,7 +353,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'my-profile' | 'creator-profile' | 'admin';
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'admin';
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
@@ -360,6 +361,7 @@ const PAGE_TO_PARAM: Record<PageId, string> = {
   'prompts': 'memory',
   'user-pools': 'auras',
   'community': 'community',
+  'messages': 'messages',
   'my-profile': 'profile',
   'creator-profile': '',
   'admin': 'admin',
@@ -2236,7 +2238,7 @@ export function App() {
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
     setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
-    setActivePage('community');
+    setActivePage('messages');
   }, []);
 
   const handleNotificationNavigate = useCallback((n: Notification) => {
@@ -2246,7 +2248,7 @@ export function App() {
         if (typeof p.senderAuthUid === 'string' && typeof p.senderName === 'string') {
           handleStartDM(p.senderAuthUid, p.senderName);
         } else {
-          setActivePage('community');
+          setActivePage('messages');
         }
         break;
       case 'new_follower':
@@ -3757,6 +3759,16 @@ export function App() {
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
               <button
                 type="button"
+                className={`app-nav-messages-btn${activePage === 'messages' ? ' active' : ''}`}
+                title="Messages"
+                onClick={() => setActivePage('messages')}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                type="button"
                 className="app-page-toggle-action-button"
                 onClick={handleLogout}
               >
@@ -3895,6 +3907,16 @@ export function App() {
           }}
           onMessage={handleStartDM}
         />
+      ) : activePage === 'messages' ? (
+        authUser ? (
+          <DMInbox
+            authUid={authUser.authUid}
+            authName={authUser.name}
+            initialRecipient={dmInitialRecipient}
+          />
+        ) : (
+          <div className="app-messages-login">Log in to send and receive messages.</div>
+        )
       ) : activePage === 'community' ? (
         <CommunityPage
           userId={authUser?.id ?? null}
@@ -3904,7 +3926,6 @@ export function App() {
           onViewCreator={handleViewCreator}
           currentPromptText={workspacePrompt}
           activeIdentityTags={activeIdentityTags}
-          dmInitialRecipient={dmInitialRecipient}
         />
       ) : activePage === 'prompts' ? (
         <PromptsPage
