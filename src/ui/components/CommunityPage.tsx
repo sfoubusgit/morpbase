@@ -123,7 +123,7 @@ type CommunityPageProps = {
   onIdentityAdded?: () => Promise<void>;
   onViewCreator?: (authUid: string, name: string) => void;
   onOpenPost?: (postId: string) => void;
-  onOpenIdentity?: (id: string) => void;
+  onOpenIdentity?: (identity: CommunitySharedIdentity) => void;
   activeIdentityTags?: WallPostIdentityTag[];
   currentPromptText?: string;
 };
@@ -435,7 +435,7 @@ export function CommunityPage({
                         <button
                           type="button"
                           className="community-card-name community-card-name--link"
-                          onClick={(e) => { e.stopPropagation(); onOpenIdentity?.(item.id); }}
+                          onClick={(e) => { e.stopPropagation(); const src = sharedItems.find(s => s.id === item.id); if (src) onOpenIdentity?.(src); }}
                         >
                           {item.name}
                         </button>

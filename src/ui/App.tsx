@@ -49,6 +49,7 @@ import { DMInbox } from './components/dm/DMInbox';
 import { getUnreadDMCount } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import { IdentityDetailPage } from './components/community/IdentityDetailPage';
+import type { CommunitySharedIdentity } from '../engine/communityStore';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
@@ -2247,15 +2248,15 @@ export function App() {
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [selectedIdentityId, setSelectedIdentityId] = useState<string | null>(null);
+  const [selectedIdentity, setSelectedIdentity] = useState<CommunitySharedIdentity | null>(null);
 
   const handleOpenPost = useCallback((postId: string) => {
     setSelectedPostId(postId);
     setActivePage('post-detail');
   }, []);
 
-  const handleOpenIdentity = useCallback((id: string) => {
-    setSelectedIdentityId(id);
+  const handleOpenIdentity = useCallback((identity: CommunitySharedIdentity) => {
+    setSelectedIdentity(identity);
     setActivePage('identity-detail');
   }, []);
 
@@ -3879,9 +3880,9 @@ export function App() {
           }}
           onMessage={handleStartDM}
         />
-      ) : activePage === 'identity-detail' && selectedIdentityId ? (
+      ) : activePage === 'identity-detail' && selectedIdentity ? (
         <IdentityDetailPage
-          identityId={selectedIdentityId}
+          identity={selectedIdentity}
           authUid={authUser?.authUid ?? null}
           userId={authUser?.id ?? null}
           userName={authUser?.name ?? null}
