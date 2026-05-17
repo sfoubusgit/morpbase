@@ -2,11 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { WallPost, WallPostIdentityTag } from '../../../types/community';
 import {
   deleteWallPost,
-  getLikedPostIds,
-  likePost,
   listWallPosts,
-  unlikePost,
 } from '../../../engine/wallStore';
+import {
+  getReactionsForPosts,
+  getMyReactions,
+  addReaction,
+  removeReaction,
+  type PostReactions,
+} from '../../../engine/reactionStore';
 import { getFollowingAuthUids } from '../../../engine/followStore';
 import { getXPMap } from '../../../engine/xpStore';
 import { useOnlineAuthUids } from '../../hooks/useOnlineAuthUids';
@@ -38,7 +42,8 @@ export function WallFeed({
 }: WallFeedProps) {
   const [posts, setPosts] = useState<WallPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [likedIds, setLikedIds] = useState<Set<string>>(new Set());
+  const [reactionMap, setReactionMap] = useState<Record<string, PostReactions>>({});
+  const [myReactionMap, setMyReactionMap] = useState<Record<string, Set<string>>>({});
   const [followingUids, setFollowingUids] = useState<Set<string>>(new Set());
   const [authorXpMap, setAuthorXpMap] = useState<Map<string, number>>(new Map());
   const [filter, setFilter] = useState<FilterMode>('all');
@@ -51,15 +56,21 @@ export function WallFeed({
     const data = await listWallPosts({ limit: 60 });
     setPosts(data);
     setLoading(false);
+    const postIds = data.map(p => p.id);
     const authorUids = [...new Set(data.map(p => p.authUid))];
-    const xpMap = await getXPMap(authorUids);
+    const [xpMap, reactions] = await Promise.all([
+      getXPMap(authorUids),
+      getReactionsForPosts(postIds),
+    ]);
     setAuthorXpMap(xpMap);
+    setReactionMap(reactions);
+    return postIds;
   }, []);
 
-  const fetchLikes = useCallback(async () => {
-    if (!authUid) return;
-    const ids = await getLikedPostIds(authUid);
-    setLikedIds(new Set(ids));
+  const fetchMyReactions = useCallback(async (postIds: string[]) => {
+    if (!authUid || postIds.length === 0) return;
+    const mine = await getMyReactions(authUid, postIds);
+    setMyReactionMap(mine);
   }, [authUid]);
 
   const fetchFollowing = useCallback(async () => {
@@ -73,29 +84,47 @@ export function WallFeed({
     lastVisitedRef.current = stored ? parseInt(stored, 10) : 0;
     localStorage.setItem(LAST_VISITED_KEY, String(Date.now()));
 
-    void fetchPosts();
-    void fetchLikes();
+    void (async () => {
+      const postIds = await fetchPosts();
+      await fetchMyReactions(postIds);
+    })();
     void fetchFollowing();
-    pollRef.current = setInterval(() => { void fetchPosts(); }, POLL_INTERVAL_MS);
+    pollRef.current = setInterval(async () => {
+      const postIds = await fetchPosts();
+      await fetchMyReactions(postIds);
+    }, POLL_INTERVAL_MS);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
-  }, [fetchPosts, fetchLikes, fetchFollowing]);
+  }, [fetchPosts, fetchMyReactions, fetchFollowing]);
 
   const handlePosted = useCallback(() => {
     setComposerOpen(false);
     void fetchPosts();
   }, [fetchPosts]);
 
-  const handleLike = useCallback(async (postId: string) => {
+  const handleReact = useCallback(async (postId: string, emoji: string) => {
     if (!authUid) return;
-    setLikedIds(prev => new Set([...prev, postId]));
-    await likePost(postId, authUid);
-  }, [authUid]);
-
-  const handleUnlike = useCallback(async (postId: string) => {
-    if (!authUid) return;
-    setLikedIds(prev => { const n = new Set(prev); n.delete(postId); return n; });
-    await unlikePost(postId, authUid);
-  }, [authUid]);
+    const alreadyReacted = myReactionMap[postId]?.has(emoji);
+    // optimistic update
+    setMyReactionMap(prev => {
+      const next = { ...prev };
+      const set = new Set(prev[postId] ?? []);
+      if (alreadyReacted) set.delete(emoji); else set.add(emoji);
+      next[postId] = set;
+      return next;
+    });
+    setReactionMap(prev => {
+      const next = { ...prev };
+      const counts = { ...(prev[postId] ?? {}) };
+      counts[emoji] = Math.max(0, (counts[emoji] ?? 0) + (alreadyReacted ? -1 : 1));
+      next[postId] = counts;
+      return next;
+    });
+    if (alreadyReacted) {
+      await removeReaction(postId, authUid, emoji);
+    } else {
+      await addReaction(postId, authUid, emoji);
+    }
+  }, [authUid, myReactionMap]);
 
   const handleDelete = useCallback(async (postId: string) => {
     await deleteWallPost(postId);
@@ -152,7 +181,7 @@ export function WallFeed({
 
       {!authUid && (
         <div className="wall-feed-login-nudge">
-          Log in to post to the Wall and like posts.
+          Log in to post to the Wall and react to posts.
         </div>
       )}
 
@@ -171,12 +200,13 @@ export function WallFeed({
               key={post.id}
               post={post}
               isOwnPost={post.authUid === authUid}
-              isLiked={likedIds.has(post.id)}
               isNew={post.createdAt > lastVisitedRef.current && lastVisitedRef.current > 0}
+              reactions={reactionMap[post.id] ?? {}}
+              myReactions={myReactionMap[post.id] ?? new Set()}
+              canReact={!!authUid}
               authorXp={authorXpMap.get(post.authUid)}
               isAuthorOnline={onlineUids.has(post.authUid)}
-              onLike={handleLike}
-              onUnlike={handleUnlike}
+              onReact={handleReact}
               onDelete={handleDelete}
               onViewAuthor={onViewAuthor}
             />

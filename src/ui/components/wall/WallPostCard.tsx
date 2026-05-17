@@ -3,6 +3,7 @@ import type { WallPost } from '../../../types/community';
 import { TitleBadge } from '../shared/TitleBadge';
 import { OnlineIndicator } from '../shared/OnlineIndicator';
 import { getTitleForXp } from '../../../data/communityTitles';
+import { REACTION_EMOJIS, type PostReactions } from '../../../engine/reactionStore';
 import './WallPostCard.css';
 
 const TYPE_COLORS: Record<string, string> = {
@@ -35,12 +36,13 @@ const PROMPT_PREVIEW_LENGTH = 220;
 type WallPostCardProps = {
   post: WallPost;
   isOwnPost: boolean;
-  isLiked: boolean;
   isNew?: boolean;
+  reactions: PostReactions;
+  myReactions: Set<string>;
+  canReact: boolean;
   authorXp?: number;
   isAuthorOnline?: boolean;
-  onLike: (postId: string) => void;
-  onUnlike: (postId: string) => void;
+  onReact: (postId: string, emoji: string) => void;
   onDelete: (postId: string) => void;
   onViewAuthor?: (authUid: string, name: string) => void;
 };
@@ -48,18 +50,17 @@ type WallPostCardProps = {
 export function WallPostCard({
   post,
   isOwnPost,
-  isLiked,
   isNew,
+  reactions,
+  myReactions,
+  canReact,
   authorXp,
   isAuthorOnline,
-  onLike,
-  onUnlike,
+  onReact,
   onDelete,
   onViewAuthor,
 }: WallPostCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const [likeCount, setLikeCount] = useState(post.likeCount);
-  const [liked, setLiked] = useState(isLiked);
 
   const isLong = post.promptText.length > PROMPT_PREVIEW_LENGTH;
   const displayText = expanded || !isLong
@@ -68,17 +69,7 @@ export function WallPostCard({
 
   const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
 
-  const handleLikeToggle = () => {
-    if (liked) {
-      setLiked(false);
-      setLikeCount(c => Math.max(0, c - 1));
-      onUnlike(post.id);
-    } else {
-      setLiked(true);
-      setLikeCount(c => c + 1);
-      onLike(post.id);
-    }
-  };
+  const totalReactions = REACTION_EMOJIS.reduce((sum, e) => sum + (reactions[e] ?? 0), 0);
 
   return (
     <div className="wall-card">
@@ -136,15 +127,26 @@ export function WallPostCard({
       </div>
 
       <div className="wall-card-footer">
-        <button
-          type="button"
-          className={`wall-card-like${liked ? ' wall-card-like--active' : ''}`}
-          onClick={handleLikeToggle}
-          title={liked ? 'Unlike' : 'Like'}
-        >
-          <span className="wall-card-like-icon">{liked ? '♥' : '♡'}</span>
-          {likeCount > 0 && <span className="wall-card-like-count">{likeCount}</span>}
-        </button>
+        <div className="wall-card-reactions">
+          {REACTION_EMOJIS.map(emoji => {
+            const count = reactions[emoji] ?? 0;
+            const active = myReactions.has(emoji);
+            return (
+              <button
+                key={emoji}
+                type="button"
+                className={`wall-card-reaction${active ? ' wall-card-reaction--active' : ''}`}
+                onClick={() => canReact && onReact(post.id, emoji)}
+                title={canReact ? (active ? `Remove ${emoji}` : `React with ${emoji}`) : 'Log in to react'}
+                disabled={!canReact}
+              >
+                <span className="wall-card-reaction-emoji">{emoji}</span>
+                {count > 0 && <span className="wall-card-reaction-count">{count}</span>}
+              </button>
+            );
+          })}
+          {totalReactions === 0 && !canReact && null}
+        </div>
 
         {isOwnPost && (
           <button

@@ -156,35 +156,54 @@
   margin-top: 2px;
 }
 
-.wall-card-like {
+.wall-card-reactions {
   display: flex;
   align-items: center;
-  gap: 5px;
-  background: none;
-  border: none;
-  padding: 4px 0;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.wall-card-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
   cursor: pointer;
   font-family: inherit;
-  color: var(--text-tertiary);
-  transition: color 0.12s;
+  transition: border-color 0.12s, background 0.12s;
 }
 
-.wall-card-like:hover {
-  color: #fda4af;
+.wall-card-reaction:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-.wall-card-like--active {
-  color: #fb7185;
+.wall-card-reaction--active {
+  border-color: rgba(167, 139, 250, 0.35);
+  background: rgba(167, 139, 250, 0.1);
 }
 
-.wall-card-like-icon {
-  font-size: 14px;
+.wall-card-reaction--active:hover:not(:disabled) {
+  border-color: rgba(167, 139, 250, 0.5);
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.wall-card-reaction:disabled {
+  cursor: default;
+}
+
+.wall-card-reaction-emoji {
+  font-size: 13px;
   line-height: 1;
 }
 
-.wall-card-like-count {
+.wall-card-reaction-count {
   font-size: 11px;
   font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .wall-card-delete {
