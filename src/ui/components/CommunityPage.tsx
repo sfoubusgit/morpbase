@@ -123,6 +123,7 @@ type CommunityPageProps = {
   onIdentityAdded?: () => Promise<void>;
   onViewCreator?: (authUid: string, name: string) => void;
   onOpenPost?: (postId: string) => void;
+  onOpenIdentity?: (name: string, type: string) => void;
   activeIdentityTags?: WallPostIdentityTag[];
   currentPromptText?: string;
 };
@@ -134,6 +135,7 @@ export function CommunityPage({
   onIdentityAdded,
   onViewCreator,
   onOpenPost,
+  onOpenIdentity,
   activeIdentityTags = [],
   currentPromptText = '',
 }: CommunityPageProps) {
@@ -332,6 +334,7 @@ export function CommunityPage({
                 currentPromptText={currentPromptText}
                 onViewAuthor={onViewCreator}
                 onOpenPost={onOpenPost}
+                onOpenIdentity={onOpenIdentity}
               />
             ) : (
               <PulsePanel onViewAuthor={onViewCreator} />
@@ -430,7 +433,13 @@ export function CommunityPage({
                       style={coverStyle}
                     >
                       <div className="community-card-header">
-                        <div className="community-card-name">{item.name}</div>
+                        <button
+                          type="button"
+                          className="community-card-name community-card-name--link"
+                          onClick={(e) => { e.stopPropagation(); onOpenIdentity?.(item.name, item.type); }}
+                        >
+                          {item.name}
+                        </button>
                         <div className="community-card-header-right">
                           {item.remixCount > 0 && (
                             <span className="community-card-remix-count">↺ {item.remixCount}</span>

@@ -48,6 +48,7 @@ type WallPostCardProps = {
   onDelete: (postId: string) => void;
   onViewAuthor?: (authUid: string, name: string) => void;
   onOpenPost?: (postId: string) => void;
+  onOpenIdentity?: (name: string, type: string) => void;
 };
 
 export function WallPostCard({
@@ -65,6 +66,7 @@ export function WallPostCard({
   onDelete,
   onViewAuthor,
   onOpenPost,
+  onOpenIdentity,
 }: WallPostCardProps) {
   const displayText = post.promptText.length > PROMPT_PREVIEW_LENGTH
     ? post.promptText.slice(0, PROMPT_PREVIEW_LENGTH) + '…'
@@ -89,13 +91,15 @@ export function WallPostCard({
       {post.identityTags.length > 0 && (
         <div className="wall-card-tags">
           {post.identityTags.map(tag => (
-            <span
+            <button
               key={`${tag.type}-${tag.name}`}
+              type="button"
               className="wall-card-tag"
               style={{ color: TYPE_COLORS[tag.type] ?? '#94a3b8' }}
+              onClick={(e) => { e.stopPropagation(); onOpenIdentity?.(tag.name, tag.type); }}
             >
               {tag.name}
-            </span>
+            </button>
           ))}
         </div>
       )}

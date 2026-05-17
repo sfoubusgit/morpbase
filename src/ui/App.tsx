@@ -48,6 +48,7 @@ import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
 import { getUnreadDMCount } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
+import { IdentityDetailPage } from './components/community/IdentityDetailPage';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
@@ -356,7 +357,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'admin';
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'identity-detail' | 'admin';
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
@@ -368,6 +369,7 @@ const PAGE_TO_PARAM: Record<PageId, string> = {
   'my-profile': 'profile',
   'creator-profile': '',
   'post-detail': '',
+  'identity-detail': '',
   'admin': 'admin',
 };
 
@@ -2245,10 +2247,16 @@ export function App() {
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [selectedIdentity, setSelectedIdentity] = useState<{ name: string; type: string } | null>(null);
 
   const handleOpenPost = useCallback((postId: string) => {
     setSelectedPostId(postId);
     setActivePage('post-detail');
+  }, []);
+
+  const handleOpenIdentity = useCallback((name: string, type: string) => {
+    setSelectedIdentity({ name, type });
+    setActivePage('identity-detail');
   }, []);
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
@@ -3871,6 +3879,18 @@ export function App() {
           }}
           onMessage={handleStartDM}
         />
+      ) : activePage === 'identity-detail' && selectedIdentity ? (
+        <IdentityDetailPage
+          identityName={selectedIdentity.name}
+          identityType={selectedIdentity.type}
+          authUid={authUser?.authUid ?? null}
+          userId={authUser?.id ?? null}
+          userName={authUser?.name ?? null}
+          activeIdentityTags={activeIdentityTags}
+          onBack={() => setActivePage('community')}
+          onViewAuthor={handleViewCreator}
+          onAddIdentity={handleCommunityIdentityAdded}
+        />
       ) : activePage === 'post-detail' && selectedPostId ? (
         <PostDetailPage
           postId={selectedPostId}
@@ -3879,6 +3899,7 @@ export function App() {
           userName={authUser?.name ?? null}
           onBack={() => setActivePage('community')}
           onViewAuthor={handleViewCreator}
+          onOpenIdentity={handleOpenIdentity}
         />
       ) : activePage === 'messages' ? (
         authUser ? (
@@ -3899,6 +3920,7 @@ export function App() {
           onIdentityAdded={handleCommunityIdentityAdded}
           onViewCreator={handleViewCreator}
           onOpenPost={handleOpenPost}
+          onOpenIdentity={handleOpenIdentity}
           currentPromptText={workspacePrompt}
           activeIdentityTags={activeIdentityTags}
         />
