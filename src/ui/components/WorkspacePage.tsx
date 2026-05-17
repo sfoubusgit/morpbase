@@ -12,6 +12,7 @@ type LaneSlotProps = {
   onChoose: () => void;
   locked?: boolean;
   onToggleLock?: () => void;
+  entryPoint?: boolean;
 };
 
 type MultiLaneSlotProps = {
@@ -60,17 +61,21 @@ function LaneSlot({
   onChoose,
   locked = false,
   onToggleLock,
+  entryPoint = false,
 }: LaneSlotProps) {
   const isActive = activeItems.length > 0;
 
   return (
     <div
-      className={`ws-lane-slot ws-lane-slot-${variant}${isActive ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}`}
+      className={`ws-lane-slot ws-lane-slot-${variant}${isActive ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}${entryPoint ? ' ws-lane-slot-entry' : ''}`}
       onClick={onToggleLock}
       title={onToggleLock ? (locked ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
       role={onToggleLock ? 'button' : undefined}
     >
       <div className="ws-lane-label">{label}</div>
+      {entryPoint && (
+        <div className="ws-lane-entry-hint">Start here — who's in your scene?</div>
+      )}
       {activeItems.length === 0 ? (
         <div className="ws-lane-name"><span className="ws-lane-name-empty">None</span></div>
       ) : (
@@ -569,6 +574,7 @@ export function WorkspacePage({
               onChoose={onChooseCharacter}
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
+              entryPoint={!hasAnyActiveLane}
             />
             {(() => {
               const needsMoreChars = activeCharacterItems.length < 2;

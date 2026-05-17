@@ -691,6 +691,25 @@
   user-select: none;
 }
 
+/* Entry point treatment — character slot when nothing is active */
+.ws-lane-slot-entry {
+  box-shadow: 0 0 0 1px rgba(147,197,253,0.5), 0 0 20px rgba(147,197,253,0.15);
+  animation: ws-entry-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ws-entry-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(147,197,253,0.5), 0 0 20px rgba(147,197,253,0.15); }
+  50%       { box-shadow: 0 0 0 1px rgba(147,197,253,0.8), 0 0 28px rgba(147,197,253,0.28); }
+}
+
+.ws-lane-entry-hint {
+  font-size: 11px;
+  color: rgba(147,197,253,0.7);
+  font-style: italic;
+  margin-bottom: 2px;
+  letter-spacing: 0.01em;
+}
+
 /* Per-lane hover glow + locked glow */
 .ws-lane-slot { transition: box-shadow 0.2s; }
 
