@@ -61,7 +61,6 @@ type PostDetailPageProps = {
   userName: string | null;
   onBack: () => void;
   onViewAuthor?: (authUid: string, name: string) => void;
-  onOpenIdentity?: (name: string, type: string) => void;
 };
 
 export function PostDetailPage({
@@ -71,7 +70,6 @@ export function PostDetailPage({
   userName,
   onBack,
   onViewAuthor,
-  onOpenIdentity,
 }: PostDetailPageProps) {
   const [post, setPost] = useState<WallPost | null>(null);
   const [replies, setReplies] = useState<WallPost[]>([]);
@@ -185,15 +183,13 @@ export function PostDetailPage({
                   <span className="post-detail-build-lane">{TYPE_LABELS[type] ?? type}</span>
                   <div className="post-detail-build-tags">
                     {tags.map(tag => (
-                      <button
+                      <span
                         key={tag.name}
-                        type="button"
                         className="post-detail-build-tag"
                         style={{ color: TYPE_COLORS[type] ?? '#94a3b8' }}
-                        onClick={() => onOpenIdentity?.(tag.name, tag.type)}
                       >
                         {tag.name}
-                      </button>
+                      </span>
                     ))}
                   </div>
                 </div>

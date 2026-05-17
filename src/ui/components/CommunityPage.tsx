@@ -334,7 +334,6 @@ export function CommunityPage({
                 currentPromptText={currentPromptText}
                 onViewAuthor={onViewCreator}
                 onOpenPost={onOpenPost}
-                onOpenIdentity={onOpenIdentity}
               />
             ) : (
               <PulsePanel onViewAuthor={onViewCreator} />

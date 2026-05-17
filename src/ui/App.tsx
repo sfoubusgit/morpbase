@@ -3899,7 +3899,6 @@ export function App() {
           userName={authUser?.name ?? null}
           onBack={() => setActivePage('community')}
           onViewAuthor={handleViewCreator}
-          onOpenIdentity={handleOpenIdentity}
         />
       ) : activePage === 'messages' ? (
         authUser ? (
