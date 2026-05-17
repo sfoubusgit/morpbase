@@ -13,33 +13,28 @@
   border-color: var(--border-medium);
 }
 
-/* ── Header ── */
+/* ── Author meta (bottom of card) ── */
 
-.wall-card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.wall-card-author-block {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.wall-card-author-row {
+.wall-card-meta {
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.wall-card-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   min-width: 0;
 }
 
 .wall-card-author-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
   background: none;
   border: none;
   padding: 0;
@@ -60,7 +55,6 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  padding-top: 3px;
 }
 
 .wall-card-time {

@@ -73,30 +73,10 @@ export function WallPostCard({
 
   const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
 
-  const totalReactions = REACTION_EMOJIS.reduce((sum, e) => sum + (reactions[e] ?? 0), 0);
-
   return (
     <div className="wall-card">
-      <div className="wall-card-header">
-        <div className="wall-card-author-block">
-          <div className="wall-card-author-row">
-            <button
-              type="button"
-              className="wall-card-author-name"
-              onClick={() => onViewAuthor?.(post.authUid, post.authorName)}
-            >
-              {post.authorName}
-            </button>
-            <OnlineIndicator isOnline={!!isAuthorOnline} />
-          </div>
-          {title && <TitleBadge title={title} size="sm" />}
-        </div>
-        <div className="wall-card-time-row">
-          {isNew && <span className="wall-card-new">NEW</span>}
-          <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
-        </div>
-      </div>
 
+      {/* Content first */}
       {post.postType === 'share_event' && (
         <div className="wall-card-event-label">shared an identity</div>
       )}
@@ -119,7 +99,6 @@ export function WallPostCard({
         {post.caption && (
           <div className="wall-card-caption">{post.caption}</div>
         )}
-
         <div className="wall-card-prompt">
           {displayText}
           {isLong && (
@@ -131,6 +110,25 @@ export function WallPostCard({
               {expanded ? 'Show less' : 'Show more'}
             </button>
           )}
+        </div>
+      </div>
+
+      {/* Author + meta at the bottom */}
+      <div className="wall-card-meta">
+        <div className="wall-card-meta-left">
+          <button
+            type="button"
+            className="wall-card-author-name"
+            onClick={() => onViewAuthor?.(post.authUid, post.authorName)}
+          >
+            {post.authorName}
+          </button>
+          <OnlineIndicator isOnline={!!isAuthorOnline} />
+          {title && <TitleBadge title={title} size="sm" />}
+        </div>
+        <div className="wall-card-time-row">
+          {isNew && <span className="wall-card-new">NEW</span>}
+          <span className="wall-card-time">{formatRelativeTime(post.createdAt)}</span>
         </div>
       </div>
 
@@ -153,7 +151,6 @@ export function WallPostCard({
               </button>
             );
           })}
-          {totalReactions === 0 && !canReact && null}
         </div>
 
         {canReply && post.postType !== 'response' && (
