@@ -27,6 +27,7 @@ import { PulsePanel } from './wall/PulsePanel';
 import { CreatorGrid } from './creators/CreatorGrid';
 import { ChallengesPanel } from './challenges/ChallengesPanel';
 import type { WallPostIdentityTag } from '../../types/community';
+import { type SharedIdentityData } from './community/IdentityDetailPage';
 import './CommunityPage.css';
 
 const TYPE_LABELS: Record<CommunityIdentityType, string> = {
@@ -123,7 +124,7 @@ type CommunityPageProps = {
   onIdentityAdded?: () => Promise<void>;
   onViewCreator?: (authUid: string, name: string) => void;
   onOpenPost?: (postId: string) => void;
-  onOpenIdentity?: (identity: CommunitySharedIdentity) => void;
+  onOpenIdentity?: (identity: SharedIdentityData) => void;
   activeIdentityTags?: WallPostIdentityTag[];
   currentPromptText?: string;
 };
@@ -435,7 +436,7 @@ export function CommunityPage({
                         <button
                           type="button"
                           className="community-card-name community-card-name--link"
-                          onClick={(e) => { e.stopPropagation(); const src = sharedItems.find(s => s.id === item.id); if (src) onOpenIdentity?.(src); }}
+                          onClick={(e) => { e.stopPropagation(); onOpenIdentity?.(item); }}
                         >
                           {item.name}
                         </button>

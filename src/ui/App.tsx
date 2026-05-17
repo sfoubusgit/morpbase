@@ -48,8 +48,7 @@ import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
 import { getUnreadDMCount } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
-import { IdentityDetailPage } from './components/community/IdentityDetailPage';
-import type { CommunitySharedIdentity } from '../engine/communityStore';
+import { IdentityDetailPage, type SharedIdentityData } from './components/community/IdentityDetailPage';
 import type { Notification } from '../types/community';
 import { CATEGORY_MAP } from '../data/categoryMap';
 import { PROMPT_FRAGMENT_DEFINITIONS, type PromptFragmentDefinition } from '../data/promptFragments';
@@ -2248,14 +2247,14 @@ export function App() {
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
   const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [selectedIdentity, setSelectedIdentity] = useState<CommunitySharedIdentity | null>(null);
+  const [selectedIdentity, setSelectedIdentity] = useState<SharedIdentityData | null>(null);
 
   const handleOpenPost = useCallback((postId: string) => {
     setSelectedPostId(postId);
     setActivePage('post-detail');
   }, []);
 
-  const handleOpenIdentity = useCallback((identity: CommunitySharedIdentity) => {
+  const handleOpenIdentity = useCallback((identity: SharedIdentityData) => {
     setSelectedIdentity(identity);
     setActivePage('identity-detail');
   }, []);
@@ -3889,7 +3888,6 @@ export function App() {
           activeIdentityTags={activeIdentityTags}
           onBack={() => setActivePage('community')}
           onViewAuthor={handleViewCreator}
-          onAddIdentity={handleCommunityIdentityAdded}
         />
       ) : activePage === 'post-detail' && selectedPostId ? (
         <PostDetailPage

@@ -1,6 +1,18 @@
-import type { CommunitySharedIdentity } from '../../../engine/communityStore';
 import type { WallPostIdentityTag } from '../../../types/community';
 import './IdentityDetailPage.css';
+
+export type SharedIdentityData = {
+  id: string;
+  name: string;
+  type: string;
+  phrases: string[];
+  summary: string;
+  authorName: string;
+  authorId: string | null;
+  remixCount: number;
+  parentId: string | null;
+  createdAt?: number;
+};
 
 const TYPE_COLORS: Record<string, string> = {
   character:   '#c4b5fd',
@@ -20,14 +32,13 @@ function formatDate(ts: number): string {
 }
 
 type IdentityDetailPageProps = {
-  identity: CommunitySharedIdentity;
+  identity: SharedIdentityData;
   authUid: string | null;
   userId: string | null;
   userName: string | null;
   activeIdentityTags: WallPostIdentityTag[];
   onBack: () => void;
   onViewAuthor?: (authUid: string, name: string) => void;
-  onAddIdentity?: (identity: CommunitySharedIdentity) => void;
 };
 
 export function IdentityDetailPage({
@@ -35,7 +46,6 @@ export function IdentityDetailPage({
   activeIdentityTags,
   onBack,
   onViewAuthor,
-  onAddIdentity,
 }: IdentityDetailPageProps) {
   const color = TYPE_COLORS[identity.type] ?? '#a78bfa';
   const alreadyAdded = activeIdentityTags.some(
@@ -89,10 +99,12 @@ export function IdentityDetailPage({
               <span className="identity-detail-meta-value">{identity.authorName}</span>
             )}
           </div>
-          <div className="identity-detail-meta-row">
-            <span className="identity-detail-meta-label">Shared</span>
-            <span className="identity-detail-meta-value">{formatDate(identity.createdAt)}</span>
-          </div>
+          {identity.createdAt && (
+            <div className="identity-detail-meta-row">
+              <span className="identity-detail-meta-label">Shared</span>
+              <span className="identity-detail-meta-value">{formatDate(identity.createdAt)}</span>
+            </div>
+          )}
           {identity.remixCount > 0 && (
             <div className="identity-detail-meta-row">
               <span className="identity-detail-meta-label">Remixes</span>
@@ -107,20 +119,10 @@ export function IdentityDetailPage({
           )}
         </div>
 
-        {onAddIdentity && (
-          alreadyAdded ? (
-            <div className="identity-detail-added">
-              ✓ In your {identity.type}
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="identity-detail-add-btn"
-              onClick={() => onAddIdentity(identity)}
-            >
-              Add to my {identity.type}
-            </button>
-          )
+        {alreadyAdded && (
+          <div className="identity-detail-added">
+            ✓ In your {identity.type}
+          </div>
         )}
       </div>
     </div>
