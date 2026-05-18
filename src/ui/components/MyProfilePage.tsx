@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile } from '../../types';
 import type { WallPost, EarnedBadge } from '../../types/community';
-import { getMyPublicProfile, upsertMyPublicProfile } from '../../engine/profileStore';
+import { getMyPublicProfile, upsertMyPublicProfile, uploadAvatar, deleteAvatarFile } from '../../engine/profileStore';
 import { listWallPosts } from '../../engine/wallStore';
 import { getUserXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
@@ -59,6 +59,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
     displayName: '',
     bio: '',
     avatarUrl: '',
+    avatarStoragePath: '',
     coverImageUrl: '',
     tags: '',
     links: '',
@@ -129,6 +130,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           displayName:          nextProfile?.displayName ?? userName ?? '',
           bio:                  nextProfile?.bio ?? '',
           avatarUrl:            nextProfile?.avatarUrl ?? '',
+          avatarStoragePath:    nextProfile?.avatarStoragePath ?? '',
           coverImageUrl:        nextProfile?.coverImageUrl ?? '',
           tags:                 nextProfile?.tags?.join(', ') ?? '',
           links:                profileLinksToText(nextProfile?.links),
@@ -186,6 +188,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
         displayName: dn,
         bio:         form.bio.trim() || null,
         avatarUrl:   form.avatarUrl.trim() || null,
+        avatarStoragePath: form.avatarStoragePath.trim() || null,
         coverImageUrl: form.coverImageUrl.trim() || null,
         tags:        tags.length > 0 ? tags : null,
         links,
@@ -206,25 +209,21 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
 
   const handleAvatarFile = async (file: File | null) => {
     if (!file) return;
-    if (!file.type.startsWith('image/'))       { setError('Avatar must be an image file.'); return; }
-    if (file.size > 2 * 1024 * 1024)          { setError('Avatar must be 2 MB or smaller.'); return; }
+    if (!authUid) { setError('Log in to upload an avatar.'); return; }
+    if (!file.type.startsWith('image/')) { setError('Avatar must be an image file.'); return; }
+    if (file.size > 5 * 1024 * 1024)     { setError('Avatar must be 5 MB or smaller.'); return; }
     setUploadingAvatar(true);
     setError(null);
+    const previousStoragePath = form.avatarStoragePath;
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          const result = typeof reader.result === 'string' ? reader.result : '';
-          if (!result) { reject(new Error('Failed to read image.')); return; }
-          resolve(result);
-        };
-        reader.onerror = () => reject(new Error('Failed to read image.'));
-        reader.readAsDataURL(file);
-      });
-      setForm(prev => ({ ...prev, avatarUrl: dataUrl }));
-      setMessage('Avatar ready — save to apply.');
+      const { storagePath, publicUrl } = await uploadAvatar(authUid, file);
+      setForm(prev => ({ ...prev, avatarUrl: publicUrl, avatarStoragePath: storagePath }));
+      setMessage('Avatar uploaded — save to apply.');
+      if (previousStoragePath && previousStoragePath !== storagePath) {
+        void deleteAvatarFile(previousStoragePath);
+      }
     } catch (err: any) {
-      setError(err?.message ?? 'Failed to prepare avatar.');
+      setError(err?.message ?? 'Failed to upload avatar.');
     } finally {
       setUploadingAvatar(false);
     }
@@ -328,14 +327,18 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
                     className="profile-field-input"
                     placeholder="https://…"
                     value={form.avatarUrl}
-                    onChange={e => setForm(prev => ({ ...prev, avatarUrl: e.target.value }))}
+                    onChange={e => setForm(prev => ({ ...prev, avatarUrl: e.target.value, avatarStoragePath: '' }))}
                   />
                 </div>
                 {form.avatarUrl && (
                   <button
                     type="button"
                     className="profile-link-btn"
-                    onClick={() => setForm(prev => ({ ...prev, avatarUrl: '' }))}
+                    onClick={() => {
+                      const orphan = form.avatarStoragePath;
+                      setForm(prev => ({ ...prev, avatarUrl: '', avatarStoragePath: '' }));
+                      if (orphan) void deleteAvatarFile(orphan);
+                    }}
                   >
                     Remove avatar
                   </button>

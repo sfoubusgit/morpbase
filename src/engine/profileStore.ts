@@ -66,6 +66,27 @@ export const getPublicProfileByAuthUid = async (authUid: string): Promise<Public
   }
 };
 
+const AVATAR_BUCKET = 'avatars';
+
+export const uploadAvatar = async (
+  authUid: string,
+  file: File,
+): Promise<{ storagePath: string; publicUrl: string }> => {
+  const ext = (file.name.split('.').pop() ?? 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const storagePath = `${authUid}/avatar-${Date.now()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from(AVATAR_BUCKET)
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+  if (uploadError) throw new Error(uploadError.message);
+  const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(storagePath);
+  return { storagePath, publicUrl: data.publicUrl };
+};
+
+export const deleteAvatarFile = async (storagePath: string | null | undefined): Promise<void> => {
+  if (!storagePath) return;
+  try { await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]); } catch { /* non-fatal */ }
+};
+
 export const getAvatarsByAuthUids = async (
   authUids: string[],
 ): Promise<Map<string, string | null>> => {
