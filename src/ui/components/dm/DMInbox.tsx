@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DirectMessage, DMThread } from '../../../types/community';
 import { listThreads, listMessages, sendDM, markThreadRead, subscribeToIncomingDMs, subscribeToReadReceipts } from '../../../engine/dmStore';
+import { getAvatarsByAuthUids } from '../../../engine/profileStore';
 import './DMInbox.css';
 
 type DMInboxProps = {
@@ -24,6 +25,7 @@ type ActiveThread = { authUid: string; name: string };
 
 export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: DMInboxProps) {
   const [threads, setThreads] = useState<DMThread[]>([]);
+  const [avatars, setAvatars] = useState<Map<string, string | null>>(new Map());
   const [loadingThreads, setLoadingThreads] = useState(true);
   const [active, setActive] = useState<ActiveThread | null>(initialRecipient ?? null);
   const [messages, setMessages] = useState<DirectMessage[]>([]);
@@ -38,6 +40,10 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
     const data = await listThreads(authUid);
     setThreads(data);
     setLoadingThreads(false);
+    if (data.length > 0) {
+      const uids = data.map(t => t.otherAuthUid);
+      void getAvatarsByAuthUids(uids).then(setAvatars);
+    }
   }, [authUid]);
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
@@ -121,6 +127,12 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
           <button type="button" className="dm-back-btn" onClick={() => setActive(null)}>
             ← All Messages
           </button>
+          {(() => {
+            const activeAvatar = avatars.get(active.authUid);
+            return activeAvatar ? (
+              <img src={activeAvatar} alt={active.name} className="dm-thread-header-avatar" />
+            ) : null;
+          })()}
           <span className="dm-thread-name">{active.name}</span>
         </div>
 
@@ -213,16 +225,22 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
         </div>
       ) : (
         <div className="dm-thread-list">
-          {threads.map(thread => (
+          {threads.map(thread => {
+            const avatarUrl = avatars.get(thread.otherAuthUid);
+            return (
             <button
               key={thread.otherAuthUid}
               type="button"
               className={`dm-thread-row${thread.unreadCount > 0 ? ' dm-thread-row--unread' : ''}`}
               onClick={() => handleOpenThread(thread)}
             >
-              <div className="dm-thread-avatar">
-                {thread.otherName.charAt(0).toUpperCase()}
-              </div>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={thread.otherName} className="dm-thread-avatar dm-thread-avatar--img" />
+              ) : (
+                <div className="dm-thread-avatar">
+                  {thread.otherName.charAt(0).toUpperCase()}
+                </div>
+              )}
               <div className="dm-thread-body">
                 <div className="dm-thread-top">
                   <span className="dm-thread-other-name">{thread.otherName}</span>
@@ -239,7 +257,8 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
                 <span className="dm-thread-badge">{thread.unreadCount}</span>
               )}
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

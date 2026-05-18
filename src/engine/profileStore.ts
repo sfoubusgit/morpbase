@@ -65,6 +65,33 @@ export const getPublicProfileByAuthUid = async (authUid: string): Promise<Public
   }
 };
 
+export const getAvatarsByAuthUids = async (
+  authUids: string[],
+): Promise<Map<string, string | null>> => {
+  const result = new Map<string, string | null>();
+  if (authUids.length === 0) return result;
+  try {
+    const { data: users } = await supabase
+      .from('user_profiles')
+      .select('id, auth_uid')
+      .in('auth_uid', authUids);
+    const rows = (users ?? []) as Array<{ id: string; auth_uid: string }>;
+    if (rows.length === 0) return result;
+    const idToAuth = new Map(rows.map(r => [r.id, r.auth_uid]));
+    const { data: profiles } = await supabase
+      .from('public_profiles')
+      .select('user_id, avatar_url')
+      .in('user_id', rows.map(r => r.id));
+    for (const row of (profiles ?? []) as Array<{ user_id: string; avatar_url: string | null }>) {
+      const authUid = idToAuth.get(row.user_id);
+      if (authUid) result.set(authUid, row.avatar_url ?? null);
+    }
+  } catch {
+    // non-fatal — caller falls back to initials
+  }
+  return result;
+};
+
 export const searchPublicProfiles = async (input: {
   query?: string;
   tags?: string[];
