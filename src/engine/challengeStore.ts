@@ -3,6 +3,7 @@ import type { Challenge, ChallengeEntry, WallPostIdentityTag } from '../types/co
 import { awardXP } from './xpStore';
 import { checkAndAwardChallengeBadges } from './badgeStore';
 import { createWallPost } from './wallStore';
+import { createNotification } from './notificationStore';
 
 type ChallengeRow = {
   id: string;
@@ -268,6 +269,29 @@ export async function setChallengeWinner(
     .update({ winner_entry_id: winnerEntryId })
     .eq('id', challengeId);
   if (error) throw new Error(error.message);
+
+  if (!winnerEntryId) return;
+  try {
+    const { data: entry } = await supabase
+      .from('challenge_entries')
+      .select('auth_uid')
+      .eq('id', winnerEntryId)
+      .maybeSingle();
+    const winnerAuthUid = (entry as { auth_uid: string } | null)?.auth_uid;
+    if (!winnerAuthUid) return;
+    const { data: challenge } = await supabase
+      .from('challenges')
+      .select('number, title')
+      .eq('id', challengeId)
+      .maybeSingle();
+    const c = challenge as { number: number; title: string } | null;
+    void createNotification(winnerAuthUid, 'challenge_won', {
+      challengeId,
+      challengeNumber: c?.number ?? null,
+      challengeTitle: c?.title ?? null,
+      entryId: winnerEntryId,
+    });
+  } catch { /* non-fatal */ }
 }
 
 export type ChallengeWinner = {

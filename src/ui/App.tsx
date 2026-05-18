@@ -2336,6 +2336,9 @@ export function App() {
       case 'xp_milestone':
         setActivePage('my-profile');
         break;
+      case 'challenge_won':
+        setActivePage('community');
+        break;
       default:
         setActivePage('community');
     }

@@ -141,6 +141,10 @@ function notifMessage(n: Notification): string {
         ? `${icon}You earned the "${p.badgeLabel}" badge!`
         : 'You earned a new badge!';
     }
+    case 'challenge_won':
+      return p.challengeTitle
+        ? `You won Challenge #${p.challengeNumber}: "${p.challengeTitle}"! 🏆`
+        : 'You won a challenge! 🏆';
     case 'xp_milestone':
       return p.title
         ? `You reached the "${p.title}" title!`
@@ -158,6 +162,7 @@ function notifIcon(type: string): string {
     case 'wall_post_replied': return '💬';
     case 'dm_received':       return '✉';
     case 'badge_earned':      return '🏅';
+    case 'challenge_won':     return '🏆';
     case 'xp_milestone':      return '⭐';
     default:                  return '·';
   }

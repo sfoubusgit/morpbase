@@ -156,6 +156,7 @@ export type NotificationType =
   | 'wall_post_replied'
   | 'dm_received'
   | 'challenge_deadline'
+  | 'challenge_won'
   | 'xp_milestone'
   | 'badge_earned';
 
