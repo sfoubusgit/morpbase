@@ -504,6 +504,33 @@
 
 /* ── Cover image preview ─────────────────────────── */
 
+.profile-cover-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.profile-cover-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  background: rgba(110, 86, 249, 0.15);
+  border: 1px solid rgba(110, 86, 249, 0.4);
+  color: #a78bfa;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.profile-cover-upload-btn:hover {
+  background: rgba(110, 86, 249, 0.25);
+  border-color: rgba(110, 86, 249, 0.6);
+}
+
 .profile-cover-preview {
   margin-top: 8px;
   border-radius: var(--radius-md);

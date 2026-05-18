@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicProfile } from '../../types';
 import type { WallPost, EarnedBadge } from '../../types/community';
-import { getMyPublicProfile, upsertMyPublicProfile, uploadAvatar, deleteAvatarFile } from '../../engine/profileStore';
+import { getMyPublicProfile, upsertMyPublicProfile, uploadAvatar, deleteAvatarFile, uploadCover, deleteCoverFile } from '../../engine/profileStore';
 import { listWallPosts } from '../../engine/wallStore';
 import { getUserXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
@@ -53,6 +53,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
   const [loading, setLoading]           = useState(true);
   const [saving, setSaving]             = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [message, setMessage]           = useState<string | null>(null);
   const [error, setError]               = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -61,6 +62,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
     avatarUrl: '',
     avatarStoragePath: '',
     coverImageUrl: '',
+    coverStoragePath: '',
     tags: '',
     links: '',
     showPublicPrompts: false,
@@ -132,6 +134,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           avatarUrl:            nextProfile?.avatarUrl ?? '',
           avatarStoragePath:    nextProfile?.avatarStoragePath ?? '',
           coverImageUrl:        nextProfile?.coverImageUrl ?? '',
+          coverStoragePath:     nextProfile?.coverStoragePath ?? '',
           tags:                 nextProfile?.tags?.join(', ') ?? '',
           links:                profileLinksToText(nextProfile?.links),
           showPublicPrompts:    Boolean(nextProfile?.showPublicPrompts),
@@ -190,6 +193,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
         avatarUrl:   form.avatarUrl.trim() || null,
         avatarStoragePath: form.avatarStoragePath.trim() || null,
         coverImageUrl: form.coverImageUrl.trim() || null,
+        coverStoragePath: form.coverStoragePath.trim() || null,
         tags:        tags.length > 0 ? tags : null,
         links,
         showPublicPrompts:    form.showPublicPrompts,
@@ -226,6 +230,28 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
       setError(err?.message ?? 'Failed to upload avatar.');
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  const handleCoverFile = async (file: File | null) => {
+    if (!file) return;
+    if (!authUid) { setError('Log in to upload a cover image.'); return; }
+    if (!file.type.startsWith('image/')) { setError('Cover must be an image file.'); return; }
+    if (file.size > 8 * 1024 * 1024)     { setError('Cover must be 8 MB or smaller.'); return; }
+    setUploadingCover(true);
+    setError(null);
+    const previousStoragePath = form.coverStoragePath;
+    try {
+      const { storagePath, publicUrl } = await uploadCover(authUid, file);
+      setForm(prev => ({ ...prev, coverImageUrl: publicUrl, coverStoragePath: storagePath }));
+      setMessage('Cover uploaded — save to apply.');
+      if (previousStoragePath && previousStoragePath !== storagePath) {
+        void deleteCoverFile(previousStoragePath);
+      }
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to upload cover.');
+    } finally {
+      setUploadingCover(false);
     }
   };
 
@@ -347,14 +373,39 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
             </div>
 
             <div className="profile-field">
-              <label className="profile-field-label" htmlFor="profile-cover-url">Cover image link</label>
+              <label className="profile-field-label" htmlFor="profile-cover-url">Cover image</label>
+              <div className="profile-cover-actions">
+                <label className="profile-cover-upload-btn">
+                  {uploadingCover ? 'Uploading…' : (form.coverImageUrl ? 'Replace cover' : 'Upload cover')}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    disabled={uploadingCover}
+                    onChange={e => { void handleCoverFile(e.target.files?.[0] ?? null); e.target.value = ''; }}
+                  />
+                </label>
+                {form.coverImageUrl && (
+                  <button
+                    type="button"
+                    className="profile-link-btn"
+                    onClick={() => {
+                      const orphan = form.coverStoragePath;
+                      setForm(prev => ({ ...prev, coverImageUrl: '', coverStoragePath: '' }));
+                      if (orphan) void deleteCoverFile(orphan);
+                    }}
+                  >
+                    Remove cover
+                  </button>
+                )}
+              </div>
               <input
                 id="profile-cover-url"
                 type="text"
                 className="profile-field-input"
-                placeholder="https://… (appears as card background in Community)"
+                placeholder="…or paste an image URL"
                 value={form.coverImageUrl}
-                onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value }))}
+                onChange={e => setForm(prev => ({ ...prev, coverImageUrl: e.target.value, coverStoragePath: '' }))}
               />
               {form.coverImageUrl.trim() && (
                 <div className="profile-cover-preview">

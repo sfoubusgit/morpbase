@@ -10,6 +10,7 @@ const toPublicProfile = (row: any): PublicProfile => ({
   avatarUrl: row.avatar_url ?? null,
   avatarStoragePath: row.avatar_storage_path ?? null,
   coverImageUrl: row.cover_image_url ?? null,
+  coverStoragePath: row.cover_storage_path ?? null,
   links: row.links ?? null,
   tags: row.tags ?? null,
   showPublicPrompts: row.show_public_prompts ?? null,
@@ -67,6 +68,7 @@ export const getPublicProfileByAuthUid = async (authUid: string): Promise<Public
 };
 
 const AVATAR_BUCKET = 'avatars';
+const COVER_BUCKET = 'covers';
 
 export const uploadAvatar = async (
   authUid: string,
@@ -85,6 +87,25 @@ export const uploadAvatar = async (
 export const deleteAvatarFile = async (storagePath: string | null | undefined): Promise<void> => {
   if (!storagePath) return;
   try { await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]); } catch { /* non-fatal */ }
+};
+
+export const uploadCover = async (
+  authUid: string,
+  file: File,
+): Promise<{ storagePath: string; publicUrl: string }> => {
+  const ext = (file.name.split('.').pop() ?? 'png').toLowerCase().replace(/[^a-z0-9]/g, '') || 'png';
+  const storagePath = `${authUid}/cover-${Date.now()}.${ext}`;
+  const { error: uploadError } = await supabase.storage
+    .from(COVER_BUCKET)
+    .upload(storagePath, file, { contentType: file.type, upsert: false });
+  if (uploadError) throw new Error(uploadError.message);
+  const { data } = supabase.storage.from(COVER_BUCKET).getPublicUrl(storagePath);
+  return { storagePath, publicUrl: data.publicUrl };
+};
+
+export const deleteCoverFile = async (storagePath: string | null | undefined): Promise<void> => {
+  if (!storagePath) return;
+  try { await supabase.storage.from(COVER_BUCKET).remove([storagePath]); } catch { /* non-fatal */ }
 };
 
 export const getPublicProfilesByAuthUids = async (
@@ -174,6 +195,7 @@ export const upsertMyPublicProfile = async (input: {
   avatarUrl?: string | null;
   avatarStoragePath?: string | null;
   coverImageUrl?: string | null;
+  coverStoragePath?: string | null;
   links?: Record<string, string> | null;
   tags?: string[] | null;
   showPublicPrompts?: boolean | null;
@@ -191,6 +213,7 @@ export const upsertMyPublicProfile = async (input: {
     avatar_url: input.avatarUrl?.trim() || null,
     avatar_storage_path: input.avatarStoragePath?.trim() || null,
     cover_image_url: input.coverImageUrl?.trim() || null,
+    cover_storage_path: input.coverStoragePath?.trim() || null,
     links: input.links ?? null,
     tags: input.tags ?? null,
     show_public_prompts: input.showPublicPrompts ?? null,
