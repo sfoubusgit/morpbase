@@ -139,3 +139,37 @@ export async function getUnreadDMCount(authUid: string): Promise<number> {
     return 0;
   }
 }
+
+export function subscribeToIncomingDMs(
+  authUid: string,
+  onInsert: (msg: DirectMessage) => void,
+): () => void {
+  const channel = supabase
+    .channel(`dms:in:${authUid}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'direct_messages', filter: `recipient_auth_uid=eq.${authUid}` },
+      (payload: { new: DMRow }) => {
+        try { onInsert(toMessage(payload.new)); } catch { /* non-fatal */ }
+      },
+    )
+    .subscribe();
+  return () => { try { void supabase.removeChannel(channel); } catch { /* non-fatal */ } };
+}
+
+export function subscribeToReadReceipts(
+  authUid: string,
+  onUpdate: (msg: DirectMessage) => void,
+): () => void {
+  const channel = supabase
+    .channel(`dms:receipts:${authUid}`)
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'direct_messages', filter: `sender_auth_uid=eq.${authUid}` },
+      (payload: { new: DMRow }) => {
+        try { onUpdate(toMessage(payload.new)); } catch { /* non-fatal */ }
+      },
+    )
+    .subscribe();
+  return () => { try { void supabase.removeChannel(channel); } catch { /* non-fatal */ } };
+}

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DirectMessage, DMThread } from '../../../types/community';
-import { listThreads, listMessages, sendDM, markThreadRead } from '../../../engine/dmStore';
+import { listThreads, listMessages, sendDM, markThreadRead, subscribeToIncomingDMs, subscribeToReadReceipts } from '../../../engine/dmStore';
 import './DMInbox.css';
 
 type DMInboxProps = {
@@ -42,12 +42,18 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
 
   useEffect(() => { void loadThreads(); }, [loadThreads]);
 
+  // Refresh thread list whenever any incoming DM arrives.
+  useEffect(() => {
+    const unsubscribe = subscribeToIncomingDMs(authUid, () => { void loadThreads(); });
+    return unsubscribe;
+  }, [authUid, loadThreads]);
+
   // When initialRecipient changes (e.g. from clicking Message on a profile)
   useEffect(() => {
     if (initialRecipient) setActive(initialRecipient);
   }, [initialRecipient?.authUid]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Load messages when active thread changes, then poll for new ones
+  // Load messages when active thread changes, subscribe for live updates
   useEffect(() => {
     if (!active) { setMessages([]); return; }
     setLoadingMessages(true);
@@ -61,12 +67,16 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
         t.otherAuthUid === otherUid ? { ...t, unreadCount: 0 } : t,
       ));
     });
-    const poll = setInterval(async () => {
-      const msgs = await listMessages(authUid, otherUid);
-      setMessages(msgs);
+    const unsubIncoming = subscribeToIncomingDMs(authUid, msg => {
+      if (msg.senderAuthUid !== otherUid) return;
+      setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
       void markThreadRead(authUid, otherUid);
-    }, 10_000);
-    return () => clearInterval(poll);
+    });
+    const unsubReceipts = subscribeToReadReceipts(authUid, msg => {
+      if (msg.recipientAuthUid !== otherUid) return;
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, readAt: msg.readAt } : m));
+    });
+    return () => { unsubIncoming(); unsubReceipts(); };
   }, [authUid, active?.authUid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom when new messages arrive

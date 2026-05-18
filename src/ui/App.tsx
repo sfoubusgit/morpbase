@@ -46,7 +46,7 @@ import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
 import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
-import { getUnreadDMCount } from '../engine/dmStore';
+import { getUnreadDMCount, subscribeToIncomingDMs } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import { IdentityDetailPage, type SharedIdentityData } from './components/community/IdentityDetailPage';
 import type { Notification } from '../types/community';
@@ -2271,10 +2271,10 @@ export function App() {
     if (activePage === 'messages') { setDmUnreadCount(0); return; }
     const uid = authUser.authUid;
     void getUnreadDMCount(uid).then(setDmUnreadCount);
-    const timer = setInterval(() => {
-      void getUnreadDMCount(uid).then(setDmUnreadCount);
-    }, 30_000);
-    return () => clearInterval(timer);
+    const unsubscribe = subscribeToIncomingDMs(uid, () => {
+      setDmUnreadCount(prev => prev + 1);
+    });
+    return unsubscribe;
   }, [authUser, activePage]);
 
   const handleNotificationNavigate = useCallback((n: Notification) => {
