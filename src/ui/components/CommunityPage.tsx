@@ -115,7 +115,7 @@ type DisplayIdentity = {
   remixCount: number;
 };
 
-type CommunitySection = 'wall' | 'identities' | 'creators' | 'challenges';
+type CommunitySection = 'wall' | 'identities' | 'people' | 'challenges';
 
 type CommunityPageProps = {
   userId: string | null;
@@ -294,14 +294,14 @@ export function CommunityPage({
           </div>
 
           <div className="community-section-tabs">
-            {(['wall', 'identities', 'creators', 'challenges'] as CommunitySection[]).map(s => (
+            {(['wall', 'identities', 'people', 'challenges'] as CommunitySection[]).map(s => (
               <button
                 key={s}
                 type="button"
                 className={`community-section-tab${activeSection === s ? ' community-section-tab--active' : ''}`}
                 onClick={() => setActiveSection(s)}
               >
-                {s === 'creators' ? 'Users' : s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'people' ? 'People' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
@@ -342,7 +342,7 @@ export function CommunityPage({
           </div>
         )}
 
-        {activeSection === 'creators' && (
+        {activeSection === 'people' && (
           <CreatorGrid
             authUid={authUid}
             onViewCreator={onViewCreator}

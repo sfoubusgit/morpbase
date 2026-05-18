@@ -87,6 +87,31 @@ export const deleteAvatarFile = async (storagePath: string | null | undefined): 
   try { await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]); } catch { /* non-fatal */ }
 };
 
+export const getPublicProfilesByAuthUids = async (
+  authUids: string[],
+): Promise<Map<string, PublicProfile>> => {
+  const result = new Map<string, PublicProfile>();
+  if (authUids.length === 0) return result;
+  try {
+    const { data: users } = await supabase
+      .from('user_profiles')
+      .select('id, auth_uid')
+      .in('auth_uid', authUids);
+    const rows = (users ?? []) as Array<{ id: string; auth_uid: string }>;
+    if (rows.length === 0) return result;
+    const idToAuth = new Map(rows.map(r => [r.id, r.auth_uid]));
+    const { data: profiles } = await supabase
+      .from('public_profiles')
+      .select('*')
+      .in('user_id', rows.map(r => r.id));
+    for (const row of (profiles ?? []) as any[]) {
+      const authUid = idToAuth.get(row.user_id);
+      if (authUid) result.set(authUid, toPublicProfile(row));
+    }
+  } catch { /* non-fatal */ }
+  return result;
+};
+
 export const getAvatarsByAuthUids = async (
   authUids: string[],
 ): Promise<Map<string, string | null>> => {

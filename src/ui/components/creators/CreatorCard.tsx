@@ -3,10 +3,12 @@ import { TitleBadge } from '../shared/TitleBadge';
 import { OnlineIndicator } from '../shared/OnlineIndicator';
 import { getTitleForXp } from '../../../data/communityTitles';
 import type { CreatorSummary } from '../../../engine/creatorFeedStore';
+import type { PublicProfile } from '../../../types';
 import './CreatorCard.css';
 
 type CreatorCardProps = {
   creator: CreatorSummary;
+  profile?: PublicProfile;
   authorXp?: number;
   reach?: number;
   authUid: string | null;
@@ -18,6 +20,7 @@ type CreatorCardProps = {
 
 export function CreatorCard({
   creator,
+  profile,
   authorXp,
   reach = 0,
   authUid,
@@ -29,11 +32,18 @@ export function CreatorCard({
   const isOwnCard = authUid === creator.authUid;
   const isFollowing = followingSet.has(creator.authUid);
   const title = authorXp !== undefined ? getTitleForXp(authorXp) : null;
+  const bio = profile?.bio?.trim();
+  const tags = (profile?.tags ?? []).slice(0, 3);
+  const avatarUrl = profile?.avatarUrl;
 
   return (
     <div className="creator-card">
       <div className="creator-card-avatar">
-        {creator.name.charAt(0).toUpperCase()}
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={creator.name} className="creator-card-avatar-img" />
+        ) : (
+          creator.name.charAt(0).toUpperCase()
+        )}
         <OnlineIndicator isOnline={!!isOnline} />
       </div>
 
@@ -49,6 +59,20 @@ export function CreatorCard({
           </button>
           {title && <TitleBadge title={title} size="sm" />}
         </div>
+
+        {bio && (
+          <p className="creator-card-bio">
+            {bio.length > 100 ? bio.slice(0, 100) + '…' : bio}
+          </p>
+        )}
+
+        {tags.length > 0 && (
+          <div className="creator-card-tags">
+            {tags.map(tag => (
+              <span key={tag} className="creator-card-tag">{tag}</span>
+            ))}
+          </div>
+        )}
 
         <div className="creator-card-stats">
           {creator.wallPostCount > 0 && (
