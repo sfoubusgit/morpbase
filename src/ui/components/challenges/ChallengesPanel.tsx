@@ -10,7 +10,9 @@ import {
   voteForEntry,
   unvoteEntry,
   subscribeToChallengeEntries,
+  getWinnersForChallenges,
   type ChallengeEntryWithPost,
+  type ChallengeWinner,
 } from '../../../engine/challengeStore';
 import './ChallengesPanel.css';
 
@@ -247,6 +249,7 @@ export function ChallengesPanel({
 }: ChallengesPanelProps) {
   const [active, setActive] = useState<Challenge[]>([]);
   const [past, setPast] = useState<Challenge[]>([]);
+  const [winners, setWinners] = useState<Map<string, ChallengeWinner>>(new Map());
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
@@ -255,6 +258,10 @@ export function ChallengesPanel({
     setActive(a);
     setPast(p);
     setLoading(false);
+    const pastWithWinners = p.filter(c => c.winnerEntryId);
+    if (pastWithWinners.length > 0) {
+      void getWinnersForChallenges(pastWithWinners.map(c => c.id)).then(setWinners);
+    }
   }, []);
 
   useEffect(() => { void load(); }, [load]);
@@ -285,14 +292,27 @@ export function ChallengesPanel({
         <div className="challenges-archive">
           <div className="challenges-archive-title">Past Challenges</div>
           <div className="challenges-archive-list">
-            {past.map(c => (
-              <div key={c.id} className="challenge-archive-row">
-                <span className="challenge-archive-number">#{c.number}</span>
-                <TypeBadge type={c.type} />
-                <span className="challenge-archive-title-text">{c.title}</span>
-                <span className="challenge-archive-constraint">{c.constraintText}</span>
-              </div>
-            ))}
+            {past.map(c => {
+              const winner = winners.get(c.id);
+              return (
+                <div key={c.id} className="challenge-archive-row">
+                  <div className="challenge-archive-row-head">
+                    <span className="challenge-archive-number">#{c.number}</span>
+                    <TypeBadge type={c.type} />
+                    <span className="challenge-archive-title-text">{c.title}</span>
+                    <span className="challenge-archive-constraint">{c.constraintText}</span>
+                  </div>
+                  {winner && (
+                    <div className="challenge-archive-winner">
+                      <span className="challenge-archive-winner-label">🏆 Winner — {winner.authorName}</span>
+                      <p className="challenge-archive-winner-text">
+                        {winner.promptText.length > 160 ? winner.promptText.slice(0, 160) + '…' : winner.promptText}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

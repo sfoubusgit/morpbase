@@ -270,6 +270,39 @@ export async function setChallengeWinner(
   if (error) throw new Error(error.message);
 }
 
+export type ChallengeWinner = {
+  entryId: string;
+  authUid: string;
+  authorName: string;
+  promptText: string;
+};
+
+export async function getWinnersForChallenges(
+  challengeIds: string[],
+): Promise<Map<string, ChallengeWinner>> {
+  const result = new Map<string, ChallengeWinner>();
+  if (challengeIds.length === 0) return result;
+  try {
+    const { data } = await supabase
+      .from('challenges')
+      .select('id, winner_entry_id, challenge_entries!winner_entry_id(id, auth_uid, wall_posts(prompt_text, author_name))')
+      .in('id', challengeIds)
+      .not('winner_entry_id', 'is', null);
+    for (const row of (data ?? []) as any[]) {
+      const entry = row.challenge_entries;
+      const post = entry?.wall_posts;
+      if (!entry || !post) continue;
+      result.set(row.id as string, {
+        entryId: entry.id as string,
+        authUid: entry.auth_uid as string,
+        authorName: post.author_name as string,
+        promptText: post.prompt_text as string,
+      });
+    }
+  } catch { /* non-fatal */ }
+  return result;
+}
+
 export function subscribeToChallengeEntries(
   challengeId: string,
   onChange: () => void,

@@ -6,7 +6,7 @@ import {
   createMissingPublicProfile,
   listAdminUsers,
 } from '../../engine/adminStore';
-import { listAllChallenges, createChallenge } from '../../engine/challengeStore';
+import { listAllChallenges, createChallenge, listChallengeEntries, setChallengeWinner, type ChallengeEntryWithPost } from '../../engine/challengeStore';
 import {
   getAdminAnalyticsSummary,
   listAdminAnalyticsPageBreakdown,
@@ -28,6 +28,94 @@ const formatDate = (timestamp: number) =>
 
 const formatDateTime = (timestamp: number) =>
   new Date(timestamp).toLocaleString();
+
+function AdminChallengeRow({ challenge, onWinnerChange }: {
+  challenge: Challenge;
+  onWinnerChange: (winnerEntryId: string | null) => void;
+}) {
+  const now = Date.now();
+  const status: 'upcoming' | 'active' | 'ended' = now < challenge.startsAt ? 'upcoming' : now > challenge.endsAt ? 'ended' : 'active';
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [entries, setEntries] = useState<ChallengeEntryWithPost[] | null>(null);
+  const [loadingEntries, setLoadingEntries] = useState(false);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const openPicker = async () => {
+    setPickerOpen(true);
+    if (entries === null) {
+      setLoadingEntries(true);
+      const list = await listChallengeEntries(challenge.id);
+      setEntries(list);
+      setLoadingEntries(false);
+    }
+  };
+
+  const handlePick = async (entryId: string | null) => {
+    setUpdating(entryId ?? '__clear__');
+    try {
+      await setChallengeWinner(challenge.id, entryId);
+      onWinnerChange(entryId);
+    } catch { /* non-fatal */ }
+    finally { setUpdating(null); }
+  };
+
+  return (
+    <div className={`admin-challenge-row admin-challenge-row--${status}`}>
+      <div className="admin-challenge-row-top">
+        <span className="admin-challenge-num">#{challenge.number}</span>
+        <span className={`admin-challenge-type-badge admin-challenge-type-badge--${challenge.type}`}>{challenge.type}</span>
+        <span className={`admin-challenge-status admin-challenge-status--${status}`}>{status}</span>
+        {challenge.winnerEntryId && <span className="admin-challenge-winner-marker">🏆 winner set</span>}
+      </div>
+      <div className="admin-challenge-title">{challenge.title}</div>
+      <div className="admin-challenge-constraint">{challenge.constraintText}</div>
+      <div className="admin-challenge-dates-info">
+        {new Date(challenge.startsAt).toLocaleDateString()} → {new Date(challenge.endsAt).toLocaleDateString()}
+      </div>
+      {status === 'ended' && (
+        <div className="admin-challenge-winner-section">
+          {!pickerOpen ? (
+            <button type="button" className="admin-ghost-btn" onClick={() => void openPicker()}>
+              {challenge.winnerEntryId ? 'Change winner' : 'Pick winner'}
+            </button>
+          ) : loadingEntries ? (
+            <p className="admin-empty">Loading entries…</p>
+          ) : entries && entries.length === 0 ? (
+            <p className="admin-empty">No entries to choose from.</p>
+          ) : (
+            <div className="admin-challenge-winner-picker">
+              {entries?.map((e, i) => {
+                const isWinner = e.entryId === challenge.winnerEntryId;
+                return (
+                  <div key={e.entryId} className={`admin-winner-row${isWinner ? ' admin-winner-row--active' : ''}`}>
+                    <span className="admin-winner-rank">#{i + 1}</span>
+                    <div className="admin-winner-main">
+                      <span className="admin-winner-author">{e.authorName} · ▲ {e.voteCount}</span>
+                      <p className="admin-winner-text">
+                        {e.promptText.length > 140 ? e.promptText.slice(0, 140) + '…' : e.promptText}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="admin-ghost-btn"
+                      disabled={updating !== null}
+                      onClick={() => void handlePick(isWinner ? null : e.entryId)}
+                    >
+                      {updating === e.entryId ? '…' : isWinner ? 'Unmark' : 'Mark winner'}
+                    </button>
+                  </div>
+                );
+              })}
+              <button type="button" className="admin-ghost-btn admin-winner-close" onClick={() => setPickerOpen(false)}>
+                Close
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AdminPage({ userName }: AdminPageProps) {
   const [users, setUsers] = useState<AdminUserRecord[]>([]);
@@ -535,24 +623,15 @@ export function AdminPage({ userName }: AdminPageProps) {
                   <div className="admin-empty">No challenges yet.</div>
                 ) : (
                   <div className="admin-challenge-list">
-                    {challenges.map(c => {
-                      const now = Date.now();
-                      const status = now < c.startsAt ? 'upcoming' : now > c.endsAt ? 'ended' : 'active';
-                      return (
-                        <div key={c.id} className={`admin-challenge-row admin-challenge-row--${status}`}>
-                          <div className="admin-challenge-row-top">
-                            <span className="admin-challenge-num">#{c.number}</span>
-                            <span className={`admin-challenge-type-badge admin-challenge-type-badge--${c.type}`}>{c.type}</span>
-                            <span className={`admin-challenge-status admin-challenge-status--${status}`}>{status}</span>
-                          </div>
-                          <div className="admin-challenge-title">{c.title}</div>
-                          <div className="admin-challenge-constraint">{c.constraintText}</div>
-                          <div className="admin-challenge-dates-info">
-                            {new Date(c.startsAt).toLocaleDateString()} → {new Date(c.endsAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {challenges.map(c => (
+                      <AdminChallengeRow
+                        key={c.id}
+                        challenge={c}
+                        onWinnerChange={(winnerEntryId) => setChallenges(prev =>
+                          prev.map(x => x.id === c.id ? { ...x, winnerEntryId } : x),
+                        )}
+                      />
+                    ))}
                   </div>
                 )}
               </div>

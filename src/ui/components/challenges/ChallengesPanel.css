@@ -361,13 +361,44 @@
 
 .challenge-archive-row {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 8px;
+}
+
+.challenge-archive-row-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   flex-wrap: wrap;
+}
+
+.challenge-archive-winner {
+  border-left: 2px solid rgba(253, 224, 71, 0.45);
+  background: rgba(253, 224, 71, 0.05);
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.challenge-archive-winner-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fde68a;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.challenge-archive-winner-text {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
 }
 
 .challenge-archive-number {
