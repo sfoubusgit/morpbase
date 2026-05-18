@@ -130,15 +130,23 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
           ) : messages.length === 0 ? (
             <div className="dm-empty">No messages yet. Say hello!</div>
           ) : (
-            messages.map(msg => {
+            messages.map((msg, i) => {
               const isMine = msg.senderAuthUid === authUid;
+              const isLastMine = isMine && messages.slice(i + 1).every(m => m.senderAuthUid !== authUid);
               return (
                 <div key={msg.id} className={`dm-message${isMine ? ' dm-message--mine' : ''}`}>
                   {msg.promptSnapshot && (
                     <div className="dm-message-snapshot">{msg.promptSnapshot}</div>
                   )}
                   <div className="dm-message-bubble">{msg.body}</div>
-                  <div className="dm-message-time">{formatTime(msg.createdAt)}</div>
+                  <div className="dm-message-time">
+                    {formatTime(msg.createdAt)}
+                    {isLastMine && (
+                      <span className={`dm-message-receipt${msg.readAt ? ' dm-message-receipt--read' : ''}`}>
+                        {msg.readAt ? '· Read' : '· Sent'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })

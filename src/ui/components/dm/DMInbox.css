@@ -210,6 +210,21 @@
   color: rgba(255, 255, 255, 0.25);
   margin-top: 3px;
   padding: 0 4px;
+  display: flex;
+  gap: 4px;
+}
+
+.dm-message--mine .dm-message-time {
+  justify-content: flex-end;
+}
+
+.dm-message-receipt {
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.2s;
+}
+
+.dm-message-receipt--read {
+  color: rgba(167, 139, 250, 0.75);
 }
 
 /* ── Compose ── */
