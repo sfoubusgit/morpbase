@@ -912,6 +912,56 @@
 }
 .profile-badge--legendary .profile-badge-label { color: #fcd34d; }
 
+.profile-badge--pinned {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(167, 139, 250, 0.12);
+}
+
+.profile-badge--new {
+  position: relative;
+}
+
+.profile-badge-new-tag {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.14);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.profile-badge-pin {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.12s;
+  font-family: inherit;
+}
+
+.profile-badge-pin:hover:not(:disabled) {
+  color: #c4b5fd;
+}
+
+.profile-badge--pinned .profile-badge-pin {
+  color: #c4b5fd;
+}
+
+.profile-badge-pin:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.profile-badge-pinhint {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+}
+
 /* ── Responsive ──────────────────────────────────── */
 
 @media (max-width: 1060px) {

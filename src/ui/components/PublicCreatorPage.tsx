@@ -353,26 +353,43 @@ export function PublicCreatorPage({
       {/* Body */}
       <div className="pub-profile-body">
 
-        {creatorBadges.length > 0 && (
-          <section className="pub-profile-section">
-            <div className="pub-profile-section-head">
-              <h2>Badges</h2>
-              <span className="pub-profile-section-meta">{creatorBadges.length} earned</span>
-            </div>
-            <div className="pub-profile-badges">
-              {creatorBadges.map(b => {
-                const def = BADGE_REGISTRY[b.badgeId];
-                if (!def) return null;
-                return (
-                  <div key={b.badgeId} className={`pub-profile-badge pub-profile-badge--${def.rarity}`} title={def.description}>
-                    <span className="pub-profile-badge-icon">{def.icon}</span>
-                    <span className="pub-profile-badge-label">{def.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        {creatorBadges.length > 0 && (() => {
+          const featured = profile?.featuredBadgeIds ?? [];
+          const featuredSet = new Set(featured);
+          const orderedBadges = [
+            ...featured
+              .map(id => creatorBadges.find(b => b.badgeId === id))
+              .filter((b): b is typeof creatorBadges[number] => !!b),
+            ...[...creatorBadges]
+              .filter(b => !featuredSet.has(b.badgeId))
+              .sort((a, b) => b.earnedAt - a.earnedAt),
+          ];
+          return (
+            <section className="pub-profile-section">
+              <div className="pub-profile-section-head">
+                <h2>Badges</h2>
+                <span className="pub-profile-section-meta">{creatorBadges.length} earned</span>
+              </div>
+              <div className="pub-profile-badges">
+                {orderedBadges.map(b => {
+                  const def = BADGE_REGISTRY[b.badgeId];
+                  if (!def) return null;
+                  const isFeatured = featuredSet.has(b.badgeId);
+                  return (
+                    <div
+                      key={b.badgeId}
+                      className={`pub-profile-badge pub-profile-badge--${def.rarity}${isFeatured ? ' pub-profile-badge--featured' : ''}`}
+                      title={def.description}
+                    >
+                      <span className="pub-profile-badge-icon">{def.icon}</span>
+                      <span className="pub-profile-badge-label">{def.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })()}
 
         {creatorAuthUid && wallPosts.length > 0 && (
           <section className="pub-profile-section">

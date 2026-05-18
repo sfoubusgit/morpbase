@@ -12,6 +12,7 @@ export type PublicProfile = {
   showPublicPools?: boolean | null;
   discoverableInSearch?: boolean | null;
   showLinksPublicly?: boolean | null;
+  featuredBadgeIds?: string[] | null;
   createdAt: number;
   updatedAt: number;
 };

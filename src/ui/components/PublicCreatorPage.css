@@ -462,6 +462,12 @@
   color: #fcd34d;
 }
 
+.pub-profile-badge--featured {
+  border-color: rgba(167, 139, 250, 0.6);
+  background: rgba(167, 139, 250, 0.14);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.18);
+}
+
 /* ── Creative DNA ───────────────────────────────────── */
 
 .pub-profile-dna-grid {

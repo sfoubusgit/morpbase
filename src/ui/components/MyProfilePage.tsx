@@ -46,6 +46,8 @@ const TOGGLE_FIELDS = [
   { key: 'showLinksPublicly'   as const, title: 'Show links publicly',      desc: 'Display your external links on your public creator page.' },
 ];
 
+const MAX_FEATURED_BADGES = 3;
+
 export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequestLogin }: MyProfilePageProps) {
   const [profile, setProfile]           = useState<PublicProfile | null>(null);
   const [loading, setLoading]           = useState(true);
@@ -64,6 +66,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
     showPublicPools: false,
     discoverableInSearch: true,
     showLinksPublicly: true,
+    featuredBadgeIds: [] as string[],
   });
 
   const [myWallPosts, setMyWallPosts] = useState<WallPost[]>([]);
@@ -133,6 +136,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           showPublicPools:      Boolean(nextProfile?.showPublicPools),
           discoverableInSearch: nextProfile?.discoverableInSearch ?? true,
           showLinksPublicly:    nextProfile?.showLinksPublicly ?? true,
+          featuredBadgeIds:     nextProfile?.featuredBadgeIds ?? [],
         });
       } catch (err: any) {
         if (isActive) setError(err?.message ?? 'Failed to load your public profile.');
@@ -189,6 +193,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
         showPublicPools:      form.showPublicPools,
         discoverableInSearch: form.discoverableInSearch,
         showLinksPublicly:    form.showLinksPublicly,
+        featuredBadgeIds:     form.featuredBadgeIds,
       });
       setProfile(saved);
       setMessage('Profile saved.');
@@ -609,18 +614,48 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
             {myBadges.length === 0 ? (
               <p className="profile-signal-empty">No badges yet — post to the Wall, share identities, and enter challenges to earn them.</p>
             ) : (
-              <div className="profile-badges">
-                {myBadges.map(b => {
-                  const def = BADGE_REGISTRY[b.badgeId];
-                  if (!def) return null;
-                  return (
-                    <div key={b.badgeId} className={`profile-badge profile-badge--${def.rarity}`} title={def.description}>
-                      <span className="profile-badge-icon">{def.icon}</span>
-                      <span className="profile-badge-label">{def.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <>
+                <div className="profile-badge-pinhint">
+                  Pin up to {MAX_FEATURED_BADGES} to showcase on your public page ({form.featuredBadgeIds.length}/{MAX_FEATURED_BADGES}).
+                </div>
+                <div className="profile-badges">
+                  {[...myBadges].sort((a, b) => b.earnedAt - a.earnedAt).map((b, i) => {
+                    const def = BADGE_REGISTRY[b.badgeId];
+                    if (!def) return null;
+                    const isPinned = form.featuredBadgeIds.includes(b.badgeId);
+                    const pinDisabled = !isPinned && form.featuredBadgeIds.length >= MAX_FEATURED_BADGES;
+                    const isNewest = i === 0 && Date.now() - b.earnedAt < 7 * 24 * 60 * 60 * 1000;
+                    const togglePin = () => {
+                      setForm(prev => ({
+                        ...prev,
+                        featuredBadgeIds: isPinned
+                          ? prev.featuredBadgeIds.filter(id => id !== b.badgeId)
+                          : [...prev.featuredBadgeIds, b.badgeId].slice(0, MAX_FEATURED_BADGES),
+                      }));
+                    };
+                    return (
+                      <div
+                        key={b.badgeId}
+                        className={`profile-badge profile-badge--${def.rarity}${isPinned ? ' profile-badge--pinned' : ''}${isNewest ? ' profile-badge--new' : ''}`}
+                        title={def.description}
+                      >
+                        <span className="profile-badge-icon">{def.icon}</span>
+                        <span className="profile-badge-label">{def.label}</span>
+                        {isNewest && <span className="profile-badge-new-tag">NEW</span>}
+                        <button
+                          type="button"
+                          className="profile-badge-pin"
+                          onClick={togglePin}
+                          disabled={pinDisabled}
+                          title={isPinned ? 'Unpin' : pinDisabled ? `Already pinned ${MAX_FEATURED_BADGES}` : 'Pin to public page'}
+                        >
+                          {isPinned ? '★' : '☆'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </div>
 
