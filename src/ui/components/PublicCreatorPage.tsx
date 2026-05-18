@@ -7,30 +7,62 @@ type CreativeDna = {
   recentPosts: number;
   previousPosts: number;
   totalPosts: number;
+  typeBreakdown: { type: string; count: number; percent: number }[];
+  pace: { recentPerWeek: number; previousPerWeek: number; changePct: number | null };
+  topPhrases: { word: string; count: number }[];
 };
+
+const PHRASE_STOPWORDS = new Set([
+  'the','a','an','and','or','of','in','on','at','to','with','by','for','from','as','is','it','this','that',
+  'be','are','was','were','have','has','had','will','would','could','should','can','may','might','do','does',
+  'did','but','if','then','so','than','very','more','most','some','any','no','not','yes','its','about',
+  'into','over','under','near','one','two','i','you','he','she','we','they','them','their','his','her',
+]);
 
 function computeCreativeDna(posts: WallPost[]): CreativeDna {
   const now = Date.now();
   const thirtyDays = 30 * 24 * 60 * 60 * 1000;
   const tagCounts = new Map<string, { tag: WallPostIdentityTag; count: number }>();
+  const typeTagTotals = new Map<string, number>();
+  const phraseCounts = new Map<string, number>();
   for (const post of posts) {
     for (const tag of post.identityTags) {
       const key = `${tag.type}\x00${tag.name}`;
       const entry = tagCounts.get(key);
       if (entry) entry.count++;
       else tagCounts.set(key, { tag, count: 1 });
+      typeTagTotals.set(tag.type, (typeTagTotals.get(tag.type) ?? 0) + 1);
+    }
+    for (const raw of post.promptText.split(/[\s,.\/;:!?()"'\[\]{}<>\-—–]+/)) {
+      const w = raw.toLowerCase();
+      if (w.length < 4 || PHRASE_STOPWORDS.has(w)) continue;
+      phraseCounts.set(w, (phraseCounts.get(w) ?? 0) + 1);
     }
   }
   const topTags = [...tagCounts.values()]
     .sort((a, b) => b.count - a.count)
     .slice(0, 6)
     .map(({ tag, count }) => ({ type: tag.type, name: tag.name, count }));
+  const totalTypeTags = [...typeTagTotals.values()].reduce((s, n) => s + n, 0);
+  const typeBreakdown = totalTypeTags === 0 ? [] : [...typeTagTotals.entries()]
+    .map(([type, count]) => ({ type, count, percent: Math.round((count / totalTypeTags) * 100) }))
+    .sort((a, b) => b.percent - a.percent);
   const recentPosts = posts.filter(p => now - p.createdAt < thirtyDays).length;
   const previousPosts = posts.filter(p => {
     const age = now - p.createdAt;
     return age >= thirtyDays && age < 2 * thirtyDays;
   }).length;
-  return { topTags, recentPosts, previousPosts, totalPosts: posts.length };
+  const recentPerWeek = +(recentPosts / 4).toFixed(1);
+  const previousPerWeek = +(previousPosts / 4).toFixed(1);
+  const changePct = previousPosts === 0
+    ? (recentPosts > 0 ? null : 0)
+    : Math.round(((recentPosts - previousPosts) / previousPosts) * 100);
+  const topPhrases = [...phraseCounts.entries()]
+    .filter(([, c]) => c >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6)
+    .map(([word, count]) => ({ word, count }));
+  return { topTags, recentPosts, previousPosts, totalPosts: posts.length, typeBreakdown, pace: { recentPerWeek, previousPerWeek, changePct }, topPhrases };
 }
 import { getPublicProfileByUserId, getPublicProfileByAuthUid } from '../../engine/profileStore';
 import { listPublicPromptsByUser } from '../../engine/promptStore';
@@ -434,18 +466,73 @@ export function PublicCreatorPage({
             <div className="pub-profile-section-head">
               <h2>Creative DNA</h2>
               <span className="pub-profile-section-meta">
-                {creativeDna.totalPosts} posts{creativeDna.recentPosts > 0 && ` · ${creativeDna.recentPosts} this month`}{creativeDna.recentPosts > creativeDna.previousPosts && ' ↑'}
+                {creativeDna.totalPosts} posts{creativeDna.recentPosts > 0 && ` · ${creativeDna.recentPosts} this month`}
               </span>
             </div>
-            <div className="pub-profile-dna-grid">
-              {creativeDna.topTags.map(tag => (
-                <div key={`${tag.type}_${tag.name}`} className={`pub-profile-dna-tag pub-profile-dna-tag--${tag.type}`}>
-                  <span className="pub-profile-dna-type">{tag.type}</span>
-                  <span className="pub-profile-dna-name">{tag.name}</span>
-                  <span className="pub-profile-dna-count">{tag.count}×</span>
+
+            {creativeDna.typeBreakdown.length > 0 && (
+              <div className="pub-profile-dna-block">
+                <span className="pub-profile-dna-block-label">Focus</span>
+                <div className="pub-profile-dna-bar">
+                  {creativeDna.typeBreakdown.map(seg => (
+                    <div
+                      key={seg.type}
+                      className={`pub-profile-dna-bar-seg pub-profile-dna-bar-seg--${seg.type}`}
+                      style={{ flexGrow: seg.percent }}
+                      title={`${seg.type}: ${seg.percent}% (${seg.count} tags)`}
+                    />
+                  ))}
                 </div>
-              ))}
+                <div className="pub-profile-dna-bar-legend">
+                  {creativeDna.typeBreakdown.slice(0, 4).map(seg => (
+                    <span key={seg.type} className={`pub-profile-dna-bar-key pub-profile-dna-bar-key--${seg.type}`}>
+                      <span className="pub-profile-dna-bar-swatch" />
+                      {seg.type} {seg.percent}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(creativeDna.pace.recentPerWeek > 0 || creativeDna.pace.previousPerWeek > 0) && (
+              <div className="pub-profile-dna-block">
+                <span className="pub-profile-dna-block-label">Pace</span>
+                <div className="pub-profile-dna-pace">
+                  <strong>{creativeDna.pace.recentPerWeek}</strong> posts/week
+                  {creativeDna.pace.changePct !== null && creativeDna.pace.changePct !== 0 && (
+                    <span className={`pub-profile-dna-pace-delta${creativeDna.pace.changePct > 0 ? ' up' : ' down'}`}>
+                      {creativeDna.pace.changePct > 0 ? '↑' : '↓'} {Math.abs(creativeDna.pace.changePct)}% vs prior month
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="pub-profile-dna-block">
+              <span className="pub-profile-dna-block-label">Most-used identities</span>
+              <div className="pub-profile-dna-grid">
+                {creativeDna.topTags.map(tag => (
+                  <div key={`${tag.type}_${tag.name}`} className={`pub-profile-dna-tag pub-profile-dna-tag--${tag.type}`}>
+                    <span className="pub-profile-dna-type">{tag.type}</span>
+                    <span className="pub-profile-dna-name">{tag.name}</span>
+                    <span className="pub-profile-dna-count">{tag.count}×</span>
+                  </div>
+                ))}
+              </div>
             </div>
+
+            {creativeDna.topPhrases.length > 0 && (
+              <div className="pub-profile-dna-block">
+                <span className="pub-profile-dna-block-label">Recurring words</span>
+                <div className="pub-profile-dna-phrases">
+                  {creativeDna.topPhrases.map(p => (
+                    <span key={p.word} className="pub-profile-dna-phrase">
+                      {p.word} <em>{p.count}×</em>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 

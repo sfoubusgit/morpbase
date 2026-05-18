@@ -470,6 +470,141 @@
 
 /* ── Creative DNA ───────────────────────────────────── */
 
+.pub-profile-dna-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pub-profile-dna-block:first-of-type {
+  border-top: none;
+  padding-top: 4px;
+}
+
+.pub-profile-dna-block-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.pub-profile-dna-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pub-profile-dna-bar-seg {
+  height: 100%;
+}
+
+.pub-profile-dna-bar-seg--character   { background: rgba(34, 197, 94, 0.65); }
+.pub-profile-dna-bar-seg--style       { background: rgba(96, 165, 250, 0.65); }
+.pub-profile-dna-bar-seg--lighting    { background: rgba(252, 211, 77, 0.65); }
+.pub-profile-dna-bar-seg--environment { background: rgba(110, 231, 183, 0.65); }
+.pub-profile-dna-bar-seg--wardrobe    { background: rgba(253, 164, 175, 0.65); }
+.pub-profile-dna-bar-seg--composition { background: rgba(103, 232, 249, 0.65); }
+.pub-profile-dna-bar-seg--mood        { background: rgba(165, 180, 252, 0.65); }
+.pub-profile-dna-bar-seg--negative    { background: rgba(252, 165, 165, 0.65); }
+.pub-profile-dna-bar-seg--aura        { background: rgba(253, 186, 116, 0.65); }
+.pub-profile-dna-bar-seg--object      { background: rgba(253, 230, 138, 0.65); }
+
+.pub-profile-dna-bar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pub-profile-dna-bar-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: capitalize;
+}
+
+.pub-profile-dna-bar-swatch {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.pub-profile-dna-bar-key--character   .pub-profile-dna-bar-swatch { background: #4ade80; }
+.pub-profile-dna-bar-key--style       .pub-profile-dna-bar-swatch { background: #60a5fa; }
+.pub-profile-dna-bar-key--lighting    .pub-profile-dna-bar-swatch { background: #fcd34d; }
+.pub-profile-dna-bar-key--environment .pub-profile-dna-bar-swatch { background: #6ee7b7; }
+.pub-profile-dna-bar-key--wardrobe    .pub-profile-dna-bar-swatch { background: #fda4af; }
+.pub-profile-dna-bar-key--composition .pub-profile-dna-bar-swatch { background: #67e8f9; }
+.pub-profile-dna-bar-key--mood        .pub-profile-dna-bar-swatch { background: #a5b4fc; }
+.pub-profile-dna-bar-key--negative    .pub-profile-dna-bar-swatch { background: #fca5a5; }
+.pub-profile-dna-bar-key--aura        .pub-profile-dna-bar-swatch { background: #fdba74; }
+.pub-profile-dna-bar-key--object      .pub-profile-dna-bar-swatch { background: #fde68a; }
+
+.pub-profile-dna-pace {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pub-profile-dna-pace strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.pub-profile-dna-pace-delta {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.pub-profile-dna-pace-delta.up {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.pub-profile-dna-pace-delta.down {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.pub-profile-dna-phrases {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pub-profile-dna-phrase {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 999px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.pub-profile-dna-phrase em {
+  font-style: normal;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
 .pub-profile-dna-grid {
   display: flex;
   flex-wrap: wrap;
