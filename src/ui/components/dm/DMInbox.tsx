@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { DirectMessage, DMThread } from '../../../types/community';
-import { listThreads, listMessages, sendDM, markThreadRead, subscribeToIncomingDMs, subscribeToReadReceipts } from '../../../engine/dmStore';
+import { listThreads, listMessages, sendDM, markThreadRead, subscribeToIncomingDMs, subscribeToReadReceipts, openTypingChannel } from '../../../engine/dmStore';
 import { getAvatarsByAuthUids } from '../../../engine/profileStore';
 import './DMInbox.css';
 
@@ -34,7 +34,11 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
   const [attachPrompt, setAttachPrompt] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [otherTyping, setOtherTyping] = useState(false);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const sendTypingRef = useRef<(() => void) | null>(null);
+  const lastTypingSentRef = useRef(0);
+  const typingHideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadThreads = useCallback(async () => {
     const data = await listThreads(authUid);
@@ -77,12 +81,28 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
       if (msg.senderAuthUid !== otherUid) return;
       setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, msg]);
       void markThreadRead(authUid, otherUid);
+      setOtherTyping(false);
+      if (typingHideTimerRef.current) clearTimeout(typingHideTimerRef.current);
     });
     const unsubReceipts = subscribeToReadReceipts(authUid, msg => {
       if (msg.recipientAuthUid !== otherUid) return;
       setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, readAt: msg.readAt } : m));
     });
-    return () => { unsubIncoming(); unsubReceipts(); };
+    const typing = openTypingChannel(authUid, otherUid);
+    sendTypingRef.current = typing.sendTyping;
+    const unsubTyping = typing.subscribe(() => {
+      setOtherTyping(true);
+      if (typingHideTimerRef.current) clearTimeout(typingHideTimerRef.current);
+      typingHideTimerRef.current = setTimeout(() => setOtherTyping(false), 3000);
+    });
+    return () => {
+      unsubIncoming();
+      unsubReceipts();
+      unsubTyping();
+      sendTypingRef.current = null;
+      if (typingHideTimerRef.current) clearTimeout(typingHideTimerRef.current);
+      setOtherTyping(false);
+    };
   }, [authUid, active?.authUid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Scroll to bottom when new messages arrive
@@ -116,6 +136,17 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       void handleSend();
+    }
+  };
+
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setBody(e.target.value);
+    const send = sendTypingRef.current;
+    if (!send || !e.target.value.trim()) return;
+    const now = Date.now();
+    if (now - lastTypingSentRef.current > 1500) {
+      lastTypingSentRef.current = now;
+      send();
     }
   };
 
@@ -163,6 +194,14 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
               );
             })
           )}
+          {otherTyping && (
+            <div className="dm-typing-indicator">
+              <span className="dm-typing-dot" />
+              <span className="dm-typing-dot" />
+              <span className="dm-typing-dot" />
+              <span className="dm-typing-label">{active.name} is typing…</span>
+            </div>
+          )}
           <div ref={bottomRef} />
         </div>
 
@@ -179,7 +218,7 @@ export function DMInbox({ authUid, authName, initialRecipient, currentPrompt }: 
               placeholder={`Message ${active.name}… (Enter to send)`}
               value={body}
               rows={2}
-              onChange={e => setBody(e.target.value)}
+              onChange={handleBodyChange}
               onKeyDown={handleKeyDown}
               disabled={sending}
             />

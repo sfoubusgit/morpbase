@@ -173,3 +173,32 @@ export function subscribeToReadReceipts(
     .subscribe();
   return () => { try { void supabase.removeChannel(channel); } catch { /* non-fatal */ } };
 }
+
+// Deterministic channel name shared by both peers so each side can broadcast and listen
+function dmTypingChannelKey(a: string, b: string): string {
+  return [a, b].sort().join(':');
+}
+
+export function openTypingChannel(myAuthUid: string, otherAuthUid: string): {
+  sendTyping: () => void;
+  subscribe: (onTyping: () => void) => () => void;
+} {
+  const channel = supabase.channel(`dms:typing:${dmTypingChannelKey(myAuthUid, otherAuthUid)}`);
+  let subscribed = false;
+  void channel.subscribe(status => { if (status === 'SUBSCRIBED') subscribed = true; });
+
+  const sendTyping = () => {
+    if (!subscribed) return;
+    try { void channel.send({ type: 'broadcast', event: 'typing', payload: { from: myAuthUid } }); } catch { /* non-fatal */ }
+  };
+
+  const subscribe = (onTyping: () => void): () => void => {
+    const handler = (msg: { payload: { from: string } }) => {
+      if (msg.payload?.from && msg.payload.from !== myAuthUid) onTyping();
+    };
+    channel.on('broadcast', { event: 'typing' }, handler);
+    return () => { try { void supabase.removeChannel(channel); } catch { /* non-fatal */ } };
+  };
+
+  return { sendTyping, subscribe };
+}
