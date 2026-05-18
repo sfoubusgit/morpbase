@@ -14,6 +14,7 @@ type ChallengeRow = {
   starts_at: string;
   ends_at: string;
   created_at: string;
+  winner_entry_id: string | null;
 };
 
 type EntryRow = {
@@ -35,6 +36,7 @@ const toChallenge = (row: ChallengeRow): Challenge => ({
   startsAt: new Date(row.starts_at).getTime(),
   endsAt: new Date(row.ends_at).getTime(),
   createdAt: new Date(row.created_at).getTime(),
+  winnerEntryId: row.winner_entry_id ?? null,
 });
 
 const toEntry = (row: EntryRow): ChallengeEntry => ({
@@ -162,9 +164,14 @@ export type ChallengeEntryWithPost = {
   authorName: string;
   promptText: string;
   createdAt: number;
+  voteCount: number;
+  iVoted: boolean;
 };
 
-export async function listChallengeEntries(challengeId: string): Promise<ChallengeEntryWithPost[]> {
+export async function listChallengeEntries(
+  challengeId: string,
+  viewerAuthUid?: string | null,
+): Promise<ChallengeEntryWithPost[]> {
   try {
     const { data, error } = await supabase
       .from('challenge_entries')
@@ -175,18 +182,112 @@ export async function listChallengeEntries(challengeId: string): Promise<Challen
 
     if (error || !data) return [];
 
-    return (data as any[])
-      .filter(row => row.wall_posts)
-      .map(row => ({
-        entryId: row.id as string,
-        authUid: row.auth_uid as string,
-        authorName: (row.wall_posts as any).author_name as string,
-        promptText: (row.wall_posts as any).prompt_text as string,
-        createdAt: new Date(row.created_at as string).getTime(),
-      }));
+    const rows = (data as any[]).filter(row => row.wall_posts);
+    const entryIds = rows.map(r => r.id as string);
+
+    const [voteCounts, myVotes] = await Promise.all([
+      getVoteCountsForEntries(entryIds),
+      viewerAuthUid ? getMyVoteEntryIds(viewerAuthUid, entryIds) : Promise.resolve(new Set<string>()),
+    ]);
+
+    const mapped = rows.map(row => ({
+      entryId: row.id as string,
+      authUid: row.auth_uid as string,
+      authorName: (row.wall_posts as any).author_name as string,
+      promptText: (row.wall_posts as any).prompt_text as string,
+      createdAt: new Date(row.created_at as string).getTime(),
+      voteCount: voteCounts.get(row.id as string) ?? 0,
+      iVoted: myVotes.has(row.id as string),
+    }));
+
+    // Leaderboard sort: most votes first; ties break by newest.
+    mapped.sort((a, b) => b.voteCount - a.voteCount || b.createdAt - a.createdAt);
+    return mapped;
   } catch {
     return [];
   }
+}
+
+async function getVoteCountsForEntries(entryIds: string[]): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  if (entryIds.length === 0) return counts;
+  try {
+    const { data } = await supabase
+      .from('challenge_entry_votes')
+      .select('entry_id')
+      .in('entry_id', entryIds);
+    for (const row of (data ?? []) as Array<{ entry_id: string }>) {
+      counts.set(row.entry_id, (counts.get(row.entry_id) ?? 0) + 1);
+    }
+  } catch { /* non-fatal */ }
+  return counts;
+}
+
+async function getMyVoteEntryIds(authUid: string, entryIds: string[]): Promise<Set<string>> {
+  const set = new Set<string>();
+  if (entryIds.length === 0) return set;
+  try {
+    const { data } = await supabase
+      .from('challenge_entry_votes')
+      .select('entry_id')
+      .eq('voter_auth_uid', authUid)
+      .in('entry_id', entryIds);
+    for (const row of (data ?? []) as Array<{ entry_id: string }>) set.add(row.entry_id);
+  } catch { /* non-fatal */ }
+  return set;
+}
+
+export async function voteForEntry(
+  entryId: string,
+  challengeId: string,
+  voterAuthUid: string,
+): Promise<void> {
+  try {
+    await supabase
+      .from('challenge_entry_votes')
+      .insert({ entry_id: entryId, challenge_id: challengeId, voter_auth_uid: voterAuthUid });
+  } catch { /* unique-violation = already voted, ignore */ }
+}
+
+export async function unvoteEntry(entryId: string, voterAuthUid: string): Promise<void> {
+  try {
+    await supabase
+      .from('challenge_entry_votes')
+      .delete()
+      .eq('entry_id', entryId)
+      .eq('voter_auth_uid', voterAuthUid);
+  } catch { /* non-fatal */ }
+}
+
+export async function setChallengeWinner(
+  challengeId: string,
+  winnerEntryId: string | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from('challenges')
+    .update({ winner_entry_id: winnerEntryId })
+    .eq('id', challengeId);
+  if (error) throw new Error(error.message);
+}
+
+export function subscribeToChallengeEntries(
+  challengeId: string,
+  onChange: () => void,
+): () => void {
+  const channel = supabase
+    .channel(`challenge:${challengeId}`)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'challenge_entries', filter: `challenge_id=eq.${challengeId}` },
+      () => { try { onChange(); } catch { /* non-fatal */ } },
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'challenge_entry_votes', filter: `challenge_id=eq.${challengeId}` },
+      () => { try { onChange(); } catch { /* non-fatal */ } },
+    )
+    .subscribe();
+  return () => { try { void supabase.removeChannel(channel); } catch { /* non-fatal */ } };
 }
 
 export async function enterChallenge(

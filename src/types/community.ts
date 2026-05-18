@@ -110,6 +110,7 @@ export type Challenge = {
   startsAt: number;
   endsAt: number;
   createdAt: number;
+  winnerEntryId: string | null;
 };
 
 export type ChallengeEntry = {

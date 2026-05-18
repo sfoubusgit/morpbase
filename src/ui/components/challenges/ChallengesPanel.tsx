@@ -7,6 +7,9 @@ import {
   getUserChallengeEntry,
   enterChallenge,
   listChallengeEntries,
+  voteForEntry,
+  unvoteEntry,
+  subscribeToChallengeEntries,
   type ChallengeEntryWithPost,
 } from '../../../engine/challengeStore';
 import './ChallengesPanel.css';
@@ -63,6 +66,17 @@ function ActiveChallengeCard({
     if (authUid) void getUserChallengeEntry(challenge.id, authUid).then(setMyEntry);
   }, [challenge.id, authUid]);
 
+  // Real-time: refresh entry count + open list when anyone enters or votes.
+  useEffect(() => {
+    const unsubscribe = subscribeToChallengeEntries(challenge.id, () => {
+      void getChallengeEntryCount(challenge.id).then(setEntryCount);
+      if (entriesOpen) {
+        void listChallengeEntries(challenge.id, authUid).then(setEntries);
+      }
+    });
+    return unsubscribe;
+  }, [challenge.id, authUid, entriesOpen]);
+
   const handleEnter = async () => {
     if (!authUid || !userId || !userName) return;
     if (!currentPromptText.trim()) {
@@ -97,9 +111,24 @@ function ActiveChallengeCard({
     setEntriesOpen(true);
     if (entries.length === 0) {
       setEntriesLoading(true);
-      const list = await listChallengeEntries(challenge.id);
+      const list = await listChallengeEntries(challenge.id, authUid);
       setEntries(list);
       setEntriesLoading(false);
+    }
+  };
+
+  const handleToggleVote = async (entry: ChallengeEntryWithPost) => {
+    if (!authUid || entry.authUid === authUid) return;
+    const willVote = !entry.iVoted;
+    setEntries(prev => prev.map(e =>
+      e.entryId === entry.entryId
+        ? { ...e, iVoted: willVote, voteCount: Math.max(0, e.voteCount + (willVote ? 1 : -1)) }
+        : e,
+    ));
+    if (willVote) {
+      await voteForEntry(entry.entryId, challenge.id, authUid);
+    } else {
+      await unvoteEntry(entry.entryId, authUid);
     }
   };
 
@@ -173,14 +202,31 @@ function ActiveChallengeCard({
           {entriesOpen && (
             <div className="challenge-card-entries-list">
               {entriesLoading && <p className="challenge-entries-loading">Loading…</p>}
-              {!entriesLoading && entries.map(e => (
-                <div key={e.entryId} className="challenge-entry-row">
-                  <span className="challenge-entry-author">{e.authorName}</span>
-                  <p className="challenge-entry-text">
-                    {e.promptText.length > 120 ? e.promptText.slice(0, 120) + '…' : e.promptText}
-                  </p>
-                </div>
-              ))}
+              {!entriesLoading && entries.map((e, i) => {
+                const isMine = authUid != null && e.authUid === authUid;
+                return (
+                  <div key={e.entryId} className="challenge-entry-row">
+                    <span className={`challenge-entry-rank${i === 0 && e.voteCount > 0 ? ' challenge-entry-rank--top' : ''}`}>
+                      #{i + 1}
+                    </span>
+                    <div className="challenge-entry-main">
+                      <span className="challenge-entry-author">{e.authorName}{isMine ? ' (you)' : ''}</span>
+                      <p className="challenge-entry-text">
+                        {e.promptText.length > 120 ? e.promptText.slice(0, 120) + '…' : e.promptText}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className={`challenge-entry-vote${e.iVoted ? ' challenge-entry-vote--on' : ''}`}
+                      disabled={!authUid || isMine}
+                      onClick={() => void handleToggleVote(e)}
+                      title={!authUid ? 'Log in to vote' : isMine ? 'Cannot vote on your own entry' : (e.iVoted ? 'Remove vote' : 'Vote')}
+                    >
+                      ▲ {e.voteCount}
+                    </button>
+                  </div>
+                );
+              })}
               {!entriesLoading && entries.length === 0 && (
                 <p className="challenge-entries-loading">No entries yet.</p>
               )}
