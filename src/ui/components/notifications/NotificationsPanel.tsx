@@ -17,6 +17,8 @@ function groupKey(n: Notification): string {
   switch (n.type) {
     case 'wall_post_liked':
       return `wall_post_liked:${typeof p.postId === 'string' ? p.postId : 'unknown'}`;
+    case 'wall_post_replied':
+      return `wall_post_replied:${typeof p.parentPostId === 'string' ? p.parentPostId : 'unknown'}`;
     case 'identity_remixed':
       return `identity_remixed:${typeof p.remixIdentityId === 'string' ? p.remixIdentityId : (typeof p.identityName === 'string' ? p.identityName : 'unknown')}`;
     case 'new_follower':
@@ -31,6 +33,7 @@ function groupKey(n: Notification): string {
 function groupActor(n: Notification): string | null {
   const p = n.payload;
   if (n.type === 'wall_post_liked' && typeof p.reactorName === 'string') return p.reactorName;
+  if (n.type === 'wall_post_replied' && typeof p.replierName === 'string') return p.replierName;
   if (n.type === 'identity_remixed' && typeof p.remixerName === 'string') return p.remixerName;
   if (n.type === 'new_follower' && typeof p.followerName === 'string') return p.followerName;
   if (n.type === 'dm_received' && typeof p.senderName === 'string') return p.senderName;
@@ -81,6 +84,10 @@ function groupMessage(g: NotificationGroup): string {
   switch (n.type) {
     case 'wall_post_liked':
       return `${who} reacted to your wall post.`;
+    case 'wall_post_replied': {
+      const target = p.identityName ? `"${p.identityName}"` : 'your wall post';
+      return `${who} commented on ${target}.`;
+    }
     case 'identity_remixed':
       return `${who} remixed your "${p.identityName ?? 'identity'}".`;
     case 'new_follower':
@@ -119,6 +126,11 @@ function notifMessage(n: Notification): string {
       const what = p.emoji ? ` ${p.emoji}` : '';
       return `${who} reacted${what} to your wall post.`;
     }
+    case 'wall_post_replied': {
+      const who = p.replierName ?? 'Someone';
+      const target = p.identityName ? `"${p.identityName}"` : 'your wall post';
+      return `${who} commented on ${target}.`;
+    }
     case 'dm_received':
       return p.senderName
         ? `New message from ${p.senderName}.`
@@ -143,6 +155,7 @@ function notifIcon(type: string): string {
     case 'new_follower':      return '👤';
     case 'identity_remixed':  return '↺';
     case 'wall_post_liked':   return '♥';
+    case 'wall_post_replied': return '💬';
     case 'dm_received':       return '✉';
     case 'badge_earned':      return '🏅';
     case 'xp_milestone':      return '⭐';

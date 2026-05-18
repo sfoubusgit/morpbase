@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient';
 import type { WallPost, CreateWallPostInput } from '../types/community';
 import { awardXP } from './xpStore';
 import { checkAndAwardWallPostBadges } from './badgeStore';
+import { createNotification } from './notificationStore';
 
 type WallPostRow = {
   id: string;
@@ -80,6 +81,29 @@ export async function createWallPost(
   const post = toWallPost(data as WallPostRow);
   void awardXP(authUid, 'post_to_wall');
   void checkAndAwardWallPostBadges(authUid);
+
+  if (input.parentPostId) {
+    void supabase
+      .from('wall_posts')
+      .select('auth_uid, post_type, identity_tags')
+      .eq('id', input.parentPostId)
+      .maybeSingle()
+      .then(({ data: parent }) => {
+        const parentRow = parent as { auth_uid?: string; post_type?: string; identity_tags?: Array<{ name: string; type: string }> } | null;
+        if (!parentRow?.auth_uid || parentRow.auth_uid === authUid) return;
+        const firstTag = Array.isArray(parentRow.identity_tags) ? parentRow.identity_tags[0] : null;
+        void createNotification(parentRow.auth_uid, 'wall_post_replied', {
+          replierAuthUid: authUid,
+          replierName: authorName,
+          parentPostId: input.parentPostId,
+          parentPostType: parentRow.post_type ?? 'standard',
+          identityName: firstTag?.name ?? null,
+          identityType: firstTag?.type ?? null,
+          excerpt: post.promptText.slice(0, 80),
+        });
+      });
+  }
+
   return post;
 }
 

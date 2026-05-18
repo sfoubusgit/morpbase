@@ -2301,6 +2301,13 @@ export function App() {
           setActivePage('community');
         }
         break;
+      case 'wall_post_replied':
+        if (typeof p.parentPostId === 'string') {
+          handleOpenPost(p.parentPostId);
+        } else {
+          setActivePage('community');
+        }
+        break;
       case 'identity_remixed':
         if (typeof p.remixIdentityId === 'string') {
           void getIdentityById(p.remixIdentityId).then(identity => {

@@ -152,6 +152,7 @@ export type NotificationType =
   | 'new_follower'
   | 'identity_remixed'
   | 'wall_post_liked'
+  | 'wall_post_replied'
   | 'dm_received'
   | 'challenge_deadline'
   | 'xp_milestone'
