@@ -5,6 +5,8 @@ import { getMyPublicProfile, upsertMyPublicProfile } from '../../engine/profileS
 import { listWallPosts } from '../../engine/wallStore';
 import { getUserXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
+import { getFollowerCount } from '../../engine/followStore';
+import { getRemixesReceivedCount } from '../../engine/communityStore';
 import { getTitleForXp } from '../../data/communityTitles';
 import { BADGE_REGISTRY } from '../../data/communityBadges';
 import './MyProfilePage.css';
@@ -67,12 +69,20 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
   const [myWallPosts, setMyWallPosts] = useState<WallPost[]>([]);
   const [myXp, setMyXp] = useState<number | null>(null);
   const [myBadges, setMyBadges] = useState<EarnedBadge[]>([]);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [remixesReceived, setRemixesReceived] = useState(0);
 
   useEffect(() => {
-    if (!authUid) { setMyWallPosts([]); setMyXp(null); setMyBadges([]); return; }
+    if (!authUid) {
+      setMyWallPosts([]); setMyXp(null); setMyBadges([]);
+      setFollowerCount(0); setRemixesReceived(0);
+      return;
+    }
     void listWallPosts({ authorAuthUid: authUid, limit: 50 }).then(setMyWallPosts);
     void getUserXP(authUid).then(setMyXp);
     void getEarnedBadges(authUid).then(setMyBadges);
+    void getFollowerCount(authUid).then(setFollowerCount);
+    void getRemixesReceivedCount(authUid).then(setRemixesReceived);
   }, [authUid]);
 
   const myDna = useMemo(() => {
@@ -572,6 +582,24 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           {/* XP & Badges */}
           <div className="profile-panel">
             <span className="profile-panel-kicker">Reputation</span>
+            <div className="profile-stats-row">
+              <div className="profile-stat">
+                <strong>{followerCount}</strong>
+                <span>Followers</span>
+              </div>
+              <div className="profile-stat">
+                <strong>{myWallPosts.length}</strong>
+                <span>Wall posts</span>
+              </div>
+              <div className="profile-stat">
+                <strong>{remixesReceived}</strong>
+                <span>Remixes</span>
+              </div>
+              <div className="profile-stat">
+                <strong>{myBadges.length}</strong>
+                <span>Badges</span>
+              </div>
+            </div>
             {myXp !== null && (
               <div className="profile-xp-row">
                 <span className="profile-xp-amount">{myXp.toLocaleString()} XP</span>

@@ -291,6 +291,10 @@ export function PublicCreatorPage({
       {shareMessage && <div className="pub-profile-share-toast">{shareMessage}</div>}
       {profileError && <div className="pub-profile-error-banner">{profileError}</div>}
 
+      {profile?.coverImageUrl && (
+        <div className="pub-profile-cover" style={{ backgroundImage: `url(${profile.coverImageUrl})` }} />
+      )}
+
       {/* Hero */}
       <div className="pub-profile-hero">
         <div className="pub-profile-hero-main">

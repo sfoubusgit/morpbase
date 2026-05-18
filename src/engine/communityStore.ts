@@ -80,6 +80,22 @@ export async function listCommunityIdentities(
   }
 }
 
+export async function getRemixesReceivedCount(authUid: string): Promise<number> {
+  try {
+    const { data } = await supabase
+      .from('community_identities')
+      .select('remix_count')
+      .eq('author_id', authUid);
+    if (!data) return 0;
+    return (data as Array<{ remix_count: number | null }>).reduce(
+      (sum, row) => sum + (row.remix_count ?? 0),
+      0,
+    );
+  } catch {
+    return 0;
+  }
+}
+
 export async function getIdentityById(
   id: string,
 ): Promise<CommunitySharedIdentity | null> {
