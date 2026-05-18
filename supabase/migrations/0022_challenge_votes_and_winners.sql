@@ -24,13 +24,17 @@ create index if not exists idx_challenge_entry_votes_challenge
 
 alter table public.challenge_entry_votes enable row level security;
 
-create policy if not exists challenge_entry_votes_read on public.challenge_entry_votes
+drop policy if exists challenge_entry_votes_read   on public.challenge_entry_votes;
+drop policy if exists challenge_entry_votes_insert on public.challenge_entry_votes;
+drop policy if exists challenge_entry_votes_delete on public.challenge_entry_votes;
+
+create policy challenge_entry_votes_read on public.challenge_entry_votes
   for select using (true);
 
-create policy if not exists challenge_entry_votes_insert on public.challenge_entry_votes
+create policy challenge_entry_votes_insert on public.challenge_entry_votes
   for insert with check (voter_auth_uid = auth.uid()::text);
 
-create policy if not exists challenge_entry_votes_delete on public.challenge_entry_votes
+create policy challenge_entry_votes_delete on public.challenge_entry_votes
   for delete using (voter_auth_uid = auth.uid()::text);
 
 
