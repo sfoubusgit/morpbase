@@ -3,6 +3,95 @@ import type { Notification } from '../../../types/community';
 import { listNotifications, markRead, markAllRead } from '../../../engine/notificationStore';
 import './NotificationsPanel.css';
 
+type NotificationGroup = {
+  key: string;
+  representative: Notification;
+  ids: string[];
+  count: number;
+  actorNames: string[];
+  hasUnread: boolean;
+};
+
+function groupKey(n: Notification): string {
+  const p = n.payload;
+  switch (n.type) {
+    case 'wall_post_liked':
+      return `wall_post_liked:${typeof p.postId === 'string' ? p.postId : 'unknown'}`;
+    case 'identity_remixed':
+      return `identity_remixed:${typeof p.remixIdentityId === 'string' ? p.remixIdentityId : (typeof p.identityName === 'string' ? p.identityName : 'unknown')}`;
+    case 'new_follower':
+      return 'new_follower';
+    case 'dm_received':
+      return `dm_received:${typeof p.senderAuthUid === 'string' ? p.senderAuthUid : 'unknown'}`;
+    default:
+      return `${n.type}:${n.id}`;
+  }
+}
+
+function groupActor(n: Notification): string | null {
+  const p = n.payload;
+  if (n.type === 'wall_post_liked' && typeof p.reactorName === 'string') return p.reactorName;
+  if (n.type === 'identity_remixed' && typeof p.remixerName === 'string') return p.remixerName;
+  if (n.type === 'new_follower' && typeof p.followerName === 'string') return p.followerName;
+  if (n.type === 'dm_received' && typeof p.senderName === 'string') return p.senderName;
+  return null;
+}
+
+function groupNotifications(notifs: Notification[]): NotificationGroup[] {
+  const map = new Map<string, NotificationGroup>();
+  for (const n of notifs) {
+    const key = groupKey(n);
+    const actor = groupActor(n);
+    const existing = map.get(key);
+    if (existing) {
+      existing.ids.push(n.id);
+      existing.count += 1;
+      if (actor && !existing.actorNames.includes(actor)) existing.actorNames.push(actor);
+      if (!n.readAt) existing.hasUnread = true;
+    } else {
+      map.set(key, {
+        key,
+        representative: n,
+        ids: [n.id],
+        count: 1,
+        actorNames: actor ? [actor] : [],
+        hasUnread: !n.readAt,
+      });
+    }
+  }
+  return Array.from(map.values()).sort((a, b) => b.representative.createdAt - a.representative.createdAt);
+}
+
+function formatActors(names: string[], extra: number): string {
+  if (names.length === 0) return extra > 0 ? `${extra} people` : 'Someone';
+  if (names.length === 1) return extra === 0 ? names[0] : `${names[0]} and ${extra} other${extra === 1 ? '' : 's'}`;
+  if (names.length === 2 && extra === 0) return `${names[0]} and ${names[1]}`;
+  return `${names[0]}, ${names[1]} and ${extra + names.length - 2} other${extra + names.length - 2 === 1 ? '' : 's'}`;
+}
+
+function groupMessage(g: NotificationGroup): string {
+  const n = g.representative;
+  const p = n.payload;
+  if (g.count === 1) {
+    return notifMessage(n);
+  }
+  const shown = g.actorNames.slice(0, 2);
+  const extra = g.count - shown.length;
+  const who = formatActors(shown, extra);
+  switch (n.type) {
+    case 'wall_post_liked':
+      return `${who} reacted to your wall post.`;
+    case 'identity_remixed':
+      return `${who} remixed your "${p.identityName ?? 'identity'}".`;
+    case 'new_follower':
+      return `${who} started following you.`;
+    case 'dm_received':
+      return `${g.count} new messages from ${p.senderName ?? 'someone'}.`;
+    default:
+      return notifMessage(n);
+  }
+}
+
 function formatRelative(ts: number): string {
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60_000);
@@ -79,13 +168,15 @@ export function NotificationsPanel({ authUid, onClose, onAllRead, onNavigate }: 
     });
   }, [authUid]);
 
-  const handleClick = (n: Notification) => {
-    if (!n.readAt) {
-      void markRead(n.id);
-      setNotifs(prev => prev.map(x => x.id === n.id ? { ...x, readAt: Date.now() } : x));
+  const handleGroupClick = (g: NotificationGroup) => {
+    if (g.hasUnread) {
+      const now = Date.now();
+      const idSet = new Set(g.ids);
+      for (const id of g.ids) void markRead(id);
+      setNotifs(prev => prev.map(x => idSet.has(x.id) ? { ...x, readAt: x.readAt ?? now } : x));
     }
     if (onNavigate) {
-      onNavigate(n);
+      onNavigate(g.representative);
       onClose();
     }
   };
@@ -97,6 +188,7 @@ export function NotificationsPanel({ authUid, onClose, onAllRead, onNavigate }: 
   };
 
   const hasUnread = notifs.some(n => !n.readAt);
+  const groups = groupNotifications(notifs);
 
   return (
     <>
@@ -117,19 +209,19 @@ export function NotificationsPanel({ authUid, onClose, onAllRead, onNavigate }: 
           ) : notifs.length === 0 ? (
             <div className="notif-panel-empty">No notifications yet.</div>
           ) : (
-            notifs.map(n => (
+            groups.map(g => (
               <button
-                key={n.id}
+                key={g.key}
                 type="button"
-                className={`notif-item${n.readAt ? ' notif-item--read' : ''}${onNavigate ? ' notif-item--clickable' : ''}`}
-                onClick={() => handleClick(n)}
+                className={`notif-item${!g.hasUnread ? ' notif-item--read' : ''}${onNavigate ? ' notif-item--clickable' : ''}`}
+                onClick={() => handleGroupClick(g)}
               >
-                <span className="notif-item-icon">{notifIcon(n.type)}</span>
+                <span className="notif-item-icon">{notifIcon(g.representative.type)}</span>
                 <div className="notif-item-body">
-                  <span className="notif-item-message">{notifMessage(n)}</span>
-                  <span className="notif-item-time">{formatRelative(n.createdAt)}</span>
+                  <span className="notif-item-message">{groupMessage(g)}</span>
+                  <span className="notif-item-time">{formatRelative(g.representative.createdAt)}</span>
                 </div>
-                {!n.readAt && <span className="notif-item-dot" />}
+                {g.hasUnread && <span className="notif-item-dot" />}
               </button>
             ))
           )}
