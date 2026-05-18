@@ -116,6 +116,7 @@ import { listWorlds } from '../engine/worldStore';
 import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
 import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
 import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
+import { getIdentityById } from '../engine/communityStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
 import type { Universe, UniverseInput } from '../types/universe';
 import {
@@ -2294,8 +2295,35 @@ export function App() {
         }
         break;
       case 'wall_post_liked':
+        if (typeof p.postId === 'string') {
+          handleOpenPost(p.postId);
+        } else {
+          setActivePage('community');
+        }
+        break;
       case 'identity_remixed':
-        setActivePage('community');
+        if (typeof p.remixIdentityId === 'string') {
+          void getIdentityById(p.remixIdentityId).then(identity => {
+            if (identity) {
+              handleOpenIdentity({
+                id: identity.id,
+                name: identity.name,
+                type: identity.type,
+                phrases: identity.phrases,
+                summary: identity.summary,
+                authorName: identity.authorName,
+                authorId: identity.authorId,
+                remixCount: identity.remixCount,
+                parentId: identity.parentId,
+                createdAt: identity.createdAt,
+              });
+            } else {
+              setActivePage('community');
+            }
+          });
+        } else {
+          setActivePage('community');
+        }
         break;
       case 'badge_earned':
       case 'xp_milestone':
@@ -2304,7 +2332,7 @@ export function App() {
       default:
         setActivePage('community');
     }
-  }, [handleStartDM, handleViewCreator]);
+  }, [handleStartDM, handleViewCreator, handleOpenPost, handleOpenIdentity]);
 
   const handleSetActiveTerritory = (id: string | null) => {
     setActiveTerritory(id);

@@ -165,6 +165,7 @@ export async function shareIdentity(
             remixerAuthUid: authUid,
             remixerName: authorName,
             identityName: parentRow.name as string,
+            remixIdentityId: (data as Row).id,
           });
         }
       });
