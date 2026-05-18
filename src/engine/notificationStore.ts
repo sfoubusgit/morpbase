@@ -90,3 +90,22 @@ export async function markAllRead(authUid: string): Promise<void> {
     // non-fatal
   }
 }
+
+export function subscribeToNotifications(
+  authUid: string,
+  onInsert: (n: Notification) => void,
+): () => void {
+  const channel = supabase
+    .channel(`notifications:${authUid}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'notifications', filter: `auth_uid=eq.${authUid}` },
+      (payload: { new: NotifRow }) => {
+        try { onInsert(toNotif(payload.new)); } catch { /* non-fatal */ }
+      },
+    )
+    .subscribe();
+  return () => {
+    try { void supabase.removeChannel(channel); } catch { /* non-fatal */ }
+  };
+}

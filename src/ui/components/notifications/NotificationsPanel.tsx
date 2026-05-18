@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Notification } from '../../../types/community';
-import { listNotifications, markRead, markAllRead } from '../../../engine/notificationStore';
+import { listNotifications, markRead, markAllRead, subscribeToNotifications } from '../../../engine/notificationStore';
 import './NotificationsPanel.css';
 
 type NotificationGroup = {
@@ -166,6 +166,10 @@ export function NotificationsPanel({ authUid, onClose, onAllRead, onNavigate }: 
       setNotifs(data);
       setLoading(false);
     });
+    const unsubscribe = subscribeToNotifications(authUid, newNotif => {
+      setNotifs(prev => prev.some(x => x.id === newNotif.id) ? prev : [newNotif, ...prev]);
+    });
+    return unsubscribe;
   }, [authUid]);
 
   const handleGroupClick = (g: NotificationGroup) => {
