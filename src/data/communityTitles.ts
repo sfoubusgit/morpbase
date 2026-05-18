@@ -33,4 +33,5 @@ export const XP_PER_EVENT: Record<string, number> = {
   got_followed:             5,
   identity_remixed:        25,
   complete_challenge:      50,
+  profile_step_completed:   5,
 };

@@ -737,6 +737,58 @@
   flex: 1;
 }
 
+.profile-check-xp {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.profile-check-item--available .profile-check-xp {
+  color: #fde68a;
+  background: rgba(253, 224, 71, 0.12);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.profile-check-item--claimed .profile-check-xp {
+  color: rgba(110, 231, 183, 0.65);
+}
+
+.profile-check-item--available {
+  color: var(--text-secondary);
+}
+
+.profile-check-item--available .profile-check-icon {
+  color: #fde68a;
+}
+
+.profile-check-item--claimed .profile-check-icon {
+  color: #6ee7b7;
+}
+
+.profile-checklist-summary {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+}
+
+.profile-checklist-summary strong {
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.profile-checklist-summary-available {
+  color: var(--text-secondary);
+}
+
+.profile-checklist-summary-done {
+  color: #6ee7b7;
+  font-weight: 600;
+}
+
 .profile-last-saved {
   font-size: 11px;
   color: var(--text-muted);

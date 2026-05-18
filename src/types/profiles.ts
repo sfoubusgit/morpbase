@@ -14,6 +14,7 @@ export type PublicProfile = {
   discoverableInSearch?: boolean | null;
   showLinksPublicly?: boolean | null;
   featuredBadgeIds?: string[] | null;
+  profileXpStepsClaimed?: string[] | null;
   createdAt: number;
   updatedAt: number;
 };

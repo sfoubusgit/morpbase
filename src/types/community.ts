@@ -61,7 +61,8 @@ export type XPEventType =
   | 'identity_added_by_other'
   | 'got_followed'
   | 'identity_remixed'
-  | 'complete_challenge';
+  | 'complete_challenge'
+  | 'profile_step_completed';
 
 // ── Badges ────────────────────────────────────────────────────────────────────
 

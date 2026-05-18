@@ -18,6 +18,7 @@ const toPublicProfile = (row: any): PublicProfile => ({
   discoverableInSearch: row.discoverable_in_search ?? null,
   showLinksPublicly: row.show_links_publicly ?? null,
   featuredBadgeIds: Array.isArray(row.featured_badge_ids) ? row.featured_badge_ids : [],
+  profileXpStepsClaimed: Array.isArray(row.profile_xp_steps_claimed) ? row.profile_xp_steps_claimed : [],
   createdAt: new Date(row.created_at).getTime(),
   updatedAt: new Date(row.updated_at).getTime(),
 });
@@ -203,6 +204,7 @@ export const upsertMyPublicProfile = async (input: {
   discoverableInSearch?: boolean | null;
   showLinksPublicly?: boolean | null;
   featuredBadgeIds?: string[] | null;
+  profileXpStepsClaimed?: string[] | null;
 }): Promise<PublicProfile> => {
   const profile = await getProfile();
   if (!profile) throw new Error('You must be logged in.');
@@ -221,6 +223,7 @@ export const upsertMyPublicProfile = async (input: {
     discoverable_in_search: input.discoverableInSearch ?? null,
     show_links_publicly: input.showLinksPublicly ?? null,
     featured_badge_ids: input.featuredBadgeIds ?? [],
+    profile_xp_steps_claimed: input.profileXpStepsClaimed ?? [],
   };
   const { data, error } = await supabase
     .from('public_profiles')

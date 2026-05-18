@@ -3,7 +3,7 @@ import type { PublicProfile } from '../../types';
 import type { WallPost, EarnedBadge } from '../../types/community';
 import { getMyPublicProfile, upsertMyPublicProfile, uploadAvatar, deleteAvatarFile, uploadCover, deleteCoverFile } from '../../engine/profileStore';
 import { listWallPosts } from '../../engine/wallStore';
-import { getUserXP } from '../../engine/xpStore';
+import { getUserXP, awardXP } from '../../engine/xpStore';
 import { getEarnedBadges } from '../../engine/badgeStore';
 import { getFollowerCount } from '../../engine/followStore';
 import { getRemixesReceivedCount } from '../../engine/communityStore';
@@ -70,6 +70,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
     discoverableInSearch: true,
     showLinksPublicly: true,
     featuredBadgeIds: [] as string[],
+    profileXpStepsClaimed: [] as string[],
   });
 
   const [myWallPosts, setMyWallPosts] = useState<WallPost[]>([]);
@@ -142,6 +143,7 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           discoverableInSearch: nextProfile?.discoverableInSearch ?? true,
           showLinksPublicly:    nextProfile?.showLinksPublicly ?? true,
           featuredBadgeIds:     nextProfile?.featuredBadgeIds ?? [],
+          profileXpStepsClaimed: nextProfile?.profileXpStepsClaimed ?? [],
         });
       } catch (err: any) {
         if (isActive) setError(err?.message ?? 'Failed to load your public profile.');
@@ -165,11 +167,12 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
   }, [form.links, form.showLinksPublicly]);
 
   const completionItems = useMemo(() => ([
-    { label: 'Display name', done: form.displayName.trim().length > 0 },
-    { label: 'Bio',          done: form.bio.trim().length > 0 },
-    { label: 'Avatar',       done: form.avatarUrl.trim().length > 0 },
-    { label: 'Tags',         done: previewTags.length > 0 },
-    { label: 'Visibility',   done: form.discoverableInSearch || form.showPublicPrompts },
+    { key: 'display_name', label: 'Display name', done: form.displayName.trim().length > 0 },
+    { key: 'bio',          label: 'Bio',          done: form.bio.trim().length > 0 },
+    { key: 'avatar',       label: 'Avatar',       done: form.avatarUrl.trim().length > 0 },
+    { key: 'cover',        label: 'Cover image',  done: form.coverImageUrl.trim().length > 0 },
+    { key: 'tags',         label: 'Tags',         done: previewTags.length > 0 },
+    { key: 'visibility',   label: 'Visibility',   done: form.discoverableInSearch || form.showPublicPrompts },
   ]), [form, previewTags.length]);
 
   const completionCount = completionItems.filter(i => i.done).length;
@@ -187,6 +190,10 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
     try {
       const tags  = form.tags.split(',').map(t => t.trim()).filter(Boolean);
       const links = parseProfileLinks(form.links);
+      const claimed = new Set(form.profileXpStepsClaimed);
+      const newlyEarned = completionItems.filter(i => i.done && !claimed.has(i.key));
+      const nextClaimed = [...claimed, ...newlyEarned.map(i => i.key)];
+
       const saved = await upsertMyPublicProfile({
         displayName: dn,
         bio:         form.bio.trim() || null,
@@ -201,9 +208,19 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
         discoverableInSearch: form.discoverableInSearch,
         showLinksPublicly:    form.showLinksPublicly,
         featuredBadgeIds:     form.featuredBadgeIds,
+        profileXpStepsClaimed: nextClaimed,
       });
       setProfile(saved);
-      setMessage('Profile saved.');
+      setForm(prev => ({ ...prev, profileXpStepsClaimed: nextClaimed }));
+
+      if (newlyEarned.length > 0 && authUid) {
+        for (const _ of newlyEarned) void awardXP(authUid, 'profile_step_completed');
+        const earnedXp = newlyEarned.length * 5;
+        setMessage(`Profile saved · +${earnedXp} XP for ${newlyEarned.length === 1 ? 'completing a step' : `${newlyEarned.length} new steps`}.`);
+        void getUserXP(authUid).then(setMyXp);
+      } else {
+        setMessage('Profile saved.');
+      }
     } catch (err: any) {
       setError(err?.message ?? 'Failed to save profile.');
     } finally {
@@ -578,17 +595,41 @@ export function MyProfilePage({ isLoggedIn = false, authUid, userName, onRequest
           {/* Profile strength */}
           <div className="profile-panel profile-checklist-panel">
             <span className="profile-panel-kicker">Profile Strength</span>
-            <div className="profile-checklist-bar">
-              <div className="profile-checklist-fill" style={{ width: `${completionPct}%` }} />
-            </div>
-            <div className="profile-checklist">
-              {completionItems.map(item => (
-                <div key={item.label} className={`profile-check-item${item.done ? ' done' : ''}`}>
-                  <span className="profile-check-icon">{item.done ? '✓' : '○'}</span>
-                  <span className="profile-check-label">{item.label}</span>
-                </div>
-              ))}
-            </div>
+            {(() => {
+              const claimedSet = new Set(form.profileXpStepsClaimed);
+              const availableXp = completionItems.filter(i => i.done && !claimedSet.has(i.key)).length * 5;
+              const allDoneAndClaimed = completionItems.every(i => i.done && claimedSet.has(i.key));
+              return (
+                <>
+                  <div className="profile-checklist-summary">
+                    {allDoneAndClaimed
+                      ? <span className="profile-checklist-summary-done">🎉 Profile complete — {completionItems.length * 5} XP earned.</span>
+                      : availableXp > 0
+                        ? <span className="profile-checklist-summary-available">Save to claim <strong>+{availableXp} XP</strong>.</span>
+                        : <span>{completionCount} of {completionItems.length} complete · +5 XP per step.</span>
+                    }
+                  </div>
+                  <div className="profile-checklist-bar">
+                    <div className="profile-checklist-fill" style={{ width: `${completionPct}%` }} />
+                  </div>
+                  <div className="profile-checklist">
+                    {completionItems.map(item => {
+                      const claimed = claimedSet.has(item.key);
+                      const state = !item.done ? 'todo' : claimed ? 'claimed' : 'available';
+                      return (
+                        <div key={item.key} className={`profile-check-item profile-check-item--${state}`}>
+                          <span className="profile-check-icon">{item.done ? '✓' : '○'}</span>
+                          <span className="profile-check-label">{item.label}</span>
+                          <span className="profile-check-xp">
+                            {state === 'claimed' ? '+5 XP' : state === 'available' ? '+5 XP available' : '+5 XP'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
             {profile?.updatedAt && (
               <div className="profile-last-saved">
                 Saved {new Date(profile.updatedAt).toLocaleString(undefined, {
