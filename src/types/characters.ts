@@ -51,6 +51,8 @@ export type CharacterIdentity = {
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
   tags?: string[];
+  /** LoRA trigger word — when set, it's prepended to the prompt to activate the character's LoRA. */
+  loraTrigger?: string;
   createdAt: number;
   updatedAt: number;
 };
@@ -63,6 +65,7 @@ export type CharacterIdentityInput = {
   identity: CharacterIdentityFields;
   phraseBundle: CharacterPhraseBundle;
   tags?: string[];
+  loraTrigger?: string;
 };
 
 export type CharacterStore = {

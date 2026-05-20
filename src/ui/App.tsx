@@ -256,6 +256,12 @@ function buildCharacterPromptProjection(
     .map(text => text.trim())
     .filter(Boolean);
 
+  // LoRA-backed characters lead with their trigger word so the LoRA activates.
+  const trigger = character.loraTrigger?.trim();
+  if (trigger) {
+    corePhrases.unshift(trigger);
+  }
+
   return {
     characterId: character.id,
     displayName,

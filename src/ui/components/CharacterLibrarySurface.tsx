@@ -29,6 +29,7 @@ type CharacterFormState = {
   motifs: string;
   corePhrases: string;
   tags: string[];
+  loraTrigger: string;
 };
 
 const EMPTY_FORM: CharacterFormState = {
@@ -45,6 +46,7 @@ const EMPTY_FORM: CharacterFormState = {
   motifs: '',
   corePhrases: '',
   tags: [],
+  loraTrigger: '',
 };
 
 const CHARACTER_AVATAR_SIZE = 160;
@@ -178,6 +180,7 @@ const formFromCharacter = (character: CharacterIdentity): CharacterFormState => 
   motifs: toMultiline(character.identity.motifs),
   corePhrases: character.phraseBundle.core.join('\n'),
   tags: character.tags ?? [],
+  loraTrigger: character.loraTrigger ?? '',
 });
 
 const parseLineItems = (
@@ -234,6 +237,7 @@ const buildCharacterInput = (form: CharacterFormState): CharacterIdentityInput =
     core: parseStringList(form.corePhrases),
   },
   tags: form.tags.length > 0 ? form.tags : undefined,
+  loraTrigger: form.loraTrigger.trim() || undefined,
 });
 
 const validateCharacterInput = (input: CharacterIdentityInput): string | null => {
@@ -745,6 +749,15 @@ export function CharacterLibrarySurface({
                     value={form.summary}
                     onChange={event => handleFormChange('summary', event.target.value)}
                     placeholder="Recurring mystic heroine with luminous ornamented features."
+                  />
+                </label>
+                <label className="character-editor-field">
+                  <span>LoRA trigger word <span className="character-editor-cover-optional">(optional)</span></span>
+                  <input
+                    type="text"
+                    value={form.loraTrigger}
+                    onChange={event => handleFormChange('loraTrigger', event.target.value)}
+                    placeholder="e.g. sorayavex — added to the front of the prompt to activate this character's LoRA"
                   />
                 </label>
                 <div className="character-editor-field character-editor-field-wide">

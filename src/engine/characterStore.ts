@@ -20,6 +20,7 @@ const CHARACTER_SEED_FLAG_KEY_V7 = 'promptgen:characters:seeded:v7';
 const CHARACTER_SEED_FLAG_KEY_V8 = 'promptgen:characters:seeded:v8';
 const CHARACTER_SEED_FLAG_KEY_V9 = 'promptgen:characters:seeded:v9';
 const CHARACTER_SEED_FLAG_KEY_V10 = 'promptgen:characters:seeded:v10';
+const CHARACTER_SEED_FLAG_KEY_V11 = 'promptgen:characters:seeded:v11';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -266,6 +267,7 @@ const sanitizeCharacter = (value: unknown): CharacterIdentity | null => {
     identity: sanitizeFields(value.identity),
     phraseBundle,
     tags: rawTags.length > 0 ? rawTags : undefined,
+    loraTrigger: typeof value.loraTrigger === 'string' ? normalizeText(value.loraTrigger) || undefined : undefined,
     createdAt,
     updatedAt,
   };
@@ -281,6 +283,7 @@ const SEED_TS_7 = 1748044800000;
 const SEED_TS_8 = 1748131200000;
 const SEED_TS_9 = 1748217600000;
 const SEED_TS_10 = 1748304000000;
+const SEED_TS_11 = 1748390400000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -1063,6 +1066,43 @@ const V10_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V11_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_soraya_vex',
+    name: 'Soraya Vex',
+    summary: 'Streetwear-gothic vampire. LoRA-backed — trigger word "sorayavex" activates her trained likeness (Illustrious XL). Use in any Illustrious-family model.',
+    tags: ['solo', 'vampire', 'lora'],
+    loraTrigger: 'sorayavex',
+    identity: {
+      archetype: 'streetwear-gothic vampire',
+      presentation: 'clothed',
+      ageImpression: 'young adult',
+      personalityTone: 'melancholy, dry, perpetually unbothered',
+      visualAnchors: [
+        { id: 'anchor_sv_1', label: 'Hair', kind: 'hair', text: 'very long grey hair with pink streaks, blunt bangs, high ponytail' },
+        { id: 'anchor_sv_2', label: 'Eyes', kind: 'eyes', text: 'crimson red eyes, slit pupils' },
+        { id: 'anchor_sv_3', label: 'Face', kind: 'face', text: 'pale skin, small fangs, mole under the eye' },
+        { id: 'anchor_sv_4', label: 'Silhouette', kind: 'silhouette', text: 'slender build, narrow waist, wide hips' },
+        { id: 'anchor_sv_5', label: 'Outfit', kind: 'clothing', text: 'oversized black hoodie with skeleton print, light blue leggings with red stripes' },
+      ],
+      motifs: [
+        { id: 'motif_sv_1', label: 'Streetwear Gothic', text: 'skeleton print, neon-lit nights, pink-and-grey palette, vampire calm' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo',
+        'grey hair with pink streaks, very long hair, high ponytail, blunt bangs',
+        'red eyes, pale skin, small fangs, mole under eye',
+        'slender, narrow waist, wide hips',
+        'oversized black hoodie, skeleton print, light blue leggings, red striped leggings',
+      ],
+    },
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -1184,6 +1224,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     }
   }
 
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V11_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
   return result;
 };
 
@@ -1213,6 +1263,7 @@ const sanitizeInput = (input: CharacterIdentityInput): CharacterIdentityInput =>
     identity,
     phraseBundle,
     tags: rawTags.length > 0 ? rawTags : undefined,
+    loraTrigger: input.loraTrigger ? normalizeText(input.loraTrigger) || undefined : undefined,
   };
 };
 
@@ -1247,6 +1298,7 @@ export async function createCharacter(input: CharacterIdentityInput): Promise<Ch
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
     tags: sanitized.tags,
+    loraTrigger: sanitized.loraTrigger,
     createdAt: now,
     updatedAt: now,
   };
@@ -1281,6 +1333,7 @@ export async function updateCharacter(
     identity: sanitized.identity,
     phraseBundle: sanitized.phraseBundle,
     tags: sanitized.tags,
+    loraTrigger: sanitized.loraTrigger,
     updatedAt: Date.now(),
   };
 
