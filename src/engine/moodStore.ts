@@ -5,6 +5,7 @@ const MOOD_STORE_BACKUP_KEY = 'promptgen:moods:backup:v1';
 const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v2';
 const MOOD_SEED_FLAG_KEY_V3 = 'promptgen:moods:seeded:v3';
 const MOOD_SEED_FLAG_KEY_V4 = 'promptgen:moods:seeded:v4';
+const MOOD_SEED_FLAG_KEY_V5 = 'promptgen:moods:seeded:v5';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -88,6 +89,88 @@ const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
+const SEED_TS_5 = 1748476800000;
+
+const V5_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_ny_neon_melancholy',
+    name: 'Neon Melancholy',
+    summary: 'Beautiful loneliness under electric light — the quiet ache of a glowing city that never looks back at you.',
+    phrases: [
+      'beautiful loneliness under electric light, a glowing city indifferent to the figure within it',
+      'quiet ache and longing, solitude made gorgeous by colour',
+      'the specific melancholy of being awake when everything else is asleep',
+      'warmth visible everywhere but unreachable, glass between you and the glow',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'mood_ny_haunted_serenity',
+    name: 'Haunted Serenity',
+    summary: 'A spirit perfectly at peace among the living who cannot see it — calm, patient, slightly sorrowful presence.',
+    phrases: [
+      'a calm patient presence moving among the living who cannot perceive it',
+      'serene rather than vengeful, sorrow worn smooth by time',
+      'stillness in the centre of a moving city, unbothered and apart',
+      'the gentle melancholy of a ghost who has stopped trying to be noticed',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'mood_ny_electric_menace',
+    name: 'Electric Menace',
+    summary: 'Predatory energy crackling under the neon — a yokai about to drop the human disguise, tension wound tight.',
+    phrases: [
+      'predatory tension wound tight beneath a thin human surface',
+      'a disguise about to slip, something hungry waiting just behind the eyes',
+      'electric charge in the air, the moment before the mask comes off',
+      'sharp, coiled, dangerous — the city as hunting ground',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'mood_ny_midnight_mischief',
+    name: 'Midnight Mischief',
+    summary: 'Playful trickster delight — a spirit having fun at the city\'s expense, grinning, light-footed, harmless until it isn\'t.',
+    phrases: [
+      'playful trickster delight, a spirit enjoying itself at the city\'s expense',
+      'light-footed mischief, a grin that promises minor chaos',
+      'cheerful and quick, harmless on the surface with a sly edge underneath',
+      'the buoyant energy of a prank in progress under the neon',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'mood_ny_rain_soaked_calm',
+    name: 'Rain-Soaked Calm',
+    summary: 'The hushed peace of heavy rain at night — sound muffled, world softened, a meditative stillness in the downpour.',
+    phrases: [
+      'the hushed meditative peace of heavy rain at night, all sound muffled',
+      'the world softened and slowed, edges blurred by water',
+      'contemplative stillness, breath held, the city washed quiet',
+      'a private calm found inside the noise of the downpour',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'mood_ny_festival_fever',
+    name: 'Festival Fever',
+    summary: 'Frenetic matsuri energy — crowds, lanterns, music and spirits mingling, joy edged with the wildness of a night out of bounds.',
+    phrases: [
+      'frenetic festival energy, crowds and lanterns and overlapping music',
+      'joy edged with wildness, a night where the usual rules are suspended',
+      'spirits and humans mingling unnoticed in the press of bodies',
+      'heat, colour, motion — euphoria with an undertow of the uncanny',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
 
 const DEFAULT_SEED_MOODS: MoodPreset[] = [
   {
@@ -360,6 +443,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V4_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V5_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

@@ -4,6 +4,7 @@ const WARDROBE_STORE_KEY = 'promptgen:wardrobe:v1';
 const WARDROBE_STORE_BACKUP_KEY = 'promptgen:wardrobe:backup:v1';
 const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v3';
 const WARDROBE_SEED_FLAG_KEY_V4 = 'promptgen:wardrobe:seeded:v4';
+const WARDROBE_SEED_FLAG_KEY_V5 = 'promptgen:wardrobe:seeded:v5';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -87,6 +88,7 @@ const SEED_TS = 1746748800000;
 const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
+const SEED_TS_5 = 1748476800000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -230,6 +232,87 @@ const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+const V5_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_ny_neon_streetwear',
+    name: 'Neon Techwear Streetwear',
+    summary: 'Layered black techwear lit by integrated LED piping — utility straps, a cropped shell jacket, glowing seams that trace the body in the dark.',
+    phrases: [
+      'layered black techwear, cropped technical shell jacket with utility straps',
+      'integrated electroluminescent piping glowing cyan and magenta along the seams',
+      'cargo trousers with buckles and zips, chunky high-top sneakers',
+      'the LED lines tracing the silhouette in the dark, function and glow combined',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'outfit_ny_cyber_kimono',
+    name: 'Cyber Kimono',
+    summary: 'A short modernised kimono in synthetic fabric — traditional silhouette cut for the street, obi reworked as a tech harness, neon-printed lining.',
+    phrases: [
+      'short modernised kimono in iridescent synthetic fabric, traditional silhouette cut short for the street',
+      'obi reworked as a buckled tech harness across the waist',
+      'neon-printed inner lining flashing colour with movement',
+      'paired with platform sandals and mesh leggings, old form rebuilt for a new city',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'outfit_ny_konbini_uniform',
+    name: 'Convenience Store Uniform',
+    summary: 'The mundane konbini work uniform — striped collared shirt, apron, name tag, cap — worn by a spirit pretending to belong.',
+    phrases: [
+      'convenience store work uniform, striped collared shirt with a branded apron',
+      'plastic name tag, soft visor cap, sleeves rolled to the elbow',
+      'utterly ordinary retail clothing, deliberately unremarkable',
+      'the camouflage of the everyday worn by something that is not an employee',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'outfit_ny_holographic_idol',
+    name: 'Holographic Idol Costume',
+    summary: 'A stage idol outfit in holographic fabric — frilled skirt, ribbon accents, light-reactive sequins that shatter neon into rainbow.',
+    phrases: [
+      'holographic idol stage costume, frilled tiered skirt with ribbon accents',
+      'light-reactive sequins shattering neon into rainbow flecks',
+      'fingerless gloves, thigh-high boots, oversized bow at the collar',
+      'engineered to catch and throw every coloured stage light',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'outfit_ny_rain_slicker',
+    name: 'Translucent Rain Slicker',
+    summary: 'A clear vinyl rain slicker over neon clothing — the city lights glowing through wet plastic, hood up, droplets beaded on the surface.',
+    phrases: [
+      'transparent vinyl rain slicker worn over glowing neon clothing beneath',
+      'city lights diffusing through the wet translucent plastic',
+      'hood up, drawstring tight, droplets beaded across the surface',
+      'the colour underneath softened and smeared by the rain-streaked vinyl',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'outfit_ny_yokai_formal',
+    name: 'Spirit Formalwear',
+    summary: 'A spirit dressed for the night in dark tailoring threaded with traditional motifs — a sharp suit or haori with embroidered yokai crests, understated and uncanny.',
+    phrases: [
+      'sharp dark tailoring threaded with traditional motifs, a suit or haori cut clean',
+      'embroidered yokai family crests in metallic thread catching the neon',
+      'understated, elegant, expensive — old money from an older world',
+      'a quiet uncanny formality, dressed for a night that humans were not invited to',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
+
 const V4_SEED_OUTFITS: OutfitIdentity[] = [
   {
     id: 'outfit_aiw_alice_blue_pinafore',
@@ -334,6 +417,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V4_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V5_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

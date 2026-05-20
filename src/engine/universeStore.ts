@@ -4,8 +4,10 @@ import type { LaneUniverse } from '../types/laneSets';
 const KEY = 'morpbase:universes:v1';
 const UNIVERSE_SEED_FLAG_KEY = 'morpbase:universes:seeded:v1';
 const UNIVERSE_SEED_FLAG_KEY_V2 = 'morpbase:universes:seeded:v2';
+const UNIVERSE_SEED_FLAG_KEY_V3 = 'morpbase:universes:seeded:v3';
 
 const SEED_TS = 1748217600000;
+const SEED_TS_NY = 1748476800000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -110,6 +112,102 @@ const SEED_UNIVERSE_V2_POOLS = {
   ],
 };
 
+const SEED_UNIVERSE_NEON_YOKAI: Universe = {
+  id: 'universe_seed_neon_yokai',
+  name: 'Neon Yokai',
+  description: 'A rain-slick megacity at 3am where old gods and ghosts wear the modern world like a disguise — kitsune behind the counter, ghosts on the last train, neon torii marking the threshold between the human city and the spirit one.',
+  pools: {
+    character: [
+      'character_seed_ny_konbini_yurei',
+      'character_seed_ny_subway_kitsune',
+      'character_seed_ny_neon_oni',
+      'character_seed_ny_kasa_obake',
+      'character_seed_ny_rokurokubi',
+      'character_seed_ny_tengu_courier',
+      'character_seed_ny_nekomata_barista',
+      'character_seed_ny_yuki_onna',
+      'character_seed_ny_jorogumo',
+      'character_seed_ny_bakeneko_idol',
+      'character_seed_ny_zashiki_warashi',
+      'character_seed_ny_nopperabo',
+    ],
+    environment: [
+      'environment_seed_ny_scramble_crossing',
+      'environment_seed_ny_konbini_interior',
+      'environment_seed_ny_shrine_alley',
+      'environment_seed_ny_subway_platform_night',
+      'environment_seed_ny_yokocho_alley',
+      'environment_seed_ny_capsule_corridor',
+      'environment_seed_ny_rooftop_sprawl',
+      'environment_seed_ny_pachinko_parlor',
+      'environment_seed_ny_ramen_under_bridge',
+      'environment_seed_ny_flooded_gutter',
+      'environment_seed_ny_love_hotel_district',
+      'environment_seed_ny_abandoned_shrine',
+      'environment_seed_ny_late_train_interior',
+    ],
+    wardrobe: [
+      'outfit_ny_neon_streetwear',
+      'outfit_ny_cyber_kimono',
+      'outfit_ny_konbini_uniform',
+      'outfit_ny_holographic_idol',
+      'outfit_ny_rain_slicker',
+      'outfit_ny_yokai_formal',
+    ],
+    mood: [
+      'mood_ny_neon_melancholy',
+      'mood_ny_haunted_serenity',
+      'mood_ny_electric_menace',
+      'mood_ny_midnight_mischief',
+      'mood_ny_rain_soaked_calm',
+      'mood_ny_festival_fever',
+    ],
+    style: [
+      'style_ny_neon_noir_anime',
+      'style_ny_ukiyoe_neon',
+      'style_ny_sumi_neon_ink',
+      'style_ny_rain_slick_render',
+      'style_ny_vhs_glitch',
+      'style_ny_holographic_pop',
+    ],
+    lighting: [
+      'lighting_ny_neon_sign_wash',
+      'lighting_ny_konbini_fluorescent',
+      'lighting_ny_paper_lantern_glow',
+      'lighting_ny_spectral_self_glow',
+      'lighting_ny_vending_machine_bloom',
+      'lighting_ny_train_window_strobe',
+    ],
+    object: [
+      'object_ny_paper_charm',
+      'object_ny_vending_machine',
+      'object_ny_neon_torii',
+      'object_ny_spirit_lantern',
+      'object_ny_cracked_phone',
+      'object_ny_sake_cup',
+      'object_ny_fox_mask',
+    ],
+    aura: [
+      'world_seed_ny_neon_yokai',
+    ],
+  },
+  createdAt: SEED_TS_NY,
+  updatedAt: SEED_TS_NY,
+};
+
+function maybeApplyUniverseSeedV3(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V3) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V3, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_NEON_YOKAI.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_NEON_YOKAI];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -153,9 +251,9 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeed(universes);
+    return maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes));
   } catch {
-    return maybeApplyUniverseSeed([]);
+    return maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([]));
   }
 }
 

@@ -6,6 +6,7 @@ const STYLE_SEED_FLAG_KEY = 'promptgen:styles:seeded:v2';
 const STYLE_SEED_FLAG_KEY_V3 = 'promptgen:styles:seeded:v3';
 const STYLE_SEED_FLAG_KEY_V4 = 'promptgen:styles:seeded:v4';
 const STYLE_SEED_FLAG_KEY_V5 = 'promptgen:styles:seeded:v5';
+const STYLE_SEED_FLAG_KEY_V6 = 'promptgen:styles:seeded:v6';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -90,6 +91,7 @@ const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747872000000;
 const SEED_TS_5 = 1748304000000;
+const SEED_TS_6 = 1748476800000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -335,6 +337,93 @@ const V5_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+const V6_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_ny_neon_noir_anime',
+    name: 'Neon Noir Anime',
+    summary: 'Rain-soaked cyberpunk anime — wet neon reflections, deep blacks, hard rim light, the saturated grime of a midnight city.',
+    phrases: [
+      'neon noir anime illustration, cinematic cyberpunk night',
+      'wet reflective streets mirroring magenta and cyan neon signage',
+      'deep crushed blacks, hard rim lighting on every silhouette',
+      'volumetric haze threaded with coloured light, dense atmosphere',
+      'saturated grime and glow, the look of a late-night seinen anime key frame',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'style_ny_ukiyoe_neon',
+    name: 'Ukiyo-e Neon Fusion',
+    summary: 'Edo woodblock composition collided with electric signage — flat carved waves and clouds lit by impossible neon colour.',
+    phrases: [
+      'ukiyo-e woodblock print fused with neon cyberpunk colour',
+      'flat carved linework, traditional wave and cloud patterning',
+      'electric magenta, cyan and acid green replacing the natural palette',
+      'visible woodgrain texture and registration, bokashi gradient skies glowing like signage',
+      'Edo composition discipline lit by a city that should not exist',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'style_ny_sumi_neon_ink',
+    name: 'Sumi-e Neon Ink Wash',
+    summary: 'Loose black ink brushwork bleeding into luminous neon washes — restraint and electricity in the same stroke.',
+    phrases: [
+      'sumi-e ink wash with neon pigment bleeding through the black',
+      'loose confident brushstrokes, vast luminous negative space',
+      'electric cyan and magenta blooming wet-on-wet at the wash edges',
+      'minimal detail, gesture over description, single decisive marks',
+      'traditional ink restraint shot through with electric colour',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'style_ny_rain_slick_render',
+    name: 'Rain-Slick Cinematic Render',
+    summary: 'Photoreal night render — wet asphalt, lens bloom, anamorphic flares, the glistening surface of a neon downpour.',
+    phrases: [
+      'photorealistic cinematic night render, rain-slick city surfaces',
+      'wet asphalt with mirror-bright neon reflections, puddle ripples',
+      'anamorphic lens flares, soft bloom around every light source',
+      'volumetric rain and atmospheric haze, shallow depth of field',
+      'film-grade colour grade, teal shadows and magenta highlights',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'style_ny_vhs_glitch',
+    name: 'VHS Glitch Horror',
+    summary: 'Degraded analogue video aesthetic — scanlines, chromatic tearing, tracking errors haunting a neon ghost story.',
+    phrases: [
+      'degraded VHS analogue horror aesthetic, heavy scanlines',
+      'chromatic aberration tearing colour channels apart at the edges',
+      'tracking glitches, signal noise, timestamp burn-in artefacts',
+      'neon glow smeared by tape bloom, muddy blacks and bleeding reds',
+      'the unsettling lo-fi dread of a found late-night broadcast',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'style_ny_holographic_pop',
+    name: 'Holographic City Pop',
+    summary: 'Bright 80s-revival city pop — airbrushed gradients, chrome type, holographic iridescence over a cheerful neon night.',
+    phrases: [
+      'retro city pop illustration, 1980s airbrush revival',
+      'smooth gradient skies, chrome and holographic iridescent surfaces',
+      'bright optimistic neon palette — hot pink, electric blue, gold',
+      'crisp highlight glints, glossy clean rendering, no grime',
+      'the polished commercial sheen of vintage anime album art',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+];
+
 const V3_SEED_STYLES: StylePreset[] = [
   {
     id: 'style_seed_beksinski',
@@ -397,6 +486,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V5_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V6_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

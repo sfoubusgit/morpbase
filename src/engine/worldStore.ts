@@ -15,11 +15,13 @@ const WORLD_SEED_FLAG_KEY = 'promptgen:worlds:seeded:v1';
 const WORLD_SEED_FLAG_KEY_V2 = 'promptgen:worlds:seeded:v2';
 const WORLD_SEED_FLAG_KEY_V3 = 'promptgen:worlds:seeded:v3';
 const WORLD_SEED_FLAG_KEY_V4 = 'promptgen:worlds:seeded:v4';
+const WORLD_SEED_FLAG_KEY_V5 = 'promptgen:worlds:seeded:v5';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
 const WORLD_SEED_TS_V3 = 1748304000000;
 const WORLD_SEED_TS_V4 = 1748304000000;
+const WORLD_SEED_TS_V5 = 1748476800000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -184,6 +186,48 @@ const SEED_WORLDS_V4: World[] = [
   },
 ];
 
+const SEED_WORLDS_V5: World[] = [
+  {
+    id: 'world_seed_ny_neon_yokai',
+    name: 'Neon Yokai',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_ny_01', text: 'a rain-slick megacity at 3am, every surface mirroring magenta and cyan signage, the streets emptier than the lights suggest' },
+      { id: 'wp_ny_02', text: 'old gods and ghosts wearing the city like a disguise — a fox behind a barista, a ghost behind a cashier, none of them noticed' },
+      { id: 'wp_ny_03', text: 'neon kanji buzzing and flickering overhead, half the characters dead, the surviving ones spelling something almost coherent' },
+      { id: 'wp_ny_04', text: 'wet asphalt holding the full reflection of the signage above, the puddles brighter and more honest than the street' },
+      { id: 'wp_ny_05', text: 'a torii gate rebuilt in glowing neon tube, humming faintly, marking a threshold between the human city and the spirit one' },
+      { id: 'wp_ny_06', text: 'vending machines glowing alone on black streets, each one a small island of cold light, one slot offering something unpriced' },
+      { id: 'wp_ny_07', text: 'paper lanterns and electroluminescent wire strung together down a yokocho alley, tradition and voltage sharing the same string' },
+      { id: 'wp_ny_08', text: 'steam rising from a ramen stall under a bridge, lit from below by a hotplate and from above by passing train light' },
+      { id: 'wp_ny_09', text: 'the last train of the night, fluorescent-lit and nearly empty, one passenger who is not casting a reflection in the dark glass' },
+      { id: 'wp_ny_10', text: 'ofuda paper charms overlaid with glowing circuit traces, taped to doorframes, warding off both demons and surveillance' },
+      { id: 'wp_ny_11', text: 'a convenience store at the corner, merciless white fluorescent light spilling onto the wet pavement, open and waiting' },
+      { id: 'wp_ny_12', text: 'spectral figures lit from within, pale neon luminescence radiating off them onto the puddles at their feet' },
+      { id: 'wp_ny_13', text: 'the scramble crossing seen from above, umbrellas and neon and a single still figure the crowd flows around without seeing' },
+      { id: 'wp_ny_14', text: 'a shrine swallowed by the city, its stone foxes flanked by drink machines, incense smoke mixing with exhaust' },
+      { id: 'wp_ny_15', text: 'capsule hotel corridors glowing in rows, each pod a lit cell, something breathing softly in the one with the curtain drawn' },
+      { id: 'wp_ny_16', text: 'the low electric hum beneath everything — transformers, signage, the city itself running warm in the rain' },
+      { id: 'wp_ny_17', text: 'a kitsune mask edged in glowing line, pushed to the side of a head, the painted grin lit faintly from within' },
+      { id: 'wp_ny_18', text: 'rooftop sprawl of antennas and water tanks and signage backs, the unglamorous machinery behind the glowing face of the city' },
+      { id: 'wp_ny_19', text: 'a pachinko parlor entrance flooding the street with chaotic colour and noise, a doorway into manufactured frenzy' },
+      { id: 'wp_ny_20', text: 'cherry blossoms and falling rain caught in the same neon glow, beauty and decay sharing one colour temperature' },
+      { id: 'wp_ny_21', text: 'a flooded gutter running with light, the reflected signage broken and reassembled in the moving water' },
+      { id: 'wp_ny_22', text: 'an offering left on a ledge — a sake cup, a coin, a folded note — a quiet transaction with something unseen, recently made' },
+      { id: 'wp_ny_23', text: 'the love hotel district glowing in lurid pinks and purples, discreet entrances, the architecture pretending not to be looked at' },
+      { id: 'wp_ny_24', text: 'a smartphone with a cracked screen showing a call from a number with too many digits, the glow leaking through in the wrong colour' },
+      { id: 'wp_ny_25', text: 'an abandoned shrine deeper in, the neon not reaching, only a will-o-wisp glowing cold blue between the dark torii' },
+      { id: 'wp_ny_26', text: 'salarymen asleep on benches, drunk and harmless, stepped over by things that are neither' },
+      { id: 'wp_ny_27', text: 'the smell the image implies — rain on hot concrete, fryer oil, ozone, incense, the specific perfume of a city that never fully dries' },
+      { id: 'wp_ny_28', text: 'a back alley shrine the size of a phone booth, lit by a single red bulb, immaculately kept by hands no one has seen' },
+      { id: 'wp_ny_29', text: 'reflections that lag a half-second behind, or show one too many figures, in every dark window along the street' },
+      { id: 'wp_ny_30', text: 'the whole city beautiful and lonely and quietly haunted — the neon indifferent, the spirits patient, the rain washing none of it away' },
+    ],
+    createdAt: WORLD_SEED_TS_V5,
+    updatedAt: WORLD_SEED_TS_V5,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -223,6 +267,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V4, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V4.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V5) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V5, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V5.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

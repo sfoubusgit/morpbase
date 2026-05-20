@@ -18,7 +18,9 @@ export type ObjectIdentityInput = {
 const STORE_KEY = 'promptgen:objects:v1';
 const BACKUP_KEY = 'promptgen:objects:backup:v1';
 const SEED_FLAG_KEY = 'promptgen:objects:seeded:v1';
+const SEED_FLAG_KEY_V2 = 'promptgen:objects:seeded:v2';
 const SEED_TS = 1748304000000;
+const SEED_TS_2 = 1748476800000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -228,18 +230,124 @@ const DEFAULT_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+const V2_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_ny_paper_charm',
+    name: 'Glowing Paper Charm',
+    summary: 'A traditional ofuda paper charm reprinted with circuit traces — the protective script glowing faint neon, half prayer, half firmware.',
+    phrases: [
+      'a traditional ofuda paper charm, the printed script overlaid with glowing circuit traces',
+      'faint neon light pulsing along the kanji, half protective prayer and half firmware',
+      'edges singed, the paper old but the glow new',
+      'the kind of ward that stops both demons and surveillance drones',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_vending_machine',
+    name: 'Haunted Vending Machine',
+    summary: 'A glowing drinks machine humming on a black street — one row of cans flickering, an extra unlabelled slot that was not there yesterday.',
+    phrases: [
+      'a glowing drinks vending machine humming alone on a dark street',
+      'rows of brightly lit cans, one row flickering and mislabelled',
+      'an extra unmarked slot offering something that has no price',
+      'cold blue-white light spilling onto the wet pavement around it',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_neon_torii',
+    name: 'Neon Torii Gate',
+    summary: 'A shrine gate rebuilt in glowing neon tube — the traditional vermilion replaced by humming electric red, marking the threshold between worlds.',
+    phrases: [
+      'a torii shrine gate rebuilt from glowing neon tubing, humming electric red',
+      'the traditional vermilion form rendered in light, buzzing faintly',
+      'reflections of the gate doubled in the wet ground beneath it',
+      'a threshold marker between the human city and the spirit one',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_spirit_lantern',
+    name: 'Spirit Lantern',
+    summary: 'A round paper lantern carried by a yokai — the flame inside replaced by a captive will-o-wisp glowing cold blue, swaying without wind.',
+    phrases: [
+      'a round paper lantern, the flame inside replaced by a captive blue will-o-wisp',
+      'cold spectral light glowing through the paper, swaying gently without any wind',
+      'faded calligraphy on the side, the paper translucent and worn',
+      'the small contained ghost casting a trembling pale glow',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_cracked_phone',
+    name: 'Cracked Smartphone',
+    summary: 'A phone with a spiderwebbed screen showing a call from a number with too many digits — the glow leaking through the cracks in the wrong colour.',
+    phrases: [
+      'a smartphone with a heavily spiderwebbed cracked screen',
+      'an incoming call displayed from a number with far too many digits',
+      'the screen glow leaking through the cracks in a colour screens do not make',
+      'held loosely, the only light on a dark face',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_sake_cup',
+    name: 'Offering Sake Cup',
+    summary: 'A small ceramic sake cup left on a ledge as an offering — the liquid inside catching neon, a single coin and a folded note beside it.',
+    phrases: [
+      'a small ceramic sake cup left as an offering on a stone ledge',
+      'the liquid inside trembling, catching and holding the neon colour above',
+      'a single coin and a folded paper note placed carefully beside it',
+      'a quiet transaction with something unseen, recently made',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+  {
+    id: 'object_ny_fox_mask',
+    name: 'Neon Kitsune Mask',
+    summary: 'A white fox festival mask edged in glowing line — worn pushed to the side of the head, the painted grin lit faintly from within.',
+    phrases: [
+      'a white kitsune fox festival mask, the markings edged in glowing neon line',
+      'worn pushed to the side of the head, the painted grin lit faintly from within',
+      'lacquered surface catching the city colour, eyeholes dark',
+      'traditional festival craft wired with quiet light',
+    ],
+    createdAt: SEED_TS_2,
+    updatedAt: SEED_TS_2,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
+  let result = items;
+
   if (readStorageItem(SEED_FLAG_KEY) === null) {
     writeStorageItem(SEED_FLAG_KEY, true);
-    const existingIds = new Set(items.map(i => i.id));
+    const existingIds = new Set(result.map(i => i.id));
     const toAdd = DEFAULT_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
-      const merged = sortItems([...items, ...toAdd]);
-      writeItems(merged);
-      return merged;
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
     }
   }
-  return items;
+
+  if (readStorageItem(SEED_FLAG_KEY_V2) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V2, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V2_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  return result;
 };
 
 const writeItems = (items: ObjectIdentity[]) => {

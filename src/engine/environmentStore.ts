@@ -11,6 +11,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V4 = 'promptgen:environments:seeded:v4';
 const ENVIRONMENT_SEED_FLAG_KEY_V5 = 'promptgen:environments:seeded:v5';
 const ENVIRONMENT_SEED_FLAG_KEY_V6 = 'promptgen:environments:seeded:v6';
 const ENVIRONMENT_SEED_FLAG_KEY_V7 = 'promptgen:environments:seeded:v7';
+const ENVIRONMENT_SEED_FLAG_KEY_V8 = 'promptgen:environments:seeded:v8';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -106,6 +107,7 @@ const ENV_SEED_TS_4 = 1747785600000;
 const ENV_SEED_TS_5 = 1748304000000;
 const ENV_SEED_TS_6 = 1748217600000;
 const ENV_SEED_TS_7 = 1748304000000;
+const ENV_SEED_TS_8 = 1748476800000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -666,6 +668,230 @@ const V7_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+const V8_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_ny_scramble_crossing',
+    name: 'Neon Scramble Crossing',
+    summary: 'A rain-slick pedestrian scramble at night, drowned in towering neon signage and the glow of a thousand screens.',
+    phraseBundle: {
+      core: [
+        'a vast pedestrian scramble crossing at night, wet asphalt mirroring the lights',
+        'towering walls of neon signage and giant video screens in pink, cyan, and electric blue',
+        'crowds blurred in motion under a fine drizzle, umbrellas catching the glow',
+        'kanji and katakana signage stacked storey upon storey, advertising everything at once',
+        'puddles fracturing the neon into long colored streaks across the road',
+        'the hum of the city at its most awake and most anonymous',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_konbini_interior',
+    name: '24-Hour Convenience Store',
+    summary: 'The flat fluorescent calm of an all-night konbini — stocked shelves, a softly humming cooler, nobody and everybody passing through.',
+    phraseBundle: {
+      core: [
+        'interior of a 24-hour Japanese convenience store at night, flat white fluorescent light',
+        'neat rows of brightly packaged snacks, onigiri, and bento on clean shelves',
+        'a glowing drinks cooler humming softly along one wall',
+        'magazine rack by the window, the dark street and faint neon beyond the glass',
+        'spotless tiled floor reflecting the ceiling lights, a quiet liminal stillness',
+        'the specific loneliness of a bright shop at 3am',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_shrine_alley',
+    name: 'Shrine Alley with Vending Machines',
+    summary: 'A narrow backstreet where a small old shrine and its red torii sit between glowing vending machines and tangled wires.',
+    phraseBundle: {
+      core: [
+        'a narrow night backstreet, a small old Shinto shrine wedged between buildings',
+        'a faded red torii gate, stone fox statues, a worn offering box',
+        'a row of glowing vending machines casting warm and cold light on the pavement',
+        'tangled overhead power lines, moss in the gutter cracks, a paper lantern swaying',
+        'incense smoke drifting against the electric glow, old and new pressed together',
+        'quiet and sacred and faintly humming with current',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_subway_platform_night',
+    name: 'Last-Train Subway Platform',
+    summary: 'An empty subway platform near the last train — tiled, fluorescent, faintly echoing, the city asleep above.',
+    phraseBundle: {
+      core: [
+        'an empty subway platform late at night, long and tiled and fluorescent-lit',
+        'yellow tactile paving along the platform edge, a single waiting figure far down',
+        'station signage in Japanese, a digital board counting down the last train',
+        'the dark mouth of the tunnel, faint rails catching the light',
+        'reflections on polished floor tiles, vending machines glowing against the wall',
+        'the hollow echoing quiet of the system\'s final hour',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_yokocho_alley',
+    name: 'Yokocho Lantern Alley',
+    summary: 'A tight alley of tiny bars and ramen counters, strung with red paper lanterns and warm amber light, barely two people wide.',
+    phraseBundle: {
+      core: [
+        'a tight narrow yokocho alley lined with tiny bars and food counters',
+        'rows of red paper lanterns strung overhead glowing warm amber',
+        'handwritten wooden signs and noren curtains, stools spilling into the lane',
+        'steam rising from a yakitori grill, smoke and savory haze in the air',
+        'wet cobblestones reflecting the lantern light, barely two people wide',
+        'cramped, warm, and alive with low conversation',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_capsule_corridor',
+    name: 'Capsule Hotel Corridor',
+    summary: 'Stacked sleeping pods receding down a dim corridor lit cold blue, each capsule a glowing rectangle of private dark.',
+    phraseBundle: {
+      core: [
+        'a capsule hotel corridor, two stacked rows of sleeping pods receding into the distance',
+        'cool blue ambient light along the pod openings, each capsule a small glowing rectangle',
+        'small ladders to the upper pods, numbered panels, neat and futuristic',
+        'soft carpet, low ceiling, the muffled hush of many people sleeping in boxes',
+        'a vending corner glowing at the far end of the corridor',
+        'clean, claustrophobic, and quietly science-fictional',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_rooftop_sprawl',
+    name: 'Rooftop Over the Neon Sprawl',
+    summary: 'A water-tank rooftop overlooking an endless neon city — chain-link fence, distant towers, the whole glittering grid below.',
+    phraseBundle: {
+      core: [
+        'a building rooftop at night overlooking an endless neon city sprawl',
+        'water tanks, ventilation units, and a chain-link fence at the edge',
+        'distant skyscrapers studded with lit windows and rooftop signage to the horizon',
+        'a haze of light pollution glowing orange-pink against low clouds',
+        'the city grid stretching out in glittering circuits below',
+        'wind, height, and the quiet of being above it all',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_pachinko_parlor',
+    name: 'Pachinko Parlor',
+    summary: 'A wall-to-wall blaze of pachinko machines — chaotic light, mirrored ceilings, and a roar of falling steel balls.',
+    phraseBundle: {
+      core: [
+        'the interior of a pachinko parlor, endless rows of glowing machines wall to wall',
+        'chaotic flashing light in every color, mirrored ceiling doubling the chaos',
+        'screens, jackpots, and cascading steel balls behind glass',
+        'narrow aisles between the machines, plush stools, smoke-tinged air',
+        'overwhelming sensory blaze, garish and hypnotic',
+        'the relentless mechanical roar of a hundred machines at once',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_ramen_under_bridge',
+    name: 'Ramen Stall Under the Tracks',
+    summary: 'A tiny ramen counter tucked beneath a railway bridge, steam and warm light pooling as trains rumble overhead.',
+    phraseBundle: {
+      core: [
+        'a tiny ramen stall tucked under a railway bridge at night',
+        'a short wooden counter with a few stools, warm light from a single bulb',
+        'thick steam rising from the broth pots, fogging the night air',
+        'concrete bridge supports, a train rumbling across the tracks overhead',
+        'handwritten menu strips on the wall, noren curtain at the entrance',
+        'cramped, warm, and steeped in savory steam',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_flooded_gutter',
+    name: 'Typhoon-Night Gutter',
+    summary: 'A flooded street gutter on a storm night, every neon sign doubled and rippling in the running water.',
+    phraseBundle: {
+      core: [
+        'a flooded city street on a typhoon night, water running ankle-deep along the gutter',
+        'every neon sign reflected and rippling, doubled in the moving water',
+        'heavy rain streaking through the glow, droplets exploding on the surface',
+        'overflowing drains, a swaying traffic light, debris caught at the curb',
+        'dramatic reflections fractured by the current, color smeared across the wet road',
+        'the drama and isolation of a storm-soaked night',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_love_hotel_district',
+    name: 'Love Hotel District',
+    summary: 'A backstreet of lurid themed facades and heart-shaped signs, drenched in pink and purple light and discreet quiet.',
+    phraseBundle: {
+      core: [
+        'a love hotel district backstreet at night, lurid themed building facades',
+        'heart-shaped and crown-shaped neon signs glowing pink, purple, and red',
+        'gaudy ornate exteriors, discreet curtained entrances, vacancy panels lit',
+        'wet pavement saturated with magenta and violet light',
+        'empty street, a single figure passing, an air of secrecy',
+        'kitsch, lurid, and strangely lonely',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_abandoned_shrine',
+    name: 'Shrine Swallowed by the City',
+    summary: 'A neglected old shrine boxed in by towering modern buildings — overgrown, forgotten, lit only by the spill of distant neon.',
+    phraseBundle: {
+      core: [
+        'a small abandoned Shinto shrine hemmed in on all sides by towering modern buildings',
+        'cracked stone steps overgrown with weeds, a leaning weathered torii',
+        'faded shimenawa rope, moss-covered guardian statues, a collapsed offering hall',
+        'no direct light except the spill of distant neon over the rooftops',
+        'a pocket of old silence trapped inside the roaring city',
+        'forgotten, sacred, and quietly waiting',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+  {
+    id: 'environment_seed_ny_late_train_interior',
+    name: 'Late-Night Train Carriage',
+    summary: 'The fluorescent interior of a near-empty late train, dark suburbs sliding past the windows in streaks of distant light.',
+    phraseBundle: {
+      core: [
+        'the interior of a near-empty commuter train carriage late at night',
+        'flat fluorescent ceiling light, rows of empty priority seats and hanging straps',
+        'dark windows with the city sliding past in streaks of distant light',
+        'a lone passenger or two, reflections doubled in the black glass',
+        'worn floor, route map above the doors, gentle rocking motion implied',
+        'the suspended, dreamlike quiet of the last train home',
+      ],
+    },
+    createdAt: ENV_SEED_TS_8,
+    updatedAt: ENV_SEED_TS_8,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -748,6 +974,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V7_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V8_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

@@ -5,6 +5,7 @@ const LIGHTING_STORE_BACKUP_KEY = 'promptgen:lightings:backup:v1';
 const LIGHTING_SEED_FLAG_KEY = 'promptgen:lightings:seeded:v2';
 const LIGHTING_SEED_FLAG_KEY_V3 = 'promptgen:lightings:seeded:v3';
 const LIGHTING_SEED_FLAG_KEY_V4 = 'promptgen:lightings:seeded:v4';
+const LIGHTING_SEED_FLAG_KEY_V5 = 'promptgen:lightings:seeded:v5';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -88,6 +89,88 @@ const SEED_TS = 1746921600000;
 const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
+const SEED_TS_5 = 1748476800000;
+
+const V5_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_ny_neon_sign_wash',
+    name: 'Neon Sign Wash',
+    summary: 'Saturated coloured light from off-screen signage — magenta and cyan washing across the subject from opposing sides, no neutral fill.',
+    phrases: [
+      'saturated neon signage light from off-screen, no neutral fill anywhere',
+      'magenta key from one side, electric cyan from the other, colours meeting on the skin',
+      'hard coloured rim light tracing every edge, deep shadow between the two hues',
+      'the glow of a hundred signs reflected back as ambient colour',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'lighting_ny_konbini_fluorescent',
+    name: 'Convenience Store Fluorescent',
+    summary: 'Flat clinical overhead fluorescent — even cold white light, faint green cast, the merciless honesty of a 3am konbini.',
+    phrases: [
+      'flat overhead fluorescent tube lighting, clinical and even',
+      'cold white with a faint sickly green cast, no warmth in the spectrum',
+      'shadowless merciless illumination, every detail exposed',
+      'the specific honest ugliness of a 3am convenience store interior',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'lighting_ny_paper_lantern_glow',
+    name: 'Paper Lantern Glow',
+    summary: 'Warm red-orange light from hanging paper lanterns — soft, diffused through paper, swaying pools of amber in the dark alley.',
+    phrases: [
+      'warm red-orange light from hanging paper lanterns, diffused soft through paper',
+      'multiple small swaying sources casting overlapping amber pools',
+      'deep blue shadow filling the spaces between the lantern light',
+      'gentle flicker, the intimate warmth of a yokocho alley after dark',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'lighting_ny_spectral_self_glow',
+    name: 'Spectral Self-Glow',
+    summary: 'A yokai lit from within — pale neon luminescence radiating from the spirit itself, illuminating the wet street around it.',
+    phrases: [
+      'spectral internal glow, pale neon luminescence radiating from within the figure',
+      'the spirit itself the light source, no external illumination',
+      'soft cyan or magenta corona spilling onto the wet ground nearby',
+      'everything beyond the glow radius swallowed by night',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'lighting_ny_vending_machine_bloom',
+    name: 'Vending Machine Bloom',
+    summary: 'A lone vending machine as the only light — cold blue-white glow blooming into the rain, the single bright island on a black street.',
+    phrases: [
+      'a single vending machine as the sole light source on a black street',
+      'cold blue-white glow blooming outward into the rain and mist',
+      'one bright island of illumination surrounded by total dark',
+      'long reflections of the machine stretched across wet asphalt',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'lighting_ny_train_window_strobe',
+    name: 'Train Window Strobe',
+    summary: 'Passing light through train windows — rhythmic strobing of tunnel lamps and platform signage raking across the interior.',
+    phrases: [
+      'rhythmic strobing light through train windows, tunnel lamps passing in sequence',
+      'bands of light and dark raking across the interior at speed',
+      'cold platform fluorescents and neon flashing intermittently',
+      'motion-blurred streaks of colour smearing past the glass',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
 
 const V4_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -321,6 +404,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V4_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V5_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

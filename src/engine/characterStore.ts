@@ -21,6 +21,7 @@ const CHARACTER_SEED_FLAG_KEY_V8 = 'promptgen:characters:seeded:v8';
 const CHARACTER_SEED_FLAG_KEY_V9 = 'promptgen:characters:seeded:v9';
 const CHARACTER_SEED_FLAG_KEY_V10 = 'promptgen:characters:seeded:v10';
 const CHARACTER_SEED_FLAG_KEY_V11 = 'promptgen:characters:seeded:v11';
+const CHARACTER_SEED_FLAG_KEY_V12 = 'promptgen:characters:seeded:v12';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -284,6 +285,7 @@ const SEED_TS_8 = 1748131200000;
 const SEED_TS_9 = 1748217600000;
 const SEED_TS_10 = 1748304000000;
 const SEED_TS_11 = 1748390400000;
+const SEED_TS_12 = 1748476800000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -1103,6 +1105,405 @@ const V11_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+const V12_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_ny_konbini_yurei',
+    name: 'The Konbini Ghost',
+    summary: 'A pale night-shift phantom who has worked the same convenience store for decades — translucent at the edges, endlessly polite, never clocking out.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'yurei (ghost)',
+      presentation: 'clothed',
+      ageImpression: 'ageless young adult',
+      personalityTone: 'quiet courtesy worn smooth by repetition; the calm of someone with nowhere else to be',
+      visualAnchors: [
+        { id: 'anchor_nyk_1', label: 'Form', kind: 'silhouette', text: 'slender figure, edges faintly translucent and dissolving into the fluorescent air' },
+        { id: 'anchor_nyk_2', label: 'Skin', kind: 'other', text: 'pale bloodless skin lit cold by ceiling fluorescents, faint blue undertone' },
+        { id: 'anchor_nyk_3', label: 'Hair', kind: 'hair', text: 'long black hair hanging straight and damp, partly over the face' },
+        { id: 'anchor_nyk_4', label: 'Eyes', kind: 'eyes', text: 'dark hollow eyes with a tired distant gaze' },
+        { id: 'anchor_nyk_5', label: 'Uniform', kind: 'clothing', text: 'convenience store uniform — striped apron over a collared shirt, name tag with no readable name' },
+      ],
+      motifs: [
+        { id: 'motif_nyk_1', label: 'The Eternal Night Shift', text: 'fluorescent hum, restocked shelves, the politeness of the permanently on-duty' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, ghost',
+        'pale translucent skin, edges dissolving into fluorescent light',
+        'long straight damp black hair partly over the face, dark hollow tired eyes',
+        'convenience store striped apron uniform, blank name tag',
+        'standing behind a konbini counter at night, faint and quietly polite',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_subway_kitsune',
+    name: 'The Subway Kitsune',
+    summary: 'A nine-tailed fox spirit passing as a salarywoman — sharp suit, sharper eyes, nine tails folded invisibly under a long coat on the last train home.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'kitsune (fox spirit)',
+      presentation: 'clothed',
+      ageImpression: 'composed adult',
+      personalityTone: 'cool, knowing, faintly amused; a predator comfortable in commuter clothes',
+      visualAnchors: [
+        { id: 'anchor_nysk_1', label: 'Ears', kind: 'other', text: 'fox ears rising from amber-blonde hair, alert and twitching' },
+        { id: 'anchor_nysk_2', label: 'Tails', kind: 'other', text: 'multiple fox tails, tipped white, half-hidden under a long dark coat' },
+        { id: 'anchor_nysk_3', label: 'Eyes', kind: 'eyes', text: 'golden slit-pupil eyes, sharp and amused' },
+        { id: 'anchor_nysk_4', label: 'Hair', kind: 'hair', text: 'amber-blonde hair, sleek, shoulder length' },
+        { id: 'anchor_nysk_5', label: 'Outfit', kind: 'clothing', text: 'tailored dark business suit under a long coat, briefcase' },
+      ],
+      motifs: [
+        { id: 'motif_nysk_1', label: 'The Last Train', text: 'fox-fire reflections, the empty late-night carriage, a predator in a commuter\'s coat' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, fox girl, kitsune',
+        'fox ears and multiple white-tipped tails, tails half-hidden under a long dark coat',
+        'amber-blonde sleek hair, golden slit-pupil eyes, knowing amused expression',
+        'tailored dark business suit, briefcase in hand',
+        'standing in an empty late-night subway carriage, fox-fire glints in the window',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_neon_oni',
+    name: 'The Neon Oni',
+    summary: 'A towering demon bouncer outside a basement club — crimson skin, horns wrapped in LED strip, arms folded like a wall that decides who enters.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'oni (demon)',
+      presentation: 'clothed',
+      ageImpression: 'imposing adult',
+      personalityTone: 'immovable calm; the authority of something that does not need to raise its voice',
+      visualAnchors: [
+        { id: 'anchor_nyo_1', label: 'Form', kind: 'silhouette', text: 'huge muscular figure, towering, broad as a doorway' },
+        { id: 'anchor_nyo_2', label: 'Skin', kind: 'other', text: 'deep crimson-red skin, faint scarring across the forearms' },
+        { id: 'anchor_nyo_3', label: 'Horns', kind: 'other', text: 'two thick horns wrapped in glowing cyan and pink LED strip' },
+        { id: 'anchor_nyo_4', label: 'Eyes', kind: 'eyes', text: 'gold eyes, half-lidded, unimpressed' },
+        { id: 'anchor_nyo_5', label: 'Outfit', kind: 'clothing', text: 'tight black bouncer suit, earpiece, sleeves pushed up' },
+      ],
+      motifs: [
+        { id: 'motif_nyo_1', label: 'The Door', text: 'LED-wrapped horns, folded arms, the velvet rope of the underworld' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, oni, horns',
+        'huge muscular figure, deep crimson-red skin, faint forearm scars',
+        'thick horns wrapped in glowing cyan and pink LED strip',
+        'gold half-lidded unimpressed eyes',
+        'tight black bouncer suit with earpiece, arms folded outside a neon club door',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_kasa_obake',
+    name: 'The Umbrella Spirit',
+    summary: 'A one-eyed umbrella yokai given a girl\'s shape on rainy nights — a clear vinyl umbrella that hops at crossings, blinking its single eye at the rain.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'kasa-obake (umbrella spirit)',
+      presentation: 'clothed',
+      ageImpression: 'playful youth',
+      personalityTone: 'mischievous and curious; delighted by puddles and reflected neon',
+      visualAnchors: [
+        { id: 'anchor_nyko_1', label: 'Eye', kind: 'eyes', text: 'a single large round eye, bright and curious' },
+        { id: 'anchor_nyko_2', label: 'Form', kind: 'silhouette', text: 'small slight figure fused with a clear vinyl umbrella, one-legged hopping stance' },
+        { id: 'anchor_nyko_3', label: 'Tongue', kind: 'face', text: 'long playful tongue lolling out, classic obake feature' },
+        { id: 'anchor_nyko_4', label: 'Hair', kind: 'hair', text: 'short dark hair dripping with rain' },
+        { id: 'anchor_nyko_5', label: 'Umbrella', kind: 'accessory', text: 'transparent vinyl umbrella body glowing with reflected neon' },
+      ],
+      motifs: [
+        { id: 'motif_nyko_1', label: 'Rainy Crossing', text: 'one eye, one leg, the clear umbrella full of neon, puddles everywhere' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, monster girl, one-eyed',
+        'a single large round curious eye, long playful tongue out',
+        'small slight figure merged with a transparent vinyl umbrella, hopping one-legged',
+        'short dark rain-wet hair, umbrella glowing with reflected neon',
+        'at a rainy night crossing, puddles full of pink and cyan light',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_rokurokubi',
+    name: 'The Long-Necked Clerk',
+    summary: 'A rokurokubi office worker whose neck unspools after midnight — prim and overworked by day, her head drifting the length of the floor by night.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'rokurokubi (long-necked yokai)',
+      presentation: 'clothed',
+      ageImpression: 'tired adult',
+      personalityTone: 'exhausted diligence; resigned to a body that betrays her after hours',
+      visualAnchors: [
+        { id: 'anchor_nyr_1', label: 'Neck', kind: 'silhouette', text: 'unnaturally long neck stretching and curving across the office air' },
+        { id: 'anchor_nyr_2', label: 'Hair', kind: 'hair', text: 'black hair in a loosening office bun, strands escaping' },
+        { id: 'anchor_nyr_3', label: 'Eyes', kind: 'eyes', text: 'dark tired eyes behind thin glasses' },
+        { id: 'anchor_nyr_4', label: 'Outfit', kind: 'clothing', text: 'grey office blouse and pencil skirt, lanyard ID' },
+        { id: 'anchor_nyr_5', label: 'Skin', kind: 'other', text: 'pale fluorescent-lit skin, faint shadows under the eyes' },
+      ],
+      motifs: [
+        { id: 'motif_nyr_1', label: 'After Midnight', text: 'the stretching neck, the empty cubicles, the overtime that never ends' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, rokurokubi, long neck',
+        'unnaturally long neck curving across the air, head drifting away from the body',
+        'black hair in a loosening bun, thin glasses, dark tired eyes',
+        'grey office blouse and pencil skirt with a lanyard ID',
+        'in an empty fluorescent-lit office at night',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_tengu_courier',
+    name: 'The Tengu Courier',
+    summary: 'A crow-masked delivery rider who outruns the traffic lights — black wings folded under a courier jacket, a glowing bike, and an impossible delivery time.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'tengu (crow spirit)',
+      presentation: 'clothed',
+      ageImpression: 'wiry young adult',
+      personalityTone: 'fast, terse, proud of never being late; the arrogance of the genuinely skilled',
+      visualAnchors: [
+        { id: 'anchor_nyt_1', label: 'Mask', kind: 'face', text: 'long-nosed crow tengu features, sharp beaked profile, red-black colouring' },
+        { id: 'anchor_nyt_2', label: 'Wings', kind: 'other', text: 'black crow wings half-folded under a high-vis courier jacket' },
+        { id: 'anchor_nyt_3', label: 'Hair', kind: 'hair', text: 'spiky black hair, windblown' },
+        { id: 'anchor_nyt_4', label: 'Outfit', kind: 'clothing', text: 'techwear courier jacket, fingerless gloves, insulated delivery box' },
+        { id: 'anchor_nyt_5', label: 'Eyes', kind: 'eyes', text: 'sharp red eyes, focused' },
+      ],
+      motifs: [
+        { id: 'motif_nyt_1', label: 'Never Late', text: 'black feathers in the slipstream, a glowing bike, the city blurred by speed' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, tengu, crow',
+        'long-nosed beaked crow features, sharp red-black colouring, spiky windblown black hair',
+        'black crow wings half-folded under a high-vis techwear courier jacket',
+        'fingerless gloves, insulated delivery box, sharp focused red eyes',
+        'riding a glowing delivery bike through blurred neon streets at night',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_nekomata_barista',
+    name: 'The Nekomata Barista',
+    summary: 'A two-tailed cat spirit running a 3am café — split tail swaying, a knowing grin, and coffee for the city\'s sleepless and its ghosts alike.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'nekomata (two-tailed cat)',
+      presentation: 'clothed',
+      ageImpression: 'ageless youth',
+      personalityTone: 'warm, sly, unbothered; a host who has seen every kind of late-night customer',
+      visualAnchors: [
+        { id: 'anchor_nyn_1', label: 'Ears & Tails', kind: 'other', text: 'cat ears and two long forked tails swaying lazily' },
+        { id: 'anchor_nyn_2', label: 'Eyes', kind: 'eyes', text: 'green slit-pupil eyes, half-lidded and knowing' },
+        { id: 'anchor_nyn_3', label: 'Hair', kind: 'hair', text: 'short messy charcoal-grey hair' },
+        { id: 'anchor_nyn_4', label: 'Outfit', kind: 'clothing', text: 'rolled-sleeve shirt, café apron, dark slacks' },
+        { id: 'anchor_nyn_5', label: 'Grin', kind: 'face', text: 'small fangs in a sly cat-grin' },
+      ],
+      motifs: [
+        { id: 'motif_nyn_1', label: 'The 3AM Café', text: 'forked tails, steam from a fresh pour, warm light for the sleepless' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, cat girl, nekomata',
+        'cat ears and two long forked tails swaying, green slit-pupil half-lidded eyes',
+        'short messy charcoal-grey hair, small fangs in a sly grin',
+        'rolled-sleeve shirt with a café apron',
+        'behind the counter of a tiny warm café at 3am',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_yuki_onna',
+    name: 'The Neon Yuki-onna',
+    summary: 'A snow-woman who only appears on the coldest city nights — frost trailing from her steps, breath fogging the neon, beautiful and quietly lethal.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'yuki-onna (snow woman)',
+      presentation: 'clothed',
+      ageImpression: 'ageless adult',
+      personalityTone: 'serene cold; gentle voice over a killing chill',
+      visualAnchors: [
+        { id: 'anchor_nyy_1', label: 'Skin', kind: 'other', text: 'pure white skin, faintly frost-dusted, breath visible' },
+        { id: 'anchor_nyy_2', label: 'Hair', kind: 'hair', text: 'very long white hair drifting as if weightless in cold air' },
+        { id: 'anchor_nyy_3', label: 'Eyes', kind: 'eyes', text: 'pale ice-blue eyes, calm and depthless' },
+        { id: 'anchor_nyy_4', label: 'Outfit', kind: 'clothing', text: 'white modern coat over a pale kimono-cut dress, frost at the hems' },
+        { id: 'anchor_nyy_5', label: 'Aura', kind: 'other', text: 'thin frost spreading on the pavement around her feet' },
+      ],
+      motifs: [
+        { id: 'motif_nyy_1', label: 'Coldest Night', text: 'visible breath against neon, frost on the asphalt, beauty with a chill underneath' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, yuki-onna',
+        'pure white frost-dusted skin, very long weightless white hair, pale ice-blue depthless eyes',
+        'visible breath fogging in the cold air',
+        'white modern coat over a pale kimono-cut dress, frost at the hems',
+        'thin frost spreading on the neon-lit pavement around her',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_jorogumo',
+    name: 'The Jorogumo Hostess',
+    summary: 'A spider yokai presiding over a host club — silk-smooth charm, too many slender limbs in the shadows, a smile that has already decided your evening.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'jorogumo (spider woman)',
+      presentation: 'clothed',
+      ageImpression: 'alluring adult',
+      personalityTone: 'silken control; warmth as a technique; absolute command of the room',
+      visualAnchors: [
+        { id: 'anchor_nyj_1', label: 'Limbs', kind: 'silhouette', text: 'extra slender chitinous spider-limbs emerging from the back, catching the light' },
+        { id: 'anchor_nyj_2', label: 'Hair', kind: 'hair', text: 'long glossy black hair with a faint purple sheen' },
+        { id: 'anchor_nyj_3', label: 'Eyes', kind: 'eyes', text: 'several dark glittering eyes, the extra pairs faint at the temples' },
+        { id: 'anchor_nyj_4', label: 'Outfit', kind: 'clothing', text: 'elegant black-and-violet host club dress, silk gloves' },
+        { id: 'anchor_nyj_5', label: 'Web', kind: 'other', text: 'faint silk threads glinting in the club\'s low light' },
+      ],
+      motifs: [
+        { id: 'motif_nyj_1', label: 'The Host Club', text: 'silk threads, violet light, the charm of something patient and hungry' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, spider girl, jorogumo, monster girl',
+        'extra slender chitinous spider-limbs from the back catching the light',
+        'long glossy black hair with a purple sheen, several dark glittering eyes',
+        'elegant black-and-violet host club dress with silk gloves',
+        'in a low-lit host club, faint silk threads glinting',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_bakeneko_idol',
+    name: 'The Bakeneko Idol',
+    summary: 'A cat-spirit pop idol whose holographic stage hides a flickering tail and ears — adored by thousands who never notice she is not quite human.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'bakeneko (cat spirit)',
+      presentation: 'clothed',
+      ageImpression: 'youthful idol',
+      personalityTone: 'bright stage charisma over a feline indifference; performance as glamour',
+      visualAnchors: [
+        { id: 'anchor_nyb_1', label: 'Ears & Tail', kind: 'other', text: 'cat ears and a single flicking tail, sometimes glitching like a hologram' },
+        { id: 'anchor_nyb_2', label: 'Hair', kind: 'hair', text: 'twin-tailed candy-pink and white hair' },
+        { id: 'anchor_nyb_3', label: 'Eyes', kind: 'eyes', text: 'big bright magenta star-pupil eyes' },
+        { id: 'anchor_nyb_4', label: 'Outfit', kind: 'clothing', text: 'frilly holographic idol stage costume, glowstick accents' },
+        { id: 'anchor_nyb_5', label: 'Stage', kind: 'other', text: 'holographic light effects swirling around her' },
+      ],
+      motifs: [
+        { id: 'motif_nyb_1', label: 'Holo Stage', text: 'glitching tail, magenta hologram light, an idol the crowd adores and never reads' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, cat girl, idol',
+        'cat ears and a flicking tail glitching like a hologram',
+        'twin-tailed candy-pink and white hair, big magenta star-pupil eyes',
+        'frilly holographic idol stage costume with glowstick accents',
+        'on a holographic concert stage, swirling magenta light',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_zashiki_warashi',
+    name: 'The Capsule-Hotel Child',
+    summary: 'A zashiki-warashi house-spirit that adopted a capsule hotel — a small barefoot child who brings luck to a pod and grief when she leaves it.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'zashiki-warashi (house spirit)',
+      presentation: 'clothed',
+      ageImpression: 'child',
+      personalityTone: 'shy, watchful, lonely; the quiet of a guardian no one believes in',
+      visualAnchors: [
+        { id: 'anchor_nyz_1', label: 'Form', kind: 'silhouette', text: 'small barefoot child, slight, peeking from a capsule pod' },
+        { id: 'anchor_nyz_2', label: 'Hair', kind: 'hair', text: 'short black bobbed hair with blunt bangs' },
+        { id: 'anchor_nyz_3', label: 'Eyes', kind: 'eyes', text: 'large dark watchful eyes' },
+        { id: 'anchor_nyz_4', label: 'Outfit', kind: 'clothing', text: 'plain old-fashioned red kimono, out of place in the modern pod' },
+        { id: 'anchor_nyz_5', label: 'Glow', kind: 'other', text: 'lit by the blue corridor glow of the capsule rows' },
+      ],
+      motifs: [
+        { id: 'motif_nyz_1', label: 'The Pod', text: 'a red kimono in a blue capsule corridor, luck and loneliness in one small figure' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, child, ghost',
+        'small barefoot child, short black bobbed hair with blunt bangs, large dark watchful eyes',
+        'plain old-fashioned red kimono',
+        'peeking from a capsule hotel pod',
+        'lit by the blue glow of the capsule corridor at night',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'character_seed_ny_nopperabo',
+    name: 'The Faceless Commuter',
+    summary: 'A noppera-bo who rides the rush-hour crush — indistinguishable from any salaryman until the moment his face smooths over to blank skin.',
+    tags: ['solo', 'yokai', 'neon yokai'],
+    identity: {
+      archetype: 'noppera-bo (faceless ghost)',
+      presentation: 'clothed',
+      ageImpression: 'anonymous adult',
+      personalityTone: 'utterly ordinary until he is not; the horror of total anonymity',
+      visualAnchors: [
+        { id: 'anchor_nynp_1', label: 'Face', kind: 'face', text: 'smooth featureless blank face, no eyes nose or mouth, pale skin' },
+        { id: 'anchor_nynp_2', label: 'Form', kind: 'silhouette', text: 'average build, indistinguishable salaryman silhouette' },
+        { id: 'anchor_nynp_3', label: 'Hair', kind: 'hair', text: 'neat black salaryman haircut' },
+        { id: 'anchor_nynp_4', label: 'Outfit', kind: 'clothing', text: 'plain dark business suit, briefcase, surgical mask pushed down to reveal blankness' },
+        { id: 'anchor_nynp_5', label: 'Setting', kind: 'other', text: 'lost in a blurred rush-hour crowd' },
+      ],
+      motifs: [
+        { id: 'motif_nynp_1', label: 'Anonymous', text: 'the blank face, the identical suit, the crowd that hides him perfectly' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, faceless, noppera-bo',
+        'smooth featureless blank pale face with no eyes nose or mouth',
+        'neat black salaryman haircut, average indistinguishable build',
+        'plain dark business suit with a briefcase, surgical mask pushed down',
+        'standing in a blurred rush-hour subway crowd',
+      ],
+    },
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -1228,6 +1629,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V11, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V11_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V12_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
