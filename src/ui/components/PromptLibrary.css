@@ -390,6 +390,9 @@
 /* ── Captured sets group ─────────────────────────── */
 
 .prompt-library-captured-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid var(--border-hairline);
@@ -799,6 +802,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+  min-height: 26px;
 }
 
 .prompt-library-sets-kicker {
