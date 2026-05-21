@@ -58,6 +58,25 @@ function CapturedSetsSection() {
     setTimeout(() => setCopiedIdx(null), 1500);
   }, []);
 
+  const handleCopyAll = useCallback((set: CaptureSet) => {
+    void navigator.clipboard.writeText(set.prompts.join('\n\n'));
+    setCopiedIdx(`all:${set.id}`);
+    setTimeout(() => setCopiedIdx(null), 1500);
+  }, []);
+
+  const handleDownload = useCallback((set: CaptureSet) => {
+    const safeName = set.name.replace(/[^a-z0-9-_ ]/gi, '').trim().replace(/\s+/g, '_') || 'prompt_set';
+    const blob = new Blob([set.prompts.join('\n\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
+
   if (sets.length === 0) return null;
 
   return (
@@ -77,6 +96,22 @@ function CapturedSetsSection() {
               >
                 <span className="capture-set-name">{set.name}</span>
                 <span className="capture-set-meta">{set.prompts.length} prompt{set.prompts.length !== 1 ? 's' : ''} · {new Date(set.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}</span>
+              </button>
+              <button
+                type="button"
+                className="capture-set-copy-btn"
+                onClick={() => handleCopyAll(set)}
+                title="Copy all prompts to clipboard"
+              >
+                {copiedIdx === `all:${set.id}` ? 'Copied' : 'Copy All'}
+              </button>
+              <button
+                type="button"
+                className="capture-set-copy-btn"
+                onClick={() => handleDownload(set)}
+                title="Download all prompts as a .txt file"
+              >
+                Download
               </button>
               <button type="button" className="capture-set-delete-btn" onClick={() => handleDelete(set.id)} title="Delete set">×</button>
             </div>
