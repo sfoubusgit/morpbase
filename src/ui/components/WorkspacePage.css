@@ -779,6 +779,9 @@
 .ws-lane-slot-mood:hover               { box-shadow: 0 0 0 1px rgba(196,181,253,0.45), 0 0 14px rgba(196,181,253,0.2); }
 .ws-lane-slot-mood.ws-lane-slot-locked      { box-shadow: 0 0 0 1px rgba(196,181,253,0.75), 0 0 18px rgba(196,181,253,0.35); }
 
+.ws-lane-slot-aura:hover               { box-shadow: 0 0 0 1px rgba(167,139,250,0.45), 0 0 14px rgba(167,139,250,0.2); }
+.ws-lane-slot-aura.ws-lane-slot-locked      { box-shadow: 0 0 0 1px rgba(167,139,250,0.75), 0 0 18px rgba(167,139,250,0.35); }
+
 
 .ws-lane-name {
   font-size: 12px;
