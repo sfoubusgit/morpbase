@@ -34,7 +34,7 @@ function getLaneBadges(lanes: LaneSet['lanes']): LaneBadge[] {
   ];
 }
 
-function LaneSetCard({
+export function LaneSetCard({
   set,
   onApply,
   onDelete,

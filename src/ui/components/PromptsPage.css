@@ -212,6 +212,42 @@
   margin: 0;
 }
 
+.sets-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.sets-tab {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: rgba(227, 224, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.sets-tab:hover {
+  color: rgba(227, 224, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sets-tab--active {
+  background: rgba(167, 139, 250, 0.12);
+  border-color: rgba(167, 139, 250, 0.4);
+  color: #c4b5fd;
+}
+
+.sets-empty {
+  font-size: 13px;
+  color: rgba(227, 224, 255, 0.45);
+  padding: 18px 4px;
+}
+
 .capture-sets-list {
   display: flex;
   flex-direction: column;

@@ -3980,6 +3980,9 @@ export function App() {
           activeCharacterName={activeCharacterDisplayName}
           externalOpenSaveSignal={savePromptOpenSignal}
           defaultSaveName={captureAutoName}
+          laneSets={laneSets}
+          onApplyLaneSet={(set) => { handleApplyLaneSet(set); setActivePage('generator'); }}
+          onDeleteLaneSet={handleDeleteLaneSet}
         />
       ) : (
         <WorkspacePage
