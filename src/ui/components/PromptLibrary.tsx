@@ -20,6 +20,7 @@ import {
   updatePromptSet,
 } from '../../engine/promptSetStore';
 import { trackAnalyticsEvent } from '../../engine/analyticsStore';
+import { listCaptureSets, deleteCaptureSet, type CaptureSet } from '../../engine/captureStore';
 import { Modal } from './Modal';
 import { composePromptWithAdditions } from '../promptAdditions';
 import './PromptLibrary.css';
@@ -170,6 +171,44 @@ export function PromptLibrary({
   const [editingPromptSetId, setEditingPromptSetId] = useState<string | null>(null);
   const [editingPromptSetName, setEditingPromptSetName] = useState('');
   const canUsePromptSets = Boolean(authUser);
+
+  const [capturedSets, setCapturedSets] = useState<CaptureSet[]>([]);
+  const [expandedCapturedId, setExpandedCapturedId] = useState<string | null>(null);
+  const [copiedCapturedKey, setCopiedCapturedKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCapturedSets(listCaptureSets());
+  }, []);
+
+  const handleDeleteCaptured = (id: string) => {
+    deleteCaptureSet(id);
+    setCapturedSets(prev => prev.filter(s => s.id !== id));
+  };
+
+  const handleCopyCaptured = (text: string, key: string) => {
+    void navigator.clipboard.writeText(text);
+    setCopiedCapturedKey(key);
+    setTimeout(() => setCopiedCapturedKey(null), 1500);
+  };
+
+  const handleCopyAllCaptured = (set: CaptureSet) => {
+    void navigator.clipboard.writeText(set.prompts.join('\n\n'));
+    setCopiedCapturedKey(`all:${set.id}`);
+    setTimeout(() => setCopiedCapturedKey(null), 1500);
+  };
+
+  const handleDownloadCaptured = (set: CaptureSet) => {
+    const safeName = set.name.replace(/[^a-z0-9-_ ]/gi, '').trim().replace(/\s+/g, '_') || 'prompt_set';
+    const blob = new Blob([set.prompts.join('\n\n')], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${safeName}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   const currentText = useMemo(
     () => buildPromptText(prompt, customAdditions, positionedAdditions, editedPositive, editedNegative),
@@ -771,10 +810,12 @@ export function PromptLibrary({
             </div>
 
             {/* Sidebar: Prompt Sets + filter */}
-            {canUsePromptSets && (
+            {(canUsePromptSets || capturedSets.length > 0) && (
               <aside className="prompt-library-sets-aside">
                 <div className="prompt-library-sets-module">
 
+                  {canUsePromptSets && (
+                  <>
                   {/* Header */}
                   <div className="prompt-library-sets-head">
                     <span className="prompt-library-sets-kicker">Prompt Sets</span>
@@ -866,6 +907,56 @@ export function PromptLibrary({
                           )}
                         </div>
                       ))}
+                    </div>
+                  )}
+                  </>
+                  )}
+
+                  {capturedSets.length > 0 && (
+                    <div className="prompt-library-captured-group">
+                      <div className="prompt-library-sets-head">
+                        <span className="prompt-library-sets-kicker">Captured</span>
+                      </div>
+                      <div className="prompt-library-set-list">
+                        {capturedSets.map(set => (
+                          <div key={set.id} className="prompt-library-set-item prompt-library-captured-item">
+                            <div
+                              className="prompt-library-set-item-main"
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => setExpandedCapturedId(prev => prev === set.id ? null : set.id)}
+                              onKeyDown={e => e.key === 'Enter' && setExpandedCapturedId(prev => prev === set.id ? null : set.id)}
+                            >
+                              <div className="prompt-library-set-item-title">{set.name}</div>
+                              <div className="prompt-library-set-item-description">
+                                {set.prompts.length} prompt{set.prompts.length !== 1 ? 's' : ''} · {new Date(set.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' })}
+                              </div>
+                            </div>
+                            <div className="prompt-library-set-item-actions">
+                              <button type="button" onClick={() => handleCopyAllCaptured(set)}>
+                                {copiedCapturedKey === `all:${set.id}` ? 'Copied' : 'Copy all'}
+                              </button>
+                              <button type="button" onClick={() => handleDownloadCaptured(set)}>Download</button>
+                              <button type="button" onClick={() => handleDeleteCaptured(set.id)}>Delete</button>
+                            </div>
+                            {expandedCapturedId === set.id && (
+                              <div className="prompt-library-captured-prompts">
+                                {set.prompts.map((text, i) => {
+                                  const key = `${set.id}:${i}`;
+                                  return (
+                                    <div key={key} className="prompt-library-captured-prompt">
+                                      <p className="prompt-library-captured-prompt-text">{text}</p>
+                                      <button type="button" onClick={() => handleCopyCaptured(text, key)}>
+                                        {copiedCapturedKey === key ? 'Copied' : 'Copy'}
+                                      </button>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

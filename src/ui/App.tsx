@@ -518,6 +518,7 @@ export function App() {
   const [moodPresets, setMoodPresets] = useState<MoodPreset[]>([]);
   const [isMoodOpen, setIsMoodOpen] = useState(false);
   const [lockedLanes, setLockedLanes] = useState<Set<string>>(new Set());
+  const [pinnedItems, setPinnedItems] = useState<Set<string>>(new Set());
   const [activeNegativeIds, setActiveNegativeIds] = useState<string[]>(initialBuilderSession?.activeNegativeIds ?? []);
   const [negativePresets, setNegativePresets] = useState<NegativePreset[]>([]);
   const [isNegativeOpen, setIsNegativeOpen] = useState(false);
@@ -1956,6 +1957,14 @@ export function App() {
     });
   }, []);
 
+  const handleTogglePin = useCallback((id: string) => {
+    setPinnedItems(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
   const handleRandomizeLanes = useCallback(() => {
     const pickN = <T extends { id: string }>(arr: T[], n: number): string[] => {
       if (arr.length === 0) return [];
@@ -1969,39 +1978,46 @@ export function App() {
     const scopeMulti = <T extends { id: string }>(full: T[], uids?: string[]): T[] =>
       uids && uids.length > 0 ? full.filter(x => uids.includes(x.id)) : full;
 
+    // Keep pinned active items and only re-roll the remaining slots so the lane size is preserved.
+    const rollMulti = <T extends { id: string }>(full: T[], activeIds: string[], uids?: string[]): string[] => {
+      const pool = scopeMulti(full, uids);
+      const pinnedActive = activeIds.filter(id => pinnedItems.has(id));
+      const need = Math.max(1, activeIds.length) - pinnedActive.length;
+      if (need <= 0) return pinnedActive;
+      const candidates = pool.filter(x => !pinnedActive.includes(x.id));
+      return [...pinnedActive, ...pickN(candidates, need)];
+    };
+
     if (rollAll || locked.has('character')) {
-      const n = Math.max(1, activeCharacterIds.length);
-      setActiveCharacterIds(pickN(scopeMulti(characters, activeUniverse?.character), n));
+      setActiveCharacterIds(rollMulti(characters, activeCharacterIds, activeUniverse?.character));
     }
 
     if (rollAll || locked.has('environment')) {
-      const n = Math.max(1, activeEnvironmentIds.length);
-      setActiveEnvironmentIds(pickN(scopeMulti(environments, activeUniverse?.environment), n));
+      setActiveEnvironmentIds(rollMulti(environments, activeEnvironmentIds, activeUniverse?.environment));
     }
 
     if (rollAll || locked.has('wardrobe')) {
-      const n = Math.max(1, activeOutfitIds.length);
-      setActiveOutfitIds(pickN(scopeMulti(outfits, activeUniverse?.wardrobe), n));
+      setActiveOutfitIds(rollMulti(outfits, activeOutfitIds, activeUniverse?.wardrobe));
     }
 
     if (rollAll || locked.has('style')) {
-      const n = Math.max(1, activeStyleIds.length);
-      setActiveStyleIds(pickN(scopeMulti(stylePresets, activeUniverse?.style), n));
+      setActiveStyleIds(rollMulti(stylePresets, activeStyleIds, activeUniverse?.style));
     }
 
     if (rollAll || locked.has('lighting')) {
-      const n = Math.max(1, activeLightingIds.length);
-      setActiveLightingIds(pickN(scopeMulti(lightingSetups, activeUniverse?.lighting), n));
+      setActiveLightingIds(rollMulti(lightingSetups, activeLightingIds, activeUniverse?.lighting));
     }
 
     if (rollAll || locked.has('composition')) {
-      const n = Math.max(1, activeCompositionIds.length);
-      setActiveCompositionIds(pickN(scopeMulti(compositionFrames, activeUniverse?.composition), n));
+      setActiveCompositionIds(rollMulti(compositionFrames, activeCompositionIds, activeUniverse?.composition));
     }
 
     if (rollAll || locked.has('mood')) {
-      const n = Math.max(1, activeMoodIds.length);
-      setActiveMoodIds(pickN(scopeMulti(moodPresets, activeUniverse?.mood), n));
+      setActiveMoodIds(rollMulti(moodPresets, activeMoodIds, activeUniverse?.mood));
+    }
+
+    if (rollAll || locked.has('object')) {
+      setActiveObjectIds(rollMulti(objects, activeObjectIds, activeUniverse?.object));
     }
 
     if (rollAll || locked.has('dynamics')) {
@@ -2021,7 +2037,7 @@ export function App() {
         setAuraVariationEnabled(false);
       }
     }
-  }, [lockedLanes, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeInteractionPhraseId, worlds, activeUniverseId, universes]);
+  }, [lockedLanes, pinnedItems, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, objects, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeObjectIds, activeInteractionPhraseId, worlds, activeUniverseId, universes]);
 
   const handleApplyLaneSet = useCallback((set: LaneSet) => {
     const { lanes } = set;
@@ -3980,9 +3996,6 @@ export function App() {
           activeCharacterName={activeCharacterDisplayName}
           externalOpenSaveSignal={savePromptOpenSignal}
           defaultSaveName={captureAutoName}
-          laneSets={laneSets}
-          onApplyLaneSet={(set) => { handleApplyLaneSet(set); setActivePage('generator'); }}
-          onDeleteLaneSet={handleDeleteLaneSet}
         />
       ) : (
         <WorkspacePage
@@ -4048,6 +4061,8 @@ export function App() {
           onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}
           onToggleLaneLock={handleToggleLaneLock}
+          pinnedItems={pinnedItems}
+          onTogglePin={handleTogglePin}
           captureCount={captureBuffer.length}
           captureAutoName={captureAutoName}
           onCapture={handleCapture}

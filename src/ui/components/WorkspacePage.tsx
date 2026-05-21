@@ -13,6 +13,8 @@ type LaneSlotProps = {
   locked?: boolean;
   onToggleLock?: () => void;
   entryPoint?: boolean;
+  pinnedItems?: Set<string>;
+  onTogglePin?: (id: string) => void;
 };
 
 type MultiLaneSlotProps = {
@@ -21,15 +23,25 @@ type MultiLaneSlotProps = {
   items: { id: string; name: string }[];
   onChoose: () => void;
   onRemove: (id: string) => void;
+  pinnedItems?: Set<string>;
+  onTogglePin?: (id: string) => void;
 };
 
-function MultiLaneSlot({ label, variant, items, onChoose, onRemove }: MultiLaneSlotProps) {
+function MultiLaneSlot({ label, variant, items, onChoose, onRemove, pinnedItems, onTogglePin }: MultiLaneSlotProps) {
   return (
     <div className={`ws-lane-slot ws-lane-slot-${variant}${items.length > 0 ? ' ws-lane-slot-active' : ''}`}>
       <div className="ws-lane-label">{label}</div>
       <div className="ws-multi-tags">
         {items.map(item => (
-          <span key={item.id} className="ws-multi-tag">
+          <span key={item.id} className={`ws-multi-tag${pinnedItems?.has(item.id) ? ' ws-multi-tag--pinned' : ''}`}>
+            {onTogglePin && (
+              <button
+                type="button"
+                className="ws-multi-tag-pin"
+                onClick={e => { e.stopPropagation(); onTogglePin(item.id); }}
+                title={pinnedItems?.has(item.id) ? 'Unpin — allow this to be rolled' : 'Pin — keep this when rolling'}
+              >{pinnedItems?.has(item.id) ? '●' : '○'}</button>
+            )}
             {item.name}
             <button
               type="button"
@@ -61,6 +73,8 @@ function LaneSlot({
   locked = false,
   onToggleLock,
   entryPoint = false,
+  pinnedItems,
+  onTogglePin,
 }: LaneSlotProps) {
   const isActive = activeItems.length > 0;
 
@@ -77,7 +91,15 @@ function LaneSlot({
       )}
       <div className="ws-multi-tags">
         {activeItems.map(item => (
-          <span key={item.id} className="ws-multi-tag">
+          <span key={item.id} className={`ws-multi-tag${pinnedItems?.has(item.id) ? ' ws-multi-tag--pinned' : ''}`}>
+            {onTogglePin && (
+              <button
+                type="button"
+                className="ws-multi-tag-pin"
+                onClick={e => { e.stopPropagation(); onTogglePin(item.id); }}
+                title={pinnedItems?.has(item.id) ? 'Unpin — allow this to be rolled' : 'Pin — keep this when rolling'}
+              >{pinnedItems?.has(item.id) ? '●' : '○'}</button>
+            )}
             {item.name}
             <button
               type="button"
@@ -173,6 +195,8 @@ type WorkspacePageProps = {
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
   onToggleLaneLock?: (lane: string) => void;
+  pinnedItems?: Set<string>;
+  onTogglePin?: (id: string) => void;
   captureCount?: number;
   captureAutoName?: string;
   onCapture?: () => void;
@@ -246,6 +270,8 @@ export function WorkspacePage({
   onDeactivateUniverse,
   lockedLanes,
   onToggleLaneLock,
+  pinnedItems,
+  onTogglePin,
   captureCount = 0,
   captureAutoName = '',
   onCapture,
@@ -601,6 +627,8 @@ export function WorkspacePage({
               locked={lockedLanes?.has('character')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('character') : undefined}
               entryPoint={!hasAnyActiveLane}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             {(() => {
               const needsMoreChars = activeCharacterItems.length < 2;
@@ -651,7 +679,15 @@ export function WorkspacePage({
               <div className="ws-lane-label">Environment</div>
               <div className="ws-multi-tags">
                 {activeEnvironmentItems.map(item => (
-                  <span key={item.id} className="ws-multi-tag">
+                  <span key={item.id} className={`ws-multi-tag${pinnedItems?.has(item.id) ? ' ws-multi-tag--pinned' : ''}`}>
+                    {onTogglePin && (
+                      <button
+                        type="button"
+                        className="ws-multi-tag-pin"
+                        onClick={e => { e.stopPropagation(); onTogglePin(item.id); }}
+                        title={pinnedItems?.has(item.id) ? 'Unpin — allow this to be rolled' : 'Pin — keep this when rolling'}
+                      >{pinnedItems?.has(item.id) ? '●' : '○'}</button>
+                    )}
                     {item.name}
                     <button
                       type="button"
@@ -692,6 +728,8 @@ export function WorkspacePage({
               onChoose={onChooseWardrobe}
               locked={lockedLanes?.has('wardrobe')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('wardrobe') : undefined}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <LaneSlot
               label="Style"
@@ -701,6 +739,8 @@ export function WorkspacePage({
               onChoose={onChooseStyle}
               locked={lockedLanes?.has('style')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('style') : undefined}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <LaneSlot
               label="Lighting"
@@ -710,6 +750,8 @@ export function WorkspacePage({
               onChoose={onChooseLighting}
               locked={lockedLanes?.has('lighting')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('lighting') : undefined}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <LaneSlot
               label="Composition"
@@ -719,6 +761,8 @@ export function WorkspacePage({
               onChoose={onChooseComposition}
               locked={lockedLanes?.has('composition')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('composition') : undefined}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <LaneSlot
               label="Mood"
@@ -728,6 +772,8 @@ export function WorkspacePage({
               onChoose={onChooseMood}
               locked={lockedLanes?.has('mood')}
               onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('mood') : undefined}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <div className="ws-lane-divider" />
             <MultiLaneSlot
@@ -736,6 +782,8 @@ export function WorkspacePage({
               items={activeObjectItems}
               onChoose={onChooseObject}
               onRemove={onRemoveObject}
+              pinnedItems={pinnedItems}
+              onTogglePin={onTogglePin}
             />
             <MultiLaneSlot
               label="Negative"
