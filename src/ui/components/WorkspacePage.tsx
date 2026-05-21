@@ -388,16 +388,6 @@ export function WorkspacePage({
                       Post to Wall
                     </button>
                   )}
-                  {onCapture && (
-                    <button
-                      type="button"
-                      className="workspace-action-capture"
-                      onClick={onCapture}
-                      disabled={!displayPrompt}
-                    >
-                      {captureCount > 0 ? `+ Capture (${captureCount})` : '+ Capture'}
-                    </button>
-                  )}
                   {onEditPrompt && (
                     <button
                       type="button"
@@ -535,19 +525,32 @@ export function WorkspacePage({
                 )}
               </div>
             </div>
-            {(onClearAllLanes || onRandomize) && (
+            {(onClearAllLanes || onRandomize || onCapture) && (
               <div className="ws-panel-header-bottom">
-                {onClearAllLanes ? (
-                  <button
-                    type="button"
-                    className="ws-clear-lanes-btn"
-                    onClick={onClearAllLanes}
-                    disabled={!hasAnyActiveLane}
-                    title="Clear all lanes"
-                  >
-                    Clear All
-                  </button>
-                ) : <span />}
+                <div className="ws-panel-header-actions">
+                  {onClearAllLanes && (
+                    <button
+                      type="button"
+                      className="ws-clear-lanes-btn"
+                      onClick={onClearAllLanes}
+                      disabled={!hasAnyActiveLane}
+                      title="Clear all lanes"
+                    >
+                      Clear All
+                    </button>
+                  )}
+                  {onCapture && (
+                    <button
+                      type="button"
+                      className="ws-capture-btn"
+                      onClick={onCapture}
+                      disabled={!displayPrompt}
+                      title="Capture the current prompt into a Set"
+                    >
+                      {captureCount > 0 ? `+ Capture (${captureCount})` : '+ Capture'}
+                    </button>
+                  )}
+                </div>
                 {onRandomize && (
                   <div className="ws-randomize-wrap">
                     <button
