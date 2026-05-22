@@ -2028,16 +2028,27 @@ export function App() {
     }
 
     if (rollAll || locked.has('aura')) {
-      const auraPool = scopeMulti(worlds, activeUniverse?.aura);
-      const pool = auraPool.length > 0 ? auraPool : worlds;
-      if (pool.length > 0) {
-        const picked = pool[Math.floor(Math.random() * pool.length)];
-        setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
-        setActiveChipTexts([]);
-        setAuraVariationEnabled(false);
+      if (auraVariationEnabled && activeWorld && activeWorld.phrases.length > 0) {
+        // Variation ON: re-roll the phrase subset within range, like the → arrow.
+        const phrases = activeWorld.phrases;
+        const sampled = pickAuraPhrases(phrases, auraVariationMin, auraVariationMax);
+        setActiveChipTexts(prev => [
+          ...prev.filter(t => !phrases.includes(t)),
+          ...sampled,
+        ]);
+      } else {
+        // Variation OFF: swap to a random world.
+        const auraPool = scopeMulti(worlds, activeUniverse?.aura);
+        const pool = auraPool.length > 0 ? auraPool : worlds;
+        if (pool.length > 0) {
+          const picked = pool[Math.floor(Math.random() * pool.length)];
+          setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
+          setActiveChipTexts([]);
+          setAuraVariationEnabled(false);
+        }
       }
     }
-  }, [lockedLanes, pinnedItems, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, objects, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeObjectIds, activeInteractionPhraseId, worlds, activeUniverseId, universes]);
+  }, [lockedLanes, pinnedItems, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, objects, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeObjectIds, activeInteractionPhraseId, worlds, activeUniverseId, universes, auraVariationEnabled, activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
 
   const handleApplyLaneSet = useCallback((set: LaneSet) => {
     const { lanes } = set;
