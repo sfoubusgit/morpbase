@@ -303,6 +303,7 @@ export function CharacterLibrarySurface({
   const [isProcessingCover, setIsProcessingCover] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const [activeTagFilter, setActiveTagFilter] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
   const [previewCharacterId, setPreviewCharacterId] = useState<string | null>(null);
 
   const activeCharacter = useMemo(
@@ -484,8 +485,14 @@ export function CharacterLibrarySurface({
       ? characters.filter(c => universeFilter.includes(c.id))
       : characters;
     if (activeTagFilter) result = result.filter(c => c.tags?.includes(activeTagFilter));
+    const ql = query.trim().toLowerCase();
+    if (ql) result = result.filter(c =>
+      c.name.toLowerCase().includes(ql) ||
+      (c.summary?.toLowerCase().includes(ql) ?? false) ||
+      (c.tags?.some(t => t.toLowerCase().includes(ql)) ?? false)
+    );
     return result;
-  }, [characters, activeTagFilter, universeFilter]);
+  }, [characters, activeTagFilter, universeFilter, query]);
 
   const handleAddTag = (tag: string) => {
     const trimmed = tag.trim().toLowerCase().replace(/\s+/g, '-');
@@ -559,6 +566,16 @@ export function CharacterLibrarySurface({
             </div>
           )}
 
+          {!isLoading && characters.length > 0 && (
+            <input
+              type="text"
+              className="character-library-search"
+              placeholder="Search characters…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          )}
+
           {allTags.length > 0 && (
             <div className="character-tag-filter-bar">
               <button
@@ -590,8 +607,8 @@ export function CharacterLibrarySurface({
             </div>
           ) : filteredCharacters.length === 0 ? (
             <div className="character-library-empty">
-              <strong>No characters tagged "{activeTagFilter}".</strong>
-              <span>Try a different filter or clear it to see all characters.</span>
+              <strong>No matches.</strong>
+              <span>Try a different search{activeTagFilter ? ' or clear the tag filter' : ''}.</span>
             </div>
           ) : (
             <div className="character-library-list">

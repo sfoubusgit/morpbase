@@ -66,6 +66,7 @@ export function EnvironmentLibrarySurface({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
+  const [query, setQuery] = useState('');
 
   const selectedEnvironment = environments.find(e => e.id === selectedId) ?? null;
 
@@ -151,12 +152,22 @@ export function EnvironmentLibrarySurface({
     }
   };
 
-  const visibleEnvironments = useMemo(
+  const universeEnvironments = useMemo(
     () => universeFilter && universeFilter.length > 0
       ? environments.filter(e => universeFilter.includes(e.id))
       : environments,
     [environments, universeFilter]
   );
+
+  const visibleEnvironments = useMemo(() => {
+    const ql = query.trim().toLowerCase();
+    if (!ql) return universeEnvironments;
+    return universeEnvironments.filter(e =>
+      e.name.toLowerCase().includes(ql) ||
+      (e.summary?.toLowerCase().includes(ql) ?? false) ||
+      e.phraseBundle.core.some(p => p.toLowerCase().includes(ql))
+    );
+  }, [universeEnvironments, query]);
 
   const showForm = isCreating || selectedId !== null;
 
@@ -201,17 +212,31 @@ export function EnvironmentLibrarySurface({
             </div>
           )}
 
+          {!isLoading && universeEnvironments.length > 0 && (
+            <input
+              type="text"
+              className="environment-library-search"
+              placeholder="Search environments…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          )}
+
           {isLoading && (
             <div className="environment-library-message">Loading…</div>
           )}
 
-          {!isLoading && environments.length === 0 && (
+          {!isLoading && universeEnvironments.length === 0 && (
             <div className="environment-library-empty">
               No environments yet. Create your first one.
             </div>
           )}
 
-          {!isLoading && environments.length > 0 && (
+          {!isLoading && universeEnvironments.length > 0 && visibleEnvironments.length === 0 && (
+            <div className="environment-library-empty">No matches for “{query.trim()}”.</div>
+          )}
+
+          {!isLoading && visibleEnvironments.length > 0 && (
             <div className="environment-library-list">
               {visibleEnvironments.map(env => {
                 const isActive = activeEnvironmentIds.includes(env.id);

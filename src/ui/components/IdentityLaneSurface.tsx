@@ -81,10 +81,20 @@ export function IdentityLaneSurface({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
+  const [query, setQuery] = useState('');
 
-  const visibleItems = universeFilter && universeFilter.length > 0
+  const universeItems = universeFilter && universeFilter.length > 0
     ? items.filter(i => universeFilter.includes(i.id))
     : items;
+
+  const q = query.trim().toLowerCase();
+  const visibleItems = q
+    ? universeItems.filter(i =>
+        i.name.toLowerCase().includes(q) ||
+        (i.summary?.toLowerCase().includes(q) ?? false) ||
+        i.phrases.some(p => p.toLowerCase().includes(q))
+      )
+    : universeItems;
 
   const selectedItem = items.find(i => i.id === selectedId) ?? null;
   const showForm = isCreating || selectedId !== null;
@@ -197,7 +207,7 @@ export function IdentityLaneSurface({
             <div className="identity-lane-panel-title">{config.entityLabelPlural}</div>
             <div className="identity-lane-panel-subtitle">
               {universeFilter && universeFilter.length > 0
-                ? `${visibleItems.length} of ${items.length} — ${universeName ?? 'universe'}`
+                ? `${universeItems.length} of ${items.length} — ${universeName ?? 'universe'}`
                 : `${items.length} ${items.length === 1 ? config.entityLabel.toLowerCase() : config.entityLabelPlural.toLowerCase()}`}
             </div>
           </div>
@@ -208,14 +218,28 @@ export function IdentityLaneSurface({
             </div>
           )}
 
+          {!isLoading && universeItems.length > 0 && (
+            <input
+              type="text"
+              className="identity-lane-search"
+              placeholder={`Search ${config.entityLabelPlural.toLowerCase()}…`}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          )}
+
           {isLoading && <div className="identity-lane-empty">Loading…</div>}
 
-          {!isLoading && visibleItems.length === 0 && (
+          {!isLoading && universeItems.length === 0 && (
             <div className="identity-lane-empty">
               {universeFilter && universeFilter.length > 0
                 ? <span>No {config.entityLabelPlural.toLowerCase()} in this universe yet. Add some in the Lane Sets editor.</span>
                 : <><strong>No {config.entityLabelPlural.toLowerCase()} yet.</strong><span>Create one to start building your library.</span></>}
             </div>
+          )}
+
+          {!isLoading && universeItems.length > 0 && visibleItems.length === 0 && (
+            <div className="identity-lane-empty"><span>No matches for “{query.trim()}”.</span></div>
           )}
 
           {!isLoading && visibleItems.length > 0 && (

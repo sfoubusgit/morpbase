@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { INTERACTION_PHRASES, type InteractionPhrase } from '../../data/interactionPhrases';
 import { Modal } from './Modal';
 import './InteractionModal.css';
@@ -10,6 +11,13 @@ type InteractionModalProps = {
 };
 
 export function InteractionModal({ isOpen, onClose, activeId, onSelect }: InteractionModalProps) {
+  const [query, setQuery] = useState('');
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? INTERACTION_PHRASES.filter(p => p.text.toLowerCase().includes(q))
+    : INTERACTION_PHRASES;
+
   const handleToggle = (phrase: InteractionPhrase) => {
     onSelect(activeId === phrase.id ? null : phrase.id);
   };
@@ -33,8 +41,19 @@ export function InteractionModal({ isOpen, onClose, activeId, onSelect }: Intera
         </button>
       </div>
 
+      <input
+        type="text"
+        className="interaction-search"
+        placeholder="Search dynamics…"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+      />
+
+      {filtered.length === 0 ? (
+        <div className="interaction-empty">No dynamics match “{query.trim()}”.</div>
+      ) : (
       <div className="interaction-phrase-list">
-        {INTERACTION_PHRASES.map(phrase => {
+        {filtered.map(phrase => {
           const isActive = phrase.id === activeId;
           return (
             <div
@@ -58,6 +77,7 @@ export function InteractionModal({ isOpen, onClose, activeId, onSelect }: Intera
           );
         })}
       </div>
+      )}
     </Modal>
   );
 }

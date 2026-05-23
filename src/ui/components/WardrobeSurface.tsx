@@ -57,12 +57,24 @@ export function WardrobeSurface({
   const [isSaving, setIsSaving] = useState(false);
   const [isProcessingCover, setIsProcessingCover] = useState(false);
 
-  const visibleOutfits = useMemo(
+  const [query, setQuery] = useState('');
+
+  const universeOutfits = useMemo(
     () => universeFilter && universeFilter.length > 0
       ? outfits.filter(o => universeFilter.includes(o.id))
       : outfits,
     [outfits, universeFilter]
   );
+
+  const visibleOutfits = useMemo(() => {
+    const ql = query.trim().toLowerCase();
+    if (!ql) return universeOutfits;
+    return universeOutfits.filter(o =>
+      o.name.toLowerCase().includes(ql) ||
+      (o.summary?.toLowerCase().includes(ql) ?? false) ||
+      o.phrases.some(p => p.toLowerCase().includes(ql))
+    );
+  }, [universeOutfits, query]);
 
   const selectedOutfit = outfits.find(o => o.id === selectedId) ?? null;
   const showForm = isCreating || selectedId !== null;
@@ -188,16 +200,30 @@ export function WardrobeSurface({
             </div>
           )}
 
+          {!isLoading && universeOutfits.length > 0 && (
+            <input
+              type="text"
+              className="wardrobe-search"
+              placeholder="Search outfits…"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+          )}
+
           {isLoading && <div className="wardrobe-empty">Loading…</div>}
 
-          {!isLoading && outfits.length === 0 && (
+          {!isLoading && universeOutfits.length === 0 && (
             <div className="wardrobe-empty">
               <strong>No outfits yet.</strong>
               <span>Create one to start building your wardrobe library.</span>
             </div>
           )}
 
-          {!isLoading && outfits.length > 0 && (
+          {!isLoading && universeOutfits.length > 0 && visibleOutfits.length === 0 && (
+            <div className="wardrobe-empty"><span>No matches for “{query.trim()}”.</span></div>
+          )}
+
+          {!isLoading && visibleOutfits.length > 0 && (
             <div className="wardrobe-list">
               {visibleOutfits.map(outfit => {
                 const isActive = activeOutfitIds.includes(outfit.id);
