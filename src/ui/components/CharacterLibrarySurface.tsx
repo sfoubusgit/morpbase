@@ -614,80 +614,53 @@ export function CharacterLibrarySurface({
             <div className="character-library-list">
               {filteredCharacters.map(character => {
                 const isActive = activeCharacterIds.includes(character.id);
+                const isSelected = previewCharacterId === character.id;
                 const needsVisualAnchorRepair = characterNeedsVisualAnchorRepair(character);
+                const hasMeta = isActive || needsVisualAnchorRepair || (character.tags?.length ?? 0) > 0;
                 return (
-                  <article
+                  <div
                     key={character.id}
-                    className={`character-library-card ${isActive ? 'active' : ''} ${previewCharacterId === character.id ? 'preview-selected' : ''}`}
+                    role="button"
+                    tabIndex={0}
+                    className={[
+                      'character-library-item',
+                      isSelected ? 'character-library-item-selected' : '',
+                      isActive ? 'character-library-item-active' : '',
+                    ].filter(Boolean).join(' ')}
                     onClick={() => setPreviewCharacterId(character.id)}
-                    style={{ cursor: 'pointer' }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPreviewCharacterId(character.id); } }}
                   >
-                    <div className="character-library-card-header">
-                      <div className="character-library-card-identity">
-                        <CharacterAvatarTile
-                          name={character.name}
-                          avatar={character.avatar}
-                          size="small"
-                        />
-                        <div>
-                          <div className="character-library-card-title-row">
-                            <h3 className="character-library-card-title">{character.name}</h3>
-                            {isActive && <span className="character-library-active-badge">In Workflow</span>}
-                            {needsVisualAnchorRepair && (
-                              <span className="character-library-warning-badge">Needs Anchor</span>
-                            )}
-                          </div>
-                          <p className="character-library-card-summary">
-                            {character.summary || 'No summary yet.'}
-                          </p>
-                          {character.tags && character.tags.length > 0 && (
-                            <div className="character-card-tags">
-                              {character.tags.map(tag => (
-                                <span key={tag} className="character-card-tag-chip">{tag}</span>
-                              ))}
-                            </div>
-                          )}
+                    <CharacterAvatarTile
+                      name={character.name}
+                      avatar={character.avatar}
+                      size="small"
+                    />
+                    <div className="character-library-item-main">
+                      <div className="character-library-item-name">{character.name}</div>
+                      {character.summary && (
+                        <div className="character-library-item-summary">{character.summary}</div>
+                      )}
+                      {hasMeta && (
+                        <div className="character-library-item-meta">
+                          {isActive && <span className="character-library-active-badge">In Workflow</span>}
                           {needsVisualAnchorRepair && (
-                            <p className="character-library-card-warning">
-                              This legacy character needs at least one visual anchor before it can be saved again.
-                            </p>
+                            <span className="character-library-warning-badge">Needs Anchor</span>
                           )}
+                          {character.tags?.slice(0, 3).map(tag => (
+                            <span key={tag} className="character-card-tag-chip">{tag}</span>
+                          ))}
                         </div>
-                      </div>
+                      )}
                     </div>
-                    {character.phraseBundle.core.length > 0 && (
-                      <div className="character-library-card-phrases">
-                        {character.phraseBundle.core.slice(0, 3).map((phrase, index) => (
-                          <span key={`${character.id}-${index}`} className="character-library-phrase-chip">
-                            {phrase}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <div className="character-library-card-actions">
-                      <button
-                        type="button"
-                        className={`character-library-secondary-button${isActive ? ' character-library-active-indicator' : ''}`}
-                        onClick={e => { e.stopPropagation(); if (!isActive) handleUseCharacter(character); }}
-                      >
-                        {isActive ? '✓ Active' : '+ Add'}
-                      </button>
-                      <button
-                        type="button"
-                        className="character-library-secondary-button"
-                        onClick={e => { e.stopPropagation(); handleBeginEdit(character); }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="character-library-danger-button"
-                        onClick={e => { e.stopPropagation(); void handleDelete(character); }}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </article>
+                    <button
+                      type="button"
+                      className={`character-library-item-toggle${isActive ? ' character-library-item-toggle-on' : ''}`}
+                      onClick={e => { e.stopPropagation(); onSelectCharacter(character.id); }}
+                      title={isActive ? 'Remove from workflow' : 'Add to workflow'}
+                    >
+                      {isActive ? '✓' : '+'}
+                    </button>
+                  </div>
                 );
               })}
             </div>
@@ -1019,6 +992,13 @@ export function CharacterLibrarySurface({
                   onClick={() => handleBeginEdit(displayCharacter)}
                 >
                   {displayCharacterIsActive ? 'Edit Active Character' : 'Edit'}
+                </button>
+                <button
+                  type="button"
+                  className="character-library-danger-button"
+                  onClick={() => void handleDelete(displayCharacter)}
+                >
+                  Delete
                 </button>
               </div>
             </div>
