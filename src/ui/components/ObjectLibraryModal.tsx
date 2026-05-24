@@ -74,7 +74,7 @@ export function ObjectLibraryModal({
   };
 
   const universeObjects = useMemo(
-    () => universeFilter && universeFilter.length > 0
+    () => universeFilter
       ? objects.filter(o => universeFilter.includes(o.id))
       : objects,
     [objects, universeFilter]
@@ -91,7 +91,7 @@ export function ObjectLibraryModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Objects" className="obj-modal-container">
       <div className="obj-modal">
 
-        {universeFilter && universeFilter.length > 0 && (
+        {universeFilter && (
           <div className="identity-lane-universe-banner">
             {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated object{universeFilter.length === 1 ? '' : 's'}
           </div>

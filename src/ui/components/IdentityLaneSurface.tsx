@@ -83,7 +83,7 @@ export function IdentityLaneSurface({
   const [isProcessingCover, setIsProcessingCover] = useState(false);
   const [query, setQuery] = useState('');
 
-  const universeItems = universeFilter && universeFilter.length > 0
+  const universeItems = universeFilter
     ? items.filter(i => universeFilter.includes(i.id))
     : items;
 
@@ -206,13 +206,13 @@ export function IdentityLaneSurface({
           <div className="identity-lane-panel-header">
             <div className="identity-lane-panel-title">{config.entityLabelPlural}</div>
             <div className="identity-lane-panel-subtitle">
-              {universeFilter && universeFilter.length > 0
+              {universeFilter
                 ? `${universeItems.length} of ${items.length} — ${universeName ?? 'universe'}`
                 : `${items.length} ${items.length === 1 ? config.entityLabel.toLowerCase() : config.entityLabelPlural.toLowerCase()}`}
             </div>
           </div>
 
-          {universeFilter && universeFilter.length > 0 && (
+          {universeFilter && (
             <div className="identity-lane-universe-banner">
               Filtered to {universeName ?? 'active universe'}
             </div>
@@ -232,7 +232,7 @@ export function IdentityLaneSurface({
 
           {!isLoading && universeItems.length === 0 && (
             <div className="identity-lane-empty">
-              {universeFilter && universeFilter.length > 0
+              {universeFilter
                 ? <span>No {config.entityLabelPlural.toLowerCase()} in this universe yet. Add some in the Lane Sets editor.</span>
                 : <><strong>No {config.entityLabelPlural.toLowerCase()} yet.</strong><span>Create one to start building your library.</span></>}
             </div>

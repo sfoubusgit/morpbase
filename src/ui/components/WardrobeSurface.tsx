@@ -60,7 +60,7 @@ export function WardrobeSurface({
   const [query, setQuery] = useState('');
 
   const universeOutfits = useMemo(
-    () => universeFilter && universeFilter.length > 0
+    () => universeFilter
       ? outfits.filter(o => universeFilter.includes(o.id))
       : outfits,
     [outfits, universeFilter]
@@ -188,13 +188,13 @@ export function WardrobeSurface({
           <div className="wardrobe-panel-header">
             <div className="wardrobe-panel-title">Wardrobe Library</div>
             <div className="wardrobe-panel-subtitle">
-              {universeFilter && universeFilter.length > 0
+              {universeFilter
                 ? `${universeFilter.length} of ${outfits.length} outfit${outfits.length === 1 ? '' : 's'}`
                 : `${outfits.length} outfit${outfits.length === 1 ? '' : 's'}`}
             </div>
           </div>
 
-          {universeFilter && universeFilter.length > 0 && (
+          {universeFilter && (
             <div className="identity-lane-universe-banner">
               {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated outfit{universeFilter.length === 1 ? '' : 's'}
             </div>

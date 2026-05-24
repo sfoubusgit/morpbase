@@ -153,7 +153,7 @@ export function EnvironmentLibrarySurface({
   };
 
   const universeEnvironments = useMemo(
-    () => universeFilter && universeFilter.length > 0
+    () => universeFilter
       ? environments.filter(e => universeFilter.includes(e.id))
       : environments,
     [environments, universeFilter]
@@ -206,7 +206,7 @@ export function EnvironmentLibrarySurface({
             </button>
           </div>
 
-          {universeFilter && universeFilter.length > 0 && (
+          {universeFilter && (
             <div className="identity-lane-universe-banner">
               {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated environment{universeFilter.length === 1 ? '' : 's'}
             </div>

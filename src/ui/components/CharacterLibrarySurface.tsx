@@ -481,7 +481,7 @@ export function CharacterLibrarySurface({
   }, [characters]);
 
   const filteredCharacters = useMemo(() => {
-    let result = universeFilter && universeFilter.length > 0
+    let result = universeFilter
       ? characters.filter(c => universeFilter.includes(c.id))
       : characters;
     if (activeTagFilter) result = result.filter(c => c.tags?.includes(activeTagFilter));
@@ -554,13 +554,13 @@ export function CharacterLibrarySurface({
           <div className="character-library-panel-header">
             <div className="character-library-panel-title">Character Library</div>
             <div className="character-library-panel-subtitle">
-              {universeFilter && universeFilter.length > 0
+              {universeFilter
                 ? `${universeFilter.length} of ${characters.length} character${characters.length === 1 ? ' identity' : ' identities'}`
                 : `${characters.length} reusable character${characters.length === 1 ? ' identity' : ' identities'}`}
             </div>
           </div>
 
-          {universeFilter && universeFilter.length > 0 && (
+          {universeFilter && (
             <div className="identity-lane-universe-banner">
               {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated character{universeFilter.length === 1 ? '' : 's'}
             </div>

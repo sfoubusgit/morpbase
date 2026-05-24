@@ -65,7 +65,7 @@ export function WorldModal({
   }, [hubEntries, isOpen]);
 
   const universeWorlds = useMemo(() => {
-    if (!universeFilter || universeFilter.length === 0) return worlds;
+    if (!universeFilter) return worlds;
     return worlds.filter(w => {
       const rawId = w.id.startsWith('user:') ? w.id.slice(5)
         : w.id.startsWith('hub:') ? w.id.slice(4)
@@ -99,7 +99,7 @@ export function WorldModal({
         <div className="world-modal-description">
           Activate an aura to reshape your inspiration field with its phrases instead of the default pool.
         </div>
-        {universeFilter && universeFilter.length > 0 && (
+        {universeFilter && (
           <div className="identity-lane-universe-banner">
             {universeName ? `Universe: ${universeName}` : 'Universe active'} — showing {universeFilter.length} curated aura{universeFilter.length === 1 ? '' : 's'}
           </div>

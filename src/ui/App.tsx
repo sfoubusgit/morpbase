@@ -4110,7 +4110,7 @@ export function App() {
         onCreateCharacter={async (input) => { const c = await handleCreateCharacter(input); addToActiveUniverse('character', c.id); return c; }}
         onUpdateCharacter={handleUpdateCharacter}
         onDeleteCharacter={handleDeleteCharacter}
-        universeFilter={activeUniverse?.character}
+        universeFilter={activeUniverse ? (activeUniverse.character ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <InteractionModal
@@ -4157,7 +4157,7 @@ export function App() {
         onCreateEnvironment={async (input) => { const c = await handleCreateEnvironment(input); addToActiveUniverse('environment', c.id); return c; }}
         onUpdateEnvironment={handleUpdateEnvironment}
         onDeleteEnvironment={handleDeleteEnvironment}
-        universeFilter={activeUniverse?.environment}
+        universeFilter={activeUniverse ? (activeUniverse.environment ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <WardrobeModal
@@ -4169,7 +4169,7 @@ export function App() {
         onCreateOutfit={async (input) => { const c = await handleCreateOutfit(input); addToActiveUniverse('wardrobe', c.id); return c; }}
         onUpdateOutfit={handleUpdateOutfit}
         onDeleteOutfit={handleDeleteOutfit}
-        universeFilter={activeUniverse?.wardrobe}
+        universeFilter={activeUniverse ? (activeUniverse.wardrobe ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <StyleModal
@@ -4181,7 +4181,7 @@ export function App() {
         onCreateItem={async (input) => { const c = await handleCreateStylePreset(input); addToActiveUniverse('style', c.id); return c; }}
         onUpdateItem={handleUpdateStylePreset}
         onDeleteItem={handleDeleteStylePreset}
-        universeFilter={activeUniverse?.style}
+        universeFilter={activeUniverse ? (activeUniverse.style ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <LightingModal
@@ -4193,7 +4193,7 @@ export function App() {
         onCreateItem={async (input) => { const c = await handleCreateLightingSetup(input); addToActiveUniverse('lighting', c.id); return c; }}
         onUpdateItem={handleUpdateLightingSetup}
         onDeleteItem={handleDeleteLightingSetup}
-        universeFilter={activeUniverse?.lighting}
+        universeFilter={activeUniverse ? (activeUniverse.lighting ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <CompositionModal
@@ -4205,7 +4205,7 @@ export function App() {
         onCreateItem={async (input) => { const c = await handleCreateCompositionFrame(input); addToActiveUniverse('composition', c.id); return c; }}
         onUpdateItem={handleUpdateCompositionFrame}
         onDeleteItem={handleDeleteCompositionFrame}
-        universeFilter={activeUniverse?.composition}
+        universeFilter={activeUniverse ? (activeUniverse.composition ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <MoodModal
@@ -4217,7 +4217,7 @@ export function App() {
         onCreateItem={async (input) => { const c = await handleCreateMoodPreset(input); addToActiveUniverse('mood', c.id); return c; }}
         onUpdateItem={handleUpdateMoodPreset}
         onDeleteItem={handleDeleteMoodPreset}
-        universeFilter={activeUniverse?.mood}
+        universeFilter={activeUniverse ? (activeUniverse.mood ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <NegativeModal
@@ -4230,7 +4230,7 @@ export function App() {
         onCreateItem={async (input) => { const c = await handleCreateNegativePreset(input); addToActiveUniverse('negative', c.id); return c; }}
         onUpdateItem={handleUpdateNegativePreset}
         onDeleteItem={handleDeleteNegativePreset}
-        universeFilter={activeUniverse?.negative}
+        universeFilter={activeUniverse ? (activeUniverse.negative ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <ObjectLibraryModal
@@ -4240,7 +4240,7 @@ export function App() {
         onAdd={handleAddObject}
         onRemove={handleRemoveObject}
         onItemCreated={(id) => addToActiveUniverse('object', id)}
-        universeFilter={activeUniverse?.object}
+        universeFilter={activeUniverse ? (activeUniverse.object ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <WorldModal
@@ -4249,7 +4249,7 @@ export function App() {
         activeWorldId={activeWorld?.id ?? null}
         onSelectWorld={(id, name, phrases) => { setActiveWorld({ id, name, phrases }); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
         onDeactivate={() => { setActiveWorld(null); setActiveChipTexts([]); setAuraVariationEnabled(false); }}
-        universeFilter={activeUniverse?.aura}
+        universeFilter={activeUniverse ? (activeUniverse.aura ?? []) : undefined}
         universeName={activeUniverseName}
       />
       <Modal
