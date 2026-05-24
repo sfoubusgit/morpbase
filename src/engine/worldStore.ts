@@ -16,12 +16,14 @@ const WORLD_SEED_FLAG_KEY_V2 = 'promptgen:worlds:seeded:v2';
 const WORLD_SEED_FLAG_KEY_V3 = 'promptgen:worlds:seeded:v3';
 const WORLD_SEED_FLAG_KEY_V4 = 'promptgen:worlds:seeded:v4';
 const WORLD_SEED_FLAG_KEY_V5 = 'promptgen:worlds:seeded:v5';
+const WORLD_SEED_FLAG_KEY_V6 = 'promptgen:worlds:seeded:v6';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
 const WORLD_SEED_TS_V3 = 1748304000000;
 const WORLD_SEED_TS_V4 = 1748304000000;
 const WORLD_SEED_TS_V5 = 1748476800000;
+const WORLD_SEED_TS_V6 = 1748563200000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -228,6 +230,48 @@ const SEED_WORLDS_V5: World[] = [
   },
 ];
 
+const SEED_WORLDS_V6: World[] = [
+  {
+    id: 'world_seed_sb_solarpunk_bloom',
+    name: 'Solarpunk Bloom',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_sb_01', text: 'a green-tech city at golden hour, every roof and balcony spilling over with gardens, the air warm and full of pollen and light' },
+      { id: 'wp_sb_02', text: 'glass towers terraced into vertical farms, crops cascading down their faces, irrigation mist hanging like a soft veil' },
+      { id: 'wp_sb_03', text: 'solar sails and amber photovoltaic membranes catching the sun on rooftops, gliders launching silently into the warm wind' },
+      { id: 'wp_sb_04', text: 'old streets given back to water — gentle green canals between planted buildings, footbridges, gardens growing down to the waterline' },
+      { id: 'wp_sb_05', text: 'sculptural solar trees spreading petalled canopies over a sunlit plaza, pooling cool shade across warm paving' },
+      { id: 'wp_sb_06', text: 'a vast geodesic glass dome full of mature trees, soft milky daylight raining down through triangular panes' },
+      { id: 'wp_sb_07', text: 'wind turbines turning slowly on a ridge of wildflowers above the valley, clean and patient against a big bright sky' },
+      { id: 'wp_sb_08', text: 'a repair café where nothing is thrown away — salvaged parts sorted in jars, mushroom-grown furniture, a kettle always on' },
+      { id: 'wp_sb_09', text: 'glowing green algae bioreactor tubes lining a hall, columns of living light bubbling softly, warm emerald glow on a clean floor' },
+      { id: 'wp_sb_10', text: 'a community food forest open to all, fruit trees over berry hedges over herb beds, baskets left out for whoever is hungry' },
+      { id: 'wp_sb_11', text: 'tiny brass-and-gauze pollinator drones drifting in glittering clouds over the orchard blossom, half insect, half tool' },
+      { id: 'wp_sb_12', text: 'rooftop beehives among the wildflowers, honey gathering gold in the comb, bees drifting calm in the warm afternoon' },
+      { id: 'wp_sb_13', text: 'a tram station overgrown into a garden, moss furring the platform, a wooden tram gliding in under flowering arches' },
+      { id: 'wp_sb_14', text: 'a floating market of boats lashed deck to deck on the canals, produce and cut flowers heaped under bright striped awnings' },
+      { id: 'wp_sb_15', text: 'a seed vault library of floor-to-ceiling labelled drawers, rolling ladders on brass rails, a thousand heirloom varieties kept safe' },
+      { id: 'wp_sb_16', text: 'sunlight filtered through leaf canopies everywhere, shifting dappled pools of warm light and soft green shadow' },
+      { id: 'wp_sb_17', text: 'people in natural-fibre workwear and woven solar cloaks, hands in the soil, unhurried and at ease with their world' },
+      { id: 'wp_sb_18', text: 'living-fibre clothing threaded with real moss and embroidered vines, garments that are half garden' },
+      { id: 'wp_sb_19', text: 'a harvest festival in full swing — flower crowns, falling petals, ribbons and garlands, music under golden afternoon light' },
+      { id: 'wp_sb_20', text: 'rainwater chains and gentle weirs routing water through the city, the soft sound of running water everywhere' },
+      { id: 'wp_sb_21', text: 'warm wooden architecture wrapped in greenery, rammed earth and reclaimed timber, soft organic curves instead of hard edges' },
+      { id: 'wp_sb_22', text: 'solar lanterns glowing honey-gold at dusk in woven cages, light gathered through the day and given gently back at night' },
+      { id: 'wp_sb_23', text: 'a grove warden with faint photosynthetic vine-tattoos, a living staff sprouting fresh leaves, speaking softly for the trees' },
+      { id: 'wp_sb_24', text: 'mushroom cellars in the warm dark, a mycologist with faintly luminous fingertips tending the slow web beneath the city' },
+      { id: 'wp_sb_25', text: 'the smell the image implies — turned earth, cut grass, blossom, beeswax, rain on warm stone, bread from a communal oven' },
+      { id: 'wp_sb_26', text: 'long shared tables under vine pergolas strung with lanterns, food passed hand to hand, nobody eating alone' },
+      { id: 'wp_sb_27', text: 'children learning among the trees in a teaching grove, dappled green light, the next generation growing up in abundance' },
+      { id: 'wp_sb_28', text: 'a courier high on a thermal looking down on the whole green city — canals and gardens and turning turbines laid out like a map' },
+      { id: 'wp_sb_29', text: 'stained-glass and Art Nouveau botanical motifs in the public buildings, sun streaming through leaded floral panes' },
+      { id: 'wp_sb_30', text: 'the whole world warm and hopeful and quietly thriving — technology and nature finally grown together instead of apart' },
+    ],
+    createdAt: WORLD_SEED_TS_V6,
+    updatedAt: WORLD_SEED_TS_V6,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -277,6 +321,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V5, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V5.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V6) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V6, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V6.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

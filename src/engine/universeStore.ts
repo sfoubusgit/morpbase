@@ -6,10 +6,12 @@ const UNIVERSE_SEED_FLAG_KEY = 'morpbase:universes:seeded:v1';
 const UNIVERSE_SEED_FLAG_KEY_V2 = 'morpbase:universes:seeded:v2';
 const UNIVERSE_SEED_FLAG_KEY_V3 = 'morpbase:universes:seeded:v3';
 const UNIVERSE_SEED_FLAG_KEY_V4 = 'morpbase:universes:seeded:v4';
+const UNIVERSE_SEED_FLAG_KEY_V5 = 'morpbase:universes:seeded:v5';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
 const SEED_TS_V4 = 1748563200000;
+const SEED_TS_V5 = 1748649600000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -312,6 +314,103 @@ function maybeApplyUniverseSeedV4(universes: Universe[]): Universe[] {
   }
 }
 
+// V5 — Solarpunk Bloom: a full in-app universe, a lush green-tech utopia — the warm tonal opposite of Neon Yokai.
+const SEED_UNIVERSE_SOLARPUNK_BLOOM: Universe = {
+  id: 'universe_seed_solarpunk_bloom',
+  name: 'Solarpunk Bloom',
+  description: 'A green-tech city at golden hour where technology and nature have finally grown together — vertical farms cascading down glass towers, solar sails on every roof, canals where streets used to be, and a warm, hopeful community tending it all.',
+  pools: {
+    character: [
+      'character_seed_sb_greenhouse_keeper',
+      'character_seed_sb_solar_courier',
+      'character_seed_sb_mycologist',
+      'character_seed_sb_rooftop_beekeeper',
+      'character_seed_sb_water_weaver',
+      'character_seed_sb_seed_librarian',
+      'character_seed_sb_turbine_climber',
+      'character_seed_sb_repair_tinkerer',
+      'character_seed_sb_pollinator_wrangler',
+      'character_seed_sb_forager_cook',
+      'character_seed_sb_grove_warden',
+      'character_seed_sb_festival_dancer',
+    ],
+    environment: [
+      'environment_seed_sb_vertical_farm',
+      'environment_seed_sb_botanical_dome',
+      'environment_seed_sb_rooftop_commons',
+      'environment_seed_sb_skybridge_dock',
+      'environment_seed_sb_living_tram_station',
+      'environment_seed_sb_canal_district',
+      'environment_seed_sb_repair_cafe',
+      'environment_seed_sb_turbine_ridge',
+      'environment_seed_sb_floating_market',
+      'environment_seed_sb_food_forest',
+      'environment_seed_sb_algae_hall',
+      'environment_seed_sb_seed_vault',
+      'environment_seed_sb_solar_plaza',
+    ],
+    wardrobe: [
+      'outfit_sb_solar_cloak',
+      'outfit_sb_botanist_workwear',
+      'outfit_sb_glider_flightsuit',
+      'outfit_sb_living_fiber_dress',
+      'outfit_sb_repair_coveralls',
+      'outfit_sb_festival_bloomwear',
+    ],
+    mood: [
+      'mood_sb_hopeful_dawn',
+      'mood_sb_quiet_cultivation',
+      'mood_sb_communal_warmth',
+      'mood_sb_verdant_serenity',
+      'mood_sb_inventive_wonder',
+      'mood_sb_festival_abundance',
+    ],
+    style: [
+      'style_sb_solarpunk_storybook',
+      'style_sb_ghibli_pastoral',
+      'style_sb_art_nouveau_botanical',
+      'style_sb_sunlit_render',
+      'style_sb_eco_watercolor',
+      'style_sb_stained_glass_bloom',
+    ],
+    lighting: [
+      'lighting_sb_dappled_canopy',
+      'lighting_sb_greenhouse_diffusion',
+      'lighting_sb_solar_glint',
+      'lighting_sb_algae_glow',
+      'lighting_sb_golden_field',
+      'lighting_sb_overcast_pearl',
+    ],
+    object: [
+      'object_sb_seed_dispenser',
+      'object_sb_solar_lantern',
+      'object_sb_pollinator_drone',
+      'object_sb_harvest_basket',
+      'object_sb_terrarium_pendant',
+      'object_sb_tool_roll',
+      'object_sb_watering_globe',
+    ],
+    aura: [
+      'world_seed_sb_solarpunk_bloom',
+    ],
+  },
+  createdAt: SEED_TS_V5,
+  updatedAt: SEED_TS_V5,
+};
+
+function maybeApplyUniverseSeedV5(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V5) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V5, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_SOLARPUNK_BLOOM.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_SOLARPUNK_BLOOM];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -355,7 +454,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)));
+    return maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

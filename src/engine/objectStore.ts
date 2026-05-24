@@ -19,8 +19,10 @@ const STORE_KEY = 'promptgen:objects:v1';
 const BACKUP_KEY = 'promptgen:objects:backup:v1';
 const SEED_FLAG_KEY = 'promptgen:objects:seeded:v1';
 const SEED_FLAG_KEY_V2 = 'promptgen:objects:seeded:v2';
+const SEED_FLAG_KEY_V3 = 'promptgen:objects:seeded:v3';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
+const SEED_TS_3 = 1748563200000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -324,6 +326,101 @@ const V2_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V3 — Solarpunk Bloom: warm green-tech props and tools.
+const V3_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_sb_seed_dispenser',
+    name: 'Hand-Crank Seed Dispenser',
+    summary: 'A brass-and-wood hand-crank seed dispenser — a row of labelled hoppers spilling assorted seeds, well-worn from daily use.',
+    phrases: [
+      'a brass-and-wood hand-crank seed dispenser, a row of small labelled hoppers',
+      'assorted seeds spilling from the chutes, polished crank handle',
+      'well-worn from daily use, warm metal and oiled wood',
+      'a humble precise little machine for sowing',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_solar_lantern',
+    name: 'Solar Lantern',
+    summary: 'A round glass solar lantern charged by daylight — a warm honey-coloured glow held in a woven cage, soft and steady.',
+    phrases: [
+      'a round glass solar lantern in a woven rattan cage',
+      'a warm honey-coloured glow charged from the day\'s sunlight',
+      'soft steady light, brass cap and a leather carry-strap',
+      'cosy and self-sufficient, light gathered and given back',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_pollinator_drone',
+    name: 'Pollinator Drone',
+    summary: 'A tiny bee-sized pollinator drone — delicate brass and gauze wings, a fuzzy collector tip, glinting as it hovers over blossom.',
+    phrases: [
+      'a tiny bee-sized pollinator drone, delicate brass body and gauze wings',
+      'a soft fuzzy collector tip dusted with pollen',
+      'glinting in the light as it hovers over blossom',
+      'a small benevolent machine, half insect half tool',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_harvest_basket',
+    name: 'Woven Harvest Basket',
+    summary: 'A wide woven carry-basket heaped with the day\'s produce — bright vegetables, herbs and fruit spilling over the rim.',
+    phrases: [
+      'a wide woven willow harvest basket heaped with fresh produce',
+      'bright vegetables, herbs and fruit spilling over the rim',
+      'natural fibre weave, a sturdy curved carry-handle',
+      'abundant and homely, the day\'s gathering',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_terrarium_pendant',
+    name: 'Glass Terrarium Pendant',
+    summary: 'A small sealed glass terrarium worn as a pendant — a single living moss-and-fern miniature world hanging on a fine chain.',
+    phrases: [
+      'a small sealed glass terrarium pendant on a fine chain',
+      'a living miniature world of moss, fern and tiny stones inside',
+      'condensation beading on the curved glass, brass cap and loop',
+      'a whole ecosystem worn close to the heart',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_tool_roll',
+    name: 'Canvas Tool Roll',
+    summary: 'A worn canvas tool roll laid open — neat loops of well-used hand tools, oil-stained and lovingly maintained.',
+    phrases: [
+      'a worn canvas tool roll laid open flat',
+      'neat loops of well-used hand tools — drivers, pliers, a small saw',
+      'oil-stained fabric, leather tie-straps, lovingly maintained',
+      'the portable kit of someone who fixes things',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+  {
+    id: 'object_sb_watering_globe',
+    name: 'Brass Watering Globe',
+    summary: 'A round brass watering globe with a long curved spout — beaded with droplets, a fine arc of water catching the light.',
+    phrases: [
+      'a round polished brass watering can with a long curved spout',
+      'beaded with droplets, a fine arc of water catching the sunlight',
+      'a small rose head scattering a gentle spray',
+      'warm metal and clean water, a simple tending tool',
+    ],
+    createdAt: SEED_TS_3,
+    updatedAt: SEED_TS_3,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -341,6 +438,16 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V2, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V2_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V3) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V3, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V3_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

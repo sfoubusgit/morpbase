@@ -22,6 +22,7 @@ const CHARACTER_SEED_FLAG_KEY_V9 = 'promptgen:characters:seeded:v9';
 const CHARACTER_SEED_FLAG_KEY_V10 = 'promptgen:characters:seeded:v10';
 const CHARACTER_SEED_FLAG_KEY_V11 = 'promptgen:characters:seeded:v11';
 const CHARACTER_SEED_FLAG_KEY_V12 = 'promptgen:characters:seeded:v12';
+const CHARACTER_SEED_FLAG_KEY_V13 = 'promptgen:characters:seeded:v13';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -286,6 +287,7 @@ const SEED_TS_9 = 1748217600000;
 const SEED_TS_10 = 1748304000000;
 const SEED_TS_11 = 1748390400000;
 const SEED_TS_12 = 1748476800000;
+const SEED_TS_13 = 1748563200000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -1504,6 +1506,406 @@ const V12_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V13 — Solarpunk Bloom: a lush green-tech utopia, warm and hopeful — the tonal opposite of Neon Yokai.
+const V13_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_sb_greenhouse_keeper',
+    name: 'The Greenhouse Keeper',
+    summary: 'A botanist-engineer who runs a vertical farm tower — soil under her nails, a tablet of growth data in her apron, equally at home with a wrench and a seedling.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'botanist-engineer',
+      presentation: 'clothed',
+      ageImpression: 'capable adult',
+      personalityTone: 'warm, practical, unhurried; the patience of someone who works on a plant\'s schedule',
+      visualAnchors: [
+        { id: 'anchor_sbgk_1', label: 'Skin', kind: 'other', text: 'warm sun-tanned skin, faint freckles, soil smudged on one cheek' },
+        { id: 'anchor_sbgk_2', label: 'Hair', kind: 'hair', text: 'dark hair in a practical bun, escaped strands, a pencil and a sprig of herb tucked behind one ear' },
+        { id: 'anchor_sbgk_3', label: 'Eyes', kind: 'eyes', text: 'calm hazel eyes with smile lines, attentive gaze' },
+        { id: 'anchor_sbgk_4', label: 'Apron', kind: 'clothing', text: 'canvas tool apron over rolled-sleeve linen, pockets full of seed packets and a slim tablet' },
+        { id: 'anchor_sbgk_5', label: 'Hands', kind: 'other', text: 'strong working hands, soil under the nails, a woven plant-fibre bracelet' },
+      ],
+      motifs: [
+        { id: 'motif_sbgk_1', label: 'The Living Tower', text: 'terraced greenery, dappled glass light, growth charts and seedlings side by side' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, gardener',
+        'warm sun-tanned freckled skin, a smudge of soil on one cheek, calm hazel eyes',
+        'dark hair in a practical bun, a sprig of herb tucked behind the ear',
+        'canvas tool apron over rolled-sleeve linen, seed packets in the pockets',
+        'tending seedlings on a terraced vertical farm, dappled greenhouse light',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_solar_courier',
+    name: 'The Solar-Sail Courier',
+    summary: 'A glider courier who rides thermals and solar updrafts between rooftop docks — light, weatherburnt, a satchel of parcels and a folded wing-sail across her back.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'glider courier',
+      presentation: 'clothed',
+      ageImpression: 'lithe young adult',
+      personalityTone: 'breezy, quick-smiling, restless; happiest a hundred metres up',
+      visualAnchors: [
+        { id: 'anchor_sbsc_1', label: 'Hair', kind: 'hair', text: 'short wind-tousled sun-bleached hair, goggle line across the brow' },
+        { id: 'anchor_sbsc_2', label: 'Skin', kind: 'other', text: 'warm brown weatherburnt skin, a courier\'s tan, bright easy grin' },
+        { id: 'anchor_sbsc_3', label: 'Wings', kind: 'accessory', text: 'a folded solar wing-sail strapped across the back, translucent amber photovoltaic membrane' },
+        { id: 'anchor_sbsc_4', label: 'Outfit', kind: 'clothing', text: 'streamlined linen flightsuit with leather harness straps, fingerless gloves' },
+        { id: 'anchor_sbsc_5', label: 'Satchel', kind: 'accessory', text: 'a woven courier satchel of parcels slung across the body' },
+      ],
+      motifs: [
+        { id: 'motif_sbsc_1', label: 'Rooftop to Rooftop', text: 'thermals and sun-sails, the city seen from the wind, a parcel always to deliver' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, pilot',
+        'short wind-tousled sun-bleached hair, warm brown weatherburnt skin, bright grin',
+        'a folded translucent amber solar wing-sail strapped across the back',
+        'streamlined linen flightsuit with leather harness straps, fingerless gloves',
+        'standing on a rooftop glider dock, the green city spread out far below',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_mycologist',
+    name: 'The Mycologist',
+    summary: 'A quiet keeper of the city\'s fungal networks — works in the warm dark of the mushroom cellars, fingertips faintly luminous from the spores he tends.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'mycologist',
+      presentation: 'clothed',
+      ageImpression: 'thoughtful adult',
+      personalityTone: 'soft-spoken, observant, a little otherworldly; listens more than he speaks',
+      visualAnchors: [
+        { id: 'anchor_sbmy_1', label: 'Hair', kind: 'hair', text: 'long dark hair loosely tied, a streak of premature grey' },
+        { id: 'anchor_sbmy_2', label: 'Eyes', kind: 'eyes', text: 'deep-set dark eyes, gentle and patient, adjusted to low light' },
+        { id: 'anchor_sbmy_3', label: 'Hands', kind: 'other', text: 'fingertips faintly luminous with pale bioluminescent spore-dust' },
+        { id: 'anchor_sbmy_4', label: 'Outfit', kind: 'clothing', text: 'earth-toned layered robes and a canvas cross-apron, sleeves to the elbow' },
+        { id: 'anchor_sbmy_5', label: 'Companion', kind: 'accessory', text: 'a shallow tray of glowing cultivated mushrooms carried in both hands' },
+      ],
+      motifs: [
+        { id: 'motif_sbmy_1', label: 'The Warm Dark', text: 'cellar humidity, faint fungal glow, the slow patient web beneath the city' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo',
+        'long dark hair loosely tied with a streak of grey, gentle deep-set eyes',
+        'fingertips faintly glowing with pale bioluminescent spore-dust',
+        'earth-toned layered robes and a canvas cross-apron',
+        'holding a tray of softly glowing cultivated mushrooms in a warm dim cellar',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_rooftop_beekeeper',
+    name: 'The Rooftop Beekeeper',
+    summary: 'An old woman who keeps the hives among the rooftop wildflowers — unhurried, smoke-scented, the calm centre of a cloud of bees that never sting her.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'beekeeper',
+      presentation: 'clothed',
+      ageImpression: 'serene elder',
+      personalityTone: 'gentle, wry, endlessly patient; speaks softly to the bees',
+      visualAnchors: [
+        { id: 'anchor_sbbk_1', label: 'Face', kind: 'face', text: 'lined kind face, deep laugh-creases, warm dark eyes' },
+        { id: 'anchor_sbbk_2', label: 'Hair', kind: 'hair', text: 'silver hair coiled under a wide woven sun hat with a folded-back veil' },
+        { id: 'anchor_sbbk_3', label: 'Outfit', kind: 'clothing', text: 'pale natural-linen beekeeping smock, leather gloves tucked in the belt' },
+        { id: 'anchor_sbbk_4', label: 'Bees', kind: 'other', text: 'a few honeybees drifting calmly around her, none alarmed' },
+        { id: 'anchor_sbbk_5', label: 'Tool', kind: 'accessory', text: 'a brass bee-smoker held loosely, a thread of soft smoke rising' },
+      ],
+      motifs: [
+        { id: 'motif_sbbk_1', label: 'Among the Hives', text: 'rooftop wildflowers, drifting bees, the slow gold of harvested honey' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, old woman, elderly',
+        'lined kind face with deep laugh-creases, warm dark eyes, silver hair',
+        'wide woven sun hat with a folded-back beekeeping veil',
+        'pale natural-linen beekeeping smock, brass bee-smoker in hand',
+        'standing among rooftop wildflower hives, calm honeybees drifting around her',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_water_weaver',
+    name: 'The Water Weaver',
+    summary: 'A rain-and-aqueduct engineer who routes the city\'s living waterways — wades the reclaimed canals in rolled trousers, reading the flow like a language.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'water engineer',
+      presentation: 'clothed',
+      ageImpression: 'grounded adult',
+      personalityTone: 'measured, observant, quietly proud of unseen work',
+      visualAnchors: [
+        { id: 'anchor_sbww_1', label: 'Skin', kind: 'other', text: 'deep brown skin beaded with canal mist, forearms wet to the elbow' },
+        { id: 'anchor_sbww_2', label: 'Hair', kind: 'hair', text: 'tight black coils pulled back under a faded indigo headwrap' },
+        { id: 'anchor_sbww_3', label: 'Eyes', kind: 'eyes', text: 'steady dark eyes reading the moving water' },
+        { id: 'anchor_sbww_4', label: 'Outfit', kind: 'clothing', text: 'waxed canvas waders and a sleeveless indigo tunic, rolled to the knee' },
+        { id: 'anchor_sbww_5', label: 'Tool', kind: 'accessory', text: 'a long brass measuring rod and a coil of fibre-optic flow sensor' },
+      ],
+      motifs: [
+        { id: 'motif_sbww_1', label: 'Reading the Flow', text: 'reclaimed canals, gentle weirs, sunlight broken on running water' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, engineer',
+        'deep brown skin beaded with mist, steady dark eyes, tight black coils under an indigo headwrap',
+        'waxed canvas waders and a sleeveless indigo tunic rolled to the knee',
+        'a long brass measuring rod in hand',
+        'wading a sunlit reclaimed canal lined with water gardens',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_seed_librarian',
+    name: 'The Seed Librarian',
+    summary: 'The keeper of the seed vault — a precise, gentle archivist who catalogues a thousand heirloom varieties and remembers the story of every one.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'seed archivist',
+      presentation: 'clothed',
+      ageImpression: 'careful adult',
+      personalityTone: 'precise, soft, quietly devoted; treats each seed like a small life',
+      visualAnchors: [
+        { id: 'anchor_sbsl_1', label: 'Glasses', kind: 'accessory', text: 'round wire-rimmed glasses, a magnifier loupe on a cord' },
+        { id: 'anchor_sbsl_2', label: 'Hair', kind: 'hair', text: 'neat ash-blond hair in a low plait, a pressed flower pinned in it' },
+        { id: 'anchor_sbsl_3', label: 'Eyes', kind: 'eyes', text: 'pale grey eyes, gentle and exact' },
+        { id: 'anchor_sbsl_4', label: 'Outfit', kind: 'clothing', text: 'a long cream archivist\'s coat over a high-collared blouse, cotton gloves' },
+        { id: 'anchor_sbsl_5', label: 'Object', kind: 'accessory', text: 'a small labelled glass seed-vial held up to the light' },
+      ],
+      motifs: [
+        { id: 'motif_sbsl_1', label: 'A Thousand Varieties', text: 'wooden seed drawers, handwritten labels, sunlight on a held vial' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, librarian',
+        'round wire-rimmed glasses, pale grey gentle eyes, neat ash-blond low plait with a pressed flower',
+        'a long cream archivist coat over a high-collared blouse, cotton gloves',
+        'holding a small labelled glass seed-vial up to the light',
+        'standing among floor-to-ceiling wooden seed drawers in a sunlit vault',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_turbine_climber',
+    name: 'The Turbine Climber',
+    summary: 'A wind-turbine mechanic who free-climbs the ridge towers — fearless, harnessed, hair whipping, the open sky and turning blades for an office.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'aeromechanic',
+      presentation: 'clothed',
+      ageImpression: 'wiry young adult',
+      personalityTone: 'fearless, grinning, blunt; allergic to ceilings',
+      visualAnchors: [
+        { id: 'anchor_sbtc_1', label: 'Hair', kind: 'hair', text: 'choppy copper-red hair whipping in the wind, shaved at one side' },
+        { id: 'anchor_sbtc_2', label: 'Skin', kind: 'other', text: 'pale freckled skin, windburned cheeks, grease smudge on the jaw' },
+        { id: 'anchor_sbtc_3', label: 'Harness', kind: 'accessory', text: 'a climbing harness heavy with carabiners and a power-driver' },
+        { id: 'anchor_sbtc_4', label: 'Outfit', kind: 'clothing', text: 'high-vis-trimmed work overalls tied at the waist over a sun-faded tee' },
+        { id: 'anchor_sbtc_5', label: 'Eyes', kind: 'eyes', text: 'bright green eyes squinting against the light, fearless' },
+      ],
+      motifs: [
+        { id: 'motif_sbtc_1', label: 'On the Blades', text: 'hilltop turbines, wildflowers far below, harness and open sky' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, mechanic',
+        'choppy copper-red wind-whipped hair shaved at one side, pale freckled windburned skin',
+        'bright green eyes, a grease smudge on the jaw',
+        'high-vis-trimmed work overalls tied at the waist, a climbing harness of carabiners',
+        'high on a white wind turbine above a wildflower ridge, wind in everything',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_repair_tinkerer',
+    name: 'The Repair-Café Tinkerer',
+    summary: 'A jovial fixer who runs the neighbourhood repair café — nothing thrown away, everything mended, pockets and bench alike overflowing with salvaged parts.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'tinkerer',
+      presentation: 'clothed',
+      ageImpression: 'rumpled adult',
+      personalityTone: 'jovial, generous, distractible; loves a hopeless case',
+      visualAnchors: [
+        { id: 'anchor_sbrt_1', label: 'Build', kind: 'silhouette', text: 'soft round build, comfortable and unbothered' },
+        { id: 'anchor_sbrt_2', label: 'Face', kind: 'face', text: 'warm bearded face, reading glasses pushed up on the forehead, easy laugh' },
+        { id: 'anchor_sbrt_3', label: 'Outfit', kind: 'clothing', text: 'patched and hand-mended coveralls, a dozen tools in loops and pockets' },
+        { id: 'anchor_sbrt_4', label: 'Hands', kind: 'other', text: 'broad capable hands holding a half-repaired solar lamp and a screwdriver' },
+        { id: 'anchor_sbrt_5', label: 'Apron', kind: 'accessory', text: 'a leather tool-roll apron stained with oil and solder' },
+      ],
+      motifs: [
+        { id: 'motif_sbrt_1', label: 'Nothing Wasted', text: 'salvaged parts, a cluttered warm workbench, the joy of a thing made to work again' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, man',
+        'soft round build, warm bearded face with reading glasses pushed up, easy laugh',
+        'patched hand-mended coveralls covered in tools, a leather tool-roll apron',
+        'holding a half-repaired solar lamp and a screwdriver',
+        'at a cluttered warm repair-café workbench full of salvaged parts',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_pollinator_wrangler',
+    name: 'The Pollinator-Drone Wrangler',
+    summary: 'A young technician who shepherds clouds of tiny pollinator drones through the orchards — half engineer, half goatherd, always trailed by a glittering swarm.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'drone technician',
+      presentation: 'clothed',
+      ageImpression: 'eager youth',
+      personalityTone: 'curious, chatty, gentle; names every drone',
+      visualAnchors: [
+        { id: 'anchor_sbpw_1', label: 'Hair', kind: 'hair', text: 'twin black braids, a small brass control-band across the brow' },
+        { id: 'anchor_sbpw_2', label: 'Skin', kind: 'other', text: 'warm golden-brown skin, an excited bright-eyed look' },
+        { id: 'anchor_sbpw_3', label: 'Swarm', kind: 'other', text: 'a glittering swarm of tiny bee-sized pollinator drones orbiting her' },
+        { id: 'anchor_sbpw_4', label: 'Outfit', kind: 'clothing', text: 'a short utility tunic and mesh-panel leggings, a forearm control gauntlet' },
+        { id: 'anchor_sbpw_5', label: 'Gauntlet', kind: 'accessory', text: 'a glowing wrist control-gauntlet the drones answer to' },
+      ],
+      motifs: [
+        { id: 'motif_sbpw_1', label: 'The Glittering Swarm', text: 'orchard blossom, tiny drones catching the sun, a shepherd of machines' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo',
+        'warm golden-brown skin, bright eager eyes, twin black braids with a brass control-band',
+        'a glittering swarm of tiny bee-sized pollinator drones orbiting her',
+        'a short utility tunic and mesh-panel leggings, a glowing wrist control-gauntlet',
+        'walking through a blossoming orchard trailed by her drone swarm',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_forager_cook',
+    name: 'The Community Cook',
+    summary: 'The heart of the food forest kitchen — a broad-shouldered forager-cook who turns the day\'s harvest into a feast for whoever shows up hungry.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'forager-cook',
+      presentation: 'clothed',
+      ageImpression: 'hearty adult',
+      personalityTone: 'big-hearted, loud, feeds everyone; suspicious of anyone who isn\'t eating',
+      visualAnchors: [
+        { id: 'anchor_sbfc_1', label: 'Build', kind: 'silhouette', text: 'broad strong build, sleeves shoved up over thick forearms' },
+        { id: 'anchor_sbfc_2', label: 'Hair', kind: 'hair', text: 'black hair under a tied bandana, a sprig of rosemary behind the ear' },
+        { id: 'anchor_sbfc_3', label: 'Skin', kind: 'other', text: 'olive skin flushed from the stove, a generous grin' },
+        { id: 'anchor_sbfc_4', label: 'Apron', kind: 'clothing', text: 'a flour-dusted linen apron over a faded work shirt' },
+        { id: 'anchor_sbfc_5', label: 'Basket', kind: 'accessory', text: 'a woven basket of foraged greens, herbs and bright vegetables on the hip' },
+      ],
+      motifs: [
+        { id: 'motif_sbfc_1', label: 'Feed Everyone', text: 'the harvest basket, a steaming communal pot, a long table for whoever comes' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, man',
+        'broad strong build, olive skin flushed from the stove, a generous grin',
+        'black hair under a tied bandana, a sprig of rosemary behind the ear',
+        'a flour-dusted linen apron over a faded work shirt, sleeves shoved up',
+        'carrying a woven basket of foraged greens and bright vegetables in a food-forest kitchen',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_grove_warden',
+    name: 'The Grove Warden',
+    summary: 'A teacher of the children\'s forest — gentle, barefoot, half-myth, who seems to have grown out of the grove and to speak for the trees in it.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'grove warden',
+      presentation: 'clothed',
+      ageImpression: 'ageless adult',
+      personalityTone: 'serene, mythic, kind; speaks slowly and means it',
+      visualAnchors: [
+        { id: 'anchor_sbgw_1', label: 'Hair', kind: 'hair', text: 'long moss-green-tinted hair woven with small leaves and seed-pods' },
+        { id: 'anchor_sbgw_2', label: 'Skin', kind: 'other', text: 'brown skin with faint photosynthetic vine-tattoos that hold a soft green glow' },
+        { id: 'anchor_sbgw_3', label: 'Eyes', kind: 'eyes', text: 'warm amber eyes, deep and calm, flecked with green' },
+        { id: 'anchor_sbgw_4', label: 'Robe', kind: 'clothing', text: 'a flowing layered robe of undyed homespun, hem stained green, barefoot' },
+        { id: 'anchor_sbgw_5', label: 'Staff', kind: 'accessory', text: 'a living wooden staff still sprouting fresh leaves at the top' },
+      ],
+      motifs: [
+        { id: 'motif_sbgw_1', label: 'Speaks for the Grove', text: 'the children\'s forest, dappled green light, vine-tattoos faintly glowing' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo',
+        'long moss-green-tinted hair woven with small leaves and seed-pods, warm amber green-flecked eyes',
+        'brown skin with faint softly-glowing photosynthetic vine-tattoos',
+        'a flowing layered robe of undyed homespun, hem stained green, barefoot',
+        'holding a living wooden staff sprouting fresh leaves, standing in a sunlit grove',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+  {
+    id: 'character_seed_sb_festival_dancer',
+    name: 'The Bloom Festival Dancer',
+    summary: 'The spirit of the harvest festival made flesh — a dancer crowned and garlanded in living flowers, the bright laughing centre of the season\'s celebration.',
+    tags: ['solo', 'solarpunk', 'solarpunk bloom'],
+    identity: {
+      archetype: 'festival dancer',
+      presentation: 'clothed',
+      ageImpression: 'radiant young adult',
+      personalityTone: 'joyous, generous, magnetic; carries the whole crowd on her energy',
+      visualAnchors: [
+        { id: 'anchor_sbfd_1', label: 'Crown', kind: 'accessory', text: 'a full flower crown of living blooms cascading into the hair' },
+        { id: 'anchor_sbfd_2', label: 'Hair', kind: 'hair', text: 'long warm-brown hair loose and flower-threaded, caught mid-motion' },
+        { id: 'anchor_sbfd_3', label: 'Skin', kind: 'other', text: 'glowing brown skin dusted with gold pollen, a wide joyful laugh' },
+        { id: 'anchor_sbfd_4', label: 'Dress', kind: 'clothing', text: 'a flowing layered festival dress in petal-pinks and golds, ribbons and garlands trailing' },
+        { id: 'anchor_sbfd_5', label: 'Garlands', kind: 'other', text: 'flower garlands looped over the arms, petals in the air around her' },
+      ],
+      motifs: [
+        { id: 'motif_sbfd_1', label: 'The Harvest Festival', text: 'flower crowns, falling petals, music and golden afternoon light' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, dancer',
+        'glowing brown skin dusted with gold pollen, a wide joyful laugh',
+        'a full flower crown of living blooms, long flower-threaded warm-brown hair in motion',
+        'a flowing layered festival dress in petal-pink and gold, ribbons and garlands trailing',
+        'dancing amid falling petals at a harvest festival, golden afternoon light',
+      ],
+    },
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -1639,6 +2041,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V12, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V12_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V13) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V13, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V13_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);

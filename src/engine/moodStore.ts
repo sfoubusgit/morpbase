@@ -6,6 +6,7 @@ const MOOD_SEED_FLAG_KEY = 'promptgen:moods:seeded:v2';
 const MOOD_SEED_FLAG_KEY_V3 = 'promptgen:moods:seeded:v3';
 const MOOD_SEED_FLAG_KEY_V4 = 'promptgen:moods:seeded:v4';
 const MOOD_SEED_FLAG_KEY_V5 = 'promptgen:moods:seeded:v5';
+const MOOD_SEED_FLAG_KEY_V6 = 'promptgen:moods:seeded:v6';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -90,6 +91,7 @@ const SEED_TS_2 = 1747008000000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
+const SEED_TS_6 = 1748563200000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -410,6 +412,88 @@ const V4_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V6 — Solarpunk Bloom: warm, hopeful, communal emotional registers.
+const V6_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_sb_hopeful_dawn',
+    name: 'Hopeful Dawn',
+    summary: 'Bright early optimism — the clean uplift of a new day in a world that is being made better, light and forward-looking.',
+    phrases: [
+      'bright hopeful optimism, the clean uplift of a fresh new morning',
+      'a sense of a world being mended, forward-looking and warm',
+      'gentle excitement, possibility in the air',
+      'light, open-hearted, quietly inspiring',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'mood_sb_quiet_cultivation',
+    name: 'Quiet Cultivation',
+    summary: 'The patient calm of tending — slow, absorbed, content; the meditative peace of growing something with care.',
+    phrases: [
+      'the patient meditative calm of tending growing things',
+      'slow absorbed contentment, hands busy and mind at rest',
+      'unhurried care, attention given freely to small living tasks',
+      'a peaceful, grounded, deeply settled feeling',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'mood_sb_communal_warmth',
+    name: 'Communal Warmth',
+    summary: 'The glow of shared work and belonging — many hands, easy laughter, the warmth of a community at ease with itself.',
+    phrases: [
+      'the warm glow of shared work and belonging, many hands together',
+      'easy laughter and unforced companionship',
+      'a community at ease with itself, generous and welcoming',
+      'cosy collective warmth, nobody alone',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'mood_sb_verdant_serenity',
+    name: 'Verdant Serenity',
+    summary: 'Deep green calm — the restorative stillness of being surrounded by growth, breath slowing, the world gone gentle and alive.',
+    phrases: [
+      'deep restorative green calm, surrounded by living growth',
+      'breath slowing, the stillness of a place that is thriving',
+      'serene and lush, the gentle aliveness of a garden',
+      'tranquil, restorative, quietly abundant',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'mood_sb_inventive_wonder',
+    name: 'Inventive Wonder',
+    summary: 'The bright curiosity of making — the delighted focus of a tinkerer mid-idea, problem-solving as play.',
+    phrases: [
+      'bright inventive curiosity, the delight of figuring something out',
+      'playful focused problem-solving, ideas catching light',
+      'the cheerful energy of making and mending',
+      'engaged, optimistic, a little mischievous with possibility',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'mood_sb_festival_abundance',
+    name: 'Festival Abundance',
+    summary: 'Joyful harvest celebration — petals and music and overflowing tables, gratitude turned to dancing, generous and alive.',
+    phrases: [
+      'joyful harvest-festival abundance, petals and music and overflowing tables',
+      'gratitude turning to dancing, generous and overflowing',
+      'bright collective celebration, colour and laughter everywhere',
+      'warm euphoric plenty, a season giving back its best',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -453,6 +537,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V5_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V6_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

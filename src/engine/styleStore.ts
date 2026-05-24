@@ -7,6 +7,7 @@ const STYLE_SEED_FLAG_KEY_V3 = 'promptgen:styles:seeded:v3';
 const STYLE_SEED_FLAG_KEY_V4 = 'promptgen:styles:seeded:v4';
 const STYLE_SEED_FLAG_KEY_V5 = 'promptgen:styles:seeded:v5';
 const STYLE_SEED_FLAG_KEY_V6 = 'promptgen:styles:seeded:v6';
+const STYLE_SEED_FLAG_KEY_V7 = 'promptgen:styles:seeded:v7';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -92,6 +93,7 @@ const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1747872000000;
 const SEED_TS_5 = 1748304000000;
 const SEED_TS_6 = 1748476800000;
+const SEED_TS_7 = 1748563200000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -443,6 +445,94 @@ const V3_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V7 — Solarpunk Bloom: warm, hopeful, painterly green-tech art directions.
+const V7_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_sb_solarpunk_storybook',
+    name: 'Solarpunk Storybook',
+    summary: 'Warm gouache storybook illustration — soft edges, sun-washed greens and golds, hopeful and hand-painted.',
+    phrases: [
+      'warm gouache storybook illustration, soft painterly edges',
+      'sun-washed palette of leaf-green, honey-gold and sky-blue',
+      'gentle rounded shapes, cosy hand-painted texture',
+      'optimistic solarpunk picture-book mood, light and inviting',
+      'visible brushwork and paper grain, no harsh lines',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'style_sb_ghibli_pastoral',
+    name: 'Ghibli Pastoral',
+    summary: 'Lush hand-painted anime pastoral — layered foliage, soft cinematic light, the loving detail of a Studio Ghibli background.',
+    phrases: [
+      'lush hand-painted anime pastoral, Studio Ghibli background art sensibility',
+      'densely layered foliage, every leaf lovingly rendered',
+      'soft cinematic daylight, gentle volumetric haze',
+      'rich natural greens with warm highlights, painterly clouds',
+      'wholesome nostalgic warmth, immersive and detailed',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'style_sb_art_nouveau_botanical',
+    name: 'Art Nouveau Botanical',
+    summary: 'Mucha-style organic line — sinuous botanical borders, flat decorative colour, gold accents and flowing whiplash curves.',
+    phrases: [
+      'Art Nouveau illustration in the manner of Alphonse Mucha',
+      'sinuous flowing whiplash linework, ornate botanical borders',
+      'flat decorative colour fields, muted naturals with gold leaf accents',
+      'elegant framing arches wreathed in stylised flowers and vines',
+      'decorative, organic, and richly patterned',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'style_sb_sunlit_render',
+    name: 'Sunlit Cinematic Render',
+    summary: 'Photoreal golden render — warm bounce light, lush depth of field, the glossy hopeful look of a green-future film still.',
+    phrases: [
+      'photorealistic cinematic render bathed in warm golden daylight',
+      'soft warm bounce light, lush shallow depth of field',
+      'verdant greens and honeyed highlights, gentle lens bloom',
+      'clean optimistic colour grade, airy and bright',
+      'the polished hopeful look of a solarpunk film still',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'style_sb_eco_watercolor',
+    name: 'Eco Watercolor Concept',
+    summary: 'Loose architectural watercolour — washy greens, bleeding edges, ink-line structure, the airy feel of a hopeful concept board.',
+    phrases: [
+      'loose architectural watercolour concept art, washy and luminous',
+      'soft bleeding green and ochre washes over light ink linework',
+      'lots of bright paper showing through, airy negative space',
+      'quick confident gesture, foliage suggested not laboured',
+      'fresh, hopeful, exploratory concept-board feel',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'style_sb_stained_glass_bloom',
+    name: 'Stained-Glass Bloom',
+    summary: 'Luminous leaded glass — bold dark cames, glowing translucent colour, floral motifs lit from behind by the sun.',
+    phrases: [
+      'luminous stained-glass illustration, bold dark leaded cames outlining every shape',
+      'glowing translucent panes of emerald, amber and rose',
+      'symmetrical floral and leaf motifs, sun streaming through from behind',
+      'jewel-bright backlit colour, radiant and devotional',
+      'the warm glow of light through a botanical cathedral window',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -496,6 +586,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V6_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V7_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

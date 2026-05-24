@@ -12,6 +12,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V5 = 'promptgen:environments:seeded:v5';
 const ENVIRONMENT_SEED_FLAG_KEY_V6 = 'promptgen:environments:seeded:v6';
 const ENVIRONMENT_SEED_FLAG_KEY_V7 = 'promptgen:environments:seeded:v7';
 const ENVIRONMENT_SEED_FLAG_KEY_V8 = 'promptgen:environments:seeded:v8';
+const ENVIRONMENT_SEED_FLAG_KEY_V9 = 'promptgen:environments:seeded:v9';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -108,6 +109,7 @@ const ENV_SEED_TS_5 = 1748304000000;
 const ENV_SEED_TS_6 = 1748217600000;
 const ENV_SEED_TS_7 = 1748304000000;
 const ENV_SEED_TS_8 = 1748476800000;
+const ENV_SEED_TS_9 = 1748563200000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -892,6 +894,231 @@ const V8_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V9 — Solarpunk Bloom: a lush green-tech utopia, warm and hopeful — the tonal opposite of Neon Yokai.
+const V9_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_sb_vertical_farm',
+    name: 'Vertical Farm Tower',
+    summary: 'A green skyscraper terraced floor to roof with crops — sunlight pouring through glass, irrigation misting in the warm air.',
+    phraseBundle: {
+      core: [
+        'the interior of a vertical farm tower, terraced planting beds rising floor upon floor',
+        'lush rows of vegetables and trailing vines spilling over every terrace edge',
+        'tall sunlit glass walls, warm daylight pouring across the greenery',
+        'fine irrigation mist drifting in the air, droplets catching the light',
+        'wooden walkways and rope rails between the growing tiers',
+        'the warm humid calm of a building that is mostly garden',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_botanical_dome',
+    name: 'Botanical Glass Dome',
+    summary: 'A vast geodesic greenhouse atrium — a cathedral of glass and steel filled with trees, soft diffused light raining down.',
+    phraseBundle: {
+      core: [
+        'a vast geodesic glass dome greenhouse, a cathedral of triangular panes and slim steel ribs',
+        'mature trees and dense tropical planting filling the interior',
+        'soft milky daylight diffusing down through the high glass',
+        'hanging ferns and walkways spiralling among the canopy',
+        'a still reflecting pool at the centre, lily pads and koi',
+        'humid, green, and serenely luminous',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_rooftop_commons',
+    name: 'Rooftop Garden Commons',
+    summary: 'A shared rooftop of raised beds, wildflowers and beehives, the green city rolling away beyond a low planted parapet.',
+    phraseBundle: {
+      core: [
+        'a communal rooftop garden, raised planter beds heavy with vegetables and wildflowers',
+        'rows of beehives and a small tool shed wrapped in climbing beans',
+        'a planted parapet of trailing greenery edging the roof',
+        'the green city sprawling beyond — more rooftops bright with gardens to the horizon',
+        'a long shared table under a vine pergola, lanterns strung above it',
+        'open sky, gentle breeze, the easy warmth of a shared place',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_skybridge_dock',
+    name: 'Solar-Sail Skybridge Dock',
+    summary: 'A high glider dock between towers — amber solar sails furled on racks, wind socks streaming, the city far below in green.',
+    phraseBundle: {
+      core: [
+        'a high glider launch dock bridging two green towers, open to the wind',
+        'racks of furled amber solar wing-sails, translucent photovoltaic membrane glowing',
+        'wind socks and prayer-flag-like indicators streaming in the breeze',
+        'a slim cantilevered launch ramp over a long bright drop',
+        'the green city far below, canals and gardens laid out like a map',
+        'high, breezy, and quietly exhilarating',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_living_tram_station',
+    name: 'Living Tram Station',
+    summary: 'A tram stop swallowed by greenery — moss-furred platforms, vine-wrapped pillars, a wooden tram gliding in under flowering arches.',
+    phraseBundle: {
+      core: [
+        'a tram station overgrown into a garden, platform pillars wrapped in flowering vines',
+        'soft moss furring the edges of the worn stone platform',
+        'a sleek wooden-bodied electric tram gliding in beneath flowering arches',
+        'hanging baskets and climbing roses along the canopy beams',
+        'dappled light falling through the leaf-covered roof onto the rails',
+        'unhurried, green, gently humming with quiet electric movement',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_canal_district',
+    name: 'Reclaimed Canal District',
+    summary: 'Old streets given back to water — gentle green canals between planted buildings, footbridges, and gardens growing down to the waterline.',
+    phraseBundle: {
+      core: [
+        'a reclaimed canal district, former streets turned to gentle green waterways',
+        'planted buildings rising straight from the water, gardens cascading to the waterline',
+        'arched footbridges and stone steps down to small mooring docks',
+        'small boats among water lilies and reed beds, reflections doubling the greenery',
+        'sunlight broken into bright coins on the slow-moving water',
+        'tranquil, verdant, the city softened by water and growth',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_repair_cafe',
+    name: 'Mycelium Repair Café',
+    summary: 'A warm cluttered workshop-café — salvaged parts, mushroom-grown furniture, tools on every wall and a kettle always on.',
+    phraseBundle: {
+      core: [
+        'the interior of a repair café, a warm cluttered workshop full of half-mended things',
+        'walls hung with hand tools, shelves of salvaged and sorted parts in jars',
+        'furniture grown from moulded mycelium, soft and pale and organic',
+        'workbenches under warm pendant lamps, a kettle steaming in the corner',
+        'pot plants on every surface, a cat asleep among the tools',
+        'cosy, lived-in, and quietly industrious',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_turbine_ridge',
+    name: 'Wind-Turbine Ridge',
+    summary: 'A breezy hilltop of slow white turbines standing over a meadow of wildflowers, the green valley and city beyond.',
+    phraseBundle: {
+      core: [
+        'a high windy ridge lined with tall slow-turning white wind turbines',
+        'a meadow of wildflowers and long grass rippling in the wind below them',
+        'the green valley and the garden-city spread out far in the distance',
+        'big bright sky with high scattered clouds moving fast',
+        'a narrow footpath winding up between the turbine bases',
+        'open, breezy, and full of clean turning movement',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_floating_market',
+    name: 'Floating Canal Market',
+    summary: 'A bustling market of boats on the green canals — produce, flowers and bread heaped on decks under bright awnings.',
+    phraseBundle: {
+      core: [
+        'a floating market crowding the green canals, boats lashed together deck to deck',
+        'produce, cut flowers, bread and preserves heaped under bright striped awnings',
+        'vendors calling between boats, baskets passed hand to hand over the water',
+        'strings of bunting and hanging herbs swaying above the decks',
+        'warm reflections and ripples between the hulls, petals on the water',
+        'busy, colourful, and full of good-natured noise',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_food_forest',
+    name: 'Community Food Forest',
+    summary: 'A layered orchard-garden open to all — fruit trees, berry hedges and winding paths, a long communal table at its heart.',
+    phraseBundle: {
+      core: [
+        'a layered community food forest, fruit trees over berry hedges over herb beds',
+        'winding mulch paths between heavy-laden branches, baskets left for picking',
+        'a long communal table in a sunlit clearing at the heart of it',
+        'espaliered fruit along low fences, bees working the blossom',
+        'dappled golden light falling through the orchard canopy',
+        'abundant, generous, and open to anyone who wanders in',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_algae_hall',
+    name: 'Algae Bioreactor Hall',
+    summary: 'A long hall of glowing green algae tubes — columns of bright living liquid bubbling softly, casting warm emerald light.',
+    phraseBundle: {
+      core: [
+        'a long hall filled with tall vertical glass algae bioreactor tubes',
+        'columns of bright living green liquid bubbling and circulating softly',
+        'warm emerald light glowing from the tubes across the clean floor',
+        'a lattice of slim pipes and brass valves linking the columns',
+        'gentle condensation on the glass, a soft mechanical hum',
+        'luminous, green, and quietly futuristic',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_seed_vault',
+    name: 'The Seed Vault Library',
+    summary: 'A warm wooden archive of seeds — floor-to-ceiling labelled drawers, ladders on rails, shafts of dust-flecked sunlight.',
+    phraseBundle: {
+      core: [
+        'a seed vault library, floor-to-ceiling cabinets of small labelled wooden drawers',
+        'rolling ladders on brass rails reaching the upper rows',
+        'long reading tables with magnifiers, scattered seed-vials and notebooks',
+        'shafts of warm dust-flecked sunlight from high windows',
+        'jars of catalogued seeds glowing amber on the shelves',
+        'hushed, warm, and reverent as a library',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+  {
+    id: 'environment_seed_sb_solar_plaza',
+    name: 'Solar-Tree Plaza',
+    summary: 'A sun-drenched public square shaded by sculptural solar trees — petalled photovoltaic canopies, fountains, and people at ease.',
+    phraseBundle: {
+      core: [
+        'a sun-drenched public plaza shaded by sculptural solar trees',
+        'branching steel trunks spreading into petalled photovoltaic canopies',
+        'soft pools of shade thrown across warm paving, fountains running',
+        'planters and benches around the bases, climbing flowers everywhere',
+        'people sitting and passing at ease in the bright open square',
+        'open, civic, and full of warm midday light',
+      ],
+    },
+    createdAt: ENV_SEED_TS_9,
+    updatedAt: ENV_SEED_TS_9,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -984,6 +1211,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V8, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V8_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V9_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

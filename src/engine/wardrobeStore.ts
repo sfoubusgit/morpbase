@@ -5,6 +5,7 @@ const WARDROBE_STORE_BACKUP_KEY = 'promptgen:wardrobe:backup:v1';
 const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v3';
 const WARDROBE_SEED_FLAG_KEY_V4 = 'promptgen:wardrobe:seeded:v4';
 const WARDROBE_SEED_FLAG_KEY_V5 = 'promptgen:wardrobe:seeded:v5';
+const WARDROBE_SEED_FLAG_KEY_V6 = 'promptgen:wardrobe:seeded:v6';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -89,6 +90,7 @@ const SEED_TS_2 = 1746835200000;
 const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
+const SEED_TS_6 = 1748563200000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -394,6 +396,88 @@ const V4_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V6 — Solarpunk Bloom: natural-fibre green-tech workwear and festival dress.
+const V6_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_sb_solar_cloak',
+    name: 'Woven Solar Cloak',
+    summary: 'A flowing cloak woven with flexible photovoltaic threads — natural linen shot through with faintly iridescent solar panels that catch the light.',
+    phrases: [
+      'a flowing natural-linen cloak woven with flexible photovoltaic threads',
+      'faintly iridescent solar panels set like scales across the shoulders',
+      'earthy undyed fabric edged with subtle copper conductive trim',
+      'practical and elegant, function and grace in one garment',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'outfit_sb_botanist_workwear',
+    name: "Botanist's Workwear",
+    summary: 'Practical garden workwear — rolled-sleeve linen, a canvas tool apron full of seed packets, sturdy boots and gloves.',
+    phrases: [
+      'practical botanist workwear, rolled-sleeve linen shirt and sturdy trousers',
+      'a canvas tool apron with deep pockets full of seed packets and trowels',
+      'worn leather gloves tucked in the belt, scuffed work boots',
+      'earth-toned, hard-wearing, comfortably lived-in',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'outfit_sb_glider_flightsuit',
+    name: 'Glider Flightsuit',
+    summary: 'A streamlined courier flightsuit — light linen and leather harness straps cut for the wind, with a furled solar wing-sail at the back.',
+    phrases: [
+      'a streamlined linen glider flightsuit cut close for the wind',
+      'leather harness straps and buckles across the chest, fingerless gloves',
+      'a furled translucent amber solar wing-sail folded at the back',
+      'lightweight, aerodynamic, built for the open air',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'outfit_sb_living_fiber_dress',
+    name: 'Living-Fibre Dress',
+    summary: 'A soft dress of living fibre — undyed cloth threaded with real growing moss and embroidered vines that seem to creep across the fabric.',
+    phrases: [
+      'a soft flowing dress of undyed living fibre cloth',
+      'real growing moss and small ferns threaded along the seams',
+      'embroidered vines and leaves creeping across the fabric',
+      'organic and gentle, clothing that is half garden',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'outfit_sb_repair_coveralls',
+    name: 'Repair-Café Coveralls',
+    summary: 'Hard-working patched coveralls — hand-mended in mismatched fabric, hung with tools, a leather tool-roll apron over the top.',
+    phrases: [
+      'well-worn work coveralls, visibly patched and hand-mended in mismatched cloth',
+      'loops and pockets hung with small hand tools',
+      'a leather tool-roll apron stained with oil and solder',
+      'utilitarian, thrifty, proudly repaired',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'outfit_sb_festival_bloomwear',
+    name: 'Festival Bloomwear',
+    summary: 'Ceremonial harvest-festival dress — flowing petal-toned layers, ribbons and garlands, crowned with living flowers.',
+    phrases: [
+      'flowing ceremonial festival dress in petal-pink, cream and gold layers',
+      'trailing ribbons and looping flower garlands',
+      'a full crown of living blooms cascading into the hair',
+      'celebratory, abundant, dressed for the harvest dance',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -427,6 +511,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V5_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V6_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);
