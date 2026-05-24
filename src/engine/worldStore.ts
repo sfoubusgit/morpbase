@@ -18,6 +18,7 @@ const WORLD_SEED_FLAG_KEY_V4 = 'promptgen:worlds:seeded:v4';
 const WORLD_SEED_FLAG_KEY_V5 = 'promptgen:worlds:seeded:v5';
 const WORLD_SEED_FLAG_KEY_V6 = 'promptgen:worlds:seeded:v6';
 const WORLD_SEED_FLAG_KEY_V7 = 'promptgen:worlds:seeded:v7';
+const WORLD_SEED_FLAG_KEY_V8 = 'promptgen:worlds:seeded:v8';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
@@ -26,6 +27,7 @@ const WORLD_SEED_TS_V4 = 1748304000000;
 const WORLD_SEED_TS_V5 = 1748476800000;
 const WORLD_SEED_TS_V6 = 1748563200000;
 const WORLD_SEED_TS_V7 = 1748649600000;
+const WORLD_SEED_TS_V8 = 1748736000000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -316,6 +318,48 @@ const SEED_WORLDS_V7: World[] = [
   },
 ];
 
+const SEED_WORLDS_V8: World[] = [
+  {
+    id: 'world_seed_dr_dust_run',
+    name: 'Dust Run',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_dr_01', text: 'a sun-blasted post-apocalyptic desert where the old world rusted away and only the hard and the thirsty are left' },
+      { id: 'wp_dr_02', text: 'a merciless pale sky and a blinding sun hammering down, heat-haze shimmering and dissolving the horizon into glare' },
+      { id: 'wp_dr_03', text: 'a sun-bleached palette of tan, ochre, rust and bone, with a hard faded blue overhead' },
+      { id: 'wp_dr_04', text: 'cracked white salt flats split into a million dry tiles, dust devils spinning across the emptiness' },
+      { id: 'wp_dr_05', text: 'endless rolling dunes wind-carved into sharp ridges, a single faint track winding over the gold' },
+      { id: 'wp_dr_06', text: 'a ghost town main street of warped clapboard fronts, a broken sign swinging, tumbleweed on the wind' },
+      { id: 'wp_dr_07', text: 'roaring scrap-plated war-rigs trailing rooster-tails of dust, welded armour and chain-wrapped wheels' },
+      { id: 'wp_dr_08', text: 'a lone poncho-wrapped gunslinger walking in from the heat-haze, one hand never far from the revolver' },
+      { id: 'wp_dr_09', text: 'the only working well for a hundred miles, clean water hoarded behind scrap walls and armed catwalks' },
+      { id: 'wp_dr_10', text: 'the held breath of a standoff at high noon, narrowed eyes and hands hovering over holstered guns' },
+      { id: 'wp_dr_11', text: 'a vast scrapyard of rusted car hulks stacked into canyons of metal, the wind moaning through hollow steel' },
+      { id: 'wp_dr_12', text: 'a red-rock canyon pass perfect for an ambush, deep cool shadow below and a hot strip of sky above' },
+      { id: 'wp_dr_13', text: 'a battered saloon full of dust and smoke, hard god-rays through grimy windows, a torch singer on a worn stage' },
+      { id: 'wp_dr_14', text: 'a dry boneyard scattered with vast bleached skeletons, the ribs of beasts and machines half-sunk in sand' },
+      { id: 'wp_dr_15', text: 'the ruin of an old highway gas station at a crossroads to nowhere, a collapsed pump canopy and a faded sign' },
+      { id: 'wp_dr_16', text: 'a cracked freeway choked with rusted dead cars, a frozen traffic jam abandoned mid-flight, sand reclaiming the lanes' },
+      { id: 'wp_dr_17', text: 'a towering mountain-high wall of dust rolling in, the light gone thick and orange-brown, the sun a dim disc' },
+      { id: 'wp_dr_18', text: 'a rare contested oasis, a few ragged palms around a muddy spring, ringed with scrap fortifications and worth killing for' },
+      { id: 'wp_dr_19', text: 'a blind dust-oracle reading carved bones in the open waste, milky eyes and rag wrappings strung with charms' },
+      { id: 'wp_dr_20', text: 'the last sheriff holding a dead town, a tarnished star pinned to a long grey duster, a law no one else keeps' },
+      { id: 'wp_dr_21', text: 'scrap-welded guns, jury-rigged rifles and worn revolvers with notches filed into the grips' },
+      { id: 'wp_dr_22', text: 'a small campfire glowing warm against the immense cold desert night, sparks rising into a vast clear starfield' },
+      { id: 'wp_dr_23', text: 'low golden sun raking through hanging dust, long dramatic shadows and every airborne particle aglow' },
+      { id: 'wp_dr_24', text: 'a dented tin canteen with barely a swallow left, water rationed down to the last hot mouthful' },
+      { id: 'wp_dr_25', text: 'the smell the image implies — hot metal, gun-oil, sweat, dust, gasoline and sun-baked bone' },
+      { id: 'wp_dr_26', text: 'a scavenger kid in a too-big coat of pockets picking the wrecks for the good scrap others missed' },
+      { id: 'wp_dr_27', text: 'an outlaw gang on the dunes, twin pearl-handled revolvers and a dangerous grin, notches on every grip' },
+      { id: 'wp_dr_28', text: 'a gaunt dust-preacher walking the wastes with a sun-warped bible, preaching the end of a world that already ended' },
+      { id: 'wp_dr_29', text: 'the bone-deep weariness of survival, cracked lips and hollow eyes, going on because stopping means dying' },
+      { id: 'wp_dr_30', text: 'the whole waste vast and pitiless and beautiful — and the stubborn human refusal to give it the last word' },
+    ],
+    createdAt: WORLD_SEED_TS_V8,
+    updatedAt: WORLD_SEED_TS_V8,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -385,6 +429,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V7, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V7.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V8) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V8, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V8.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

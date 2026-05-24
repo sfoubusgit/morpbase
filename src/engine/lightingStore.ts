@@ -8,6 +8,7 @@ const LIGHTING_SEED_FLAG_KEY_V4 = 'promptgen:lightings:seeded:v4';
 const LIGHTING_SEED_FLAG_KEY_V5 = 'promptgen:lightings:seeded:v5';
 const LIGHTING_SEED_FLAG_KEY_V6 = 'promptgen:lightings:seeded:v6';
 const LIGHTING_SEED_FLAG_KEY_V7 = 'promptgen:lightings:seeded:v7';
+const LIGHTING_SEED_FLAG_KEY_V8 = 'promptgen:lightings:seeded:v8';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -94,6 +95,7 @@ const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
+const SEED_TS_8 = 1748736000000;
 
 const V5_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -539,6 +541,88 @@ const V7_SEED_LIGHTINGS: LightingSetup[] = [
   },
 ];
 
+// V8 — Dust Run: harsh sun, dust haze and campfire dark.
+const V8_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_dr_harsh_noon',
+    name: 'Harsh Noon Sun',
+    summary: 'The merciless overhead sun — blown-out highlights, hard black shadows straight down, blinding glare with no mercy and no shade.',
+    phrases: [
+      'merciless overhead noon sun, blinding and direct',
+      'blown-out highlights and hard black shadows pooling straight down',
+      'extreme contrast, glare bouncing off pale ground',
+      'heat shimmer rising, no shade anywhere',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'lighting_dr_golden_dust',
+    name: 'Golden Dust Haze',
+    summary: 'Low sun raking through hanging dust — warm amber light, long shadows, every particle in the air glowing gold.',
+    phrases: [
+      'low warm sun raking through hanging desert dust',
+      'thick golden amber light, every airborne particle aglow',
+      'long dramatic shadows stretched across the sand',
+      'soft hazy atmosphere, warm and cinematic',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'lighting_dr_backlit_silhouette',
+    name: 'Backlit Dust Silhouette',
+    summary: 'A figure thrown into silhouette against the bright sky — blazing rim light, dust glowing around the edges, the face in shadow.',
+    phrases: [
+      'a figure backlit into near-silhouette against a blazing bright sky',
+      'a hot rim of light tracing the edges, dust glowing around them',
+      'the face and front dropped into deep shadow',
+      'dramatic contre-jour, a lone dark shape in the glare',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'lighting_dr_saloon_shafts',
+    name: 'Saloon Window Shafts',
+    summary: 'Hard god-rays through grimy windows — solid shafts of dusty light cutting the dim interior, smoke and dust drifting through the beams.',
+    phrases: [
+      'hard shafts of daylight stabbing through grimy saloon windows',
+      'solid dusty god-rays cutting across a dim smoky interior',
+      'drifting dust and smoke catching the light beams',
+      'bright pools on the floor, deep shadow between',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'lighting_dr_campfire_night',
+    name: 'Campfire Night Glow',
+    summary: 'A small fire against the desert dark — warm flickering orange on faces, cold blue night beyond, sparks rising into a vast starfield.',
+    phrases: [
+      'a small campfire glowing warm orange against the desert night',
+      'flickering firelight on faces, deep cold blue dark beyond',
+      'sparks rising toward a vast clear starfield',
+      'intimate pool of warmth in an immense black emptiness',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'lighting_dr_duststorm_murk',
+    name: 'Dust-Storm Murk',
+    summary: 'The choking light inside a sandstorm — thick orange-brown haze, the sun a dim disc, everything flattened and dimmed by airborne grit.',
+    phrases: [
+      'the choking diffuse light inside a dust storm',
+      'thick orange-brown haze, the sun reduced to a dim glowing disc',
+      'everything flattened and dimmed by airborne grit',
+      'low visibility, eerie monochrome amber murk',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
 const writeItems = (items: LightingSetup[]) => {
   const payload: LightingStore = { version: 1, items: sortItems(items) };
   writeStorageItem(LIGHTING_STORE_KEY, payload);
@@ -602,6 +686,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V7_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V8_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

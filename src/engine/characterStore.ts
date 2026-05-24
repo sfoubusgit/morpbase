@@ -24,6 +24,7 @@ const CHARACTER_SEED_FLAG_KEY_V11 = 'promptgen:characters:seeded:v11';
 const CHARACTER_SEED_FLAG_KEY_V12 = 'promptgen:characters:seeded:v12';
 const CHARACTER_SEED_FLAG_KEY_V13 = 'promptgen:characters:seeded:v13';
 const CHARACTER_SEED_FLAG_KEY_V14 = 'promptgen:characters:seeded:v14';
+const CHARACTER_SEED_FLAG_KEY_V15 = 'promptgen:characters:seeded:v15';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -290,6 +291,7 @@ const SEED_TS_11 = 1748390400000;
 const SEED_TS_12 = 1748476800000;
 const SEED_TS_13 = 1748563200000;
 const SEED_TS_14 = 1748649600000;
+const SEED_TS_15 = 1748736000000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -2308,6 +2310,373 @@ const V14_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V15 — Dust Run: a post-apocalyptic desert, spaghetti-western-meets-Mad-Max grit.
+const V15_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_dr_drifter',
+    name: 'The Drifter',
+    summary: 'A nameless wanderer who walks in from the heat-haze and leaves before the dust settles — sun-cured, silent, one hand never far from the revolver.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'lone gunslinger',
+      presentation: 'clothed',
+      ageImpression: 'weathered adult',
+      personalityTone: 'laconic, watchful, unbothered; says nothing he does not have to',
+      visualAnchors: [
+        { id: 'anchor_drd_1', label: 'Face', kind: 'face', text: 'sun-cured stubbled face, squinting pale eyes, a thin cigarillo at the corner of the mouth' },
+        { id: 'anchor_drd_2', label: 'Poncho', kind: 'clothing', text: 'a faded sand-coloured poncho over dust-caked clothes' },
+        { id: 'anchor_drd_3', label: 'Hat', kind: 'accessory', text: 'a battered wide-brimmed hat low over the eyes' },
+        { id: 'anchor_drd_4', label: 'Weapon', kind: 'accessory', text: 'a worn revolver in a low-slung holster, one hand resting near it' },
+        { id: 'anchor_drd_5', label: 'Skin', kind: 'other', text: 'dust on every surface, deep tan, fine grit in the creases' },
+      ],
+      motifs: [
+        { id: 'motif_drd_1', label: 'In From the Heat-Haze', text: 'the lone silhouette, the low hat, the hand near the gun' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, cowboy',
+        'sun-cured stubbled face, squinting pale eyes, a thin cigarillo at the mouth',
+        'a faded sand-coloured poncho over dust-caked clothes, a battered wide-brimmed hat low over the eyes',
+        'a worn revolver in a low-slung holster, hand resting near it',
+        'standing on a dead-town street in the heat-haze',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_water_baron',
+    name: 'The Water Baron',
+    summary: 'The fat king of a dry world — he owns the only working well for a hundred miles and dresses in the wealth thirst buys, rings heavy on every finger.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'tyrant',
+      presentation: 'clothed',
+      ageImpression: 'corpulent adult',
+      personalityTone: 'oily, complacent, cruel; smiles while you go thirsty',
+      visualAnchors: [
+        { id: 'anchor_drwb_1', label: 'Build', kind: 'silhouette', text: 'a heavy corpulent build, the only well-fed man in a starving land' },
+        { id: 'anchor_drwb_2', label: 'Face', kind: 'face', text: 'a sweating jowled face, oiled moustache, gold tooth in a smug smile' },
+        { id: 'anchor_drwb_3', label: 'Outfit', kind: 'clothing', text: 'a once-fine dusty frock coat and brocade waistcoat strained at the buttons' },
+        { id: 'anchor_drwb_4', label: 'Rings', kind: 'accessory', text: 'thick gold rings on every finger, a watch chain across the gut' },
+        { id: 'anchor_drwb_5', label: 'Prop', kind: 'accessory', text: 'a dripping glass of clean water held casually, taunting' },
+      ],
+      motifs: [
+        { id: 'motif_drwb_1', label: 'He Owns the Well', text: 'the dripping glass, the gold rings, wealth measured in water' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a heavy corpulent build, a sweating jowled face, oiled moustache and a gold-tooth smug smile',
+        'a once-fine dusty frock coat and brocade waistcoat strained at the buttons, thick gold rings on every finger',
+        'holding a dripping glass of clean water, taunting',
+        'in a dim water refinery surrounded by his guards',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_mechanic',
+    name: 'The Mechanic',
+    summary: 'The one who keeps the rigs running — grease to the elbows, goggles up on the brow, a cigarette and a wrench and a hundred salvaged parts.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'rig mechanic',
+      presentation: 'clothed',
+      ageImpression: 'capable adult',
+      personalityTone: 'dry-humoured, unflappable, fiercely competent',
+      visualAnchors: [
+        { id: 'anchor_drm_1', label: 'Skin', kind: 'other', text: 'grease-streaked face and forearms, oil under the nails' },
+        { id: 'anchor_drm_2', label: 'Goggles', kind: 'accessory', text: 'cracked welding goggles pushed up on a sweat-damp brow' },
+        { id: 'anchor_drm_3', label: 'Hair', kind: 'hair', text: 'dark hair tied back under a grimy bandana' },
+        { id: 'anchor_drm_4', label: 'Outfit', kind: 'clothing', text: 'a sleeveless oil-stained jumpsuit tied at the waist over a faded tank top' },
+        { id: 'anchor_drm_5', label: 'Tool', kind: 'accessory', text: 'a heavy wrench in one hand, a roll-up cigarette at the lip' },
+      ],
+      motifs: [
+        { id: 'motif_drm_1', label: 'Keeps It Running', text: 'grease and goggles, salvaged parts, the wrench that holds the world together' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, mechanic',
+        'grease-streaked face and forearms, cracked welding goggles pushed up on the brow',
+        'dark hair tied back under a grimy bandana, a roll-up cigarette at the lip',
+        'a sleeveless oil-stained jumpsuit tied at the waist, a heavy wrench in hand',
+        'in a rust-roofed garage of salvaged vehicle parts',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_bounty_hunter',
+    name: 'The Bounty Hunter',
+    summary: 'A scarred tracker who collects the wanted and the dead alike — trophies strung on the coat, a long rifle, eyes that have already measured your worth.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'bounty hunter',
+      presentation: 'clothed',
+      ageImpression: 'hardened adult',
+      personalityTone: 'cold, transactional, patient; everything has a price',
+      visualAnchors: [
+        { id: 'anchor_drbh_1', label: 'Face', kind: 'face', text: 'a hard scarred face, a long old knife-scar across one cheek, dead-calm eyes' },
+        { id: 'anchor_drbh_2', label: 'Coat', kind: 'clothing', text: 'a long weather-beaten duster strung with bounty tokens and spent shells' },
+        { id: 'anchor_drbh_3', label: 'Weapon', kind: 'accessory', text: 'a long scoped rifle slung across the back' },
+        { id: 'anchor_drbh_4', label: 'Hair', kind: 'hair', text: 'lank dark hair under a flat-brimmed black hat' },
+        { id: 'anchor_drbh_5', label: 'Detail', kind: 'accessory', text: 'a bandolier of brass cartridges across the chest' },
+      ],
+      motifs: [
+        { id: 'motif_drbh_1', label: 'Dead or Alive', text: 'the trophy coat, the long rifle, the cold appraising stare' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a hard scarred face with a long knife-scar across one cheek, dead-calm eyes',
+        'a long weather-beaten duster strung with bounty tokens and spent shells, a bandolier of brass cartridges',
+        'lank dark hair under a flat-brimmed black hat, a long scoped rifle across the back',
+        'standing in a red-rock canyon pass',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_dust_oracle',
+    name: 'The Dust Oracle',
+    summary: 'A blind seer wrapped in sun-bleached rags who reads the wind and the bones — feared and sought, speaking the desert\'s prophecies in a cracked whisper.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'desert seer',
+      presentation: 'clothed',
+      ageImpression: 'ancient',
+      personalityTone: 'cryptic, serene, unsettling; sees what the eyes cannot',
+      visualAnchors: [
+        { id: 'anchor_drdo_1', label: 'Eyes', kind: 'eyes', text: 'milky blind white eyes, a calm distant gaze' },
+        { id: 'anchor_drdo_2', label: 'Wraps', kind: 'clothing', text: 'layered sun-bleached rag-wrappings and a tattered hooded shawl' },
+        { id: 'anchor_drdo_3', label: 'Skin', kind: 'other', text: 'deeply lined leather-brown skin caked with pale dust' },
+        { id: 'anchor_drdo_4', label: 'Adornment', kind: 'accessory', text: 'bone charms, beads and feathers strung through the wrappings' },
+        { id: 'anchor_drdo_5', label: 'Hands', kind: 'other', text: 'thin hands cradling a scatter of carved reading-bones' },
+      ],
+      motifs: [
+        { id: 'motif_drdo_1', label: 'Reads the Bones', text: 'milky eyes, rag wrappings, the prophecy in the dust' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, old woman',
+        'milky blind white eyes, deeply lined leather-brown skin caked with pale dust',
+        'layered sun-bleached rag-wrappings and a tattered hooded shawl, bone charms and feathers strung through',
+        'thin hands cradling a scatter of carved reading-bones',
+        'seated in the open desert at dusk',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_sheriff',
+    name: 'The Last Sheriff',
+    summary: 'The lone lawkeeper of a town the world forgot — a tarnished star still pinned to the duster, holding a line that no longer means anything to anyone but him.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'lawman',
+      presentation: 'clothed',
+      ageImpression: 'aging adult',
+      personalityTone: 'weary, principled, immovable; the last good man, and he knows it',
+      visualAnchors: [
+        { id: 'anchor_drs_1', label: 'Face', kind: 'face', text: 'a weathered grey-stubbled face, tired steady eyes, a grim set jaw' },
+        { id: 'anchor_drs_2', label: 'Badge', kind: 'accessory', text: 'a tarnished six-point sheriff star pinned to the chest' },
+        { id: 'anchor_drs_3', label: 'Coat', kind: 'clothing', text: 'a long dust-grey lawman\'s duster over a faded waistcoat' },
+        { id: 'anchor_drs_4', label: 'Hat', kind: 'accessory', text: 'a sweat-stained pale cowboy hat' },
+        { id: 'anchor_drs_5', label: 'Weapon', kind: 'accessory', text: 'a holstered revolver, a hand resting steady on the belt' },
+      ],
+      motifs: [
+        { id: 'motif_drs_1', label: 'Holds the Line', text: 'the tarnished star, the empty street, a law no one else keeps' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, cowboy, old man',
+        'a weathered grey-stubbled face, tired steady eyes and a grim set jaw',
+        'a tarnished six-point sheriff star pinned to a long dust-grey lawman duster',
+        'a sweat-stained pale cowboy hat, a hand resting steady on the gun belt',
+        'standing alone on a dead-town main street at high noon',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_scavenger_kid',
+    name: 'The Scavenger Kid',
+    summary: 'A wiry teenager who knows every wreck worth picking — goggles, a too-big coat of pockets, and a knack for finding what others missed.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'scavenger',
+      presentation: 'clothed',
+      ageImpression: 'teenager',
+      personalityTone: 'quick, scrappy, hopeful despite everything',
+      visualAnchors: [
+        { id: 'anchor_drsk_1', label: 'Goggles', kind: 'accessory', text: 'scratched dust goggles up on a mop of sandy hair' },
+        { id: 'anchor_drsk_2', label: 'Face', kind: 'face', text: 'a dirt-smudged young face, a gap-toothed grin, bright quick eyes' },
+        { id: 'anchor_drsk_3', label: 'Coat', kind: 'clothing', text: 'a too-big patched coat covered in pockets and clipped-on salvage' },
+        { id: 'anchor_drsk_4', label: 'Pack', kind: 'accessory', text: 'a bulging scrap-sack of wires, bolts and treasures slung on the back' },
+        { id: 'anchor_drsk_5', label: 'Detail', kind: 'other', text: 'mismatched gloves, dust on everything' },
+      ],
+      motifs: [
+        { id: 'motif_drsk_1', label: 'Finds the Good Scrap', text: 'goggles and pockets, the scrap-sack, hope in a wrecked world' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, child, teenager',
+        'a dirt-smudged young face with a gap-toothed grin and bright quick eyes, scratched dust goggles up on sandy hair',
+        'a too-big patched coat covered in pockets and clipped-on salvage, mismatched gloves',
+        'a bulging scrap-sack of wires and bolts on the back',
+        'climbing through a desert scrapyard of wrecked vehicles',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_road_warrior',
+    name: 'The Road Warrior',
+    summary: 'The driver of a roaring scrap-plated war-rig — armoured in welded steel and leather, masked against the dust, born for the chase.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'war-rig driver',
+      presentation: 'clothed',
+      ageImpression: 'hardened adult',
+      personalityTone: 'feral, fearless, adrenaline-wired',
+      visualAnchors: [
+        { id: 'anchor_drrw_1', label: 'Mask', kind: 'accessory', text: 'a riveted scrap respirator mask and dust goggles over the face' },
+        { id: 'anchor_drrw_2', label: 'Armor', kind: 'clothing', text: 'welded scrap-metal plate and studded leather armour over the shoulders' },
+        { id: 'anchor_drrw_3', label: 'Hair', kind: 'hair', text: 'a wild dust-matted mohawk or shaved sides' },
+        { id: 'anchor_drrw_4', label: 'Arms', kind: 'other', text: 'bare muscular arms streaked with grease and old burns' },
+        { id: 'anchor_drrw_5', label: 'Detail', kind: 'accessory', text: 'fingerless gloves gripping a chain-wrapped wheel or weapon' },
+      ],
+      motifs: [
+        { id: 'motif_drrw_1', label: 'Born for the Chase', text: 'the respirator mask, scrap armour, the roar of the war-rig' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a riveted scrap respirator mask and dust goggles over the face, a wild dust-matted mohawk',
+        'welded scrap-metal plate and studded leather armour, bare muscular grease-streaked arms',
+        'fingerless gloves gripping a chain-wrapped wheel',
+        'driving a roaring scrap-plated war-rig across the dunes',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_saloon_singer',
+    name: 'The Saloon Singer',
+    summary: 'Faded glamour in a town of dust — a torch singer in a once-beautiful dress who holds the whole sweaty saloon in the palm of a gloved hand.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'saloon singer',
+      presentation: 'clothed',
+      ageImpression: 'glamorous adult',
+      personalityTone: 'smoky, knowing, resilient; sorrow dressed as showmanship',
+      visualAnchors: [
+        { id: 'anchor_drss_1', label: 'Dress', kind: 'clothing', text: 'a once-fine red satin saloon dress, faded and frayed at the hem' },
+        { id: 'anchor_drss_2', label: 'Hair', kind: 'hair', text: 'dark waved hair pinned with a tired silk flower' },
+        { id: 'anchor_drss_3', label: 'Face', kind: 'face', text: 'smoky kohl-rimmed eyes and dark lipstick, a knowing half-smile' },
+        { id: 'anchor_drss_4', label: 'Gloves', kind: 'accessory', text: 'long satin gloves gone grey at the fingertips' },
+        { id: 'anchor_drss_5', label: 'Detail', kind: 'accessory', text: 'a cigarette holder or a dented microphone in hand' },
+      ],
+      motifs: [
+        { id: 'motif_drss_1', label: 'Faded Glamour', text: 'the frayed red dress, the smoky light, beauty surviving the dust' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'smoky kohl-rimmed eyes and dark lipstick, a knowing half-smile, dark waved hair pinned with a silk flower',
+        'a once-fine red satin saloon dress faded and frayed at the hem, long grey-tipped satin gloves',
+        'a dented microphone in hand',
+        'on a small saloon stage in dusty shafts of light',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_preacher',
+    name: 'The Dust Preacher',
+    summary: 'A gaunt apocalyptic revivalist who walks the wastes with a worn bible and a wilder eye — preaching the end of a world that already ended.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'apocalyptic preacher',
+      presentation: 'clothed',
+      ageImpression: 'gaunt adult',
+      personalityTone: 'feverish, charismatic, dangerous conviction',
+      visualAnchors: [
+        { id: 'anchor_drp_1', label: 'Build', kind: 'silhouette', text: 'a tall gaunt sun-starved frame' },
+        { id: 'anchor_drp_2', label: 'Face', kind: 'face', text: 'a hollow-cheeked face, burning fervent eyes, cracked lips' },
+        { id: 'anchor_drp_3', label: 'Coat', kind: 'clothing', text: 'a dusty black preacher\'s frock coat and grimy clerical collar' },
+        { id: 'anchor_drp_4', label: 'Hat', kind: 'accessory', text: 'a flat black wide-brimmed preacher hat' },
+        { id: 'anchor_drp_5', label: 'Book', kind: 'accessory', text: 'a sun-warped leather bible clutched to the chest' },
+      ],
+      motifs: [
+        { id: 'motif_drp_1', label: 'The End That Already Came', text: 'the black coat, the worn bible, the fervent burning eye' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a tall gaunt sun-starved frame, a hollow-cheeked face with burning fervent eyes and cracked lips',
+        'a dusty black preacher frock coat and grimy clerical collar, a flat black wide-brimmed hat',
+        'a sun-warped leather bible clutched to the chest',
+        'preaching in the ruin of a dead-town chapel',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+  {
+    id: 'character_seed_dr_outlaw_queen',
+    name: 'The Outlaw Queen',
+    summary: 'The twin-gun leader of the dune gangs — swaggering, sharp-eyed and quick, a row of notches on each grip and a grin that means trouble.',
+    tags: ['solo', 'dust run', 'western'],
+    identity: {
+      archetype: 'outlaw leader',
+      presentation: 'clothed',
+      ageImpression: 'fierce adult',
+      personalityTone: 'swaggering, sharp, magnetic; loves the fight',
+      visualAnchors: [
+        { id: 'anchor_droq_1', label: 'Guns', kind: 'accessory', text: 'twin pearl-handled revolvers in a low double holster, notches on each grip' },
+        { id: 'anchor_droq_2', label: 'Face', kind: 'face', text: 'a sharp confident face, a scar through one brow, a dangerous grin' },
+        { id: 'anchor_droq_3', label: 'Hair', kind: 'hair', text: 'dark hair in a long braid under a tilted hat' },
+        { id: 'anchor_droq_4', label: 'Outfit', kind: 'clothing', text: 'a dust-red leather coat over a bandolier and worn trail clothes' },
+        { id: 'anchor_droq_5', label: 'Detail', kind: 'accessory', text: 'spurred boots, a red kerchief at the throat' },
+      ],
+      motifs: [
+        { id: 'motif_droq_1', label: 'Notches on the Grip', text: 'the twin revolvers, the dangerous grin, the swagger of the gang' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, cowgirl',
+        'a sharp confident face with a scar through one brow and a dangerous grin, dark hair in a long braid under a tilted hat',
+        'a dust-red leather coat over a bandolier, twin pearl-handled revolvers in a low double holster with notched grips',
+        'spurred boots and a red kerchief at the throat',
+        'standing over the dunes with her gang behind her',
+      ],
+    },
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -2463,6 +2832,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V14, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V14_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V15) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V15, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V15_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);

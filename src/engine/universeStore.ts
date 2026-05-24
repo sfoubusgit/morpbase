@@ -8,12 +8,14 @@ const UNIVERSE_SEED_FLAG_KEY_V3 = 'morpbase:universes:seeded:v3';
 const UNIVERSE_SEED_FLAG_KEY_V4 = 'morpbase:universes:seeded:v4';
 const UNIVERSE_SEED_FLAG_KEY_V5 = 'morpbase:universes:seeded:v5';
 const UNIVERSE_SEED_FLAG_KEY_V6 = 'morpbase:universes:seeded:v6';
+const UNIVERSE_SEED_FLAG_KEY_V7 = 'morpbase:universes:seeded:v7';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
 const SEED_TS_V4 = 1748563200000;
 const SEED_TS_V5 = 1748649600000;
 const SEED_TS_V6 = 1748736000000;
+const SEED_TS_V7 = 1748822400000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -510,6 +512,102 @@ function maybeApplyUniverseSeedV6(universes: Universe[]): Universe[] {
   }
 }
 
+// V7 — Dust Run: a full in-app universe, a post-apocalyptic desert (spaghetti-western-meets-Mad-Max).
+const SEED_UNIVERSE_DUST_RUN: Universe = {
+  id: 'universe_seed_dust_run',
+  name: 'Dust Run',
+  description: 'A sun-blasted post-apocalyptic desert where the old world rusted away and only the hard and the thirsty are left — drifters and outlaws, water barons and scrap war-rigs, ghost towns and dune seas under a merciless sun. Spaghetti-western grit meets Mad-Max wasteland.',
+  pools: {
+    character: [
+      'character_seed_dr_drifter',
+      'character_seed_dr_water_baron',
+      'character_seed_dr_mechanic',
+      'character_seed_dr_bounty_hunter',
+      'character_seed_dr_dust_oracle',
+      'character_seed_dr_sheriff',
+      'character_seed_dr_scavenger_kid',
+      'character_seed_dr_road_warrior',
+      'character_seed_dr_saloon_singer',
+      'character_seed_dr_preacher',
+      'character_seed_dr_outlaw_queen',
+    ],
+    environment: [
+      'environment_seed_dr_salt_flats',
+      'environment_seed_dr_dead_town',
+      'environment_seed_dr_rust_garage',
+      'environment_seed_dr_water_refinery',
+      'environment_seed_dr_dune_sea',
+      'environment_seed_dr_canyon_pass',
+      'environment_seed_dr_saloon',
+      'environment_seed_dr_scrapyard',
+      'environment_seed_dr_gas_station',
+      'environment_seed_dr_bone_yard',
+      'environment_seed_dr_storm_wall',
+      'environment_seed_dr_oasis',
+      'environment_seed_dr_highway_wreck',
+    ],
+    wardrobe: [
+      'outfit_dr_drifter_poncho',
+      'outfit_dr_road_armor',
+      'outfit_dr_scavenger_rags',
+      'outfit_dr_saloon_dress',
+      'outfit_dr_lawman_duster',
+      'outfit_dr_desert_wraps',
+    ],
+    mood: [
+      'mood_dr_sunbaked_desolation',
+      'mood_dr_standoff_tension',
+      'mood_dr_outlaw_swagger',
+      'mood_dr_weary_survival',
+      'mood_dr_lawless_menace',
+      'mood_dr_last_hope_grit',
+    ],
+    style: [
+      'style_dr_spaghetti_western',
+      'style_dr_postapoc_concept',
+      'style_dr_dustbowl_sepia',
+      'style_dr_graphic_novel_ink',
+      'style_dr_sunbleached_render',
+      'style_dr_painted_poster',
+    ],
+    lighting: [
+      'lighting_dr_harsh_noon',
+      'lighting_dr_golden_dust',
+      'lighting_dr_backlit_silhouette',
+      'lighting_dr_saloon_shafts',
+      'lighting_dr_campfire_night',
+      'lighting_dr_duststorm_murk',
+    ],
+    object: [
+      'object_dr_revolver',
+      'object_dr_jerrycan',
+      'object_dr_skull',
+      'object_dr_hat',
+      'object_dr_scrap_rifle',
+      'object_dr_compass',
+      'object_dr_canteen',
+    ],
+    aura: [
+      'world_seed_dr_dust_run',
+    ],
+  },
+  createdAt: SEED_TS_V7,
+  updatedAt: SEED_TS_V7,
+};
+
+function maybeApplyUniverseSeedV7(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V7) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V7, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_DUST_RUN.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_DUST_RUN];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -553,7 +651,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))));
+    return maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

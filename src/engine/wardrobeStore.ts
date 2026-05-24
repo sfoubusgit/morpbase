@@ -7,6 +7,7 @@ const WARDROBE_SEED_FLAG_KEY_V4 = 'promptgen:wardrobe:seeded:v4';
 const WARDROBE_SEED_FLAG_KEY_V5 = 'promptgen:wardrobe:seeded:v5';
 const WARDROBE_SEED_FLAG_KEY_V6 = 'promptgen:wardrobe:seeded:v6';
 const WARDROBE_SEED_FLAG_KEY_V7 = 'promptgen:wardrobe:seeded:v7';
+const WARDROBE_SEED_FLAG_KEY_V8 = 'promptgen:wardrobe:seeded:v8';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -93,6 +94,7 @@ const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
+const SEED_TS_8 = 1748736000000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -562,6 +564,88 @@ const V7_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V8 — Dust Run: post-apocalyptic western dress.
+const V8_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_dr_drifter_poncho',
+    name: "Drifter's Poncho",
+    summary: 'The gunslinger\'s uniform — a faded sand-coloured poncho over dust-caked trail clothes, a battered wide-brim hat and a low-slung holster.',
+    phrases: [
+      'a faded sand-coloured wool poncho, frayed and sun-bleached',
+      'dust-caked trail clothes and worn leather boots beneath',
+      'a battered wide-brimmed hat low over the eyes',
+      'a low-slung gun belt and holster, grit in every fold',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'outfit_dr_road_armor',
+    name: 'Road-Warrior Armor',
+    summary: 'Wasteland battle dress — welded scrap-metal plate and studded leather over straps and buckles, a respirator mask and goggles.',
+    phrases: [
+      'welded scrap-metal plate armour over studded leather',
+      'a tangle of straps, buckles and salvaged hardware',
+      'a riveted respirator mask and dust goggles',
+      'fingerless gloves and reinforced boots, grease and rust',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'outfit_dr_scavenger_rags',
+    name: 'Scavenger Rags',
+    summary: 'Practical salvage wear — a too-big patched coat covered in pockets, scratched goggles, mismatched gloves and a scrap-sack.',
+    phrases: [
+      'a too-big patched coat covered in pockets and clipped-on salvage',
+      'scratched dust goggles and a wrapped scarf against the sand',
+      'mismatched gloves and layered threadbare clothing',
+      'a bulging scrap-sack slung across the body',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'outfit_dr_saloon_dress',
+    name: 'Faded Saloon Dress',
+    summary: 'Frontier glamour gone to dust — a once-fine red satin dress frayed at the hem, long grey-tipped gloves and a tired silk flower.',
+    phrases: [
+      'a once-fine red satin saloon dress, faded and frayed at the hem',
+      'a fitted corset bodice and layered ruffled skirt',
+      'long satin gloves gone grey at the fingertips',
+      'a tired silk flower pinned in the hair, worn finery',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'outfit_dr_lawman_duster',
+    name: "Lawman's Duster",
+    summary: 'The sheriff\'s long coat — a dust-grey trail duster over a waistcoat, a tarnished star pinned to the chest and a sweat-stained hat.',
+    phrases: [
+      'a long dust-grey trail duster coat over a faded waistcoat',
+      'a tarnished six-point sheriff star pinned to the chest',
+      'a sweat-stained pale cowboy hat and worn leather gun belt',
+      'practical, weathered, and quietly authoritative',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'outfit_dr_desert_wraps',
+    name: 'Sun-Bleached Desert Wraps',
+    summary: 'Nomad protection from the sun — layered rag-wrappings and a hooded shawl over the face, bone charms and beads, every inch covered.',
+    phrases: [
+      'layered sun-bleached rag-wrappings covering the body',
+      'a hooded shawl and face-wrap against the sun and dust',
+      'bone charms, beads and feathers strung through the cloth',
+      'earth-toned, ragged, and built for the open waste',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -615,6 +699,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V7_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V8_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

@@ -8,6 +8,7 @@ const MOOD_SEED_FLAG_KEY_V4 = 'promptgen:moods:seeded:v4';
 const MOOD_SEED_FLAG_KEY_V5 = 'promptgen:moods:seeded:v5';
 const MOOD_SEED_FLAG_KEY_V6 = 'promptgen:moods:seeded:v6';
 const MOOD_SEED_FLAG_KEY_V7 = 'promptgen:moods:seeded:v7';
+const MOOD_SEED_FLAG_KEY_V8 = 'promptgen:moods:seeded:v8';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -94,6 +95,7 @@ const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
+const SEED_TS_8 = 1748736000000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -578,6 +580,88 @@ const V7_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V8 — Dust Run: harsh, lawless, weary-survivor registers.
+const V8_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_dr_sunbaked_desolation',
+    name: 'Sun-Baked Desolation',
+    summary: 'The vast indifferent emptiness of the waste — silence, glare, and the smallness of one figure under an enormous merciless sky.',
+    phrases: [
+      'vast indifferent emptiness, a tiny figure under an enormous sky',
+      'silence and glare, the loneliness of the open waste',
+      'heat-stunned stillness, nothing moving for miles',
+      'desolate, immense, and pitiless',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'mood_dr_standoff_tension',
+    name: 'Standoff Tension',
+    summary: 'The held breath before the draw — narrowed eyes, a hand near a gun, the whole world gone silent and waiting to break.',
+    phrases: [
+      'the held breath before the draw, taut and silent',
+      'narrowed eyes, a hand hovering near a gun',
+      'the whole world stopped, waiting for the first move',
+      'coiled, electric, a heartbeat from violence',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'mood_dr_outlaw_swagger',
+    name: 'Outlaw Swagger',
+    summary: 'Cocky lawless bravado — a dangerous grin, a loose easy stance, the confidence of someone with nothing to lose and good aim.',
+    phrases: [
+      'cocky lawless bravado, a dangerous easy grin',
+      'a loose confident swagger, nothing left to lose',
+      'reckless charm with a gun on the hip',
+      'bold, defiant, and trouble-loving',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'mood_dr_weary_survival',
+    name: 'Weary Survival',
+    summary: 'The bone-deep tiredness of just enduring — cracked lips, hollow eyes, grit and resignation, going on because stopping means dying.',
+    phrases: [
+      'bone-deep tiredness, the grind of simply enduring',
+      'cracked lips and hollow eyes, dust in every line',
+      'grim resignation, going on because stopping is death',
+      'worn-down, parched, and stubbornly alive',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'mood_dr_lawless_menace',
+    name: 'Lawless Menace',
+    summary: 'Predatory danger in a place with no rules — cruelty without consequence, the threat of those who take what they want.',
+    phrases: [
+      'predatory danger in a place with no law',
+      'cruelty without consequence, menace that takes what it wants',
+      'a hostile, violent edge under the dust',
+      'brutal, lawless, and unsafe',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'mood_dr_last_hope_grit',
+    name: 'Last-Hope Grit',
+    summary: 'Defiant resolve against impossible odds — a jaw set, a stand made, the stubborn human refusal to give the desert the last word.',
+    phrases: [
+      'defiant resolve against impossible odds, a jaw set hard',
+      'the stubborn refusal to let the waste win',
+      'one last stand, courage scraped from nothing',
+      'hardscrabble, determined, and quietly heroic',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -641,6 +725,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V7_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V8_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

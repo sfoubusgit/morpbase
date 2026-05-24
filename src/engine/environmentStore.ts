@@ -14,6 +14,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V7 = 'promptgen:environments:seeded:v7';
 const ENVIRONMENT_SEED_FLAG_KEY_V8 = 'promptgen:environments:seeded:v8';
 const ENVIRONMENT_SEED_FLAG_KEY_V9 = 'promptgen:environments:seeded:v9';
 const ENVIRONMENT_SEED_FLAG_KEY_V10 = 'promptgen:environments:seeded:v10';
+const ENVIRONMENT_SEED_FLAG_KEY_V11 = 'promptgen:environments:seeded:v11';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -112,6 +113,7 @@ const ENV_SEED_TS_7 = 1748304000000;
 const ENV_SEED_TS_8 = 1748476800000;
 const ENV_SEED_TS_9 = 1748563200000;
 const ENV_SEED_TS_10 = 1748649600000;
+const ENV_SEED_TS_11 = 1748736000000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -1346,6 +1348,231 @@ const V10_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V11 — Dust Run: a post-apocalyptic desert, spaghetti-western-meets-Mad-Max grit.
+const V11_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_dr_salt_flats',
+    name: 'The Cracked Salt Flats',
+    summary: 'An endless white salt pan baking under a merciless sky — cracked into a million tiles, heat-haze shimmering, the horizon dissolving into glare.',
+    phraseBundle: {
+      core: [
+        'an endless cracked white salt flat baking under a merciless pale sky',
+        'the ground split into a million dry hexagonal tiles to the horizon',
+        'heat-haze shimmering and dissolving the distance into glare',
+        'a single set of footprints or tyre tracks crossing the emptiness',
+        'bleached bones and a half-buried wreck the only landmarks',
+        'blinding, silent, and utterly without shade',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_dead_town',
+    name: 'Dead-Town Main Street',
+    summary: 'A ghost town\'s single street — sun-warped clapboard fronts, a swinging broken sign, sand drifting across the boards and tumbleweed on the wind.',
+    phraseBundle: {
+      core: [
+        'the single main street of a sun-bleached ghost town',
+        'warped clapboard storefronts with peeling paint and boarded windows',
+        'a broken sign swinging on one chain, a sagging saloon porch',
+        'sand drifting in low dunes across the wooden boardwalk',
+        'tumbleweed rolling down the empty dusty street',
+        'silent, abandoned, baking in the heat',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_rust_garage',
+    name: 'The Rust Garage',
+    summary: 'A scrap-roofed chop shop where rigs are kept alive — engine blocks on chains, walls of salvaged parts, oil-black ground and a welding-spark glow.',
+    phraseBundle: {
+      core: [
+        'a corrugated-iron garage and chop shop, roof patched with scrap',
+        'engine blocks hanging on chains, a half-built war-rig on blocks',
+        'walls hung with salvaged parts, tyres, jerrycans and tools',
+        'an oil-black dirt floor, sparks from a welding torch in the gloom',
+        'shafts of harsh daylight through gaps in the rusted walls',
+        'greasy, cluttered, and clangingly industrious',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_water_refinery',
+    name: "The Water Baron's Refinery",
+    summary: 'The fortified heart of the wasteland economy — rusted tanks and dripping pipes, armed catwalks, the only clean water for a hundred miles under guard.',
+    phraseBundle: {
+      core: [
+        'a fortified water refinery of rusted tanks and dripping pipework',
+        'armed catwalks and chain-link cages around the precious flow',
+        'a trickle of clean water glinting under hanging work-lamps',
+        'sandbags, scrap-metal walls and a watchtower against the sky',
+        'thirsty crowds held back at the gates below',
+        'oppressive, guarded, and grimly valuable',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_dune_sea',
+    name: 'The Dune Sea',
+    summary: 'An ocean of rolling sand to every horizon — wind-carved ridges, a lone ribbon of track, the sun hammering down on endless gold.',
+    phraseBundle: {
+      core: [
+        'an endless sea of rolling sand dunes to every horizon',
+        'wind-carved ridges and rippled sand, sharp light and shadow',
+        'a single faint track winding over and between the dunes',
+        'a half-buried wreck or skeleton breaking the smooth gold',
+        'a vast empty blue-white sky pressing down',
+        'immense, beautiful, and lethally empty',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_canyon_pass',
+    name: 'The Canyon Pass',
+    summary: 'A narrow red-rock gorge perfect for an ambush — towering striated walls, deep shadow below, a dry riverbed snaking between the cliffs.',
+    phraseBundle: {
+      core: [
+        'a narrow red-rock canyon pass, towering striated sandstone walls',
+        'deep cool shadow on the gorge floor, a hot bright strip of sky above',
+        'a dry cracked riverbed snaking between the cliffs',
+        'scattered boulders and scrub, perfect cover for an ambush',
+        'wind-eroded hoodoos and ledges overhead',
+        'tense, enclosed, and watchful',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_saloon',
+    name: 'The Dust Saloon',
+    summary: 'The last watering hole in a dry town — a battered bar, a dusty piano, shafts of light through grimy windows full of drifting dust and smoke.',
+    phraseBundle: {
+      core: [
+        'the dim interior of a battered frontier saloon',
+        'a long scuffed bar with mismatched bottles, a cracked mirror behind',
+        'a dusty upright piano in the corner, a small worn stage',
+        'shafts of hard daylight through grimy windows, full of drifting dust and smoke',
+        'round tables, rickety chairs and a sticky board floor',
+        'smoky, close, and dangerously quiet',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_scrapyard',
+    name: 'The Scrapyard',
+    summary: 'A vast graveyard of dead machines — rusted car hulks stacked in canyons of metal, picked-over wrecks, the wind moaning through hollow steel.',
+    phraseBundle: {
+      core: [
+        'a vast desert scrapyard, rusted car and truck hulks stacked into canyons of metal',
+        'picked-over wrecks half-buried in drifting sand',
+        'twisted steel, shattered glass and tangled wire everywhere',
+        'narrow paths winding between towering walls of scrap',
+        'the wind moaning through hollow rusted bodies',
+        'desolate, labyrinthine, and rich with salvage',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_gas_station',
+    name: 'The Gas Station Ruin',
+    summary: 'A skeleton of the old world — a collapsed pump canopy, a faded price sign, rusted pumps and a looted store baking at a crossroads to nowhere.',
+    phraseBundle: {
+      core: [
+        'the ruin of an old highway gas station at a desert crossroads',
+        'a collapsed rusted pump canopy and a faded peeling price sign',
+        'broken fuel pumps and a looted, glass-shattered store',
+        'sand drifting through the empty doorways, weeds in the cracked forecourt',
+        'a dead neon sign and a leaning telephone pole',
+        'forlorn, sun-bleached, and long abandoned',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_bone_yard',
+    name: 'The Bone Yard',
+    summary: 'A dry basin scattered with vast bleached skeletons — the ribs of beasts and machines half-sunk in the sand, monstrous and still under the glare.',
+    phraseBundle: {
+      core: [
+        'a dry desert basin scattered with vast bleached skeletons',
+        'enormous sun-whitened ribcages and skulls half-sunk in the sand',
+        'the bones of great beasts tangled with rusted machine wrecks',
+        'cracked earth, scrub and dust between the monstrous remains',
+        'a hard pale sky and shimmering heat over the boneyard',
+        'eerie, monumental, and deathly still',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_storm_wall',
+    name: 'The Storm Wall',
+    summary: 'A towering wall of dust devouring the horizon — a mountain-high haboob rolling in, the light going orange-brown, everything bracing before it hits.',
+    phraseBundle: {
+      core: [
+        'a towering mountain-high wall of dust rolling in across the desert',
+        'an immense churning haboob devouring the horizon, dwarfing everything',
+        'the light gone thick and orange-brown, the sun a dim disc',
+        'sand whipping off the dunes ahead of the front',
+        'a tiny vehicle or figure fleeing before the wall',
+        'apocalyptic, overwhelming, and seconds from impact',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_oasis',
+    name: 'The Contested Oasis',
+    summary: 'A rare green miracle in the waste — a few palms around a muddy spring, ringed with scrap fortifications, worth killing for and well defended.',
+    phraseBundle: {
+      core: [
+        'a small rare oasis in the desert waste, a few ragged palms around a muddy spring',
+        'precious green reeds and a glint of open water',
+        'ringed with scrap fortifications, fences and watch-posts',
+        'tents and salvage shelters clustered in the thin shade',
+        'the surrounding dunes pale and hostile beyond the green',
+        'a fragile guarded miracle worth killing for',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+  {
+    id: 'environment_seed_dr_highway_wreck',
+    name: 'The Highway Wreck',
+    summary: 'A cracked ribbon of old freeway choked with dead cars — a rusted traffic jam frozen mid-flight, sand reclaiming the lanes, overpasses crumbling.',
+    phraseBundle: {
+      core: [
+        'a cracked stretch of old freeway choked with rusted dead cars',
+        'a frozen traffic jam of wrecks, doors open, long abandoned mid-flight',
+        'drifting sand reclaiming the cracked lanes and faded markings',
+        'a crumbling concrete overpass leaning overhead',
+        'a leaning green road sign rusted past reading',
+        'desolate, post-apocalyptic, and silent but for the wind',
+      ],
+    },
+    createdAt: ENV_SEED_TS_11,
+    updatedAt: ENV_SEED_TS_11,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -1458,6 +1685,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V10, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V10_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V11_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

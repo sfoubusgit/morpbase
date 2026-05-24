@@ -9,6 +9,7 @@ const STYLE_SEED_FLAG_KEY_V5 = 'promptgen:styles:seeded:v5';
 const STYLE_SEED_FLAG_KEY_V6 = 'promptgen:styles:seeded:v6';
 const STYLE_SEED_FLAG_KEY_V7 = 'promptgen:styles:seeded:v7';
 const STYLE_SEED_FLAG_KEY_V8 = 'promptgen:styles:seeded:v8';
+const STYLE_SEED_FLAG_KEY_V9 = 'promptgen:styles:seeded:v9';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -96,6 +97,7 @@ const SEED_TS_5 = 1748304000000;
 const SEED_TS_6 = 1748476800000;
 const SEED_TS_7 = 1748563200000;
 const SEED_TS_8 = 1748649600000;
+const SEED_TS_9 = 1748736000000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -623,6 +625,94 @@ const V8_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V9 — Dust Run: post-apocalyptic spaghetti-western art directions.
+const V9_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_dr_spaghetti_western',
+    name: 'Spaghetti Western Film Still',
+    summary: 'Sergio Leone film still — extreme telephoto compression, sun-blasted grain, deep tans and dust, tense widescreen framing.',
+    phrases: [
+      'a Sergio Leone spaghetti-western film still, anamorphic widescreen',
+      'extreme telephoto lens compression, sun-blasted 35mm grain',
+      'sun-bleached palette of tan, ochre, dust and faded blue sky',
+      'tense composition with deep focus and dramatic negative space',
+      'cinematic, gritty, and baking in the heat',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'style_dr_postapoc_concept',
+    name: 'Post-Apocalyptic Concept Art',
+    summary: 'Mad-Max wasteland concept art — scrap-and-rust detail, sun-scorched grit, dynamic vehicular chaos, painterly cinematic realism.',
+    phrases: [
+      'post-apocalyptic wasteland concept art, Mad Max sensibility',
+      'highly detailed scrap-metal, rust and welded-junk design',
+      'sun-scorched grit, dust haze and harsh contrast',
+      'dynamic cinematic composition, painterly realism',
+      'rugged, kinetic, and richly textured',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'style_dr_dustbowl_sepia',
+    name: 'Dust-Bowl Sepia Photograph',
+    summary: 'A Depression-era sepia photograph — warm monochrome, fine dust grain, sun-cracked weariness, the documentary look of a vanished frontier.',
+    phrases: [
+      'a Dust-Bowl-era sepia photograph, warm faded monochrome',
+      'fine grain and dust, scratches and aged paper tone',
+      'sun-cracked weathered detail, documentary realism',
+      'soft vignette, hard noon light, weary frontier mood',
+      'nostalgic, austere, and historic',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'style_dr_graphic_novel_ink',
+    name: 'Gritty Graphic-Novel Ink',
+    summary: 'Heavy noir ink — bold black shadows, rough crosshatching, high-contrast sun-and-shade, the look of a western graphic novel.',
+    phrases: [
+      'gritty western graphic-novel ink illustration',
+      'bold heavy black shadows and rough crosshatching',
+      'high-contrast sun-and-shade, stark white highlights',
+      'limited dusty spot-colour over strong inked linework',
+      'rugged, graphic, and dramatic',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'style_dr_sunbleached_render',
+    name: 'Sun-Bleached Cinematic Render',
+    summary: 'Photoreal desert render — blown-out highlights, dust in the air, heat shimmer, a harsh bleached colour grade.',
+    phrases: [
+      'photorealistic sun-bleached cinematic render of the desert',
+      'blown-out highlights and deep crushed shadows, harsh sun',
+      'dust suspended in the air, heat shimmer and lens flare',
+      'bleached desaturated tan-and-blue colour grade',
+      'harsh, hyper-real, and parched',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'style_dr_painted_poster',
+    name: 'Painted Western Poster',
+    summary: 'A vintage hand-painted western movie poster — bold dramatic figures, warm saturated dusk palette, gouache texture and heroic framing.',
+    phrases: [
+      'a vintage hand-painted western movie poster, gouache texture',
+      'bold dramatic figures arranged in a heroic montage',
+      'warm saturated dusk palette of orange, gold and deep brown',
+      'painterly brushwork, strong rim light and theatrical poses',
+      'epic, romantic, and larger than life',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -696,6 +786,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V8, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V8_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V9_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

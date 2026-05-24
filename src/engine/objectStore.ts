@@ -21,10 +21,12 @@ const SEED_FLAG_KEY = 'promptgen:objects:seeded:v1';
 const SEED_FLAG_KEY_V2 = 'promptgen:objects:seeded:v2';
 const SEED_FLAG_KEY_V3 = 'promptgen:objects:seeded:v3';
 const SEED_FLAG_KEY_V4 = 'promptgen:objects:seeded:v4';
+const SEED_FLAG_KEY_V5 = 'promptgen:objects:seeded:v5';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
 const SEED_TS_3 = 1748563200000;
 const SEED_TS_4 = 1748649600000;
+const SEED_TS_5 = 1748736000000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -518,6 +520,101 @@ const V4_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V5 — Dust Run: post-apocalyptic western props.
+const V5_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_dr_revolver',
+    name: 'Worn Revolver',
+    summary: 'A well-used six-shooter — bluing worn to bare steel, a scratched wooden grip with notches filed in, the tool that settles arguments out here.',
+    phrases: [
+      'a well-used single-action revolver, bluing worn to bare steel',
+      'a scratched wooden grip with notches filed into it',
+      'fine dust in the cylinder gaps, oiled and ready',
+      'the tool that settles arguments in the waste',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_jerrycan',
+    name: 'Rusted Jerrycan',
+    summary: 'A dented steel jerrycan — sloshing with something precious, water or fuel, the side stencilled and scratched, worth a life out here.',
+    phrases: [
+      'a dented rusted steel jerrycan, paint scratched and faded',
+      'sloshing with something precious, water or fuel',
+      'a stencilled marking half worn away, a battered cap',
+      'lashed with rope, worth a life in the waste',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_skull',
+    name: 'Bleached Beast Skull',
+    summary: 'A sun-whitened animal skull half-buried in the sand — long horns, cracked bone, a grim trail-marker and a memento of the heat.',
+    phrases: [
+      'a sun-bleached cattle or beast skull, white and cracked',
+      'long curved horns, hollow eye sockets full of sand',
+      'half-buried in the dust, weathered smooth',
+      'a grim marker of the trail and the heat',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_hat',
+    name: 'Battered Cowboy Hat',
+    summary: 'A sweat-stained wide-brim hat — sun-faded felt, a frayed band, a bullet-hole or two, shaped by years of dust and weather.',
+    phrases: [
+      'a battered wide-brimmed cowboy hat, sun-faded felt',
+      'a frayed sweat-stained band, the brim warped by weather',
+      'a bullet-hole or two punched clean through',
+      'dust ground into every crease, well worn',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_scrap_rifle',
+    name: 'Scrap-Welded Rifle',
+    summary: 'A jury-rigged long gun cobbled from salvage — mismatched parts, pipe and wire, taped grip, ugly and entirely functional.',
+    phrases: [
+      'a jury-rigged rifle cobbled together from salvaged parts',
+      'mismatched metal, pipe and wire, a taped wooden grip',
+      'rust and scratches, improvised sights bolted on',
+      'ugly, dangerous, and entirely functional',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_compass',
+    name: 'Cracked Compass',
+    summary: 'A dented brass compass with a spiderwebbed glass — the needle still swinging true, a lifeline across a trackless waste.',
+    phrases: [
+      'a dented brass pocket compass with spiderwebbed cracked glass',
+      'the needle still swinging true under the cracks',
+      'tarnished casing, worn smooth from handling',
+      'a lifeline across the trackless waste',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+  {
+    id: 'object_dr_canteen',
+    name: 'Tin Canteen',
+    summary: 'A battered tin canteen on a frayed strap — dented and sun-hot, almost empty, the most important thing anyone carries.',
+    phrases: [
+      'a battered dented tin canteen on a frayed shoulder strap',
+      'sun-hot metal, scratched and rusted at the seams',
+      'a cork or screw cap worn loose, barely a swallow left',
+      'the most important thing anyone carries out here',
+    ],
+    createdAt: SEED_TS_5,
+    updatedAt: SEED_TS_5,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -555,6 +652,16 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V4, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V4_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V5) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V5, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V5_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
