@@ -7,6 +7,7 @@ const LIGHTING_SEED_FLAG_KEY_V3 = 'promptgen:lightings:seeded:v3';
 const LIGHTING_SEED_FLAG_KEY_V4 = 'promptgen:lightings:seeded:v4';
 const LIGHTING_SEED_FLAG_KEY_V5 = 'promptgen:lightings:seeded:v5';
 const LIGHTING_SEED_FLAG_KEY_V6 = 'promptgen:lightings:seeded:v6';
+const LIGHTING_SEED_FLAG_KEY_V7 = 'promptgen:lightings:seeded:v7';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -92,6 +93,7 @@ const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
+const SEED_TS_7 = 1748649600000;
 
 const V5_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -455,6 +457,88 @@ const V6_SEED_LIGHTINGS: LightingSetup[] = [
   },
 ];
 
+// V7 — Porcelain Court: dim, dusty, candlelit and grey-windowed light.
+const V7_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_pc_candelabra_glow',
+    name: 'Dusty Candelabra Glow',
+    summary: 'Warm guttering candlelight from a tarnished candelabra — small pools of amber against deep shadow, dust drifting in the beams.',
+    phrases: [
+      'warm guttering candlelight from a tarnished candelabra, small amber pools',
+      'soft flickering glow falling off quickly into deep shadow',
+      'dust motes drifting visibly through the candle beams',
+      'intimate, golden, and surrounded by dark',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'lighting_pc_grimy_window',
+    name: 'Grimy Window Daylight',
+    summary: 'Pale flat daylight through dirty tall windows — cold, dim and diffuse, sifting grey through grime and torn lace curtains.',
+    phrases: [
+      'pale flat daylight filtering through tall grimy windows',
+      'cold dim diffuse light sifted grey through dust and torn lace',
+      'soft shadowless illumination, colours muted and faded',
+      'the wan quiet light of a long-shuttered room',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'lighting_pc_chandelier_refraction',
+    name: 'Chandelier Crystal Refraction',
+    summary: 'Fractured light through a dusty crystal chandelier — scattered glints and faint prismatic flecks falling across the gloom.',
+    phrases: [
+      'fractured light scattering through a dusty crystal chandelier',
+      'tiny glints and faint prismatic flecks cast across the room',
+      'a dim sparkle drifting over dust and faded gilt',
+      'delicate broken light in a vast shadowy space',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'lighting_pc_tall_window_moonlight',
+    name: 'Tall-Window Moonlight',
+    summary: 'Cold blue moonlight through high arched windows — long pale window-bars cast across dusty floors, deep silver shadow elsewhere.',
+    phrases: [
+      'cold blue moonlight pouring through tall arched windows',
+      'long pale window-bar shadows stretched across a dusty floor',
+      'silver-edged highlights, deep blue shadow filling the rest',
+      'still, lunar, and quietly haunted',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'lighting_pc_gilt_bounce',
+    name: 'Faded Gilt Bounce',
+    summary: 'Soft warm light bounced off tarnished gold — a dim amber ambient glow from flaking gilt walls and mirror frames.',
+    phrases: [
+      'soft warm light bounced off tarnished gold leaf and gilt scrollwork',
+      'a dim amber ambient glow filling a faded ornate room',
+      'gentle reflections off old mirror frames and picture frames',
+      'mellow, antique, and richly dim',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'lighting_pc_musicbox_footlight',
+    name: 'Music-Box Footlight',
+    summary: 'A low warm stage glow from below — a single footlight on the turning doll, dramatic up-lighting against a dark velvet surround.',
+    phrases: [
+      'a single low warm footlight glowing up onto the subject',
+      'dramatic stage up-lighting against a dark velvet surround',
+      'a small spotlit turning stage, everything beyond it in shadow',
+      'theatrical, intimate, and faintly sinister',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const writeItems = (items: LightingSetup[]) => {
   const payload: LightingStore = { version: 1, items: sortItems(items) };
   writeStorageItem(LIGHTING_STORE_KEY, payload);
@@ -508,6 +592,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V6_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V7_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

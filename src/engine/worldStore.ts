@@ -17,6 +17,7 @@ const WORLD_SEED_FLAG_KEY_V3 = 'promptgen:worlds:seeded:v3';
 const WORLD_SEED_FLAG_KEY_V4 = 'promptgen:worlds:seeded:v4';
 const WORLD_SEED_FLAG_KEY_V5 = 'promptgen:worlds:seeded:v5';
 const WORLD_SEED_FLAG_KEY_V6 = 'promptgen:worlds:seeded:v6';
+const WORLD_SEED_FLAG_KEY_V7 = 'promptgen:worlds:seeded:v7';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
@@ -24,6 +25,7 @@ const WORLD_SEED_TS_V3 = 1748304000000;
 const WORLD_SEED_TS_V4 = 1748304000000;
 const WORLD_SEED_TS_V5 = 1748476800000;
 const WORLD_SEED_TS_V6 = 1748563200000;
+const WORLD_SEED_TS_V7 = 1748649600000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -272,6 +274,48 @@ const SEED_WORLDS_V6: World[] = [
   },
 ];
 
+const SEED_WORLDS_V7: World[] = [
+  {
+    id: 'world_seed_pc_porcelain_court',
+    name: 'Porcelain Court',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_pc_01', text: 'a decaying rococo palace where the entire court are living porcelain dolls, beautiful and frozen and faintly wrong' },
+      { id: 'wp_pc_02', text: 'glazed bisque skin on every face, smooth and pale, threaded with hairline cracks and fine crazing' },
+      { id: 'wp_pc_03', text: 'large fixed glass doll eyes with painted lashes, unblinking, all of them somehow turned toward you' },
+      { id: 'wp_pc_04', text: 'small painted rosebud mouths set in serene, too-still smiles that never quite reach the eyes' },
+      { id: 'wp_pc_05', text: 'visible ball-joints at every wrist, elbow and knee, limbs that move in small porcelain clicks' },
+      { id: 'wp_pc_06', text: 'a pastel palette gone soft with dust — powder-blue, rose-pink, cream and tarnished gilt' },
+      { id: 'wp_pc_07', text: 'faded gilt scrollwork flaking from carved walls, gold leaf peeling into the grey light' },
+      { id: 'wp_pc_08', text: 'a great dead chandelier hanging low over a dust-blanketed parquet ballroom, half its crystals fallen' },
+      { id: 'wp_pc_09', text: 'foxed antique mirrors facing each other down a long gallery, reflections receding into spotted grey infinity' },
+      { id: 'wp_pc_10', text: 'the held breath of a dance that stopped mid-step, couples frozen forever in a faded ballroom' },
+      { id: 'wp_pc_11', text: 'a wind-up aristocrat with a slowly turning brass key in his back, charm running on a timer' },
+      { id: 'wp_pc_12', text: 'a music-box ballerina turning on a mirrored stage, one arm shattered hollow at the elbow' },
+      { id: 'wp_pc_13', text: 'marionette strings rising from limbs to cracked wooden control bars somewhere up in the dark' },
+      { id: 'wp_pc_14', text: 'twin glazed tear-tracks running down a mourning doll\'s cheeks, crazing the porcelain where they fall' },
+      { id: 'wp_pc_15', text: 'a banquet table set end to end for a feast no one attends, dust thick on every untouched plate' },
+      { id: 'wp_pc_16', text: 'kintsugi-gold repair seams where the broken have been mended, the dollmaker\'s careful handiwork' },
+      { id: 'wp_pc_17', text: 'an abandoned nursery with a stilled rocking horse and dolls slumped watching from a high shelf' },
+      { id: 'wp_pc_18', text: 'wax and silk flowers under dusty bell jars in a conservatory where the real plants died long ago' },
+      { id: 'wp_pc_19', text: 'a grand staircase under a vast dead chandelier, ancestral portraits climbing into shadow' },
+      { id: 'wp_pc_20', text: 'enormous brass clock-tower gears halted mid-tick, the whole court stopped in time with them' },
+      { id: 'wp_pc_21', text: 'a cellar catacomb of discarded dolls, countless glass eyes catching a single candle in the dark' },
+      { id: 'wp_pc_22', text: 'an overgrown formal garden, moss filling the crazing of weathered statue-dolls, ivy through a shattered shoulder' },
+      { id: 'wp_pc_23', text: 'dusty candelabra glow in small amber pools, falling off quickly into deep velvet shadow' },
+      { id: 'wp_pc_24', text: 'cold blue moonlight through tall arched windows, long pale window-bars laid across the floors' },
+      { id: 'wp_pc_25', text: 'the faint tinkling ghost of a music-box minuet, half its notes missing, dissolving into the silence' },
+      { id: 'wp_pc_26', text: 'painted half-masks held on slender handles, a face beneath that may be smooth and featureless' },
+      { id: 'wp_pc_27', text: 'the smell the image implies — dust, old varnish, dried roses, candle-wax, the cold mineral scent of porcelain' },
+      { id: 'wp_pc_28', text: 'impeccable courtly manners with a threat coiled beneath, a serene smile that has already decided your fate' },
+      { id: 'wp_pc_29', text: 'the creeping certainty that the dolls move the instant you look away, gestures subtly rearranged' },
+      { id: 'wp_pc_30', text: 'the whole court beautiful and uncanny and stopped in time — exquisite, melancholy, and quietly watching' },
+    ],
+    createdAt: WORLD_SEED_TS_V7,
+    updatedAt: WORLD_SEED_TS_V7,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -331,6 +375,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V6, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V6.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V7) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V7, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V7.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

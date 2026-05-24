@@ -7,11 +7,13 @@ const UNIVERSE_SEED_FLAG_KEY_V2 = 'morpbase:universes:seeded:v2';
 const UNIVERSE_SEED_FLAG_KEY_V3 = 'morpbase:universes:seeded:v3';
 const UNIVERSE_SEED_FLAG_KEY_V4 = 'morpbase:universes:seeded:v4';
 const UNIVERSE_SEED_FLAG_KEY_V5 = 'morpbase:universes:seeded:v5';
+const UNIVERSE_SEED_FLAG_KEY_V6 = 'morpbase:universes:seeded:v6';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
 const SEED_TS_V4 = 1748563200000;
 const SEED_TS_V5 = 1748649600000;
+const SEED_TS_V6 = 1748736000000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -411,6 +413,103 @@ function maybeApplyUniverseSeedV5(universes: Universe[]): Universe[] {
   }
 }
 
+// V6 — Porcelain Court: a full in-app universe, an eerie rococo doll-court.
+const SEED_UNIVERSE_PORCELAIN_COURT: Universe = {
+  id: 'universe_seed_porcelain_court',
+  name: 'Porcelain Court',
+  description: 'A decaying rococo palace where the entire court are living porcelain dolls — glazed bisque skin and glass eyes, hairline cracks beneath the gilt, exquisite manners over genteel menace. Beautiful, melancholy, and stopped in time.',
+  pools: {
+    character: [
+      'character_seed_pc_doll_queen',
+      'character_seed_pc_clockwork_prince',
+      'character_seed_pc_cracked_ballerina',
+      'character_seed_pc_masked_courtier',
+      'character_seed_pc_tea_maid',
+      'character_seed_pc_marionette_jester',
+      'character_seed_pc_weeping_countess',
+      'character_seed_pc_child_heir',
+      'character_seed_pc_harpsichordist',
+      'character_seed_pc_dollmaker',
+      'character_seed_pc_hollow_twins',
+      'character_seed_pc_garden_statue_lady',
+    ],
+    environment: [
+      'environment_seed_pc_throne_room',
+      'environment_seed_pc_ballroom',
+      'environment_seed_pc_mirror_gallery',
+      'environment_seed_pc_music_chamber',
+      'environment_seed_pc_doll_atelier',
+      'environment_seed_pc_rococo_garden',
+      'environment_seed_pc_banquet_hall',
+      'environment_seed_pc_nursery',
+      'environment_seed_pc_boudoir',
+      'environment_seed_pc_conservatory',
+      'environment_seed_pc_grand_staircase',
+      'environment_seed_pc_clock_tower',
+      'environment_seed_pc_doll_crypt',
+    ],
+    wardrobe: [
+      'outfit_pc_court_gown',
+      'outfit_pc_aristocrat_suit',
+      'outfit_pc_ballerina_tutu',
+      'outfit_pc_maid_pinafore',
+      'outfit_pc_mourning_black',
+      'outfit_pc_masquerade',
+    ],
+    mood: [
+      'mood_pc_uncanny_elegance',
+      'mood_pc_faded_grandeur',
+      'mood_pc_frozen_stillness',
+      'mood_pc_dollhouse_dread',
+      'mood_pc_wistful_nostalgia',
+      'mood_pc_genteel_menace',
+    ],
+    style: [
+      'style_pc_rococo_oil',
+      'style_pc_porcelain_render',
+      'style_pc_gothic_storybook',
+      'style_pc_faded_daguerreotype',
+      'style_pc_pastel_gothic',
+      'style_pc_baroque_chiaroscuro',
+    ],
+    lighting: [
+      'lighting_pc_candelabra_glow',
+      'lighting_pc_grimy_window',
+      'lighting_pc_chandelier_refraction',
+      'lighting_pc_tall_window_moonlight',
+      'lighting_pc_gilt_bounce',
+      'lighting_pc_musicbox_footlight',
+    ],
+    object: [
+      'object_pc_cracked_mask',
+      'object_pc_music_box',
+      'object_pc_hand_fan',
+      'object_pc_antique_doll',
+      'object_pc_tea_service',
+      'object_pc_stopped_clock',
+      'object_pc_rose_dome',
+    ],
+    aura: [
+      'world_seed_pc_porcelain_court',
+    ],
+  },
+  createdAt: SEED_TS_V6,
+  updatedAt: SEED_TS_V6,
+};
+
+function maybeApplyUniverseSeedV6(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V6) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V6, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_PORCELAIN_COURT.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_PORCELAIN_COURT];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -454,7 +553,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))));
+    return maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

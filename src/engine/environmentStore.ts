@@ -13,6 +13,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V6 = 'promptgen:environments:seeded:v6';
 const ENVIRONMENT_SEED_FLAG_KEY_V7 = 'promptgen:environments:seeded:v7';
 const ENVIRONMENT_SEED_FLAG_KEY_V8 = 'promptgen:environments:seeded:v8';
 const ENVIRONMENT_SEED_FLAG_KEY_V9 = 'promptgen:environments:seeded:v9';
+const ENVIRONMENT_SEED_FLAG_KEY_V10 = 'promptgen:environments:seeded:v10';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -110,6 +111,7 @@ const ENV_SEED_TS_6 = 1748217600000;
 const ENV_SEED_TS_7 = 1748304000000;
 const ENV_SEED_TS_8 = 1748476800000;
 const ENV_SEED_TS_9 = 1748563200000;
+const ENV_SEED_TS_10 = 1748649600000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -1119,6 +1121,231 @@ const V9_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V10 — Porcelain Court: an eerie rococo doll-court, pastel elegance with hairline cracks.
+const V10_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_pc_throne_room',
+    name: 'The Cracked Throne Room',
+    summary: 'A vast rococo throne room gone to faded gilt and dust — a great cracked throne on a worn dais beneath a sagging canopy of moth-eaten silk.',
+    phraseBundle: {
+      core: [
+        'a vast rococo throne room in faded grandeur, gilt flaking from carved walls',
+        'a great cracked throne on a worn dais beneath a sagging canopy of moth-eaten silk',
+        'dust thick on the marble floor, pale light from tall grimy windows',
+        'tarnished candelabra and a faded portrait gallery along the walls',
+        'cobwebs strung between chandelier crystals overhead',
+        'silent, opulent, and slowly crumbling',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_ballroom',
+    name: 'The Dust Ballroom',
+    summary: 'A grand mirrored ballroom where the dancing stopped long ago — parquet under grey dust, a dead orchestra, frozen couples mid-step.',
+    phraseBundle: {
+      core: [
+        'a grand rococo ballroom, vast parquet floor under a soft grey blanket of dust',
+        'towering windows and a flaking gilt mirrored wall doubling the emptiness',
+        'a great dead chandelier hanging low, half its crystals fallen',
+        'faded pastel frescoes of clouds and cherubs on the high ceiling',
+        'abandoned music stands and a silent harpsichord in the corner',
+        'the held breath of a dance that stopped mid-step',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_mirror_gallery',
+    name: 'The Mirror Gallery',
+    summary: 'A long hall of foxed antique mirrors facing each other — reflections receding into grey infinity, the glass spotted black with age.',
+    phraseBundle: {
+      core: [
+        'a long narrow gallery lined with tall foxed antique mirrors facing each other',
+        'reflections receding into grey spotted infinity down both walls',
+        'the silvering blackened and bubbling at the edges of every glass',
+        'a worn runner carpet and a row of dusty gilt console tables',
+        'pale grey light with no clear source, doubled endlessly',
+        'disorienting, hushed, and faintly wrong',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_music_chamber',
+    name: 'The Music-Box Chamber',
+    summary: 'An intimate chamber built like the inside of a music box — a cylinder-and-comb mechanism set in the floor, a small mirrored turning stage at its centre.',
+    phraseBundle: {
+      core: [
+        'an intimate chamber built like the inside of a giant music box',
+        'a brass pinned-cylinder and tuned-comb mechanism set into the floor',
+        'a small mirrored turning stage at the centre under a glass dome',
+        'walls of faded rose silk and tarnished gilt scrollwork',
+        'warm low light glinting off the delicate mechanism',
+        'a sense that it might begin to play at any moment',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_doll_atelier',
+    name: 'The Doll Atelier',
+    summary: 'The dollmaker\'s workshop — shelves of porcelain limbs and blank heads, a kiln glowing in the corner, tools and paint laid out for repairs.',
+    phraseBundle: {
+      core: [
+        'a cluttered doll-repair atelier, shelves crowded with porcelain limbs and blank waiting heads',
+        'rows of glass eyes in trays and spools of fine wire and thread',
+        'a small kiln glowing warm in the corner, tools and paint pots on the bench',
+        'half-mended dolls propped in a row, gold repair-seams drying',
+        'jars of pigment and a wall of tiny labelled drawers',
+        'workmanlike, intimate, and quietly unsettling',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_rococo_garden',
+    name: 'The Overgrown Rococo Garden',
+    summary: 'A formal garden run wild — collapsing topiary, mossy statues, a dry tiered fountain, gravel paths swallowed by weeds under a pale sky.',
+    phraseBundle: {
+      core: [
+        'a formal rococo garden run wild, once-geometric topiary collapsing into shapeless green',
+        'moss-eaten marble statues and cracked balustrades among the overgrowth',
+        'a dry tiered fountain stained with lichen, its basin full of dead leaves',
+        'gravel paths swallowed by weeds, roses gone feral over broken trellises',
+        'a pale overcast sky, soft flat light over everything',
+        'melancholy, fragrant, and beautifully abandoned',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_banquet_hall',
+    name: 'The Endless Banquet Hall',
+    summary: 'A long banquet table set for a feast that never came — porcelain place settings, candelabra burned to stubs, dust on every untouched plate.',
+    phraseBundle: {
+      core: [
+        'a long banquet hall, an enormous table set end to end for a feast no one attended',
+        'fine porcelain place settings and tarnished silver at every empty chair',
+        'candelabra burned down to cold wax stubs along the centre',
+        'dust settled thick on every untouched plate and crystal glass',
+        'wilted centrepieces and a faded damask cloth gone grey',
+        'expectant, formal, and utterly deserted',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_nursery',
+    name: 'The Abandoned Nursery',
+    summary: 'A child\'s nursery left mid-play — a dusty rocking horse, scattered toys, an empty cradle, dolls slumped watching from the shelf.',
+    phraseBundle: {
+      core: [
+        'an abandoned nursery, soft faded pastel wallpaper peeling at the seams',
+        'a dusty rocking horse stilled mid-rock, scattered wooden toys on the floor',
+        'an empty lace-draped cradle and a toppled toy chest',
+        'rows of old dolls slumped watching from a high shelf',
+        'pale daylight through a grimy window with a torn curtain',
+        'tender, faded, and quietly forsaken',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_boudoir',
+    name: 'The Powder Boudoir',
+    summary: 'A lady\'s dressing room frozen in time — a great cracked vanity mirror, spilled powder, dried perfume, a stool drawn out as if just left.',
+    phraseBundle: {
+      core: [
+        'an intimate rococo boudoir, a great gilt vanity with a cracked oval mirror',
+        'spilled face-powder gone to dust, dried perfume bottles and tarnished brushes',
+        'a velvet stool drawn out as if just vacated, a faded silk robe over the chair',
+        'rose-and-cream striped walls, a canopied bed with grey draperies',
+        'soft pale light through gauze curtains',
+        'private, perfumed, and stopped mid-moment',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_conservatory',
+    name: 'The Wax-Flower Conservatory',
+    summary: 'A glass conservatory of false flowers — wax and silk blooms under dusty bell jars, the real plants long dead, light grey through grimy panes.',
+    phraseBundle: {
+      core: [
+        'a rococo glass conservatory full of false flowers, wax and silk blooms under dusty bell jars',
+        'the real plants long dead and brown in their cracked porcelain pots',
+        'grimy glass panes letting in flat grey light, a few cracked and webbed',
+        'wrought-iron benches and a dry ornamental pool green with algae',
+        'artificial roses faded to grey, petals furred with dust',
+        'a strange airless stillness, beauty preserved past death',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_grand_staircase',
+    name: 'The Grand Staircase',
+    summary: 'A sweeping double staircase under a vast dead chandelier — worn red carpet, cobwebbed gilt banisters, ancestral portraits climbing the wall.',
+    phraseBundle: {
+      core: [
+        'a sweeping rococo double staircase curving up beneath a vast dead chandelier',
+        'threadbare red carpet on the steps, cobwebbed gilt banisters',
+        'ancestral portraits in tarnished frames climbing the high wall',
+        'a checkerboard marble floor below, dust drifting in a pale shaft of light',
+        'a domed ceiling fresco cracked and water-stained above',
+        'grand, hushed, and heavy with faded importance',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_clock_tower',
+    name: 'The Stopped Clock Tower',
+    summary: 'The palace clockwork interior — enormous brass gears halted mid-tick, dust on the teeth, a cracked clock face glowing pale from behind.',
+    phraseBundle: {
+      core: [
+        'the interior of a great palace clock tower, enormous brass gears halted mid-tick',
+        'dust furring the cogs and the long stilled pendulum',
+        'a huge translucent clock face glowing pale grey from behind, hands frozen',
+        'wooden scaffolding and iron walkways among the mechanism',
+        'a single shaft of dim light through the cracked dial',
+        'monumental, silent, and stopped in time',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+  {
+    id: 'environment_seed_pc_doll_crypt',
+    name: 'The Crypt of Discarded Dolls',
+    summary: 'A cellar catacomb where the broken are laid to rest — shelves and heaps of cracked porcelain dolls in the dark, glass eyes catching the candlelight.',
+    phraseBundle: {
+      core: [
+        'a dim vaulted cellar catacomb, the resting place of broken dolls',
+        'stone shelves and soft heaps of cracked porcelain dolls in the shadows',
+        'countless glass eyes catching a single candle\'s light',
+        'shattered limbs and chipped heads piled gently, almost reverent',
+        'cobwebs and cold damp stone, a low arched ceiling',
+        'mournful, macabre, and strangely tender',
+      ],
+    },
+    createdAt: ENV_SEED_TS_10,
+    updatedAt: ENV_SEED_TS_10,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -1221,6 +1448,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V9_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V10_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

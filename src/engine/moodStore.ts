@@ -7,6 +7,7 @@ const MOOD_SEED_FLAG_KEY_V3 = 'promptgen:moods:seeded:v3';
 const MOOD_SEED_FLAG_KEY_V4 = 'promptgen:moods:seeded:v4';
 const MOOD_SEED_FLAG_KEY_V5 = 'promptgen:moods:seeded:v5';
 const MOOD_SEED_FLAG_KEY_V6 = 'promptgen:moods:seeded:v6';
+const MOOD_SEED_FLAG_KEY_V7 = 'promptgen:moods:seeded:v7';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -92,6 +93,7 @@ const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
+const SEED_TS_7 = 1748649600000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -494,6 +496,88 @@ const V6_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V7 — Porcelain Court: uncanny, melancholy, genteel-sinister registers.
+const V7_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_pc_uncanny_elegance',
+    name: 'Uncanny Elegance',
+    summary: 'Beautiful and wrong — exquisite refinement with something not-quite-alive underneath, grace that raises the hair on your neck.',
+    phrases: [
+      'beautiful and subtly wrong, exquisite refinement with something not-quite-alive beneath',
+      'flawless grace that raises a quiet dread',
+      'the uncanny valley of a too-perfect, too-still elegance',
+      'lovely on the surface, deeply unsettling underneath',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'mood_pc_faded_grandeur',
+    name: 'Faded Grandeur',
+    summary: 'The melancholy of magnificence in decay — gilt going to dust, splendour outliving its purpose, beauty in the rot.',
+    phrases: [
+      'the melancholy of magnificence fallen into decay',
+      'gilt and silk going quietly to dust, splendour outliving its purpose',
+      'a wistful grandeur, beauty made poignant by ruin',
+      'opulent, mournful, and slowly crumbling',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'mood_pc_frozen_stillness',
+    name: 'Frozen Stillness',
+    summary: 'A held breath — everything stopped mid-gesture, time suspended, the silence of a paused music box.',
+    phrases: [
+      'a held breath, everything stopped mid-gesture and suspended in time',
+      'absolute motionless silence, the pause of a stilled music box',
+      'figures frozen as if the moment will never resume',
+      'tense, airless, expectant stillness',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'mood_pc_dollhouse_dread',
+    name: "Doll-House Dread",
+    summary: 'The quiet horror of being watched by the inanimate — too many glass eyes, the sense that the dolls move when you look away.',
+    phrases: [
+      'the quiet horror of being watched by inanimate things',
+      'too many glass eyes turned toward the viewer, patient and fixed',
+      'the creeping sense the dolls move the moment you look away',
+      'soft, suffocating, low-grade dread',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'mood_pc_wistful_nostalgia',
+    name: 'Wistful Nostalgia',
+    summary: 'A tender ache for something lost — childhood, a vanished world, the bittersweet sweetness of old toys and faded play.',
+    phrases: [
+      'a tender bittersweet ache for something long lost',
+      'the sweet sorrow of old toys and faded childhood play',
+      'gentle nostalgia for a vanished, gentler world',
+      'fond, melancholy, and quietly heartbreaking',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'mood_pc_genteel_menace',
+    name: 'Genteel Menace',
+    summary: 'Politeness with teeth — perfect manners barely covering a threat, a smile that has already decided your fate.',
+    phrases: [
+      'impeccable politeness with a threat coiled just beneath it',
+      'perfect courtly manners barely concealing menace',
+      'a serene smile that has already decided your fate',
+      'refined, controlled, and quietly dangerous',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -547,6 +631,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V6_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V7_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

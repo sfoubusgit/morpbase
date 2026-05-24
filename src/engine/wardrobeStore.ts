@@ -6,6 +6,7 @@ const WARDROBE_SEED_FLAG_KEY = 'promptgen:wardrobe:seeded:v3';
 const WARDROBE_SEED_FLAG_KEY_V4 = 'promptgen:wardrobe:seeded:v4';
 const WARDROBE_SEED_FLAG_KEY_V5 = 'promptgen:wardrobe:seeded:v5';
 const WARDROBE_SEED_FLAG_KEY_V6 = 'promptgen:wardrobe:seeded:v6';
+const WARDROBE_SEED_FLAG_KEY_V7 = 'promptgen:wardrobe:seeded:v7';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -91,6 +92,7 @@ const SEED_TS_3 = 1747612800000;
 const SEED_TS_4 = 1748304000000;
 const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
+const SEED_TS_7 = 1748649600000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -478,6 +480,88 @@ const V6_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V7 — Porcelain Court: rococo doll-court dress.
+const V7_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_pc_court_gown',
+    name: 'Rococo Court Gown',
+    summary: 'A grand pastel court gown over wide panniers — layered silk, lace ruffles and ribbon bows, faded and faintly dusty.',
+    phrases: [
+      'a grand rococo court gown over wide panniers, layered pastel silk',
+      'tiered lace ruffles, ribbon bows and embroidered floral panels',
+      'a tight stomacher bodice with a low square neckline',
+      'powder-blue and rose tones gone soft and faintly dusty',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'outfit_pc_aristocrat_suit',
+    name: "Powdered Aristocrat's Suit",
+    summary: 'A gentleman\'s rococo ensemble — embroidered frock coat, waistcoat, breeches and a yellowed lace jabot, elegant and moth-worn.',
+    phrases: [
+      'an embroidered rococo frock coat over a brocade waistcoat and breeches',
+      'a yellowed lace jabot and lace cuffs at the wrists',
+      'gold-thread embroidery, covered buttons, silk stockings and buckled shoes',
+      'refined and courtly, faded and faintly moth-worn',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'outfit_pc_ballerina_tutu',
+    name: 'Music-Box Tutu',
+    summary: 'A stiff little romantic tutu — layered tulle gone grey-cream, a satin bodice with wire-and-bead trim, the costume of a wind-up dancer.',
+    phrases: [
+      'a stiff romantic ballet tutu, layered tulle gone grey-cream with age',
+      'a fitted satin bodice with wire-and-bead trim and a faded rosette',
+      'pale ribboned pointe shoes laced up the ankle',
+      'the delicate dusty costume of a music-box dancer',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'outfit_pc_maid_pinafore',
+    name: "Doll-Maid Pinafore",
+    summary: 'A servant-doll\'s uniform — a starched white pinafore over a faded grey dress, lace cap and cuffs, prim and slightly threadbare.',
+    phrases: [
+      'a doll-maid uniform, a starched white pinafore apron over a faded grey dress',
+      'a frilled lace cap and matching cuffs, a high buttoned collar',
+      'prim long sleeves and a modest hem, slightly threadbare',
+      'tidy, demure, and quietly worn',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'outfit_pc_mourning_black',
+    name: 'Court Mourning Black',
+    summary: 'Rococo mourning dress — black silk and jet beading, a lace veil and gloves, funereal elegance heavy with grief.',
+    phrases: [
+      'a black silk rococo mourning gown with jet beading and crepe trim',
+      'a black lace mourning veil and long black gloves',
+      'a fitted bodice and full skirt all in funereal black',
+      'sombre, elegant, and heavy with grief',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'outfit_pc_masquerade',
+    name: 'Masquerade Ensemble',
+    summary: 'Masked-ball dress — a painted half-mask, a hooded domino cloak over court finery, mysterious and theatrical.',
+    phrases: [
+      'a masquerade ensemble, a painted porcelain half-mask on a handle',
+      'a hooded silk domino cloak thrown over rococo court finery',
+      'dark fabric with silver embroidery, a black feather accent',
+      'mysterious, theatrical, and elegantly concealing',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -521,6 +605,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V6_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V7_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

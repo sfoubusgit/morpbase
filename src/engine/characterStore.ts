@@ -23,6 +23,7 @@ const CHARACTER_SEED_FLAG_KEY_V10 = 'promptgen:characters:seeded:v10';
 const CHARACTER_SEED_FLAG_KEY_V11 = 'promptgen:characters:seeded:v11';
 const CHARACTER_SEED_FLAG_KEY_V12 = 'promptgen:characters:seeded:v12';
 const CHARACTER_SEED_FLAG_KEY_V13 = 'promptgen:characters:seeded:v13';
+const CHARACTER_SEED_FLAG_KEY_V14 = 'promptgen:characters:seeded:v14';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -288,6 +289,7 @@ const SEED_TS_10 = 1748304000000;
 const SEED_TS_11 = 1748390400000;
 const SEED_TS_12 = 1748476800000;
 const SEED_TS_13 = 1748563200000;
+const SEED_TS_14 = 1748649600000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -1906,6 +1908,406 @@ const V13_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V14 — Porcelain Court: an eerie rococo doll-court, pastel elegance with hairline cracks.
+const V14_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_pc_doll_queen',
+    name: 'The Porcelain Queen',
+    summary: 'The ruler of the doll-court — a towering bisque sovereign in faded rococo splendour, a hairline crack running through her serene painted smile.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'porcelain doll monarch',
+      presentation: 'clothed',
+      ageImpression: 'ageless adult',
+      personalityTone: 'glacial serenity; absolute, gracious, and entirely without warmth',
+      visualAnchors: [
+        { id: 'anchor_pcdq_1', label: 'Skin', kind: 'other', text: 'flawless glazed bisque-porcelain skin, a single hairline crack threading from cheek to jaw' },
+        { id: 'anchor_pcdq_2', label: 'Eyes', kind: 'eyes', text: 'large fixed glass doll eyes, pale blue, unblinking' },
+        { id: 'anchor_pcdq_3', label: 'Face', kind: 'face', text: 'a small painted rosebud mouth set in a serene, slightly too-still smile' },
+        { id: 'anchor_pcdq_4', label: 'Hair', kind: 'hair', text: 'towering powdered silver pompadour dressed with tarnished pearls and dried roses' },
+        { id: 'anchor_pcdq_5', label: 'Crown', kind: 'accessory', text: 'a chipped gilt filigree crown, one point broken off' },
+      ],
+      motifs: [
+        { id: 'motif_pcdq_1', label: 'The Cracked Throne', text: 'faded gilt, glass eyes, the hairline crack, a sovereign frozen mid-gesture' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll, ball-jointed doll',
+        'flawless glazed porcelain skin with a single hairline crack from cheek to jaw',
+        'large fixed pale-blue glass doll eyes, a small painted rosebud mouth, serene too-still smile',
+        'towering powdered silver pompadour with tarnished pearls and dried roses, a chipped gilt crown',
+        'seated on a faded gilt rococo throne in a decaying palace',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_clockwork_prince',
+    name: 'The Clockwork Prince',
+    summary: 'A wind-up aristocrat with a brass key in his back — courtly and charming until the spring runs down and he freezes mid-bow.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'clockwork doll prince',
+      presentation: 'clothed',
+      ageImpression: 'youthful adult',
+      personalityTone: 'rehearsed charm; gallant in fixed loops, hollow underneath',
+      visualAnchors: [
+        { id: 'anchor_pccp_1', label: 'Skin', kind: 'other', text: 'pale porcelain skin with painted blush high on the cheeks, a chipped chin' },
+        { id: 'anchor_pccp_2', label: 'Key', kind: 'accessory', text: 'a large ornate brass wind-up key turning slowly in his back' },
+        { id: 'anchor_pccp_3', label: 'Eyes', kind: 'eyes', text: 'glass green doll eyes with painted lashes, gaze fixed forward' },
+        { id: 'anchor_pccp_4', label: 'Hair', kind: 'hair', text: 'powdered chestnut hair tied in a black silk ribbon' },
+        { id: 'anchor_pccp_5', label: 'Outfit', kind: 'clothing', text: 'an embroidered rococo frock coat with lace cuffs, faded and moth-nibbled' },
+      ],
+      motifs: [
+        { id: 'motif_pccp_1', label: 'When the Spring Runs Down', text: 'the turning brass key, a frozen courtly bow, charm on a timer' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, living doll, clockwork doll',
+        'pale porcelain skin with painted cheek-blush and a chipped chin, glass green doll eyes',
+        'a large ornate brass wind-up key turning in his back',
+        'powdered chestnut hair in a black ribbon, an embroidered rococo frock coat with lace cuffs',
+        'frozen mid-bow in a decaying gilt ballroom',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_cracked_ballerina',
+    name: 'The Cracked Ballerina',
+    summary: 'The music-box dancer who only turns when the lid is lifted — one arm shattered at the elbow, still holding a perfect arabesque.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'music-box ballerina doll',
+      presentation: 'clothed',
+      ageImpression: 'delicate youth',
+      personalityTone: 'fragile grace; a single perfect motion repeated forever',
+      visualAnchors: [
+        { id: 'anchor_pccb_1', label: 'Arm', kind: 'other', text: 'one porcelain arm shattered clean at the elbow, the break exposed and hollow' },
+        { id: 'anchor_pccb_2', label: 'Skin', kind: 'other', text: 'smooth cream porcelain skin, fine crazing across the shoulders' },
+        { id: 'anchor_pccb_3', label: 'Eyes', kind: 'eyes', text: 'downcast glass eyes with long painted lashes' },
+        { id: 'anchor_pccb_4', label: 'Hair', kind: 'hair', text: 'pale blonde hair in a tight ballet bun crowned with a wire tiara' },
+        { id: 'anchor_pccb_5', label: 'Pose', kind: 'silhouette', text: 'frozen en pointe in a perfect arabesque on a turning music-box base' },
+      ],
+      motifs: [
+        { id: 'motif_pccb_1', label: 'One Perfect Turn', text: 'the broken arm, the lifted lid, a pirouette that never finishes' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll, ballerina',
+        'smooth cream porcelain skin with fine crazing, one arm shattered hollow at the elbow',
+        'downcast glass eyes with long painted lashes, pale blonde ballet bun and wire tiara',
+        'frozen en pointe in a perfect arabesque',
+        'standing on a turning music-box base in a dim chamber',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_masked_courtier',
+    name: 'The Masked Courtier',
+    summary: 'A whispering noble who never lowers the painted half-mask — behind the fan, the porcelain face beneath may have no features at all.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'masked doll courtier',
+      presentation: 'clothed',
+      ageImpression: 'poised adult',
+      personalityTone: 'secretive, insinuating, perfectly mannered',
+      visualAnchors: [
+        { id: 'anchor_pcmc_1', label: 'Mask', kind: 'accessory', text: 'a painted porcelain half-mask on a slender handle, held to the face' },
+        { id: 'anchor_pcmc_2', label: 'Skin', kind: 'other', text: 'glossy pale porcelain skin, smooth and faintly featureless below the mask' },
+        { id: 'anchor_pcmc_3', label: 'Fan', kind: 'accessory', text: 'a black lace folding fan half-raised, concealing the mouth' },
+        { id: 'anchor_pcmc_4', label: 'Hair', kind: 'hair', text: 'powdered grey upswept hair with a single black feather' },
+        { id: 'anchor_pcmc_5', label: 'Outfit', kind: 'clothing', text: 'a dove-grey rococo gown with tarnished silver embroidery' },
+      ],
+      motifs: [
+        { id: 'motif_pcmc_1', label: 'Behind the Fan', text: 'the held mask, the raised fan, a face that may be blank beneath' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll, masquerade',
+        'glossy pale porcelain skin, faintly featureless beneath a painted porcelain half-mask on a handle',
+        'a black lace folding fan half-raised over the mouth',
+        'powdered grey upswept hair with a black feather, a dove-grey rococo gown with silver embroidery',
+        'poised in a foxed mirror gallery',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_tea_maid',
+    name: 'The Tea-Service Maid',
+    summary: 'A small servant-doll who endlessly pours tea that never fills the cup — apron starched, head tilted, awaiting an order that never comes.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'servant doll',
+      presentation: 'clothed',
+      ageImpression: 'youthful',
+      personalityTone: 'dutiful, attentive, eerily eager to please',
+      visualAnchors: [
+        { id: 'anchor_pctm_1', label: 'Head', kind: 'silhouette', text: 'head tilted at a slightly unnatural servant\'s angle' },
+        { id: 'anchor_pctm_2', label: 'Skin', kind: 'other', text: 'pale bisque skin, a chip missing from one ear' },
+        { id: 'anchor_pctm_3', label: 'Eyes', kind: 'eyes', text: 'round brown glass eyes, wide and waiting' },
+        { id: 'anchor_pctm_4', label: 'Hands', kind: 'other', text: 'porcelain hands frozen mid-pour over a tilted teapot' },
+        { id: 'anchor_pctm_5', label: 'Outfit', kind: 'clothing', text: 'a starched white apron over a faded grey doll-maid dress and lace cap' },
+      ],
+      motifs: [
+        { id: 'motif_pctm_1', label: 'The Endless Pour', text: 'the tilted teapot, the never-filling cup, a service with no guests' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll, maid',
+        'pale bisque skin with a chip missing from one ear, round wide brown glass eyes, head tilted',
+        'porcelain hands frozen mid-pour over a tilted teapot',
+        'a starched white apron over a faded grey doll-maid dress and lace cap',
+        'in a banquet hall set for a feast no one attends',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_marionette_jester',
+    name: 'The Marionette Jester',
+    summary: 'The court fool on tangled strings — limbs hung from a cracked control bar above, grinning even as the threads knot and fray.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'marionette doll',
+      presentation: 'clothed',
+      ageImpression: 'ageless',
+      personalityTone: 'manic merriment over something desperate; the only one who seems to know',
+      visualAnchors: [
+        { id: 'anchor_pcmj_1', label: 'Strings', kind: 'accessory', text: 'taut marionette strings rising from wrists, knees and head to a cracked wooden control bar above' },
+        { id: 'anchor_pcmj_2', label: 'Skin', kind: 'other', text: 'porcelain skin painted with a white-and-rouge jester face, a cracked grin' },
+        { id: 'anchor_pcmj_3', label: 'Eyes', kind: 'eyes', text: 'mismatched glass eyes, one rolled slightly askew' },
+        { id: 'anchor_pcmj_4', label: 'Hat', kind: 'accessory', text: 'a drooping two-pointed jester cap with tarnished silver bells' },
+        { id: 'anchor_pcmj_5', label: 'Outfit', kind: 'clothing', text: 'a faded harlequin motley in rose and powder-blue diamonds' },
+      ],
+      motifs: [
+        { id: 'motif_pcmj_1', label: 'On Tangled Strings', text: 'fraying threads, a cracked grin, merriment with knots in it' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, living doll, marionette, jester',
+        'porcelain skin with a white-and-rouge jester face and a cracked grin, mismatched glass eyes',
+        'taut marionette strings rising from the limbs to a cracked wooden control bar above',
+        'a drooping jester cap with tarnished bells, a faded rose-and-blue harlequin motley',
+        'dangling in a dusty ballroom',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_weeping_countess',
+    name: 'The Weeping Countess',
+    summary: 'A grieving noblewoman doll whose glaze has cracked from endless tears — twin glossy tracks painted down her cheeks, mourning someone long gone.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'mourning doll',
+      presentation: 'clothed',
+      ageImpression: 'elegant adult',
+      personalityTone: 'bottomless quiet grief, dignified and unending',
+      visualAnchors: [
+        { id: 'anchor_pcwc_1', label: 'Tears', kind: 'face', text: 'twin glossy glazed tear-tracks running from the eyes, crazing the porcelain where they fall' },
+        { id: 'anchor_pcwc_2', label: 'Skin', kind: 'other', text: 'pale grey-toned porcelain skin, finely cracked around the eyes' },
+        { id: 'anchor_pcwc_3', label: 'Eyes', kind: 'eyes', text: 'sorrowful dark glass eyes, lids slightly lowered' },
+        { id: 'anchor_pcwc_4', label: 'Veil', kind: 'accessory', text: 'a black lace mourning veil over dark upswept hair' },
+        { id: 'anchor_pcwc_5', label: 'Outfit', kind: 'clothing', text: 'a black silk rococo mourning gown with jet beading' },
+      ],
+      motifs: [
+        { id: 'motif_pcwc_1', label: 'Glazed Tears', text: 'the painted tear-tracks, the mourning veil, grief frozen in porcelain' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll',
+        'pale grey-toned porcelain skin finely cracked around the eyes, sorrowful dark glass eyes',
+        'twin glossy glazed tear-tracks running down the cheeks',
+        'a black lace mourning veil over dark upswept hair, a black silk rococo mourning gown with jet beading',
+        'seated alone in a faded boudoir',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_child_heir',
+    name: 'The Little Heir',
+    summary: 'A small child-doll prince in miniature court dress — clutching a smaller doll of his own, watching the court with placid glass eyes.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'child doll',
+      presentation: 'clothed',
+      ageImpression: 'small child',
+      personalityTone: 'placid, watchful, unnervingly composed',
+      visualAnchors: [
+        { id: 'anchor_pcch_1', label: 'Build', kind: 'silhouette', text: 'a small child-sized doll, round-cheeked and short-limbed' },
+        { id: 'anchor_pcch_2', label: 'Skin', kind: 'other', text: 'smooth pink-tinged porcelain skin, one tiny crack at the temple' },
+        { id: 'anchor_pcch_3', label: 'Eyes', kind: 'eyes', text: 'large placid blue glass eyes, far too calm' },
+        { id: 'anchor_pcch_4', label: 'Toy', kind: 'accessory', text: 'a smaller worn doll clutched in both hands' },
+        { id: 'anchor_pcch_5', label: 'Outfit', kind: 'clothing', text: 'a miniature powder-blue rococo court suit with a lace collar' },
+      ],
+      motifs: [
+        { id: 'motif_pcch_1', label: 'The Doll Who Holds a Doll', text: 'the small heir, the smaller doll, a placid watching stillness' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, living doll, child',
+        'a small round-cheeked child doll, smooth pink-tinged porcelain skin with a tiny crack at the temple',
+        'large placid blue glass eyes, far too calm',
+        'a miniature powder-blue rococo court suit with a lace collar, clutching a smaller worn doll',
+        'standing in an abandoned nursery',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_harpsichordist',
+    name: 'The Powdered Harpsichordist',
+    summary: 'The court composer-doll fused to his instrument — fingers locked on yellowed keys, playing the same faded minuet into the dust.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'musician doll',
+      presentation: 'clothed',
+      ageImpression: 'gaunt adult',
+      personalityTone: 'consumed by the music, oblivious, rapt',
+      visualAnchors: [
+        { id: 'anchor_pchp_1', label: 'Hands', kind: 'other', text: 'long porcelain fingers locked on yellowed harpsichord keys, one fingertip chipped off' },
+        { id: 'anchor_pchp_2', label: 'Skin', kind: 'other', text: 'gaunt ivory porcelain skin stretched over sharp cheekbones' },
+        { id: 'anchor_pchp_3', label: 'Eyes', kind: 'eyes', text: 'half-closed glass eyes, rapt and unseeing' },
+        { id: 'anchor_pchp_4', label: 'Hair', kind: 'hair', text: 'an enormous powdered white wig, dusty and slightly askew' },
+        { id: 'anchor_pchp_5', label: 'Outfit', kind: 'clothing', text: 'a wine-coloured brocade coat, lace jabot yellowed with age' },
+      ],
+      motifs: [
+        { id: 'motif_pchp_1', label: 'The Faded Minuet', text: 'locked fingers, yellowed keys, the same tune dissolving into dust' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, living doll',
+        'gaunt ivory porcelain skin over sharp cheekbones, half-closed rapt glass eyes',
+        'long porcelain fingers locked on yellowed harpsichord keys, one fingertip chipped',
+        'an enormous dusty powdered white wig, a wine-coloured brocade coat with a yellowed lace jabot',
+        'seated at a harpsichord in a decaying music chamber',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_dollmaker',
+    name: 'The Dollmaker',
+    summary: 'The seamstress who keeps the court whole — part doll herself, she mends the cracked with kiln-fire and thread, deciding who is repaired and who is discarded.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'dollmaker',
+      presentation: 'clothed',
+      ageImpression: 'severe adult',
+      personalityTone: 'exacting, proprietorial, quietly merciless',
+      visualAnchors: [
+        { id: 'anchor_pcdm_1', label: 'Skin', kind: 'other', text: 'porcelain skin patched with visible kintsugi-gold repair seams, half-doll half-maker' },
+        { id: 'anchor_pcdm_2', label: 'Eyes', kind: 'eyes', text: 'sharp pale grey glass eyes behind half-moon spectacles' },
+        { id: 'anchor_pcdm_3', label: 'Tools', kind: 'accessory', text: 'a porcelain needle threaded with fine wire and a small paintbrush in hand' },
+        { id: 'anchor_pcdm_4', label: 'Hair', kind: 'hair', text: 'iron-grey hair scraped into a severe bun stuck with bone pins' },
+        { id: 'anchor_pcdm_5', label: 'Outfit', kind: 'clothing', text: 'a high-collared charcoal work-gown under a stained apron of doll parts' },
+      ],
+      motifs: [
+        { id: 'motif_pcdm_1', label: 'Mended and Discarded', text: 'gold repair seams, needle and brush, the power to keep or to break' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll',
+        'porcelain skin patched with visible kintsugi-gold repair seams, sharp pale grey glass eyes behind half-moon spectacles',
+        'iron-grey hair in a severe bun with bone pins',
+        'a high-collared charcoal work-gown under a stained apron, holding a wire-threaded needle and a paintbrush',
+        'in a cluttered doll-repair atelier of waiting parts',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_hollow_twins',
+    name: 'The Hollow Twins',
+    summary: 'Two identical bisque dolls who move as one — heads tilting in unison, finishing each other\'s frozen gestures, hollow where a heart would be.',
+    tags: ['duo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'twin dolls',
+      presentation: 'clothed',
+      ageImpression: 'youthful',
+      personalityTone: 'uncanny synchrony, sweet and wrong',
+      visualAnchors: [
+        { id: 'anchor_pcht_1', label: 'Pair', kind: 'silhouette', text: 'two identical dolls side by side, heads tilted at the same angle' },
+        { id: 'anchor_pcht_2', label: 'Skin', kind: 'other', text: 'matching pale bisque skin, the same hairline crack on each left cheek' },
+        { id: 'anchor_pcht_3', label: 'Eyes', kind: 'eyes', text: 'four identical violet glass eyes, all fixed on the viewer' },
+        { id: 'anchor_pcht_4', label: 'Hair', kind: 'hair', text: 'matching dark ringlets tied with rose ribbons' },
+        { id: 'anchor_pcht_5', label: 'Outfit', kind: 'clothing', text: 'identical cream lace rococo dresses' },
+      ],
+      motifs: [
+        { id: 'motif_pcht_1', label: 'As One', text: 'mirrored gestures, matching cracks, two dolls with one motion' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '2girls, siblings, twins, living doll',
+        'two identical pale bisque dolls, the same hairline crack on each left cheek, heads tilted in unison',
+        'identical violet glass eyes all fixed forward, matching dark ringlets with rose ribbons',
+        'identical cream lace rococo dresses',
+        'standing side by side at the foot of a grand staircase',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+  {
+    id: 'character_seed_pc_garden_statue_lady',
+    name: 'The Garden Statue',
+    summary: 'A doll left so long in the rococo garden she is half-claimed by it — moss in her crazing, ivy through one shattered shoulder, smiling under the open sky.',
+    tags: ['solo', 'porcelain court', 'doll'],
+    identity: {
+      archetype: 'overgrown garden doll',
+      presentation: 'clothed',
+      ageImpression: 'ageless adult',
+      personalityTone: 'weathered serenity; surrendered to the garden, at peace',
+      visualAnchors: [
+        { id: 'anchor_pcgs_1', label: 'Skin', kind: 'other', text: 'weathered porcelain skin, green moss filling the deep crazing, lichen at the temples' },
+        { id: 'anchor_pcgs_2', label: 'Shoulder', kind: 'other', text: 'one shoulder shattered open with ivy growing through the hollow' },
+        { id: 'anchor_pcgs_3', label: 'Eyes', kind: 'eyes', text: 'pale clouded glass eyes, gaze lifted to the sky' },
+        { id: 'anchor_pcgs_4', label: 'Hair', kind: 'hair', text: 'faded gilt-blonde hair tangled with creeping vines and small flowers' },
+        { id: 'anchor_pcgs_5', label: 'Outfit', kind: 'clothing', text: 'a moss-streaked once-white rococo gown gone grey and green' },
+      ],
+      motifs: [
+        { id: 'motif_pcgs_1', label: 'Claimed by the Garden', text: 'moss in the cracks, ivy through the shoulder, a doll returning to the earth' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, living doll, statue',
+        'weathered porcelain skin with green moss in the deep crazing and lichen at the temples',
+        'one shoulder shattered open with ivy growing through it, pale clouded glass eyes lifted to the sky',
+        'faded gilt-blonde hair tangled with vines, a moss-streaked grey-green rococo gown',
+        'standing among overgrown topiary in a ruined formal garden',
+      ],
+    },
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -2051,6 +2453,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V13, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V13_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V14) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V14, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V14_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);

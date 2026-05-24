@@ -8,6 +8,7 @@ const STYLE_SEED_FLAG_KEY_V4 = 'promptgen:styles:seeded:v4';
 const STYLE_SEED_FLAG_KEY_V5 = 'promptgen:styles:seeded:v5';
 const STYLE_SEED_FLAG_KEY_V6 = 'promptgen:styles:seeded:v6';
 const STYLE_SEED_FLAG_KEY_V7 = 'promptgen:styles:seeded:v7';
+const STYLE_SEED_FLAG_KEY_V8 = 'promptgen:styles:seeded:v8';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -94,6 +95,7 @@ const SEED_TS_4 = 1747872000000;
 const SEED_TS_5 = 1748304000000;
 const SEED_TS_6 = 1748476800000;
 const SEED_TS_7 = 1748563200000;
+const SEED_TS_8 = 1748649600000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -533,6 +535,94 @@ const V7_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V8 — Porcelain Court: eerie rococo doll-court art directions.
+const V8_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_pc_rococo_oil',
+    name: 'Rococo Oil Painting',
+    summary: 'Fragonard-and-Boucher pastel oil — feathery brushwork, pearly skin, powder-blue and rose, gilt and gauze in soft diffused light.',
+    phrases: [
+      'rococo oil painting in the manner of Fragonard and Boucher',
+      'feathery delicate brushwork, pearly luminous skin tones',
+      'a pastel palette of powder-blue, rose-pink, cream and gilt',
+      'soft diffused light, gauzy fabrics and ornate gold scrollwork',
+      'elegant, frivolous, and gorgeously decadent',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'style_pc_porcelain_render',
+    name: 'Porcelain Doll Render',
+    summary: 'Glossy bisque-porcelain render — smooth glazed surfaces, fine crazing and hairline cracks, ball-joints and glass eyes in crisp studio detail.',
+    phrases: [
+      'highly detailed render of glazed bisque porcelain, smooth glossy surfaces',
+      'fine crazing and hairline cracks across the glaze, visible ball-joints',
+      'glass doll eyes with painted lashes, subtle subsurface sheen',
+      'crisp product-studio detail, delicate chips and seams',
+      'beautiful and uncanny, the perfection of an antique doll',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'style_pc_gothic_storybook',
+    name: 'Gothic Doll Storybook',
+    summary: 'Macabre storybook illustration — spindly ink line, muted pastel-and-grey wash, the elegant creepiness of a Victorian fairy-tale plate.',
+    phrases: [
+      'macabre gothic storybook illustration, spindly expressive ink linework',
+      'muted pastel-and-grey watercolour wash over the line',
+      'elongated elegant figures, decorative dark whimsy',
+      'the refined creepiness of a Victorian fairy-tale plate',
+      'pretty and sinister in equal measure',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'style_pc_faded_daguerreotype',
+    name: 'Faded Daguerreotype',
+    summary: 'Antique photographic plate — silvery tarnished tones, soft focus, foxing and scratches, the haunted stillness of a 19th-century portrait.',
+    phrases: [
+      'antique daguerreotype photograph, silvery tarnished monochrome tones',
+      'soft shallow focus, slight motion-blur ghosting',
+      'foxing, scratches and chemical staining across the plate',
+      'a vignette of darkness around a still formal portrait',
+      'the haunted solemn stillness of early photography',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'style_pc_pastel_gothic',
+    name: 'Pastel Gothic',
+    summary: 'Sweet-and-sinister pastel goth illustration — candy pastels soured with grey, lace and bows over cracks and gloom.',
+    phrases: [
+      'pastel gothic illustration, sweet candy pastels soured with cold grey',
+      'lace, ribbons and bows set against cracks, dust and gloom',
+      'soft cel-like rendering with delicate dark linework',
+      'pretty pinks and blues haunted by something melancholy',
+      'adorable and unsettling at once',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'style_pc_baroque_chiaroscuro',
+    name: 'Baroque Chiaroscuro',
+    summary: 'Dramatic old-master chiaroscuro — a single warm light carving figures from deep shadow, rich darks, candle-gold highlights.',
+    phrases: [
+      'dramatic baroque chiaroscuro, old-master oil rendering',
+      'a single warm light source carving the subject from deep shadow',
+      'rich velvety darks, candle-gold highlights on skin and gilt',
+      'theatrical tenebrism, most of the frame in shadow',
+      'solemn, opulent, and gravely beautiful',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -596,6 +686,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V7_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V8_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

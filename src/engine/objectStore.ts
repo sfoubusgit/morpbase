@@ -20,9 +20,11 @@ const BACKUP_KEY = 'promptgen:objects:backup:v1';
 const SEED_FLAG_KEY = 'promptgen:objects:seeded:v1';
 const SEED_FLAG_KEY_V2 = 'promptgen:objects:seeded:v2';
 const SEED_FLAG_KEY_V3 = 'promptgen:objects:seeded:v3';
+const SEED_FLAG_KEY_V4 = 'promptgen:objects:seeded:v4';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
 const SEED_TS_3 = 1748563200000;
+const SEED_TS_4 = 1748649600000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -421,6 +423,101 @@ const V3_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V4 — Porcelain Court: eerie rococo doll-court props.
+const V4_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_pc_cracked_mask',
+    name: 'Cracked Porcelain Mask',
+    summary: 'A painted porcelain half-mask on a slender handle — pale glaze, rosebud lips, a hairline crack running through one painted eye.',
+    phrases: [
+      'a painted porcelain half-mask on a slender handle',
+      'pale glaze, delicate rosebud lips and painted lashes',
+      'a hairline crack running through one painted eye',
+      'elegant and unsettling, held up to conceal a face',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_music_box',
+    name: 'Wind-Up Music Box',
+    summary: 'An ornate gilt music box with the lid open — a tiny mirrored stage and a turning ballerina inside, a brass key in the side.',
+    phrases: [
+      'an ornate gilt music box, lid open to a tiny mirrored stage',
+      'a small turning ballerina figure under a glass dome',
+      'a brass wind-up key in the side, faded velvet lining',
+      'tarnished scrollwork and a thin tinkling silence',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_hand_fan',
+    name: 'Ornate Hand Fan',
+    summary: 'A folding rococo hand fan — painted silk leaves of a pastoral scene on carved ivory sticks, lace-edged and slightly foxed.',
+    phrases: [
+      'a folding rococo hand fan of painted silk on carved ivory sticks',
+      'a faded pastoral scene painted across the leaf, lace-edged',
+      'gilt detailing and a silk tassel, slightly foxed with age',
+      'half-open, poised to conceal a whisper',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_antique_doll',
+    name: 'Antique Bisque Doll',
+    summary: 'A small seated antique doll — jointed bisque limbs, a faded lace dress, one glass eye gone cloudy, watching from the shelf.',
+    phrases: [
+      'a small seated antique bisque doll with jointed limbs',
+      'a faded lace dress and real-hair ringlets gone dusty',
+      'one glass eye clear and one gone cloudy, a chipped cheek',
+      'watching from a shelf with a fixed patient gaze',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_tea_service',
+    name: 'Tarnished Tea Service',
+    summary: 'A rococo porcelain tea service on a tray — gilt-rimmed cups gone grey with dust, a cracked teapot, a single cold cup poured.',
+    phrases: [
+      'a rococo porcelain tea service on a tarnished silver tray',
+      'gilt-rimmed cups and saucers furred with grey dust',
+      'a cracked teapot with a delicate floral pattern',
+      'one cup poured and long gone cold',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_stopped_clock',
+    name: 'Stopped Mantel Clock',
+    summary: 'An ornate gilt mantel clock halted at a single minute — cherub figures, a cracked enamel face, hands frozen and furred with dust.',
+    phrases: [
+      'an ornate gilt rococo mantel clock stopped at a single minute',
+      'gilded cherub figures flanking a cracked enamel face',
+      'frozen hands furred with fine dust, the pendulum still',
+      'time held permanently in place',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+  {
+    id: 'object_pc_rose_dome',
+    name: 'Rose Under Glass',
+    summary: 'A single dried rose beneath a bell-jar dome — petals gone brown and brittle, a scatter of fallen petals around the base.',
+    phrases: [
+      'a single dried rose preserved beneath a glass bell-jar dome',
+      'petals gone brown and brittle, frozen mid-wilt',
+      'a scatter of fallen petals around the wooden base',
+      'beauty kept long past its death, dust on the glass',
+    ],
+    createdAt: SEED_TS_4,
+    updatedAt: SEED_TS_4,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -448,6 +545,16 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V3, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V3_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V4) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V4, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V4_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
