@@ -237,6 +237,7 @@ type BuilderSessionSnapshot = {
   activeLaneSetId: string | null;
   activeUniverseId: string | null;
   pinnedItems: string[];
+  targetModel: 'z-image' | 'illustrious';
 };
 
 type CharacterPromptProjection = {
@@ -362,6 +363,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       pinnedItems: Array.isArray(parsed.pinnedItems)
         ? (parsed.pinnedItems as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
+      targetModel: parsed.targetModel === 'illustrious' ? 'illustrious' : 'z-image',
     };
   } catch {
     return null;
@@ -523,6 +525,7 @@ export function App() {
   const [isMoodOpen, setIsMoodOpen] = useState(false);
   const [lockedLanes, setLockedLanes] = useState<Set<string>>(new Set());
   const [pinnedItems, setPinnedItems] = useState<Set<string>>(() => new Set(initialBuilderSession?.pinnedItems ?? []));
+  const [targetModel, setTargetModel] = useState<'z-image' | 'illustrious'>(initialBuilderSession?.targetModel ?? 'z-image');
   const [activeNegativeIds, setActiveNegativeIds] = useState<string[]>(initialBuilderSession?.activeNegativeIds ?? []);
   const [negativePresets, setNegativePresets] = useState<NegativePreset[]>([]);
   const [isNegativeOpen, setIsNegativeOpen] = useState(false);
@@ -3095,6 +3098,7 @@ export function App() {
         activeLaneSetId,
         activeUniverseId,
         pinnedItems: Array.from(pinnedItems),
+        targetModel,
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -3137,6 +3141,7 @@ export function App() {
     activeLaneSetId,
     activeUniverseId,
     pinnedItems,
+    targetModel,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
@@ -3377,8 +3382,14 @@ export function App() {
         }]
       : [];
 
+    if (targetModel === 'z-image') {
+      // Z-Image-Turbo (FLUX-family): front-load the subject, then scene, then
+      // style; drop booru quality-tag spam which hurts DiT models.
+      return [...countEntries, ...characterEntries, ...interactionEntries, ...outfitEntries, ...poseEntries, ...worldStateEntries, ...environmentEntries, ...objectEntries, ...poolEntries, ...lightEntries, ...lightingEntries, ...styleEntries, ...compositionEntries, ...moodEntries];
+    }
+    // Illustrious / booru: conventional ordering, keep quality fragments.
     return [...countEntries, ...interactionEntries, ...worldStateEntries, ...characterEntries, ...poseEntries, ...outfitEntries, ...objectEntries, ...poolEntries, ...fragmentEntries, ...environmentEntries, ...lightEntries, ...styleEntries, ...lightingEntries, ...compositionEntries, ...moodEntries];
-  }, [activeCharacterProjections, activeCharacterIds, activeInteractionPhrase, characterCountPhrase, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
+  }, [targetModel, activeCharacterProjections, activeCharacterIds, activeInteractionPhrase, characterCountPhrase, availablePromptFragments, selectedPromptFragments, poolPromptItems, formatPromptAdditionText, poseFraming, poseOrientation, poseEnergy, poseGaze, activeEnvironmentIds, environments, envTime, envWeather, envScale, envCondition, worldVariationEnabled, worldVariationPhrases, activeOutfitIds, outfits, activeObjectIds, objects, activeStyleIds, stylePresets, activeLightingIds, lightingSetups, activeCompositionIds, compositionFrames, activeMoodIds, moodPresets]);
 
   const workspacePrompt = useMemo(() => {
     const startParts = promptAdditionEntries
@@ -4058,6 +4069,8 @@ export function App() {
           activeChipTexts={activeChipTexts}
           onChipToggle={handleChipToggle}
           assembledPrompt={workspacePrompt}
+          targetModel={targetModel}
+          onTargetModelChange={setTargetModel}
           onSavePrompt={() => { setSavePromptOpenSignal(s => s + 1); setActivePage('prompts'); }}
           activeCharacterItems={activeCharacterIds.map(id => ({ id, name: characters.find(c => c.id === id)?.name ?? id }))}
           onChooseCharacter={() => setIsCharacterLibraryOpen(true)}

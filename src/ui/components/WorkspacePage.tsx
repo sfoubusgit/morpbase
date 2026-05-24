@@ -125,6 +125,8 @@ type WorkspacePageProps = {
   activeChipTexts: string[];
   onChipToggle: (text: string) => void;
   assembledPrompt: string;
+  targetModel?: 'z-image' | 'illustrious';
+  onTargetModelChange?: (model: 'z-image' | 'illustrious') => void;
   onSavePrompt?: () => void;
 
   activeCharacterItems: { id: string; name: string }[];
@@ -211,6 +213,8 @@ export function WorkspacePage({
   activeChipTexts,
   onChipToggle,
   assembledPrompt,
+  targetModel,
+  onTargetModelChange,
   onSavePrompt,
   activeCharacterItems,
   onChooseCharacter,
@@ -358,6 +362,17 @@ export function WorkspacePage({
             <div className="workspace-field-label">
               Assembled Prompt
               {isEdited && !isEditing && <span className="ws-edited-badge">edited</span>}
+              {targetModel && onTargetModelChange && (
+                <select
+                  className="ws-target-model"
+                  value={targetModel}
+                  onChange={e => onTargetModelChange(e.target.value as 'z-image' | 'illustrious')}
+                  title="Format the prompt for this model"
+                >
+                  <option value="z-image">Z-Image-Turbo</option>
+                  <option value="illustrious">Illustrious</option>
+                </select>
+              )}
             </div>
             <div className={`workspace-output${isEditing ? ' workspace-output--editing' : ''}`}>
               {isEditing ? (
