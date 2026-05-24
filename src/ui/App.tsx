@@ -4238,6 +4238,7 @@ export function App() {
         activeObjectIds={activeObjectIds}
         onAdd={handleAddObject}
         onRemove={handleRemoveObject}
+        onItemCreated={(id) => addToActiveUniverse('object', id)}
         universeFilter={activeUniverse?.object}
         universeName={activeUniverseName}
       />

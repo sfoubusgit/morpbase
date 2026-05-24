@@ -617,6 +617,12 @@ export function WorkspacePage({
             </div>
           )}
 
+          {!activeUniverseName && onOpenUniverses && (
+            <button type="button" className="ws-universe-nudge" onClick={onOpenUniverses}>
+              ◈ Pick a Universe to focus every lane →
+            </button>
+          )}
+
           <div className="workspace-lane-list">
             <LaneSlot
               label="Character"

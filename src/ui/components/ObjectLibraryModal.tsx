@@ -15,6 +15,7 @@ type ObjectLibraryModalProps = {
   activeObjectIds: string[];
   onAdd: (id: string, name: string, phrases: string[]) => void;
   onRemove: (id: string) => void;
+  onItemCreated?: (id: string) => void;
   universeFilter?: string[];
   universeName?: string;
 };
@@ -25,6 +26,7 @@ export function ObjectLibraryModal({
   activeObjectIds,
   onAdd,
   onRemove,
+  onItemCreated,
   universeFilter,
   universeName,
 }: ObjectLibraryModalProps) {
@@ -59,6 +61,7 @@ export function ObjectLibraryModal({
     setNewPhrases('');
     setNewSummary('');
     setIsCreating(false);
+    onItemCreated?.(created.id);
     onAdd(created.id, created.name, created.phrases);
     onClose();
   };
