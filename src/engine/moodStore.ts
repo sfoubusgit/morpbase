@@ -9,6 +9,7 @@ const MOOD_SEED_FLAG_KEY_V5 = 'promptgen:moods:seeded:v5';
 const MOOD_SEED_FLAG_KEY_V6 = 'promptgen:moods:seeded:v6';
 const MOOD_SEED_FLAG_KEY_V7 = 'promptgen:moods:seeded:v7';
 const MOOD_SEED_FLAG_KEY_V8 = 'promptgen:moods:seeded:v8';
+const MOOD_SEED_FLAG_KEY_V9 = 'promptgen:moods:seeded:v9';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -96,6 +97,7 @@ const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
+const SEED_TS_9 = 1748822400000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -662,6 +664,88 @@ const V8_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V9 — Deep Signal: isolated, dread-soaked, eldritch-awe registers.
+const V9_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_ds_crushing_isolation',
+    name: 'Crushing Isolation',
+    summary: 'Utterly alone under miles of water — the cold, pressing solitude of the deep, no rescue, no surface, only the dark and the breathing.',
+    phrases: [
+      'utterly alone under miles of crushing water, no rescue coming',
+      'the cold pressing solitude of the deep, no surface to reach',
+      'silence broken only by one\'s own breathing',
+      'isolated, weighed-down, and small',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'mood_ds_creeping_dread',
+    name: 'Creeping Dread',
+    summary: 'The slow certainty that something is wrong — a wrongness building at the edges, the hair rising before anything has happened.',
+    phrases: [
+      'the slow building certainty that something is deeply wrong',
+      'wrongness gathering at the edges of perception',
+      'the hair rising before anything has happened',
+      'quiet, mounting, inescapable dread',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'mood_ds_bioluminescent_wonder',
+    name: 'Bioluminescent Wonder',
+    summary: 'Awe at the impossible beauty of the deep — glowing life blooming in the black, breathtaking and serene before the dread sets in.',
+    phrases: [
+      'awe at the impossible beauty of glowing life in the black',
+      'breathtaking serene wonder, colour blooming in the dark',
+      'a hushed reverence for the alien deep',
+      'beautiful, tranquil, and otherworldly',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'mood_ds_claustrophobic_panic',
+    name: 'Claustrophobic Panic',
+    summary: 'The walls closing in as the water rises — racing pulse, flooding corridors, no way out and the air running short.',
+    phrases: [
+      'the walls closing in as cold water rises',
+      'racing pulse, flooding corridors, the air running short',
+      'frantic trapped energy with nowhere to run',
+      'tight, breathless, rising panic',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'mood_ds_eldritch_awe',
+    name: 'Eldritch Awe',
+    summary: 'The mind buckling before the vast and wrong — terror and reverence fused, the sublime horror of something far too large and old.',
+    phrases: [
+      'the mind buckling before something vast and wrong',
+      'terror and reverence fused into sublime horror',
+      'awe at a presence far too large and old to comprehend',
+      'overwhelming, cosmic, and unmooring',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'mood_ds_cold_abyssal_calm',
+    name: 'Cold Abyssal Calm',
+    summary: 'The eerie peace of the deepest dark — a still, weightless, indifferent calm, the seductive quiet of giving in to the depths.',
+    phrases: [
+      'the eerie weightless peace of the deepest dark',
+      'a still, cold, indifferent calm with no urgency left',
+      'the seductive quiet of surrendering to the depths',
+      'serene, detached, and faintly sinister',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -735,6 +819,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V8, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V8_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V9_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

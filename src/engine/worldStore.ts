@@ -19,6 +19,7 @@ const WORLD_SEED_FLAG_KEY_V5 = 'promptgen:worlds:seeded:v5';
 const WORLD_SEED_FLAG_KEY_V6 = 'promptgen:worlds:seeded:v6';
 const WORLD_SEED_FLAG_KEY_V7 = 'promptgen:worlds:seeded:v7';
 const WORLD_SEED_FLAG_KEY_V8 = 'promptgen:worlds:seeded:v8';
+const WORLD_SEED_FLAG_KEY_V9 = 'promptgen:worlds:seeded:v9';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
@@ -28,6 +29,7 @@ const WORLD_SEED_TS_V5 = 1748476800000;
 const WORLD_SEED_TS_V6 = 1748563200000;
 const WORLD_SEED_TS_V7 = 1748649600000;
 const WORLD_SEED_TS_V8 = 1748736000000;
+const WORLD_SEED_TS_V9 = 1748822400000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -360,6 +362,48 @@ const SEED_WORLDS_V8: World[] = [
   },
 ];
 
+const SEED_WORLDS_V9: World[] = [
+  {
+    id: 'world_seed_ds_deep_signal',
+    name: 'Deep Signal',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_ds_01', text: 'a deep-sea research station clinging to a black trench wall, miles down, the last lit thing in an ocean of dark' },
+      { id: 'wp_ds_02', text: 'a palette of abyssal black and steel grey pierced by bioluminescent cyan, violet and sickly gold' },
+      { id: 'wp_ds_03', text: 'crushing pressure and total silence, marine snow drifting endlessly through floodlight cones' },
+      { id: 'wp_ds_04', text: 'a great curved observation dome staring into bottomless black water, faint far-off flickers beyond the glass' },
+      { id: 'wp_ds_05', text: 'cramped flooding corridors, flickering strip-lights over ankle-deep water, seams weeping seawater' },
+      { id: 'wp_ds_06', text: 'a signal coming up from the trench that should not have words, a waveform crawling into shapes too deliberate' },
+      { id: 'wp_ds_07', text: 'a wall of glowing specimen tanks holding things that should not be, pulsing soft in the dark' },
+      { id: 'wp_ds_08', text: 'a moon pool of black seawater breathing up through the station floor, dive gear racked around it' },
+      { id: 'wp_ds_09', text: 'a lone diver in a heavy atmospheric suit, one lamp and one tether against infinite dark, only their own breathing for company' },
+      { id: 'wp_ds_10', text: 'a red emergency light pulsing through steam as the station quietly fails around the crew' },
+      { id: 'wp_ds_11', text: 'a bioluminescent reef blooming in the abyss, towering glowing growths and drifting jellies, alien and serene' },
+      { id: 'wp_ds_12', text: 'black-smoker hydrothermal vents belching superheated water, pale tube worms and a hellish red glow on the trench floor' },
+      { id: 'wp_ds_13', text: 'crew whose bodies are quietly, wrongly changing — translucent skin, gill-slits, a soft glow beneath the flesh' },
+      { id: 'wp_ds_14', text: 'an anglerfish thing shaped like a woman, a single glowing lure and a soft smile over rows of needle teeth' },
+      { id: 'wp_ds_15', text: 'a drowned diver the sea gave back, drifting the corridors in a flooded helmet half-full of dark water' },
+      { id: 'wp_ds_16', text: 'a stowaway cultist in barnacle-crusted robes, certain the thing in the trench is a god and the crew its offering' },
+      { id: 'wp_ds_17', text: 'an older sunken wreck on the trench floor, draped in silt and pale growth, doorways gaping into total black' },
+      { id: 'wp_ds_18', text: 'the comms officer with headphones clamped on, transcribing the signal, eyes too wide and sleepless' },
+      { id: 'wp_ds_19', text: 'cold console and sonar-scope glow underlighting frightened faces, the rest of every room swallowed in shadow' },
+      { id: 'wp_ds_20', text: 'a barnacle-crusted idol dredged from the deep, humanoid yet wrong, faintly warm and faintly glowing within' },
+      { id: 'wp_ds_21', text: 'the station seen from outside, tiny lit windows clinging to sheer rock, dwarfed by the crushing black' },
+      { id: 'wp_ds_22', text: 'a single eerie lure-light hanging in absolute void, drawing the eye, illuminating almost nothing' },
+      { id: 'wp_ds_23', text: 'the smell the image implies — brine, rust, ozone, machine oil, and something sweet and organic and wrong' },
+      { id: 'wp_ds_24', text: 'the deepest dark where the signal comes from, impossible geometry suggested by cold scattered constellations of light' },
+      { id: 'wp_ds_25', text: 'a colossal dim shape at the edge of the floodlight, fins and tendrils and wrong angles, a tiny diver dwarfed before it' },
+      { id: 'wp_ds_26', text: 'the wonder of impossible beauty curdling into dread, awe and terror fused in the same held breath' },
+      { id: 'wp_ds_27', text: 'a distress beacon blinking its useless SOS into the dark, half-flooded, no one coming' },
+      { id: 'wp_ds_28', text: 'reflections in dark portholes that hold a shape a half-second too long, or one too many figures' },
+      { id: 'wp_ds_29', text: 'the seductive cold calm of the deepest dark, the quiet pull of simply giving in to the depths' },
+      { id: 'wp_ds_30', text: 'the whole station fragile and luminous and doomed — beautiful, isolated, and quietly, hideously watched' },
+    ],
+    createdAt: WORLD_SEED_TS_V9,
+    updatedAt: WORLD_SEED_TS_V9,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -439,6 +483,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V8, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V8.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V9) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V9, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V9.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

@@ -15,6 +15,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V8 = 'promptgen:environments:seeded:v8';
 const ENVIRONMENT_SEED_FLAG_KEY_V9 = 'promptgen:environments:seeded:v9';
 const ENVIRONMENT_SEED_FLAG_KEY_V10 = 'promptgen:environments:seeded:v10';
 const ENVIRONMENT_SEED_FLAG_KEY_V11 = 'promptgen:environments:seeded:v11';
+const ENVIRONMENT_SEED_FLAG_KEY_V12 = 'promptgen:environments:seeded:v12';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -114,6 +115,7 @@ const ENV_SEED_TS_8 = 1748476800000;
 const ENV_SEED_TS_9 = 1748563200000;
 const ENV_SEED_TS_10 = 1748649600000;
 const ENV_SEED_TS_11 = 1748736000000;
+const ENV_SEED_TS_12 = 1748822400000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -1573,6 +1575,231 @@ const V11_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V12 — Deep Signal: a bioluminescent deep-sea research station drifting toward cosmic horror.
+const V12_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_ds_observation_dome',
+    name: 'The Observation Dome',
+    summary: 'A glass blister staring into the abyss — a curved viewport onto bottomless black water, drifting motes and far-off bioluminescent flickers beyond.',
+    phraseBundle: {
+      core: [
+        'a deep-sea station observation dome, a great curved glass viewport onto bottomless black water',
+        'drifting marine snow and faint far-off bioluminescent flickers beyond the glass',
+        'a dim interior lit only by the cold blue glow of the deep',
+        'riveted steel frame around the dome, a single worn chair facing out',
+        'condensation beading on the inside of the thick glass',
+        'silent, vast, and pressing with the weight of the ocean',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_command_deck',
+    name: 'The Command Deck',
+    summary: 'The nerve centre going dark — banks of flickering screens and dead consoles, an emergency light pulsing, half the station offline.',
+    phraseBundle: {
+      core: [
+        'a deep-sea station command deck, banks of flickering screens and consoles',
+        'half the panels dead and dark, sonar scopes glowing green',
+        'a slow red emergency light pulsing over the room',
+        'tangled cables, a spilled mug, abandoned chairs',
+        'cold blue console light against deep shadow',
+        'tense, failing, and almost deserted',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_moon_pool',
+    name: 'The Moon Pool',
+    summary: 'An open square of black water inside the station — the sea breathing up through the floor, dive gear racked around it, ripples lit from below.',
+    phraseBundle: {
+      core: [
+        'a station wet-dock moon pool, an open square of black seawater in the floor',
+        'the sea breathing gently up through the opening, ripples lit cold from below',
+        'dive suits and helmets racked around the pool, dripping hoses',
+        'a launch crane and chains over the dark water',
+        'wet steel grating, condensation and rising mist',
+        'a threshold between the dry world and the deep',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_specimen_lab',
+    name: 'The Specimen Lab',
+    summary: 'A wall of glowing tanks holding things that should not be — bioluminescent specimens pulsing in cyan and violet, the only light in a dim room.',
+    phraseBundle: {
+      core: [
+        'a deep-sea specimen lab, a wall of glass tanks holding glowing marine lifeforms',
+        'bioluminescent specimens pulsing soft cyan, violet and gold in the water',
+        'the tanks the only light, casting rippling glow across the dim room',
+        'lab benches of instruments, sample jars and tangled tubing',
+        'wet floor reflecting the tank light, a faint organic haze',
+        'beautiful, clinical, and quietly wrong',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_corridors',
+    name: 'The Flooding Corridors',
+    summary: 'Cramped steel passages going under — flickering strip-lights, ankle-deep water, weeping seams and a long dark turn ahead.',
+    phraseBundle: {
+      core: [
+        'cramped steel station corridors, low ceilings and bundled pipes',
+        'flickering strip-lights stuttering over ankle-deep black water',
+        'seawater weeping from groaning riveted seams',
+        'a long dark turn ahead swallowing the failing light',
+        'wet reflections, peeling paint and warning stencils',
+        'claustrophobic, dripping, and slowly drowning',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_engine_core',
+    name: 'The Engine Core',
+    summary: 'The failing heart of the station — a huge reactor casing leaking steam and seawater, catwalks over a flooded sump, warning lights strobing.',
+    phraseBundle: {
+      core: [
+        'a deep-sea station engine core, a huge reactor casing leaking steam and seawater',
+        'iron catwalks over a flooded sump below, dim and echoing',
+        'red warning lights strobing through drifting steam',
+        'sparking junction boxes and shuddering pipework',
+        'rust, condensation and oily reflections on the water',
+        'industrial, overheating, and barely holding',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_dive_bay',
+    name: 'The Dive Airlock',
+    summary: 'The way out into the deep — a heavy round airlock door beaded with condensation, dive suits hanging like empty divers, a warning light over the seal.',
+    phraseBundle: {
+      core: [
+        'a station dive airlock, a heavy round steel door beaded with condensation',
+        'atmospheric dive suits hanging on the wall like empty divers',
+        'a yellow warning light revolving over the sealed door',
+        'oxygen tanks, coiled umbilicals and racked helmets',
+        'wet grating underfoot, the hiss of pressurising air',
+        'tense, industrial, and one seal away from the abyss',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_crew_quarters',
+    name: 'The Crew Quarters',
+    summary: 'Claustrophobic stacked bunks where no one is sleeping — personal clutter, a flickering lamp, taped photos curling in the damp.',
+    phraseBundle: {
+      core: [
+        'cramped deep-sea station crew quarters, stacked steel bunks',
+        'rumpled bedding, personal clutter and taped photos curling in the damp',
+        'a single flickering reading lamp, the rest in shadow',
+        'a low sweating ceiling, a porthole onto black water',
+        'a sense of recent abandonment, a meal gone cold',
+        'claustrophobic, intimate, and uneasy',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_trench_exterior',
+    name: 'The Trench Exterior',
+    summary: 'The station from outside — a lit cluster of modules clinging to a black trench wall, floodlights cutting thin cones into infinite dark water.',
+    phraseBundle: {
+      core: [
+        'a deep-sea station seen from outside, a cluster of lit modules on a black trench wall',
+        'floodlights cutting thin cones into infinite dark water',
+        'marine snow drifting endlessly through the beams',
+        'cables and pipes anchoring the station to the sheer rock',
+        'the lit windows tiny against the crushing abyssal black',
+        'isolated, fragile, and utterly alone in the deep',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_bioluminescent_reef',
+    name: 'The Bioluminescent Reef',
+    summary: 'An alien garden in the abyss — towering glowing growths and drifting jellies pulsing in cyan and rose, beautiful and silent and not quite coral.',
+    phraseBundle: {
+      core: [
+        'a bioluminescent deep-sea reef, towering glowing growths in the black water',
+        'drifting jellyfish and tendrils pulsing soft cyan, rose and gold',
+        'strange anemone-like organisms breathing light, not quite coral',
+        'clouds of tiny glowing plankton hanging in the dark',
+        'soft self-lit colour fading quickly into surrounding black',
+        'alien, beautiful, and serenely wrong',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_hydrothermal_vents',
+    name: 'The Hydrothermal Vents',
+    summary: 'Black smokers on the trench floor — chimneys belching dark superheated water, shimmering heat-haze, pale tube worms and a hellish red glow.',
+    phraseBundle: {
+      core: [
+        'a field of hydrothermal black-smoker vents on the trench floor',
+        'mineral chimneys belching plumes of dark superheated water',
+        'shimmering heat-haze rising through the cold black',
+        'pale ghostly tube worms and blind crabs clustered around the heat',
+        'a faint hellish red-orange glow from the vent mouths',
+        'primordial, volcanic, and teeming with strange life',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_wreck',
+    name: 'The Sunken Wreck',
+    summary: 'An older structure on the trench floor — a half-buried hull or station drowned long ago, draped in silt and growth, doorways gaping into black.',
+    phraseBundle: {
+      core: [
+        'an older sunken wreck on the trench floor, a half-buried hull drowned long ago',
+        'draped in grey silt and pale bioluminescent growth',
+        'collapsed bulkheads and doorways gaping into total black',
+        'a school of pale fish pouring from a broken porthole',
+        'a diver floodlight grazing the corroded metal',
+        'forsaken, ancient, and heavy with dread',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+  {
+    id: 'environment_seed_ds_eldritch_depths',
+    name: 'The Eldritch Depths',
+    summary: 'Where the signal comes from — a vast wrongness in the deepest dark, impossible geometry and cold constellations of light, the trench opening into something awake.',
+    phraseBundle: {
+      core: [
+        'the deepest abyssal dark where the signal comes from, a vast wrongness in the black',
+        'impossible non-euclidean geometry suggested by cold scattered lights',
+        'colossal dim shapes and tendrils at the edge of the floodlight',
+        'cold constellations of bioluminescence in patterns that feel deliberate',
+        'a tiny diver light utterly dwarfed by the scale of it',
+        'cosmic, eldritch, and quietly, hideously awake',
+      ],
+    },
+    createdAt: ENV_SEED_TS_12,
+    updatedAt: ENV_SEED_TS_12,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -1695,6 +1922,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V11, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V11_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V12_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

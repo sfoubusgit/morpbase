@@ -22,11 +22,13 @@ const SEED_FLAG_KEY_V2 = 'promptgen:objects:seeded:v2';
 const SEED_FLAG_KEY_V3 = 'promptgen:objects:seeded:v3';
 const SEED_FLAG_KEY_V4 = 'promptgen:objects:seeded:v4';
 const SEED_FLAG_KEY_V5 = 'promptgen:objects:seeded:v5';
+const SEED_FLAG_KEY_V6 = 'promptgen:objects:seeded:v6';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
 const SEED_TS_3 = 1748563200000;
 const SEED_TS_4 = 1748649600000;
 const SEED_TS_5 = 1748736000000;
+const SEED_TS_6 = 1748822400000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -615,6 +617,101 @@ const V5_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V6 — Deep Signal: deep-sea cosmic-horror props.
+const V6_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_ds_diving_helmet',
+    name: 'Diving Helmet',
+    summary: 'A round brass-and-steel deep-sea helmet — a small barred faceplate, a lamp above the brow, condensation and a hairline crack across the glass.',
+    phrases: [
+      'a round brass-and-steel atmospheric diving helmet',
+      'a small barred faceplate fogged with condensation',
+      'a bright lamp mounted above the brow, riveted seams',
+      'a hairline crack threading across the thick glass',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_specimen_jar',
+    name: 'Specimen Jar',
+    summary: 'A sealed lab jar with something glowing inside — a translucent deep-sea organism pulsing soft cyan in murky preserving fluid.',
+    phrases: [
+      'a sealed glass specimen jar with something glowing inside',
+      'a translucent deep-sea organism pulsing soft cyan',
+      'murky preserving fluid and a handwritten label',
+      'a brass clamp lid, the only light in a dark room',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_hydrophone',
+    name: 'Hydrophone Console',
+    summary: 'A battered sonar listening station — a green oscilloscope, dials and clamped headphones, a waveform crawling across the screen.',
+    phrases: [
+      'a battered hydrophone sonar console, a glowing green oscilloscope',
+      'rows of dials, switches and a clamped set of headphones',
+      'a slow waveform crawling across the scope screen',
+      'cold green light in the dark, the hum of the deep',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_distress_beacon',
+    name: 'Distress Beacon',
+    summary: 'A failing emergency beacon — a battered yellow casing with a slowly pulsing red lamp, half-flooded, blinking its useless SOS into the dark.',
+    phrases: [
+      'a battered yellow emergency distress beacon',
+      'a red lamp pulsing slowly, half-flooded with water',
+      'scratched casing and a bent antenna, dripping',
+      'blinking a useless SOS into the abyssal dark',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_speargun',
+    name: 'Harpoon Speargun',
+    summary: 'A heavy underwater speargun — a barbed harpoon loaded, taut rubber bands, salt-pitted metal, the only weapon that works down here.',
+    phrases: [
+      'a heavy underwater harpoon speargun, a barbed spear loaded',
+      'taut stretched rubber bands, a salt-pitted metal stock',
+      'a coiled tether line trailing from the shaft',
+      'scratched and functional, the only weapon for the deep',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_eldritch_idol',
+    name: 'Barnacle Idol',
+    summary: 'A small carved idol dredged from the trench — a humanoid-yet-wrong figure crusted with barnacles, faintly warm, faintly glowing within.',
+    phrases: [
+      'a small carved idol dredged from the trench, humanoid yet wrong',
+      'crusted with barnacles and pale growth, ancient stone beneath',
+      'impossible angles in its form, faintly warm to hold',
+      'a dim glow pulsing somewhere deep inside it',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+  {
+    id: 'object_ds_rebreather',
+    name: 'Rebreather Rig',
+    summary: 'A scuffed rebreather and oxygen rig — twin tanks, a tangle of hoses and a mask, the gauge needle dropping into the red.',
+    phrases: [
+      'a scuffed rebreather and twin oxygen tanks on a harness',
+      'a tangle of hoses and a fogged dive mask',
+      'a pressure gauge needle dropping into the red',
+      'scratched and salt-stained, air running low',
+    ],
+    createdAt: SEED_TS_6,
+    updatedAt: SEED_TS_6,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -662,6 +759,16 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V5, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V5_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V6) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V6, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V6_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

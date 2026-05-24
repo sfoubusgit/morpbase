@@ -8,6 +8,7 @@ const WARDROBE_SEED_FLAG_KEY_V5 = 'promptgen:wardrobe:seeded:v5';
 const WARDROBE_SEED_FLAG_KEY_V6 = 'promptgen:wardrobe:seeded:v6';
 const WARDROBE_SEED_FLAG_KEY_V7 = 'promptgen:wardrobe:seeded:v7';
 const WARDROBE_SEED_FLAG_KEY_V8 = 'promptgen:wardrobe:seeded:v8';
+const WARDROBE_SEED_FLAG_KEY_V9 = 'promptgen:wardrobe:seeded:v9';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -95,6 +96,7 @@ const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
+const SEED_TS_9 = 1748822400000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -646,6 +648,88 @@ const V8_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V9 — Deep Signal: deep-sea station and dive dress.
+const V9_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_ds_dive_suit',
+    name: 'Atmospheric Dive Suit',
+    summary: 'A heavy armoured deep-sea suit — riveted plates, corrugated hoses and a round helmet with a single lamp, built to survive crushing pressure.',
+    phrases: [
+      'a heavy riveted atmospheric dive suit, armoured plates and joints',
+      'corrugated air hoses and an umbilical tether',
+      'a round brass-and-steel diving helmet with a single bright lamp',
+      'a fogged faceplate, built to survive crushing pressure',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'outfit_ds_station_jumpsuit',
+    name: 'Station Jumpsuit',
+    summary: 'Standard crew coverall — a worn utility jumpsuit with rank patches and an ID lanyard, damp at the collar, sleeves rolled.',
+    phrases: [
+      'a worn deep-sea station crew jumpsuit, utility coverall',
+      'faded rank and mission patches, an ID lanyard',
+      'damp at the collar, sleeves rolled to the elbow',
+      'practical, institutional, and lived-in',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'outfit_ds_lab_wetgear',
+    name: 'Lab Coat & Wet Gear',
+    summary: 'The researcher\'s layers — a rolled-sleeve lab coat over a jumpsuit, rubber gloves and waders, ready to work the tanks.',
+    phrases: [
+      'a rolled-sleeve lab coat over a station jumpsuit',
+      'rubber gloves and waders for working the specimen tanks',
+      'a chest pocket of pipettes and a sample tube rack',
+      'clinical, damp, and field-ready',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'outfit_ds_engineer_rig',
+    name: "Engineer's Wet Rig",
+    summary: 'Hard-working maintenance gear — a soaked jumpsuit tied at the waist, a tool harness and headlamp, gloves slick with grease and seawater.',
+    phrases: [
+      'a soaked engineer jumpsuit tied at the waist over a tank top',
+      'a heavy tool harness, a headlamp and a clipped torch',
+      'thick gloves slick with grease and seawater',
+      'rugged, utilitarian, and drenched',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'outfit_ds_cult_robes',
+    name: 'Barnacle Cult Robes',
+    summary: 'The deep cultist\'s vestments — sodden robes crusted with barnacles and shells, strung with bone and net, reeking of the sea.',
+    phrases: [
+      'sodden ritual robes crusted with barnacles and shells',
+      'strung with bone, netting and salt-bleached charms',
+      'waterlogged grey fabric clinging to the body',
+      'reeking of brine, devotional and unclean',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'outfit_ds_changed_fleshsuit',
+    name: 'Transformed Flesh',
+    summary: 'Not clothing but anatomy — a torn jumpsuit splitting over translucent bioluminescent flesh, new fins, gills and ridges blooming through.',
+    phrases: [
+      'a torn station jumpsuit splitting over changing anatomy',
+      'translucent faintly bioluminescent flesh showing through the rents',
+      'new fins, gill-slits and ridges blooming across the skin',
+      'body horror, half-clothed and half-transformed',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -709,6 +793,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V8, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V8_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V9_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

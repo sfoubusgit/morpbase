@@ -9,6 +9,7 @@ const UNIVERSE_SEED_FLAG_KEY_V4 = 'morpbase:universes:seeded:v4';
 const UNIVERSE_SEED_FLAG_KEY_V5 = 'morpbase:universes:seeded:v5';
 const UNIVERSE_SEED_FLAG_KEY_V6 = 'morpbase:universes:seeded:v6';
 const UNIVERSE_SEED_FLAG_KEY_V7 = 'morpbase:universes:seeded:v7';
+const UNIVERSE_SEED_FLAG_KEY_V8 = 'morpbase:universes:seeded:v8';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -16,6 +17,7 @@ const SEED_TS_V4 = 1748563200000;
 const SEED_TS_V5 = 1748649600000;
 const SEED_TS_V6 = 1748736000000;
 const SEED_TS_V7 = 1748822400000;
+const SEED_TS_V8 = 1748908800000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -608,6 +610,102 @@ function maybeApplyUniverseSeedV7(universes: Universe[]): Universe[] {
   }
 }
 
+// V8 — Deep Signal: a full in-app universe, a bioluminescent deep-sea station drifting toward cosmic horror.
+const SEED_UNIVERSE_DEEP_SIGNAL: Universe = {
+  id: 'universe_seed_deep_signal',
+  name: 'Deep Signal',
+  description: 'A bioluminescent deep-sea research station clinging to a black trench wall, miles down, slowly failing — a crew coming apart as a signal from the abyss takes hold and the dark begins to rewrite them. Crushing isolation, glowing horrors, and something vast and ancient awake below.',
+  pools: {
+    character: [
+      'character_seed_ds_commander',
+      'character_seed_ds_biologist',
+      'character_seed_ds_diver',
+      'character_seed_ds_engineer',
+      'character_seed_ds_comms',
+      'character_seed_ds_doctor',
+      'character_seed_ds_cultist',
+      'character_seed_ds_changed',
+      'character_seed_ds_siren',
+      'character_seed_ds_drowned',
+      'character_seed_ds_herald',
+    ],
+    environment: [
+      'environment_seed_ds_observation_dome',
+      'environment_seed_ds_command_deck',
+      'environment_seed_ds_moon_pool',
+      'environment_seed_ds_specimen_lab',
+      'environment_seed_ds_corridors',
+      'environment_seed_ds_engine_core',
+      'environment_seed_ds_dive_bay',
+      'environment_seed_ds_crew_quarters',
+      'environment_seed_ds_trench_exterior',
+      'environment_seed_ds_bioluminescent_reef',
+      'environment_seed_ds_hydrothermal_vents',
+      'environment_seed_ds_wreck',
+      'environment_seed_ds_eldritch_depths',
+    ],
+    wardrobe: [
+      'outfit_ds_dive_suit',
+      'outfit_ds_station_jumpsuit',
+      'outfit_ds_lab_wetgear',
+      'outfit_ds_engineer_rig',
+      'outfit_ds_cult_robes',
+      'outfit_ds_changed_fleshsuit',
+    ],
+    mood: [
+      'mood_ds_crushing_isolation',
+      'mood_ds_creeping_dread',
+      'mood_ds_bioluminescent_wonder',
+      'mood_ds_claustrophobic_panic',
+      'mood_ds_eldritch_awe',
+      'mood_ds_cold_abyssal_calm',
+    ],
+    style: [
+      'style_ds_deepsea_render',
+      'style_ds_cosmic_horror',
+      'style_ds_biolum_ink',
+      'style_ds_found_footage',
+      'style_ds_painterly_horror',
+      'style_ds_iridescent_abyssal',
+    ],
+    lighting: [
+      'lighting_ds_bioluminescent',
+      'lighting_ds_submersible_flood',
+      'lighting_ds_emergency_red',
+      'lighting_ds_console_glow',
+      'lighting_ds_lure_light',
+      'lighting_ds_abyssal_dark',
+    ],
+    object: [
+      'object_ds_diving_helmet',
+      'object_ds_specimen_jar',
+      'object_ds_hydrophone',
+      'object_ds_distress_beacon',
+      'object_ds_speargun',
+      'object_ds_eldritch_idol',
+      'object_ds_rebreather',
+    ],
+    aura: [
+      'world_seed_ds_deep_signal',
+    ],
+  },
+  createdAt: SEED_TS_V8,
+  updatedAt: SEED_TS_V8,
+};
+
+function maybeApplyUniverseSeedV8(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V8) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V8, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_DEEP_SIGNAL.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_DEEP_SIGNAL];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -651,7 +749,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))));
+    return maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

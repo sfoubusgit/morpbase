@@ -9,6 +9,7 @@ const LIGHTING_SEED_FLAG_KEY_V5 = 'promptgen:lightings:seeded:v5';
 const LIGHTING_SEED_FLAG_KEY_V6 = 'promptgen:lightings:seeded:v6';
 const LIGHTING_SEED_FLAG_KEY_V7 = 'promptgen:lightings:seeded:v7';
 const LIGHTING_SEED_FLAG_KEY_V8 = 'promptgen:lightings:seeded:v8';
+const LIGHTING_SEED_FLAG_KEY_V9 = 'promptgen:lightings:seeded:v9';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -96,6 +97,7 @@ const SEED_TS_5 = 1748476800000;
 const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
+const SEED_TS_9 = 1748822400000;
 
 const V5_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -623,6 +625,88 @@ const V8_SEED_LIGHTINGS: LightingSetup[] = [
   },
 ];
 
+// V9 — Deep Signal: bioluminescent, floodlit and abyssal-dark light.
+const V9_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_ds_bioluminescent',
+    name: 'Bioluminescent Glow',
+    summary: 'Light made by living things — soft self-illuminating cyan, violet and gold radiating from creatures into surrounding black water.',
+    phrases: [
+      'soft bioluminescent glow radiating from living things',
+      'self-illuminating cyan, violet and gold in black water',
+      'gentle falloff into total surrounding darkness',
+      'colour pulsing slowly, the only light in the deep',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'lighting_ds_submersible_flood',
+    name: 'Submersible Floodlight',
+    summary: 'A hard cone of artificial light in the abyss — a bright floodlight cutting murky water, full of drifting particles, black beyond its reach.',
+    phrases: [
+      'a hard cone of submersible floodlight cutting the murky water',
+      'a bright beam thick with drifting marine snow and particles',
+      'total black beyond the reach of the light',
+      'strong volumetric shafts, harsh falloff',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'lighting_ds_emergency_red',
+    name: 'Flickering Emergency Red',
+    summary: 'Alarm light in a failing station — a pulsing red emergency lamp strobing through steam and shadow, everything washed in alarm.',
+    phrases: [
+      'a pulsing red emergency light strobing through a dim interior',
+      'alarm-red wash over steam, shadow and wet steel',
+      'rhythmic flashing, deep black between the pulses',
+      'tense, claustrophobic, and failing',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'lighting_ds_console_glow',
+    name: 'Cold Console Glow',
+    summary: 'Screens in the dark — cold blue and green console and sonar-scope light underlighting a face, the rest of the room swallowed in shadow.',
+    phrases: [
+      'cold blue and green console and sonar-scope light in the dark',
+      'screen-glow underlighting a face from below',
+      'the rest of the room swallowed in deep shadow',
+      'electronic, eerie, and isolating',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'lighting_ds_lure_light',
+    name: 'Anglerfish Lure Light',
+    summary: 'A single eerie point in the void — one small glowing lure hanging in absolute black, drawing the eye, illuminating almost nothing.',
+    phrases: [
+      'a single small glowing lure-light hanging in absolute black',
+      'one eerie point of soft gold drawing the eye in the void',
+      'almost nothing else illuminated, faint hints at the edges',
+      'beckoning, isolated, and ominous',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'lighting_ds_abyssal_dark',
+    name: 'Abyssal Darkness',
+    summary: 'Near-total black — the lightless deep where only faint shapes and the dimmest glows resolve, dread pressing in from every side.',
+    phrases: [
+      'near-total abyssal darkness, the lightless deep',
+      'only faint shapes and the dimmest glows resolving from the black',
+      'overwhelming negative space, dread pressing from every side',
+      'minimal light, maximal void',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+];
+
 const writeItems = (items: LightingSetup[]) => {
   const payload: LightingStore = { version: 1, items: sortItems(items) };
   writeStorageItem(LIGHTING_STORE_KEY, payload);
@@ -696,6 +780,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V8, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V8_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V9_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

@@ -10,6 +10,7 @@ const STYLE_SEED_FLAG_KEY_V6 = 'promptgen:styles:seeded:v6';
 const STYLE_SEED_FLAG_KEY_V7 = 'promptgen:styles:seeded:v7';
 const STYLE_SEED_FLAG_KEY_V8 = 'promptgen:styles:seeded:v8';
 const STYLE_SEED_FLAG_KEY_V9 = 'promptgen:styles:seeded:v9';
+const STYLE_SEED_FLAG_KEY_V10 = 'promptgen:styles:seeded:v10';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -98,6 +99,7 @@ const SEED_TS_6 = 1748476800000;
 const SEED_TS_7 = 1748563200000;
 const SEED_TS_8 = 1748649600000;
 const SEED_TS_9 = 1748736000000;
+const SEED_TS_10 = 1748822400000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -713,6 +715,94 @@ const V9_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V10 — Deep Signal: deep-sea cosmic-horror art directions.
+const V10_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_ds_deepsea_render',
+    name: 'Deep-Sea Cinematic Render',
+    summary: 'Photoreal abyssal render — murky water, floodlit volumetrics, marine snow, crushing dark and cold blue depth.',
+    phrases: [
+      'photorealistic deep-sea cinematic render, murky abyssal water',
+      'floodlit volumetric light cones, drifting marine snow',
+      'crushing darkness, cold blue and teal depth',
+      'fine particulate haze and soft caustics, immense pressure',
+      'atmospheric, claustrophobic, and submerged',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'style_ds_cosmic_horror',
+    name: 'Cosmic Horror Concept Art',
+    summary: 'Lovecraftian concept art — vast wrong forms half-seen in gloom, dread scale, muted palette pierced by sickly light.',
+    phrases: [
+      'Lovecraftian cosmic-horror concept art, vast wrong forms half-seen in the gloom',
+      'oppressive dread and impossible scale, the eye refusing to resolve it',
+      'muted desaturated palette pierced by sickly bioluminescent light',
+      'painterly realism with deep shadow swallowing detail',
+      'eldritch, ominous, and sublime',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'style_ds_biolum_ink',
+    name: 'Bioluminescent Ink Wash',
+    summary: 'Black ink drowned in glowing colour — vast dark washes with luminous cyan and violet bleeding through, minimal and eerie.',
+    phrases: [
+      'black ink wash drowned in glowing abyssal colour',
+      'vast dark negative space with luminous cyan and violet bleeding through',
+      'soft glowing edges against deep black, wet-on-wet bloom',
+      'minimal suggestion of form, gesture over detail',
+      'eerie, atmospheric, and luminous',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'style_ds_found_footage',
+    name: 'Submersible Cam Footage',
+    summary: 'Grainy found-footage submersible feed — fisheye distortion, timestamp burn-in, signal noise and floodlit murk caught on a failing camera.',
+    phrases: [
+      'grainy found-footage submersible camera feed',
+      'fisheye lens distortion, timestamp and depth readout burn-in',
+      'analogue signal noise, chromatic glitching and dropouts',
+      'a harsh on-cam floodlight blowing out the murk',
+      'lo-fi, documentary, and dread-soaked',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'style_ds_painterly_horror',
+    name: 'Painterly Sci-Fi Horror',
+    summary: 'Moody painted sci-fi horror — rich brushwork, deep gloom, a single cold light source, the cinematic dread of a drowned station.',
+    phrases: [
+      'moody painterly sci-fi horror illustration, rich visible brushwork',
+      'deep enveloping gloom with one cold light source',
+      'desaturated steel and shadow shot through with bioluminescent accents',
+      'cinematic dramatic composition, atmosphere over detail',
+      'tense, oppressive, and beautifully grim',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'style_ds_iridescent_abyssal',
+    name: 'Iridescent Abyssal Illustration',
+    summary: 'Dark fantasy illustration shimmering with deep-sea iridescence — oil-slick colour over black, pearlescent creature sheen, jewel-bright bioluminescence.',
+    phrases: [
+      'dark fantasy illustration shimmering with deep-sea iridescence',
+      'oil-slick pearlescent colour playing over near-black water',
+      'jewel-bright bioluminescent accents, translucent creature sheen',
+      'smooth refined rendering, elegant and otherworldly',
+      'gorgeous, alien, and unsettling',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -796,6 +886,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V9_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V10_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

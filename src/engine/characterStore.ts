@@ -25,6 +25,7 @@ const CHARACTER_SEED_FLAG_KEY_V12 = 'promptgen:characters:seeded:v12';
 const CHARACTER_SEED_FLAG_KEY_V13 = 'promptgen:characters:seeded:v13';
 const CHARACTER_SEED_FLAG_KEY_V14 = 'promptgen:characters:seeded:v14';
 const CHARACTER_SEED_FLAG_KEY_V15 = 'promptgen:characters:seeded:v15';
+const CHARACTER_SEED_FLAG_KEY_V16 = 'promptgen:characters:seeded:v16';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -292,6 +293,7 @@ const SEED_TS_12 = 1748476800000;
 const SEED_TS_13 = 1748563200000;
 const SEED_TS_14 = 1748649600000;
 const SEED_TS_15 = 1748736000000;
+const SEED_TS_16 = 1748822400000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -2677,6 +2679,373 @@ const V15_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V16 — Deep Signal: a bioluminescent deep-sea research station drifting toward cosmic horror.
+const V16_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_ds_commander',
+    name: 'The Station Commander',
+    summary: 'The one holding the failing station together by will alone — hollow-eyed, exhausted, still issuing orders to a crew that is quietly coming apart.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'station commander',
+      presentation: 'clothed',
+      ageImpression: 'worn adult',
+      personalityTone: 'grimly composed, fraying at the edges, refusing to break first',
+      visualAnchors: [
+        { id: 'anchor_dsc_1', label: 'Face', kind: 'face', text: 'a gaunt hollow-eyed face lit blue by console glow, deep exhaustion in the eyes' },
+        { id: 'anchor_dsc_2', label: 'Hair', kind: 'hair', text: 'grey-streaked hair, unwashed and pushed back' },
+        { id: 'anchor_dsc_3', label: 'Outfit', kind: 'clothing', text: 'a worn station commander\'s jumpsuit with faded rank patches, collar open' },
+        { id: 'anchor_dsc_4', label: 'Detail', kind: 'other', text: 'damp skin sheened with condensation, a faint tremor held in check' },
+        { id: 'anchor_dsc_5', label: 'Prop', kind: 'accessory', text: 'a dead radio handset gripped too tightly' },
+      ],
+      motifs: [
+        { id: 'motif_dsc_1', label: 'Holding It Together', text: 'console-blue light, the dead handset, command fraying in the dark' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a gaunt hollow-eyed face lit blue by console glow, deep exhaustion, grey-streaked unwashed hair',
+        'a worn station commander jumpsuit with faded rank patches, collar open',
+        'damp skin sheened with condensation, gripping a dead radio handset',
+        'on a flickering deep-sea station command deck',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_biologist',
+    name: 'The Marine Biologist',
+    summary: 'A researcher who has fallen in love with the impossible things in the tanks — wonder curdling into obsession, face pressed to the specimen glass.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'marine biologist',
+      presentation: 'clothed',
+      ageImpression: 'intent adult',
+      personalityTone: 'rapt, brilliant, dangerously fascinated',
+      visualAnchors: [
+        { id: 'anchor_dsb_1', label: 'Face', kind: 'face', text: 'an intent face underlit by bioluminescent tank glow, wide fascinated eyes' },
+        { id: 'anchor_dsb_2', label: 'Hair', kind: 'hair', text: 'dark hair escaping a loose tie, damp at the temples' },
+        { id: 'anchor_dsb_3', label: 'Outfit', kind: 'clothing', text: 'a rolled-sleeve lab coat over a station jumpsuit, ID lanyard' },
+        { id: 'anchor_dsb_4', label: 'Hands', kind: 'other', text: 'a gloved hand pressed flat against glowing specimen glass' },
+        { id: 'anchor_dsb_5', label: 'Glow', kind: 'other', text: 'cyan and violet creature-light washing up over the face' },
+      ],
+      motifs: [
+        { id: 'motif_dsb_1', label: 'Face to the Glass', text: 'tank glow, the pressed hand, wonder curdling into obsession' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, scientist',
+        'an intent face underlit by bioluminescent tank glow, wide fascinated eyes, dark hair escaping a loose tie',
+        'a rolled-sleeve lab coat over a station jumpsuit, an ID lanyard',
+        'a gloved hand pressed flat against glowing specimen glass, cyan and violet light on her face',
+        'in a deep-sea specimen lab of glowing tanks',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_diver',
+    name: 'The Deep Diver',
+    summary: 'A figure in a heavy atmospheric dive suit, tethered to a thread of light and air — alone in the crushing black, the only sound their own breathing.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'deep-sea diver',
+      presentation: 'armored',
+      ageImpression: 'unknown',
+      personalityTone: 'calm, methodical, utterly alone',
+      visualAnchors: [
+        { id: 'anchor_dsd_1', label: 'Suit', kind: 'clothing', text: 'a heavy riveted atmospheric dive suit, armoured plates and hoses' },
+        { id: 'anchor_dsd_2', label: 'Helmet', kind: 'accessory', text: 'a round brass-and-steel diving helmet, a single bright lamp above the faceplate' },
+        { id: 'anchor_dsd_3', label: 'Face', kind: 'face', text: 'a dim face barely visible behind the fogged, faintly cracked faceplate' },
+        { id: 'anchor_dsd_4', label: 'Tether', kind: 'accessory', text: 'an umbilical air-and-light tether trailing up into the black' },
+        { id: 'anchor_dsd_5', label: 'Detail', kind: 'other', text: 'bubbles streaming up, fine silt drifting in the lamp beam' },
+      ],
+      motifs: [
+        { id: 'motif_dsd_1', label: 'On the Tether', text: 'the helmet lamp, the trailing umbilical, one breath at a time in the black' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, diving suit',
+        'a heavy riveted atmospheric dive suit with armoured plates and hoses',
+        'a round brass-and-steel diving helmet, a single bright lamp above a fogged cracked faceplate',
+        'an umbilical air tether trailing up into the black, bubbles streaming',
+        'alone in the crushing abyssal dark, silt drifting in the lamp beam',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_engineer',
+    name: 'The Station Engineer',
+    summary: 'The one keeping the lights on as the station fails around her — soaked, grease-streaked, working by torchlight as the seams groan and weep seawater.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'station engineer',
+      presentation: 'clothed',
+      ageImpression: 'capable adult',
+      personalityTone: 'practical, stubborn, running on fumes',
+      visualAnchors: [
+        { id: 'anchor_dse_1', label: 'Face', kind: 'face', text: 'a grease-streaked face lit by a clenched torch, jaw set' },
+        { id: 'anchor_dse_2', label: 'Hair', kind: 'hair', text: 'short hair plastered down with sweat and seawater' },
+        { id: 'anchor_dse_3', label: 'Outfit', kind: 'clothing', text: 'a soaked engineer\'s jumpsuit tied at the waist, tool harness' },
+        { id: 'anchor_dse_4', label: 'Hands', kind: 'other', text: 'gloved hands working a sparking junction box, a wrench in the teeth' },
+        { id: 'anchor_dse_5', label: 'Detail', kind: 'other', text: 'seawater weeping from a groaning seam behind her' },
+      ],
+      motifs: [
+        { id: 'motif_dse_1', label: 'Keeping the Lights On', text: 'torchlight, weeping seams, holding the failing station together' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, engineer',
+        'a grease-streaked face lit by a clenched torch, short hair plastered with sweat and seawater',
+        'a soaked engineer jumpsuit tied at the waist, a tool harness',
+        'gloved hands working a sparking junction box, seawater weeping from a groaning seam behind',
+        'in a cramped failing deep-sea station corridor',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_comms',
+    name: 'The Comms Officer',
+    summary: 'The one who hears it in the static — headphones clamped on, eyes too wide, transcribing a signal from the deep that should not have words.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'comms officer',
+      presentation: 'clothed',
+      ageImpression: 'unraveling adult',
+      personalityTone: 'haunted, sleepless, listening to something nobody else can hear',
+      visualAnchors: [
+        { id: 'anchor_dsco_1', label: 'Headphones', kind: 'accessory', text: 'heavy headphones clamped over the ears, knuckles white on them' },
+        { id: 'anchor_dsco_2', label: 'Eyes', kind: 'eyes', text: 'sleepless red-rimmed eyes, too wide, fixed on nothing' },
+        { id: 'anchor_dsco_3', label: 'Face', kind: 'face', text: 'a pale drawn face lit green by a sonar scope' },
+        { id: 'anchor_dsco_4', label: 'Outfit', kind: 'clothing', text: 'a rumpled station jumpsuit, a notebook of frantic transcribed symbols' },
+        { id: 'anchor_dsco_5', label: 'Detail', kind: 'other', text: 'a waveform on the screen forming shapes it should not' },
+      ],
+      motifs: [
+        { id: 'motif_dsco_1', label: 'It Has Words', text: 'clamped headphones, the green scope, a signal that should not speak' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'a pale drawn face lit green by a sonar scope, sleepless red-rimmed eyes too wide',
+        'heavy headphones clamped over the ears, knuckles white',
+        'a rumpled station jumpsuit, a notebook of frantic transcribed symbols',
+        'hunched at a hydrophone console in the dark',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_doctor',
+    name: 'The Station Doctor',
+    summary: 'The medic charting a sickness with no name — treating crew whose bodies are quietly, wrongly changing, and trying not to notice it in the mirror.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'station doctor',
+      presentation: 'clothed',
+      ageImpression: 'steady adult',
+      personalityTone: 'clinical, frightened, holding to procedure as a shield',
+      visualAnchors: [
+        { id: 'anchor_dsdr_1', label: 'Face', kind: 'face', text: 'a calm tired face with a faint translucent sheen starting at the jaw' },
+        { id: 'anchor_dsdr_2', label: 'Hair', kind: 'hair', text: 'hair tucked under a surgical cap' },
+        { id: 'anchor_dsdr_3', label: 'Outfit', kind: 'clothing', text: 'surgical scrubs and gloves under a station coat, a stained apron' },
+        { id: 'anchor_dsdr_4', label: 'Hands', kind: 'other', text: 'gloved hands holding a chart of impossible scans' },
+        { id: 'anchor_dsdr_5', label: 'Detail', kind: 'other', text: 'a faint web of luminous veins barely visible under the skin' },
+      ],
+      motifs: [
+        { id: 'motif_dsdr_1', label: 'A Sickness With No Name', text: 'the chart, the translucent sheen, the change in the mirror' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, doctor',
+        'a calm tired face with a faint translucent sheen starting at the jaw, hair under a surgical cap',
+        'surgical scrubs and gloves under a station coat, a stained apron',
+        'gloved hands holding a chart of impossible scans, faint luminous veins under the skin',
+        'in a cramped station medical bay',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_cultist',
+    name: 'The Deep Cultist',
+    summary: 'A stowaway who came down to worship — barnacle-crusted robes, a serene smile, certain the thing in the trench is a god and the crew its offering.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'deep cultist',
+      presentation: 'clothed',
+      ageImpression: 'fervent adult',
+      personalityTone: 'serene, rapturous, utterly converted',
+      visualAnchors: [
+        { id: 'anchor_dscu_1', label: 'Robes', kind: 'clothing', text: 'sodden barnacle-crusted robes hung with shells and bone' },
+        { id: 'anchor_dscu_2', label: 'Face', kind: 'face', text: 'a serene rapturous face, salt-cracked lips, a beatific smile' },
+        { id: 'anchor_dscu_3', label: 'Eyes', kind: 'eyes', text: 'pale eyes brimming with devotion, pupils blown wide' },
+        { id: 'anchor_dscu_4', label: 'Skin', kind: 'other', text: 'grey waterlogged skin, faint scale-like patterning at the throat' },
+        { id: 'anchor_dscu_5', label: 'Prop', kind: 'accessory', text: 'a barnacle-crusted idol cradled to the chest' },
+      ],
+      motifs: [
+        { id: 'motif_dscu_1', label: 'The God in the Trench', text: 'barnacle robes, the cradled idol, the beatific certainty' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, cultist',
+        'a serene rapturous face with salt-cracked lips and a beatific smile, pale devoted eyes blown wide',
+        'sodden barnacle-crusted robes hung with shells and bone, grey waterlogged skin',
+        'faint scale-like patterning at the throat, cradling a barnacle-crusted idol',
+        'in a dripping flooded station chamber',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_changed',
+    name: 'The Changed One',
+    summary: 'A crewmember the deep has begun to rewrite — half the face still human, the rest blooming into translucent fins, gills and soft abyssal light.',
+    tags: ['solo', 'deep signal', 'cosmic horror', 'body horror'],
+    identity: {
+      archetype: 'transformed crew',
+      presentation: 'clothed',
+      ageImpression: 'unknown',
+      personalityTone: 'caught between terror and something newly, calmly inhuman',
+      visualAnchors: [
+        { id: 'anchor_dsch_1', label: 'Face', kind: 'face', text: 'half a human face, the other half blooming into translucent fins and ridges' },
+        { id: 'anchor_dsch_2', label: 'Eyes', kind: 'eyes', text: 'one human eye and one large lidless black abyssal eye' },
+        { id: 'anchor_dsch_3', label: 'Skin', kind: 'other', text: 'skin going translucent and faintly bioluminescent, gill-slits opening at the neck' },
+        { id: 'anchor_dsch_4', label: 'Body', kind: 'silhouette', text: 'a torn station jumpsuit splitting over new soft anatomy' },
+        { id: 'anchor_dsch_5', label: 'Glow', kind: 'other', text: 'a soft internal violet glow pulsing under the changing flesh' },
+      ],
+      motifs: [
+        { id: 'motif_dsch_1', label: 'Being Rewritten', text: 'the half-human face, the gills, the soft abyssal glow under the skin' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, monster, body horror',
+        'half a human face and half blooming into translucent fins and ridges, one human eye and one large lidless black abyssal eye',
+        'skin going translucent and faintly bioluminescent, gill-slits opening at the neck',
+        'a torn station jumpsuit splitting over new soft anatomy, a soft internal violet glow under the flesh',
+        'in a dim flickering station corridor',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_siren',
+    name: 'The Anglerfish Siren',
+    summary: 'A predator wearing a lure shaped like a woman — pale translucent flesh, needle teeth behind a soft smile, a single glowing lure dangling before the dark.',
+    tags: ['solo', 'deep signal', 'cosmic horror'],
+    identity: {
+      archetype: 'anglerfish humanoid',
+      presentation: 'nude-implied',
+      ageImpression: 'ageless',
+      personalityTone: 'patient, beckoning, lethally serene',
+      visualAnchors: [
+        { id: 'anchor_dssi_1', label: 'Lure', kind: 'accessory', text: 'a single bioluminescent lure on a stalk dangling from the brow, glowing soft gold' },
+        { id: 'anchor_dssi_2', label: 'Skin', kind: 'other', text: 'pale translucent abyssal flesh, faint organs visible, veined with light' },
+        { id: 'anchor_dssi_3', label: 'Teeth', kind: 'face', text: 'a soft beckoning smile parting over rows of needle glass teeth' },
+        { id: 'anchor_dssi_4', label: 'Eyes', kind: 'eyes', text: 'huge black lidless eyes, depthless' },
+        { id: 'anchor_dssi_5', label: 'Form', kind: 'silhouette', text: 'long-fingered webbed hands, a sinuous finned lower body trailing into the dark' },
+      ],
+      motifs: [
+        { id: 'motif_dssi_1', label: 'The Lure', text: 'the glowing lure, the needle smile, a predator shaped like a welcome' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, monster girl',
+        'pale translucent abyssal flesh veined with light, huge black lidless depthless eyes',
+        'a single soft-gold bioluminescent lure on a stalk dangling from the brow',
+        'a soft beckoning smile parting over rows of needle glass teeth, long webbed fingers',
+        'a sinuous finned lower body trailing into the black water',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_drowned',
+    name: 'The Drowned Diver',
+    summary: 'A lost crewmember the sea gave back — still in a flooded, broken dive suit, drifting the corridors, helmet full of dark water and a faint blue glow.',
+    tags: ['solo', 'deep signal', 'cosmic horror', 'ghost'],
+    identity: {
+      archetype: 'drowned revenant',
+      presentation: 'armored',
+      ageImpression: 'unknown',
+      personalityTone: 'mournful, slow, drifting without purpose',
+      visualAnchors: [
+        { id: 'anchor_dsdd_1', label: 'Suit', kind: 'clothing', text: 'a flooded broken dive suit, plates buckled and trailing torn hoses' },
+        { id: 'anchor_dsdd_2', label: 'Helmet', kind: 'accessory', text: 'a cracked diving helmet half-full of dark water, a faint blue glow within' },
+        { id: 'anchor_dsdd_3', label: 'Form', kind: 'silhouette', text: 'a body drifting weightless, limbs slack, slowly turning' },
+        { id: 'anchor_dsdd_4', label: 'Detail', kind: 'other', text: 'pale waterlogged hands, small fish moving around the helmet' },
+        { id: 'anchor_dsdd_5', label: 'Glow', kind: 'other', text: 'a dim cold glow leaking from the cracked faceplate' },
+      ],
+      motifs: [
+        { id: 'motif_dsdd_1', label: 'The Sea Gave It Back', text: 'the flooded helmet, the drifting limbs, the cold glow within' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, diving suit, undead',
+        'a flooded broken dive suit with buckled plates and torn trailing hoses',
+        'a cracked diving helmet half-full of dark water with a faint blue glow within',
+        'a body drifting weightless, limbs slack and slowly turning, pale waterlogged hands',
+        'adrift in a flooded station corridor, small fish circling',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+  {
+    id: 'character_seed_ds_herald',
+    name: 'The Abyssal Herald',
+    summary: 'The shape the thing in the trench sends ahead — vaguely humanoid, immense and wrong, a silhouette of fins and impossible geometry haloed in cold light.',
+    tags: ['solo', 'deep signal', 'cosmic horror', 'eldritch'],
+    identity: {
+      archetype: 'eldritch avatar',
+      presentation: 'other',
+      ageImpression: 'eternal',
+      personalityTone: 'vast, indifferent, ancient beyond comprehension',
+      visualAnchors: [
+        { id: 'anchor_dsh_1', label: 'Form', kind: 'silhouette', text: 'a vaguely humanoid silhouette far too large, fins and tendrils and wrong angles' },
+        { id: 'anchor_dsh_2', label: 'Light', kind: 'other', text: 'a cold halo of bioluminescent light tracing its impossible edges' },
+        { id: 'anchor_dsh_3', label: 'Eyes', kind: 'eyes', text: 'constellations of small pale lights where eyes might be' },
+        { id: 'anchor_dsh_4', label: 'Surface', kind: 'other', text: 'a dark surface that seems to swallow the light around it' },
+        { id: 'anchor_dsh_5', label: 'Scale', kind: 'other', text: 'a tiny diver silhouette dwarfed before it for scale' },
+      ],
+      motifs: [
+        { id: 'motif_dsh_1', label: 'Sent Ahead', text: 'the immense wrong silhouette, the cold halo, the constellation of eyes in the dark' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'no humans, eldritch, monster',
+        'a vaguely humanoid silhouette far too large, fins and tendrils and impossible wrong angles',
+        'a cold halo of bioluminescent light tracing its edges, constellations of small pale lights where eyes might be',
+        'a dark surface that seems to swallow the surrounding light',
+        'a tiny diver dwarfed before it in the abyssal black for scale',
+      ],
+    },
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -2842,6 +3211,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V15, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V15_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V16) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V16, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V16_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);
