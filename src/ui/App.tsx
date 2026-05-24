@@ -2166,6 +2166,18 @@ export function App() {
     if (updated) setUniverses(prev => prev.map(u => u.id === id ? updated : u));
   }, []);
 
+  // Universe-first: a lane item created while a universe is active belongs to that universe.
+  const addToActiveUniverse = useCallback((lane: string, id: string) => {
+    if (!activeUniverseId) return;
+    const universe = universes.find(u => u.id === activeUniverseId);
+    if (!universe) return;
+    const pools = universe.pools as Record<string, string[] | undefined>;
+    const current = pools[lane] ?? [];
+    if (current.includes(id)) return;
+    const nextPools = { ...universe.pools, [lane]: [...current, id] } as Universe['pools'];
+    handleUpdateUniversePools(activeUniverseId, nextPools);
+  }, [activeUniverseId, universes, handleUpdateUniversePools]);
+
   const handleDeleteUniverse = useCallback((id: string) => {
     deleteUniverse(id);
     setUniverses(prev => prev.filter(u => u.id !== id));
@@ -4094,7 +4106,7 @@ export function App() {
         activeCharacterIds={activeCharacterIds}
         isLoading={charactersLoading}
         onSelectCharacter={handleSelectCharacter}
-        onCreateCharacter={handleCreateCharacter}
+        onCreateCharacter={async (input) => { const c = await handleCreateCharacter(input); addToActiveUniverse('character', c.id); return c; }}
         onUpdateCharacter={handleUpdateCharacter}
         onDeleteCharacter={handleDeleteCharacter}
         universeFilter={activeUniverse?.character}
@@ -4141,7 +4153,7 @@ export function App() {
         environments={environments}
         activeEnvironmentIds={activeEnvironmentIds}
         onSelectEnvironment={handleSelectEnvironment}
-        onCreateEnvironment={handleCreateEnvironment}
+        onCreateEnvironment={async (input) => { const c = await handleCreateEnvironment(input); addToActiveUniverse('environment', c.id); return c; }}
         onUpdateEnvironment={handleUpdateEnvironment}
         onDeleteEnvironment={handleDeleteEnvironment}
         universeFilter={activeUniverse?.environment}
@@ -4153,7 +4165,7 @@ export function App() {
         outfits={outfits}
         activeOutfitIds={activeOutfitIds}
         onSelectOutfit={handleSelectOutfit}
-        onCreateOutfit={handleCreateOutfit}
+        onCreateOutfit={async (input) => { const c = await handleCreateOutfit(input); addToActiveUniverse('wardrobe', c.id); return c; }}
         onUpdateOutfit={handleUpdateOutfit}
         onDeleteOutfit={handleDeleteOutfit}
         universeFilter={activeUniverse?.wardrobe}
@@ -4165,7 +4177,7 @@ export function App() {
         items={stylePresets}
         activeItemIds={activeStyleIds}
         onSelectItem={handleSelectStylePreset}
-        onCreateItem={handleCreateStylePreset}
+        onCreateItem={async (input) => { const c = await handleCreateStylePreset(input); addToActiveUniverse('style', c.id); return c; }}
         onUpdateItem={handleUpdateStylePreset}
         onDeleteItem={handleDeleteStylePreset}
         universeFilter={activeUniverse?.style}
@@ -4177,7 +4189,7 @@ export function App() {
         items={lightingSetups}
         activeItemIds={activeLightingIds}
         onSelectItem={handleSelectLightingSetup}
-        onCreateItem={handleCreateLightingSetup}
+        onCreateItem={async (input) => { const c = await handleCreateLightingSetup(input); addToActiveUniverse('lighting', c.id); return c; }}
         onUpdateItem={handleUpdateLightingSetup}
         onDeleteItem={handleDeleteLightingSetup}
         universeFilter={activeUniverse?.lighting}
@@ -4189,7 +4201,7 @@ export function App() {
         items={compositionFrames}
         activeItemIds={activeCompositionIds}
         onSelectItem={handleSelectCompositionFrame}
-        onCreateItem={handleCreateCompositionFrame}
+        onCreateItem={async (input) => { const c = await handleCreateCompositionFrame(input); addToActiveUniverse('composition', c.id); return c; }}
         onUpdateItem={handleUpdateCompositionFrame}
         onDeleteItem={handleDeleteCompositionFrame}
         universeFilter={activeUniverse?.composition}
@@ -4201,7 +4213,7 @@ export function App() {
         items={moodPresets}
         activeItemIds={activeMoodIds}
         onSelectItem={handleSelectMoodPreset}
-        onCreateItem={handleCreateMoodPreset}
+        onCreateItem={async (input) => { const c = await handleCreateMoodPreset(input); addToActiveUniverse('mood', c.id); return c; }}
         onUpdateItem={handleUpdateMoodPreset}
         onDeleteItem={handleDeleteMoodPreset}
         universeFilter={activeUniverse?.mood}
@@ -4214,7 +4226,7 @@ export function App() {
         activeItemIds={activeNegativeIds}
         onAddItem={handleAddNegativePreset}
         onRemoveItem={handleRemoveNegativePreset}
-        onCreateItem={handleCreateNegativePreset}
+        onCreateItem={async (input) => { const c = await handleCreateNegativePreset(input); addToActiveUniverse('negative', c.id); return c; }}
         onUpdateItem={handleUpdateNegativePreset}
         onDeleteItem={handleDeleteNegativePreset}
         universeFilter={activeUniverse?.negative}
