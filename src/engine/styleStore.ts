@@ -11,6 +11,7 @@ const STYLE_SEED_FLAG_KEY_V7 = 'promptgen:styles:seeded:v7';
 const STYLE_SEED_FLAG_KEY_V8 = 'promptgen:styles:seeded:v8';
 const STYLE_SEED_FLAG_KEY_V9 = 'promptgen:styles:seeded:v9';
 const STYLE_SEED_FLAG_KEY_V10 = 'promptgen:styles:seeded:v10';
+const STYLE_SEED_FLAG_KEY_V11 = 'promptgen:styles:seeded:v11';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -100,6 +101,7 @@ const SEED_TS_7 = 1748563200000;
 const SEED_TS_8 = 1748649600000;
 const SEED_TS_9 = 1748736000000;
 const SEED_TS_10 = 1748822400000;
+const SEED_TS_11 = 1748908800000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -803,6 +805,270 @@ const V10_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V11 — Style Lab: a toolkit of reusable, subject-agnostic art directions usable in any universe.
+const V11_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_oil_painting',
+    name: 'Classical Oil Painting',
+    summary: 'Rich old-master oil — visible brushwork, impasto texture, luminous glazed colour and chiaroscuro.',
+    phrases: [
+      'classical oil painting, rich visible brushwork and impasto texture',
+      'deep luminous colour with soft blended transitions',
+      'warm old-master glazing and chiaroscuro',
+      'canvas grain showing through, gallery-quality finish',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_watercolor',
+    name: 'Watercolor',
+    summary: 'Loose translucent washes, soft bleeding edges, wet-on-wet blooms and light paper showing through.',
+    phrases: [
+      'loose watercolour painting, translucent washes and soft bleeding edges',
+      'wet-on-wet blooms, bright paper showing through',
+      'delicate granulation and gentle colour pooling',
+      'airy, fresh, and luminous',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_gouache',
+    name: 'Gouache Illustration',
+    summary: 'Matte opaque gouache — flat rich pigment, soft edges, confident simple shapes, storybook warmth.',
+    phrases: [
+      'matte gouache illustration, opaque flat colour with soft edges',
+      'painterly but clean, rich pigment and gentle texture',
+      'storybook warmth, confident simple shapes',
+      'velvety matte finish',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_ink_wash',
+    name: 'Sumi-e Ink Wash',
+    summary: 'Loose black brush ink, vast negative space, soft grey gradients bleeding wet-on-wet, gesture over detail.',
+    phrases: [
+      'traditional sumi-e ink wash, loose confident black brushstrokes',
+      'vast luminous negative space, gesture over detail',
+      'soft grey gradients bleeding wet-on-wet',
+      'minimal, meditative, and expressive',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_charcoal',
+    name: 'Charcoal Sketch',
+    summary: 'Expressive charcoal — smudged greys and deep blacks, gestural strokes, visible paper tooth, dramatic shading.',
+    phrases: [
+      'expressive charcoal sketch, soft smudged greys and deep blacks',
+      'loose gestural strokes, visible paper tooth',
+      'dramatic high-contrast shading, fingertip blending',
+      'raw, immediate, and tonal',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_pen_ink',
+    name: 'Pen & Ink Etching',
+    summary: 'Fine crosshatching and stippling, crisp black linework, engraving-like precision, antique illustration feel.',
+    phrases: [
+      'detailed pen-and-ink etching, fine crosshatching and stippling',
+      'crisp black linework on white, engraving-like precision',
+      'dense hatched shadows, antique illustration feel',
+      'intricate, graphic, and high-contrast',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_3d_render',
+    name: '3D CGI Render',
+    summary: 'Polished modern CGI — clean subsurface surfaces, soft global illumination, realistic materials, gentle depth of field.',
+    phrases: [
+      'polished 3D CGI render, clean subsurface-scattered surfaces',
+      'soft global illumination and realistic materials',
+      'smooth modern animated-film look, gentle depth of field',
+      'crisp, glossy, and dimensional',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_claymation',
+    name: 'Claymation',
+    summary: 'Handmade stop-motion clay — modelling-clay textures, fingerprints and tool marks, miniature practical sets.',
+    phrases: [
+      'stop-motion claymation look, handmade modelling-clay textures',
+      'visible fingerprints and tool marks, soft matte surfaces',
+      'miniature set with practical lighting, slight charming imperfection',
+      'tactile and handcrafted',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_pixel_art',
+    name: 'Pixel Art',
+    summary: 'Crisp limited-palette pixel art — blocky readable forms, dithering, sharp pixel edges, retro 16-bit aesthetic.',
+    phrases: [
+      'detailed pixel art, crisp limited-palette dithering',
+      'clean blocky forms and readable silhouettes',
+      'retro 16-bit game aesthetic, sharp pixel edges',
+      'nostalgic, graphic, and precise',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_anime_cel',
+    name: 'Anime Cel',
+    summary: 'Clean modern anime — bold confident lineart, flat cel colour with crisp shadow shapes, expressive eyes.',
+    phrases: [
+      'clean anime cel shading, bold confident lineart',
+      'flat cel colour with crisp shadow shapes',
+      'bright expressive eyes, polished modern anime look',
+      'vibrant, sharp, and graphic',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_painterly_anime',
+    name: 'Painterly Anime',
+    summary: 'Lush hand-painted anime background art — soft cinematic light, densely detailed nature, warm nostalgic colour.',
+    phrases: [
+      'lush hand-painted anime background art, Studio Ghibli sensibility',
+      'soft cinematic light and densely detailed nature',
+      'warm nostalgic colour, painterly clouds and foliage',
+      'wholesome, immersive, and gentle',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_comic',
+    name: 'Comic / Graphic Novel',
+    summary: 'Bold inked comic art — strong outlines, dynamic flat colour with halftone shading, dramatic action framing.',
+    phrases: [
+      'bold comic-book and graphic-novel art, strong inked outlines',
+      'dynamic flat colour with halftone shading',
+      'dramatic high-contrast lighting and action framing',
+      'punchy, graphic, and energetic',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_noir_photo',
+    name: 'Noir Photograph',
+    summary: 'High-contrast black-and-white noir — dramatic chiaroscuro, hard key light, film grain and smoky atmosphere.',
+    phrases: [
+      'high-contrast black-and-white noir photograph',
+      'dramatic chiaroscuro, deep shadows and hard key light',
+      'film grain and smoky atmosphere',
+      'moody, cinematic, and timeless',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_film_35mm',
+    name: 'Cinematic 35mm Film',
+    summary: 'Filmic 35mm still — natural film colour grade, soft grain, gentle halation, shallow depth of field.',
+    phrases: [
+      'cinematic 35mm film still, natural filmic colour grade',
+      'soft grain, gentle halation and shallow depth of field',
+      'anamorphic framing, realistic ambient lighting',
+      'filmic, atmospheric, and photographic',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_polaroid',
+    name: 'Vintage Polaroid',
+    summary: 'Soft faded instant photo — warm cast, slight overexposure, gentle vignette and light leaks, square format.',
+    phrases: [
+      'vintage instant Polaroid photo, soft faded colour',
+      'slight overexposure, warm cast and a gentle vignette',
+      'square format, low contrast, subtle light leaks',
+      'nostalgic, casual, and analogue',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_art_nouveau',
+    name: 'Art Nouveau',
+    summary: 'Mucha-style organic line — sinuous whiplash linework, ornate floral borders, flat decorative colour and gold.',
+    phrases: [
+      'Art Nouveau illustration in the manner of Alphonse Mucha',
+      'sinuous flowing whiplash linework and ornate floral borders',
+      'flat decorative colour fields with gold-leaf accents',
+      'elegant, organic, and richly patterned',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_ukiyoe',
+    name: 'Ukiyo-e Woodblock',
+    summary: 'Edo woodblock print — flat carved linework, bokashi gradient skies, muted pigments, visible woodgrain.',
+    phrases: [
+      'traditional ukiyo-e woodblock print',
+      'flat carved linework and bokashi gradient skies',
+      'muted natural pigments, visible woodgrain and registration',
+      'Edo-period composition, elegant and graphic',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_bauhaus',
+    name: 'Bauhaus Geometric',
+    summary: 'Modernist Bauhaus poster — bold primary colours, clean abstract geometric shapes, strong diagonal composition.',
+    phrases: [
+      'Bauhaus geometric poster style, bold primary colours',
+      'clean abstract shapes and strong diagonal composition',
+      'minimal flat modernist design',
+      'graphic, balanced, and striking',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_vaporwave',
+    name: 'Vaporwave / Synthwave',
+    summary: 'Retro-futuristic neon — pink and cyan gradients, 80s grids, chrome, glitch and sunset glow.',
+    phrases: [
+      'vaporwave synthwave aesthetic, neon pink and cyan gradients',
+      'retro 80s grids, chrome surfaces and sunset glow',
+      'dreamy nostalgic digital surrealism with subtle glitch',
+      'glowing, retro-futuristic, and saturated',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'style_lab_risograph',
+    name: 'Risograph Print',
+    summary: 'Indie riso print — limited spot-colour layers slightly misregistered, grainy ink, visible halftone overprint.',
+    phrases: [
+      'risograph print look, limited spot-colour layers slightly misregistered',
+      'grainy textured ink in bright fluorescent colours',
+      'visible halftone and overprint blends',
+      'handmade indie-zine aesthetic',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -896,6 +1162,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V10, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V10_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V11_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

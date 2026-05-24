@@ -10,6 +10,7 @@ const UNIVERSE_SEED_FLAG_KEY_V5 = 'morpbase:universes:seeded:v5';
 const UNIVERSE_SEED_FLAG_KEY_V6 = 'morpbase:universes:seeded:v6';
 const UNIVERSE_SEED_FLAG_KEY_V7 = 'morpbase:universes:seeded:v7';
 const UNIVERSE_SEED_FLAG_KEY_V8 = 'morpbase:universes:seeded:v8';
+const UNIVERSE_SEED_FLAG_KEY_V9 = 'morpbase:universes:seeded:v9';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -18,6 +19,7 @@ const SEED_TS_V5 = 1748649600000;
 const SEED_TS_V6 = 1748736000000;
 const SEED_TS_V7 = 1748822400000;
 const SEED_TS_V8 = 1748908800000;
+const SEED_TS_V9 = 1748995200000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -706,6 +708,52 @@ function maybeApplyUniverseSeedV8(universes: Universe[]): Universe[] {
   }
 }
 
+// V9 — Style Lab: a toolkit universe of reusable, subject-agnostic art styles usable in any other universe.
+const SEED_UNIVERSE_STYLE_LAB: Universe = {
+  id: 'universe_seed_style_lab',
+  name: 'Style Lab',
+  description: 'A toolkit of reusable art directions — oil, watercolor, 3D render, anime, noir photo and more. Not a story world: activate it (or just pull from its Style pool) to drop any look onto any subject from any universe.',
+  pools: {
+    style: [
+      'style_lab_oil_painting',
+      'style_lab_watercolor',
+      'style_lab_gouache',
+      'style_lab_ink_wash',
+      'style_lab_charcoal',
+      'style_lab_pen_ink',
+      'style_lab_3d_render',
+      'style_lab_claymation',
+      'style_lab_pixel_art',
+      'style_lab_anime_cel',
+      'style_lab_painterly_anime',
+      'style_lab_comic',
+      'style_lab_noir_photo',
+      'style_lab_film_35mm',
+      'style_lab_polaroid',
+      'style_lab_art_nouveau',
+      'style_lab_ukiyoe',
+      'style_lab_bauhaus',
+      'style_lab_vaporwave',
+      'style_lab_risograph',
+    ],
+  },
+  createdAt: SEED_TS_V9,
+  updatedAt: SEED_TS_V9,
+};
+
+function maybeApplyUniverseSeedV9(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V9) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V9, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_STYLE_LAB.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_STYLE_LAB];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -749,7 +797,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))))));
+    return maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }
