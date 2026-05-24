@@ -12,6 +12,7 @@ const STYLE_SEED_FLAG_KEY_V8 = 'promptgen:styles:seeded:v8';
 const STYLE_SEED_FLAG_KEY_V9 = 'promptgen:styles:seeded:v9';
 const STYLE_SEED_FLAG_KEY_V10 = 'promptgen:styles:seeded:v10';
 const STYLE_SEED_FLAG_KEY_V11 = 'promptgen:styles:seeded:v11';
+const STYLE_SEED_FLAG_KEY_V12 = 'promptgen:styles:seeded:v12';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -102,6 +103,7 @@ const SEED_TS_8 = 1748649600000;
 const SEED_TS_9 = 1748736000000;
 const SEED_TS_10 = 1748822400000;
 const SEED_TS_11 = 1748908800000;
+const SEED_TS_12 = 1748995200000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1069,6 +1071,24 @@ const V11_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V12 — Style Lab addition: a bold graphic dystopian sci-fi poster look (from a CivitAI reference).
+const V12_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_graphic_scifi',
+    name: 'Bold Graphic Sci-Fi',
+    summary: 'Graphic dystopian sci-fi poster — thick clean outlines with a bright rim-light glow, flat painterly cinematic shapes, a crimson-and-teal complementary palette with hot orange accents.',
+    phrases: [
+      'bold graphic sci-fi illustration, thick clean outlines with a bright rim-light glow tracing the silhouette',
+      'flat painterly cinematic shapes, semi-realistic but graphic',
+      'limited complementary palette of crimson red and teal-green with hot orange glow accents',
+      'dramatic low-angle heroic poster composition, gritty dystopian industrial mood',
+      'high contrast, subtle grain and floating sparks',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1172,6 +1192,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V11, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V11_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V12_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
