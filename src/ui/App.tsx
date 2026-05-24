@@ -3378,24 +3378,18 @@ export function App() {
       .filter(e => e.position === 'end')
       .map(e => e.text)
       .filter(Boolean);
-    const subject = activeChipTexts.join(', ');
-    return [...startParts, ...(subject ? [subject] : []), ...endParts]
-      .filter(Boolean)
-      .join(', ');
+    const ordered = [...startParts, ...activeChipTexts, ...endParts].filter(Boolean);
+    // Drop duplicate fragments (same phrase contributed by multiple lanes/chips),
+    // keeping first occurrence so ordering/priority is preserved.
+    const seen = new Set<string>();
+    const deduped = ordered.filter(part => {
+      const key = part.trim().toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return deduped.join(', ');
   }, [promptAdditionEntries, activeChipTexts]);
-
-  // When the generated prompt changes (lane/aura/chip edits), discard any
-  // manual free-edit so the new content is visible instead of being hidden
-  // behind a stale override. Skip the very first render so a persisted edit
-  // survives a page reload.
-  const isFirstWorkspaceRender = useRef(true);
-  useEffect(() => {
-    if (isFirstWorkspaceRender.current) {
-      isFirstWorkspaceRender.current = false;
-      return;
-    }
-    setEditedPositiveOutput(null);
-  }, [workspacePrompt]);
 
   const workspaceNegativePrompt = useMemo(() => {
     const phrases = activeNegativeIds.flatMap(id => {
