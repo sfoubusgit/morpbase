@@ -108,7 +108,7 @@ function PoolEditor({
       </div>
 
       <p className="uv-editor-hint">
-        Click items to include them in this universe. Empty lanes stay open — the full library is used.
+        Click items to include them in this universe. A lane shows only what you add here; leave a lane empty to exclude it from this universe.
       </p>
 
       <div className="uv-tabs">

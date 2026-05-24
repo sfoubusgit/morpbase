@@ -2202,6 +2202,17 @@ export function App() {
     handleUpdateUniversePools(activeUniverseId, nextPools);
   }, [activeUniverseId, universes, handleUpdateUniversePools]);
 
+  // When a lane item is deleted, strip its (now-dangling) id from every universe pool.
+  const removeFromAllUniverses = useCallback((lane: string, id: string) => {
+    universes.forEach(universe => {
+      const pools = universe.pools as Record<string, string[] | undefined>;
+      const arr = pools[lane];
+      if (arr && arr.includes(id)) {
+        handleUpdateUniversePools(universe.id, { ...universe.pools, [lane]: arr.filter(x => x !== id) } as Universe['pools']);
+      }
+    });
+  }, [universes, handleUpdateUniversePools]);
+
   const handleDeleteUniverse = useCallback((id: string) => {
     deleteUniverse(id);
     setUniverses(prev => prev.filter(u => u.id !== id));
@@ -4129,7 +4140,7 @@ export function App() {
         onSelectCharacter={handleSelectCharacter}
         onCreateCharacter={async (input) => { const c = await handleCreateCharacter(input); addToActiveUniverse('character', c.id); return c; }}
         onUpdateCharacter={handleUpdateCharacter}
-        onDeleteCharacter={handleDeleteCharacter}
+        onDeleteCharacter={async (id) => { await handleDeleteCharacter(id); removeFromAllUniverses('character', id); }}
         universeFilter={activeUniverse ? (activeUniverse.character ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4176,7 +4187,7 @@ export function App() {
         onSelectEnvironment={handleSelectEnvironment}
         onCreateEnvironment={async (input) => { const c = await handleCreateEnvironment(input); addToActiveUniverse('environment', c.id); return c; }}
         onUpdateEnvironment={handleUpdateEnvironment}
-        onDeleteEnvironment={handleDeleteEnvironment}
+        onDeleteEnvironment={async (id) => { await handleDeleteEnvironment(id); removeFromAllUniverses('environment', id); }}
         universeFilter={activeUniverse ? (activeUniverse.environment ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4188,7 +4199,7 @@ export function App() {
         onSelectOutfit={handleSelectOutfit}
         onCreateOutfit={async (input) => { const c = await handleCreateOutfit(input); addToActiveUniverse('wardrobe', c.id); return c; }}
         onUpdateOutfit={handleUpdateOutfit}
-        onDeleteOutfit={handleDeleteOutfit}
+        onDeleteOutfit={async (id) => { await handleDeleteOutfit(id); removeFromAllUniverses('wardrobe', id); }}
         universeFilter={activeUniverse ? (activeUniverse.wardrobe ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4200,7 +4211,7 @@ export function App() {
         onSelectItem={handleSelectStylePreset}
         onCreateItem={async (input) => { const c = await handleCreateStylePreset(input); addToActiveUniverse('style', c.id); return c; }}
         onUpdateItem={handleUpdateStylePreset}
-        onDeleteItem={handleDeleteStylePreset}
+        onDeleteItem={async (id) => { await handleDeleteStylePreset(id); removeFromAllUniverses('style', id); }}
         universeFilter={activeUniverse ? (activeUniverse.style ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4212,7 +4223,7 @@ export function App() {
         onSelectItem={handleSelectLightingSetup}
         onCreateItem={async (input) => { const c = await handleCreateLightingSetup(input); addToActiveUniverse('lighting', c.id); return c; }}
         onUpdateItem={handleUpdateLightingSetup}
-        onDeleteItem={handleDeleteLightingSetup}
+        onDeleteItem={async (id) => { await handleDeleteLightingSetup(id); removeFromAllUniverses('lighting', id); }}
         universeFilter={activeUniverse ? (activeUniverse.lighting ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4224,7 +4235,7 @@ export function App() {
         onSelectItem={handleSelectCompositionFrame}
         onCreateItem={async (input) => { const c = await handleCreateCompositionFrame(input); addToActiveUniverse('composition', c.id); return c; }}
         onUpdateItem={handleUpdateCompositionFrame}
-        onDeleteItem={handleDeleteCompositionFrame}
+        onDeleteItem={async (id) => { await handleDeleteCompositionFrame(id); removeFromAllUniverses('composition', id); }}
         universeFilter={activeUniverse ? (activeUniverse.composition ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4236,7 +4247,7 @@ export function App() {
         onSelectItem={handleSelectMoodPreset}
         onCreateItem={async (input) => { const c = await handleCreateMoodPreset(input); addToActiveUniverse('mood', c.id); return c; }}
         onUpdateItem={handleUpdateMoodPreset}
-        onDeleteItem={handleDeleteMoodPreset}
+        onDeleteItem={async (id) => { await handleDeleteMoodPreset(id); removeFromAllUniverses('mood', id); }}
         universeFilter={activeUniverse ? (activeUniverse.mood ?? []) : undefined}
         universeName={activeUniverseName}
       />
@@ -4249,7 +4260,7 @@ export function App() {
         onRemoveItem={handleRemoveNegativePreset}
         onCreateItem={async (input) => { const c = await handleCreateNegativePreset(input); addToActiveUniverse('negative', c.id); return c; }}
         onUpdateItem={handleUpdateNegativePreset}
-        onDeleteItem={handleDeleteNegativePreset}
+        onDeleteItem={async (id) => { await handleDeleteNegativePreset(id); removeFromAllUniverses('negative', id); }}
         universeFilter={activeUniverse ? (activeUniverse.negative ?? []) : undefined}
         universeName={activeUniverseName}
       />
