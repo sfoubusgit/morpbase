@@ -236,6 +236,7 @@ type BuilderSessionSnapshot = {
   captureBuffer: string[];
   activeLaneSetId: string | null;
   activeUniverseId: string | null;
+  pinnedItems: string[];
 };
 
 type CharacterPromptProjection = {
@@ -358,6 +359,9 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
         : [],
       activeLaneSetId: typeof parsed.activeLaneSetId === 'string' ? parsed.activeLaneSetId : null,
       activeUniverseId: typeof parsed.activeUniverseId === 'string' ? parsed.activeUniverseId : null,
+      pinnedItems: Array.isArray(parsed.pinnedItems)
+        ? (parsed.pinnedItems as unknown[]).filter((x): x is string => typeof x === 'string')
+        : [],
     };
   } catch {
     return null;
@@ -518,7 +522,7 @@ export function App() {
   const [moodPresets, setMoodPresets] = useState<MoodPreset[]>([]);
   const [isMoodOpen, setIsMoodOpen] = useState(false);
   const [lockedLanes, setLockedLanes] = useState<Set<string>>(new Set());
-  const [pinnedItems, setPinnedItems] = useState<Set<string>>(new Set());
+  const [pinnedItems, setPinnedItems] = useState<Set<string>>(() => new Set(initialBuilderSession?.pinnedItems ?? []));
   const [activeNegativeIds, setActiveNegativeIds] = useState<string[]>(initialBuilderSession?.activeNegativeIds ?? []);
   const [negativePresets, setNegativePresets] = useState<NegativePreset[]>([]);
   const [isNegativeOpen, setIsNegativeOpen] = useState(false);
@@ -1975,12 +1979,19 @@ export function App() {
     const rollAll = locked.size === 0;
     const activeUniverse = activeUniverseId ? universes.find(u => u.id === activeUniverseId)?.pools : undefined;
 
-    const scopeMulti = <T extends { id: string }>(full: T[], uids?: string[]): T[] =>
-      uids && uids.length > 0 ? full.filter(x => uids.includes(x.id)) : full;
+    // Resolve the pool a lane should roll from. With a universe active a lane is
+    // limited to its curated pool; an empty/undefined pool means the lane is not
+    // part of this universe, so it is skipped (null) rather than rolling globally.
+    const poolFor = <T extends { id: string }>(full: T[], uids?: string[]): T[] | null => {
+      if (!activeUniverse) return full;
+      if (!uids || uids.length === 0) return null;
+      return full.filter(x => uids.includes(x.id));
+    };
 
     // Keep pinned active items and only re-roll the remaining slots so the lane size is preserved.
-    const rollMulti = <T extends { id: string }>(full: T[], activeIds: string[], uids?: string[]): string[] => {
-      const pool = scopeMulti(full, uids);
+    const rollMulti = <T extends { id: string }>(full: T[], activeIds: string[], uids?: string[]): string[] | null => {
+      const pool = poolFor(full, uids);
+      if (pool === null) return null;
       const pinnedActive = activeIds.filter(id => pinnedItems.has(id));
       const need = Math.max(1, activeIds.length) - pinnedActive.length;
       if (need <= 0) return pinnedActive;
@@ -1989,35 +2000,43 @@ export function App() {
     };
 
     if (rollAll || locked.has('character')) {
-      setActiveCharacterIds(rollMulti(characters, activeCharacterIds, activeUniverse?.character));
+      const next = rollMulti(characters, activeCharacterIds, activeUniverse?.character);
+      if (next) setActiveCharacterIds(next);
     }
 
     if (rollAll || locked.has('environment')) {
-      setActiveEnvironmentIds(rollMulti(environments, activeEnvironmentIds, activeUniverse?.environment));
+      const next = rollMulti(environments, activeEnvironmentIds, activeUniverse?.environment);
+      if (next) setActiveEnvironmentIds(next);
     }
 
     if (rollAll || locked.has('wardrobe')) {
-      setActiveOutfitIds(rollMulti(outfits, activeOutfitIds, activeUniverse?.wardrobe));
+      const next = rollMulti(outfits, activeOutfitIds, activeUniverse?.wardrobe);
+      if (next) setActiveOutfitIds(next);
     }
 
     if (rollAll || locked.has('style')) {
-      setActiveStyleIds(rollMulti(stylePresets, activeStyleIds, activeUniverse?.style));
+      const next = rollMulti(stylePresets, activeStyleIds, activeUniverse?.style);
+      if (next) setActiveStyleIds(next);
     }
 
     if (rollAll || locked.has('lighting')) {
-      setActiveLightingIds(rollMulti(lightingSetups, activeLightingIds, activeUniverse?.lighting));
+      const next = rollMulti(lightingSetups, activeLightingIds, activeUniverse?.lighting);
+      if (next) setActiveLightingIds(next);
     }
 
     if (rollAll || locked.has('composition')) {
-      setActiveCompositionIds(rollMulti(compositionFrames, activeCompositionIds, activeUniverse?.composition));
+      const next = rollMulti(compositionFrames, activeCompositionIds, activeUniverse?.composition);
+      if (next) setActiveCompositionIds(next);
     }
 
     if (rollAll || locked.has('mood')) {
-      setActiveMoodIds(rollMulti(moodPresets, activeMoodIds, activeUniverse?.mood));
+      const next = rollMulti(moodPresets, activeMoodIds, activeUniverse?.mood);
+      if (next) setActiveMoodIds(next);
     }
 
     if (rollAll || locked.has('object')) {
-      setActiveObjectIds(rollMulti(objects, activeObjectIds, activeUniverse?.object));
+      const next = rollMulti(objects, activeObjectIds, activeUniverse?.object);
+      if (next) setActiveObjectIds(next);
     }
 
     if (rollAll || locked.has('dynamics')) {
@@ -2037,14 +2056,17 @@ export function App() {
           ...sampled,
         ]);
       } else {
-        // Variation OFF: swap to a random world.
-        const auraPool = scopeMulti(worlds, activeUniverse?.aura);
-        const pool = auraPool.length > 0 ? auraPool : worlds;
-        if (pool.length > 0) {
-          const picked = pool[Math.floor(Math.random() * pool.length)];
-          setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
-          setActiveChipTexts([]);
-          setAuraVariationEnabled(false);
+        // Variation OFF: swap to a different world from the universe pool (skip if uncurated).
+        const auraPool = poolFor(worlds, activeUniverse?.aura);
+        if (auraPool) {
+          const others = auraPool.filter(w => w.id !== activeWorld?.id);
+          const pool = others.length > 0 ? others : auraPool;
+          if (pool.length > 0) {
+            const picked = pool[Math.floor(Math.random() * pool.length)];
+            setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
+            setActiveChipTexts([]);
+            setAuraVariationEnabled(false);
+          }
         }
       }
     }
@@ -2133,6 +2155,8 @@ export function App() {
     setWorldVariationPhrases([]);
     setAuraVariationEnabled(false);
     setActiveLaneSetId(null);
+    setPinnedItems(new Set());
+    setLockedLanes(new Set());
   }, []);
 
   const handleSaveCurrentAsLaneSet = useCallback((name: string, description?: string) => {
@@ -3059,6 +3083,7 @@ export function App() {
         captureBuffer,
         activeLaneSetId,
         activeUniverseId,
+        pinnedItems: Array.from(pinnedItems),
       };
       window.localStorage.setItem(BUILDER_SESSION_STORAGE_KEY, JSON.stringify(snapshot));
     } catch {
@@ -3100,6 +3125,7 @@ export function App() {
     captureBuffer,
     activeLaneSetId,
     activeUniverseId,
+    pinnedItems,
   ]);
 
   const handleTogglePromptFragment = useCallback((fragmentId: string) => {
