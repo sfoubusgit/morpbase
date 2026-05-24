@@ -3939,6 +3939,7 @@ export function App() {
       ) : activePage === 'user-pools' ? (
         <WorldsPage
           isLoggedIn={true}
+          onWorldCreated={(id) => addToActiveUniverse('aura', id)}
         />
       ) : activePage === 'my-profile' ? (
         <MyProfilePage

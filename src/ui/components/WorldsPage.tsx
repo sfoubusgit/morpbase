@@ -13,9 +13,10 @@ import './WorldsPage.css';
 
 type WorldsPageProps = {
   isLoggedIn: boolean;
+  onWorldCreated?: (id: string) => void;
 };
 
-export function WorldsPage({ isLoggedIn: _isLoggedIn }: WorldsPageProps) {
+export function WorldsPage({ isLoggedIn: _isLoggedIn, onWorldCreated }: WorldsPageProps) {
   const [worlds, setWorlds] = useState<World[]>(() => listWorlds());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newWorldName, setNewWorldName] = useState('');
@@ -36,6 +37,7 @@ export function WorldsPage({ isLoggedIn: _isLoggedIn }: WorldsPageProps) {
     reload();
     setNewWorldName('');
     setSelectedId(world.id);
+    onWorldCreated?.(world.id);
   };
 
   const handleDelete = (id: string) => {
