@@ -5,9 +5,11 @@ const KEY = 'morpbase:universes:v1';
 const UNIVERSE_SEED_FLAG_KEY = 'morpbase:universes:seeded:v1';
 const UNIVERSE_SEED_FLAG_KEY_V2 = 'morpbase:universes:seeded:v2';
 const UNIVERSE_SEED_FLAG_KEY_V3 = 'morpbase:universes:seeded:v3';
+const UNIVERSE_SEED_FLAG_KEY_V4 = 'morpbase:universes:seeded:v4';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
+const SEED_TS_V4 = 1748563200000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -208,6 +210,108 @@ function maybeApplyUniverseSeedV3(universes: Universe[]): Universe[] {
   }
 }
 
+// V4 — merge previously orphaned ("directionless") lane items into coherent universes.
+// Non-destructive: these universes only reference existing item IDs; nothing is deleted,
+// and items may belong to more than one universe.
+const SEED_UNIVERSE_BEKSINSKI: Universe = {
+  id: 'universe_seed_beksinski',
+  name: 'Beksiński',
+  description: "Zdzisław Beksiński's dystopian dreamscape — corroded iron, bone and dried skin, vast melancholic decay rendered in beautiful wrongness.",
+  pools: {
+    style: ['style_seed_beksinski'],
+    lighting: ['lighting_seed_abyss_underlight', 'lighting_seed_bioluminescent_glow', 'lighting_seed_moonlit_storm'],
+    mood: ['mood_seed_ancient_and_terrible', 'mood_seed_cold_remote', 'mood_seed_strange_dreamlike', 'mood_seed_melancholic_quiet'],
+    environment: [
+      'environment_seed_sunken_bathhouse', 'environment_seed_drowned_cathedral', 'environment_seed_tidal_archive',
+      'environment_seed_salt_mirror', 'environment_seed_ossuary_garden', 'environment_seed_glass_ruin',
+      'environment_seed_black_tide_docks', 'environment_seed_drowned_planetarium', 'environment_seed_brine_caves',
+      'environment_seed_fog_monastery',
+    ],
+    aura: ['world_seed_beksinski'],
+  },
+  createdAt: SEED_TS_V4,
+  updatedAt: SEED_TS_V4,
+};
+
+const SEED_UNIVERSE_DRAGON_STANDOFF: Universe = {
+  id: 'universe_seed_dragon_standoff',
+  name: 'Dragon Standoff',
+  description: 'An elemental dark-fantasy realm where storm grinds against volcano — ancient creatures, sundered geology, and weather as a weapon.',
+  pools: {
+    style: ['style_seed_epic_fantasy_concept', 'style_seed_ancient_creature_concept', 'style_seed_cinematic_creature_render', 'style_seed_norse_saga_illumination'],
+    lighting: ['lighting_seed_dual_elemental_opposition', 'lighting_seed_storm_strike', 'lighting_seed_moonlit_storm', 'lighting_seed_aurora_canopy', 'lighting_seed_abyss_underlight'],
+    mood: ['mood_seed_tense_foreboding', 'mood_seed_triumphant_epic', 'mood_seed_storm_born_fury', 'mood_seed_cold_sovereign', 'mood_seed_mythic_awe', 'mood_seed_dormant_thunder', 'mood_seed_ancient_and_terrible'],
+    environment: [
+      'environment_seed_ancient_mountain_city', 'environment_seed_observatory_rooftop', 'environment_seed_storm_spire',
+      'environment_seed_glacial_vault', 'environment_seed_lightning_coast', 'environment_seed_azure_wastes',
+      'environment_seed_volcanic_shore', 'environment_seed_ashveil_ridge', 'environment_seed_hanging_forest',
+    ],
+    aura: ['world_seed_dragon_standoff'],
+  },
+  createdAt: SEED_TS_V4,
+  updatedAt: SEED_TS_V4,
+};
+
+const SEED_UNIVERSE_CREATINE_GYM: Universe = {
+  id: 'universe_seed_creatine_gym',
+  name: 'Creatine Cyberspace Gym',
+  description: 'A neon-grid gym in cyberspace — chrome, wireframe weights and electric-blue glow, the pump rendered as commercial sci-fi.',
+  pools: {
+    style: ['style_seed_cinematic_render'],
+    lighting: ['lighting_seed_studio_portrait'],
+    mood: ['mood_seed_triumphant_epic', 'mood_seed_warm_intimate'],
+    aura: ['world_seed_creatine_cyberspace_gym'],
+  },
+  createdAt: SEED_TS_V4,
+  updatedAt: SEED_TS_V4,
+};
+
+const SEED_UNIVERSE_OPEN_ATELIER: Universe = {
+  id: 'universe_seed_open_atelier',
+  name: 'Open Atelier',
+  description: 'A general toolkit of cross-cutting art directions — painterly and photographic styles, classic lighting, and mood primitives usable in any scene.',
+  pools: {
+    style: ['style_seed_dark_fantasy_oil', 'style_seed_ethereal_ink_wash', 'style_seed_noir_photograph', 'style_seed_cinematic_render', 'style_seed_pen_and_ink', 'style_seed_impressionist_oil', 'style_seed_mythic_old_masters', 'style_seed_iridescent_ink_wash'],
+    lighting: ['lighting_seed_golden_hour_rim', 'lighting_seed_harsh_underlit', 'lighting_seed_diffuse_overcast', 'lighting_seed_candlelight', 'lighting_seed_cold_moonlight', 'lighting_seed_studio_portrait'],
+    mood: ['mood_seed_melancholic_quiet', 'mood_seed_warm_intimate', 'mood_seed_strange_dreamlike', 'mood_seed_weight_of_recognition'],
+  },
+  createdAt: SEED_TS_V4,
+  updatedAt: SEED_TS_V4,
+};
+
+const SEED_UNIVERSE_SORAYA: Universe = {
+  id: 'universe_seed_soraya_vex',
+  name: 'Soraya Vex',
+  description: 'Soraya Vex — an original recurring character identity with her own LoRA trigger.',
+  pools: {
+    character: ['character_seed_soraya_vex'],
+  },
+  createdAt: SEED_TS_V4,
+  updatedAt: SEED_TS_V4,
+};
+
+function maybeApplyUniverseSeedV4(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V4) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V4, 'true');
+    const additions = [
+      SEED_UNIVERSE_BEKSINSKI,
+      SEED_UNIVERSE_DRAGON_STANDOFF,
+      SEED_UNIVERSE_CREATINE_GYM,
+      SEED_UNIVERSE_OPEN_ATELIER,
+      SEED_UNIVERSE_SORAYA,
+    ];
+    const existingIds = new Set(universes.map(u => u.id));
+    const toAdd = additions.filter(u => !existingIds.has(u.id));
+    if (toAdd.length === 0) return universes;
+    const next = [...universes, ...toAdd];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -251,9 +355,9 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes));
+    return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)));
   } catch {
-    return maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([]));
+    return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }
 }
 
