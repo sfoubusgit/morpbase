@@ -16,6 +16,7 @@ type ObjectLibraryModalProps = {
   onAdd: (id: string, name: string, phrases: string[]) => void;
   onRemove: (id: string) => void;
   onItemCreated?: (id: string) => void;
+  onItemDeleted?: (id: string) => void;
   universeFilter?: string[];
   universeName?: string;
 };
@@ -27,6 +28,7 @@ export function ObjectLibraryModal({
   onAdd,
   onRemove,
   onItemCreated,
+  onItemDeleted,
   universeFilter,
   universeName,
 }: ObjectLibraryModalProps) {
@@ -69,6 +71,7 @@ export function ObjectLibraryModal({
   const handleDelete = (id: string) => {
     if (!window.confirm('Delete this object?')) return;
     deleteObject(id);
+    onItemDeleted?.(id);
     onRemove(id);
     reload();
   };

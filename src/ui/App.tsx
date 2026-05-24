@@ -3971,6 +3971,7 @@ export function App() {
         <WorldsPage
           isLoggedIn={true}
           onWorldCreated={(id) => addToActiveUniverse('aura', id)}
+          onWorldDeleted={(id) => removeFromAllUniverses('aura', id)}
         />
       ) : activePage === 'my-profile' ? (
         <MyProfilePage
@@ -4271,6 +4272,7 @@ export function App() {
         onAdd={handleAddObject}
         onRemove={handleRemoveObject}
         onItemCreated={(id) => addToActiveUniverse('object', id)}
+        onItemDeleted={(id) => removeFromAllUniverses('object', id)}
         universeFilter={activeUniverse ? (activeUniverse.object ?? []) : undefined}
         universeName={activeUniverseName}
       />

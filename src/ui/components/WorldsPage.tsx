@@ -14,9 +14,10 @@ import './WorldsPage.css';
 type WorldsPageProps = {
   isLoggedIn: boolean;
   onWorldCreated?: (id: string) => void;
+  onWorldDeleted?: (id: string) => void;
 };
 
-export function WorldsPage({ isLoggedIn: _isLoggedIn, onWorldCreated }: WorldsPageProps) {
+export function WorldsPage({ isLoggedIn: _isLoggedIn, onWorldCreated, onWorldDeleted }: WorldsPageProps) {
   const [worlds, setWorlds] = useState<World[]>(() => listWorlds());
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newWorldName, setNewWorldName] = useState('');
@@ -43,6 +44,7 @@ export function WorldsPage({ isLoggedIn: _isLoggedIn, onWorldCreated }: WorldsPa
   const handleDelete = (id: string) => {
     if (!window.confirm('Delete this aura and all its phrases?')) return;
     deleteWorld(id);
+    onWorldDeleted?.(id);
     if (selectedId === id) setSelectedId(null);
     reload();
   };
