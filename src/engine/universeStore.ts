@@ -13,6 +13,7 @@ const UNIVERSE_SEED_FLAG_KEY_V8 = 'morpbase:universes:seeded:v8';
 const UNIVERSE_SEED_FLAG_KEY_V9 = 'morpbase:universes:seeded:v9';
 const UNIVERSE_SEED_FLAG_KEY_V10 = 'morpbase:universes:seeded:v10';
 const UNIVERSE_SEED_FLAG_KEY_V11 = 'morpbase:universes:seeded:v11';
+const UNIVERSE_SEED_FLAG_KEY_V12 = 'morpbase:universes:seeded:v12';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -24,6 +25,7 @@ const SEED_TS_V8 = 1748908800000;
 const SEED_TS_V9 = 1748995200000;
 const SEED_TS_V10 = 1749081600000;
 const SEED_TS_V11 = 1749168000000;
+const SEED_TS_V12 = 1749254400000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -741,6 +743,7 @@ const SEED_UNIVERSE_STYLE_LAB: Universe = {
       'style_lab_risograph',
       'style_lab_graphic_scifi',
       'style_lab_charcoal_drawing',
+      'style_lab_charcoal_dark_anime',
     ],
   },
   createdAt: SEED_TS_V9,
@@ -808,6 +811,30 @@ function maybeApplyUniverseSeedV11(universes: Universe[]): Universe[] {
   }
 }
 
+// V12 — non-destructive: merge the new 'style_lab_charcoal_dark_anime' style into
+// the existing Style Lab universe pool for users who already seeded earlier.
+function maybeApplyUniverseSeedV12(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V12) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V12, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_STYLE_LAB.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    if (currentStyle.includes('style_lab_charcoal_dark_anime')) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, 'style_lab_charcoal_dark_anime'] },
+      updatedAt: SEED_TS_V12,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -851,7 +878,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))))));
+    return maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))))))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

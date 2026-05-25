@@ -14,6 +14,7 @@ const STYLE_SEED_FLAG_KEY_V10 = 'promptgen:styles:seeded:v10';
 const STYLE_SEED_FLAG_KEY_V11 = 'promptgen:styles:seeded:v11';
 const STYLE_SEED_FLAG_KEY_V12 = 'promptgen:styles:seeded:v12';
 const STYLE_SEED_FLAG_KEY_V13 = 'promptgen:styles:seeded:v13';
+const STYLE_SEED_FLAG_KEY_V14 = 'promptgen:styles:seeded:v14';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -106,6 +107,7 @@ const SEED_TS_10 = 1748822400000;
 const SEED_TS_11 = 1748908800000;
 const SEED_TS_12 = 1748995200000;
 const SEED_TS_13 = 1749081600000;
+const SEED_TS_14 = 1749168000000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1108,6 +1110,24 @@ const V13_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V14 — Style Lab addition: vintage dark anime rendered with charcoal texture.
+const V14_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_charcoal_dark_anime',
+    name: 'Charcoal Dark Classic Anime',
+    summary: 'Vintage 80s/90s OVA anime rendered in charcoal — grainy hand-drawn shading, bold retro cel linework, deep shadows and a muted, desaturated dark palette.',
+    phrases: [
+      'dark classic anime illustration in the style of vintage 1980s-90s OVA, rendered with charcoal texture',
+      'bold retro hand-drawn cel linework, grainy charcoal-and-ink shading and smudged graphite tones',
+      'low-key moody lighting, deep velvety shadows, muted desaturated near-monochrome palette',
+      'paper grain and film grain, nostalgic analogue anime atmosphere',
+      'ominous, atmospheric, hand-crafted',
+    ],
+    createdAt: SEED_TS_14,
+    updatedAt: SEED_TS_14,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1231,6 +1251,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V13, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V13_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V14) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V14, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V14_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
