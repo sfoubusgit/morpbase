@@ -17,6 +17,7 @@ const STYLE_SEED_FLAG_KEY_V13 = 'promptgen:styles:seeded:v13';
 const STYLE_SEED_FLAG_KEY_V14 = 'promptgen:styles:seeded:v14';
 const STYLE_SEED_FLAG_KEY_V15 = 'promptgen:styles:seeded:v15';
 const STYLE_SEED_FLAG_KEY_V16 = 'promptgen:styles:seeded:v16';
+const STYLE_SEED_FLAG_KEY_V17 = 'promptgen:styles:seeded:v17';
 // One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
 // actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
 // users who already seeded it. Id kept stable; only display name + phrases change.
@@ -116,6 +117,7 @@ const SEED_TS_13 = 1749081600000;
 const SEED_TS_14 = 1749168000000;
 const SEED_TS_15 = 1749254400000;
 const SEED_TS_16 = 1749340800000;
+const SEED_TS_17 = 1749427200000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1176,6 +1178,25 @@ const V16_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V17 — Style Lab addition: Stained-Glass Neon (painterly recipe), validated by
+// render test. Rough hand-painted anime + red/blue neon gel + luminous stained-glass.
+const V17_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_stained_glass_neon',
+    name: 'Stained-Glass Neon',
+    summary: 'Rough painterly anime with dramatic red/blue neon gel lighting and luminous stained-glass jewel accents — thick brushwork, gritty traditional-media texture, moody and saturated.',
+    phrases: [
+      'a textured digital painting with thick visible brushstrokes and rough painterly impasto',
+      'semi-realistic anime, dramatic complementary neon gel lighting in red and electric blue',
+      'cool blue shadows and hot red-magenta highlights',
+      'luminous stained-glass jewel-tone accents with black leading',
+      'gritty traditional-media texture, hand-painted concept-art feel, high saturation, drifting smoke, cinematic moody night',
+    ],
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1329,6 +1350,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V16, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V16_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V17) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V17, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V17_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
