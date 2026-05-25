@@ -15,6 +15,11 @@ const STYLE_SEED_FLAG_KEY_V11 = 'promptgen:styles:seeded:v11';
 const STYLE_SEED_FLAG_KEY_V12 = 'promptgen:styles:seeded:v12';
 const STYLE_SEED_FLAG_KEY_V13 = 'promptgen:styles:seeded:v13';
 const STYLE_SEED_FLAG_KEY_V14 = 'promptgen:styles:seeded:v14';
+const STYLE_SEED_FLAG_KEY_V15 = 'promptgen:styles:seeded:v15';
+// One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
+// actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
+// users who already seeded it. Id kept stable; only display name + phrases change.
+const STYLE_RENAME_FIX_KEY = 'promptgen:styles:fix:vintage_anime_cel';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -108,6 +113,7 @@ const SEED_TS_11 = 1748908800000;
 const SEED_TS_12 = 1748995200000;
 const SEED_TS_13 = 1749081600000;
 const SEED_TS_14 = 1749168000000;
+const SEED_TS_15 = 1749254400000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1110,21 +1116,42 @@ const V13_SEED_STYLES: StylePreset[] = [
   },
 ];
 
-// V14 — Style Lab addition: vintage dark anime rendered with charcoal texture.
+// V14 — Vintage Anime Cel. (Id is legacy 'charcoal_dark_anime'; the charcoal cue
+// never rendered — Z-Image produces a clean 90s anime film cel — so it's renamed
+// to match what it actually makes.)
 const V14_SEED_STYLES: StylePreset[] = [
   {
     id: 'style_lab_charcoal_dark_anime',
-    name: 'Charcoal Dark Classic Anime',
-    summary: 'Vintage 80s/90s OVA anime rendered in charcoal — grainy hand-drawn shading, bold retro cel linework, deep shadows and a muted, desaturated dark palette.',
+    name: 'Vintage Anime Cel',
+    summary: 'A 1990s anime film cel — detailed hand-painted backgrounds, clean cel linework, muted naturalistic colour, soft grain and that nostalgic retro-OVA film-still quality.',
     phrases: [
-      'dark classic anime illustration in the style of vintage 1980s-90s OVA, rendered with charcoal texture',
-      'bold retro hand-drawn cel linework, grainy charcoal-and-ink shading and smudged graphite tones',
-      'low-key moody lighting, deep velvety shadows, muted desaturated near-monochrome palette',
-      'paper grain and film grain, nostalgic analogue anime atmosphere',
-      'ominous, atmospheric, hand-crafted',
+      'vintage 1990s anime film cel, detailed hand-painted backgrounds',
+      'clean confident cel linework, classic retro OVA character design',
+      'muted desaturated naturalistic colour palette, soft cinematic lighting',
+      'subtle film grain, nostalgic analogue anime atmosphere',
+      'the look of a Satoshi Kon / Madhouse 90s anime film still',
     ],
     createdAt: SEED_TS_14,
     updatedAt: SEED_TS_14,
+  },
+];
+
+// V15 — Style Lab addition: a true charcoal drawing OF an anime character
+// (charcoal leads as the medium; anime is only the subject styling).
+const V15_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_charcoal_anime',
+    name: 'Charcoal Anime Sketch',
+    summary: 'A rough charcoal drawing of an anime character — heavy graphite texture, smudged hand-drawn shading, visible paper grain, monochrome and raw.',
+    phrases: [
+      'a rough charcoal drawing of an anime character, heavy graphite and charcoal texture',
+      'smudged hand-drawn shading, loose expressive strokes, visible paper grain',
+      'monochrome greyscale, deep velvety blacks and lifted highlights',
+      'sketchy and raw, not clean cel coloring',
+      'hand-drawn study, expressive and textural',
+    ],
+    createdAt: SEED_TS_15,
+    updatedAt: SEED_TS_15,
   },
 ];
 
@@ -1263,6 +1290,31 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     const toAdd = V14_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V15) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V15, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V15_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  // One-time rename fix-up: update an already-seeded 'charcoal_dark_anime' item
+  // in place to the corrected "Vintage Anime Cel" name + phrases.
+  if (readStorageItem(STYLE_RENAME_FIX_KEY) === null) {
+    writeStorageItem(STYLE_RENAME_FIX_KEY, true);
+    const canonical = V14_SEED_STYLES.find(s => s.id === 'style_lab_charcoal_dark_anime');
+    if (canonical && result.some(i => i.id === 'style_lab_charcoal_dark_anime')) {
+      result = sortItems(result.map(i =>
+        i.id === 'style_lab_charcoal_dark_anime'
+          ? { ...i, name: canonical.name, summary: canonical.summary, phrases: canonical.phrases, updatedAt: SEED_TS_15 }
+          : i
+      ));
       writeItems(result);
     }
   }
