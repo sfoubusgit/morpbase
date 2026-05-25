@@ -16,6 +16,7 @@ const STYLE_SEED_FLAG_KEY_V12 = 'promptgen:styles:seeded:v12';
 const STYLE_SEED_FLAG_KEY_V13 = 'promptgen:styles:seeded:v13';
 const STYLE_SEED_FLAG_KEY_V14 = 'promptgen:styles:seeded:v14';
 const STYLE_SEED_FLAG_KEY_V15 = 'promptgen:styles:seeded:v15';
+const STYLE_SEED_FLAG_KEY_V16 = 'promptgen:styles:seeded:v16';
 // One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
 // actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
 // users who already seeded it. Id kept stable; only display name + phrases change.
@@ -114,6 +115,7 @@ const SEED_TS_12 = 1748995200000;
 const SEED_TS_13 = 1749081600000;
 const SEED_TS_14 = 1749168000000;
 const SEED_TS_15 = 1749254400000;
+const SEED_TS_16 = 1749340800000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1155,6 +1157,25 @@ const V15_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V16 — Style Lab addition: the dark, moody variant of the charcoal anime sketch
+// (deep blacks + low-key lighting + filled shadow background), confirmed by test.
+const V16_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_dark_charcoal_anime',
+    name: 'Dark Charcoal Anime',
+    summary: 'A dark, moody charcoal drawing of an anime character — deep velvety blacks, dramatic low-key lighting, a shadow-filled background, ominous and atmospheric.',
+    phrases: [
+      'a dark moody charcoal drawing of an anime character, heavy graphite and charcoal',
+      'deep velvety blacks and dramatic low-key lighting',
+      'smudged hand-drawn shading, a dark shadowy charcoal-filled background',
+      'strong contrast, visible paper grain, monochrome greyscale',
+      'ominous and atmospheric, not clean cel coloring',
+    ],
+    createdAt: SEED_TS_16,
+    updatedAt: SEED_TS_16,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1298,6 +1319,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V15, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V15_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V16) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V16, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V16_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
