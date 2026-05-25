@@ -13,6 +13,7 @@ const STYLE_SEED_FLAG_KEY_V9 = 'promptgen:styles:seeded:v9';
 const STYLE_SEED_FLAG_KEY_V10 = 'promptgen:styles:seeded:v10';
 const STYLE_SEED_FLAG_KEY_V11 = 'promptgen:styles:seeded:v11';
 const STYLE_SEED_FLAG_KEY_V12 = 'promptgen:styles:seeded:v12';
+const STYLE_SEED_FLAG_KEY_V13 = 'promptgen:styles:seeded:v13';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -104,6 +105,7 @@ const SEED_TS_9 = 1748736000000;
 const SEED_TS_10 = 1748822400000;
 const SEED_TS_11 = 1748908800000;
 const SEED_TS_12 = 1748995200000;
+const SEED_TS_13 = 1749081600000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1089,6 +1091,23 @@ const V12_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V13 — Style Lab addition: a finished charcoal drawing (distinct from the looser Charcoal Sketch).
+const V13_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_charcoal_drawing',
+    name: 'Charcoal Drawing',
+    summary: 'A finished charcoal drawing — rich full tonal range, soft blended shading, deep velvety blacks and lifted white highlights on textured paper.',
+    phrases: [
+      'a finished charcoal drawing on textured paper, rich full tonal range',
+      'soft blended shading, deep velvety blacks and lifted white highlights',
+      'subtle smudging and fine hatching, controlled and carefully rendered',
+      'monochrome charcoal greyscale, expressive but refined',
+    ],
+    createdAt: SEED_TS_13,
+    updatedAt: SEED_TS_13,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1202,6 +1221,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V12, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V12_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V13) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V13, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V13_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
