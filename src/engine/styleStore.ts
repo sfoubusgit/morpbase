@@ -19,6 +19,7 @@ const STYLE_SEED_FLAG_KEY_V15 = 'promptgen:styles:seeded:v15';
 const STYLE_SEED_FLAG_KEY_V16 = 'promptgen:styles:seeded:v16';
 const STYLE_SEED_FLAG_KEY_V17 = 'promptgen:styles:seeded:v17';
 const STYLE_SEED_FLAG_KEY_V18 = 'promptgen:styles:seeded:v18';
+const STYLE_SEED_FLAG_KEY_V19 = 'promptgen:styles:seeded:v19';
 // One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
 // actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
 // users who already seeded it. Id kept stable; only display name + phrases change.
@@ -120,6 +121,7 @@ const SEED_TS_15 = 1749254400000;
 const SEED_TS_16 = 1749340800000;
 const SEED_TS_17 = 1749427200000;
 const SEED_TS_18 = 1749600000000;
+const SEED_TS_19 = 1749686400000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1287,6 +1289,80 @@ const V18_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V19 — Saint Circuit: 5 additional native styles, each a different sacred medium.
+const V19_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_sc_illuminated_manuscript',
+    name: 'Illuminated Manuscript',
+    summary: 'A medieval illuminated manuscript page — vellum, ultramarine and cobalt inks, burnished gold leaf, decorated marginalia of sigils and circuit-vines, hand-lettered scripture.',
+    phrases: [
+      'a medieval illuminated manuscript page on aged vellum',
+      'ultramarine and cobalt inks alongside burnished gold leaf',
+      'decorated marginalia of vines, sigils and circuit-traces',
+      'hand-lettered blackletter scripture and a drop-cap initial in cobalt and gold',
+      'rich devotional detail, sacred and handcrafted',
+    ],
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'style_sc_orthodox_icon',
+    name: 'Orthodox Cyber-Icon',
+    summary: 'A Russian Orthodox icon — flat hieratic figures, burnished gold-leaf background, ultramarine and cobalt robes, circuit-trace halos and stylised elongated faces.',
+    phrases: [
+      'a Russian Orthodox icon, flat hieratic devotional composition',
+      'a burnished gold-leaf background and ultramarine and cobalt robes',
+      'stylised elongated faces with large solemn eyes',
+      'circuit-trace halos around each figure, sacred lettering in cyrillic-style strokes',
+      'reverent, austere, and timeless',
+    ],
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'style_sc_dore_engraving',
+    name: 'Doré Engraving (cobalt-tinted)',
+    summary: 'Gustave Doré-style religious engraving in cobalt-tinted ink — dense black hatching and crosshatch, dramatic biblical tenebrism, sacred and apocalyptic.',
+    phrases: [
+      'a Gustave Doré-style religious engraving, dense ink hatching and crosshatch',
+      'cobalt-tinted ink instead of pure black, deep biblical tenebrism',
+      'dramatic shafts of cobalt light through smoke and architecture',
+      'sacred apocalyptic mood, fine intricate linework',
+      'antique book-plate texture, deep monochrome blue',
+    ],
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'style_sc_cathedral_fresco',
+    name: 'Cathedral Fresco',
+    summary: 'A Renaissance cathedral fresco on plaster — faded ultramarine and cobalt, burnished gold leaf accents, gentle painterly figures, soft cracking plaster texture.',
+    phrases: [
+      'a Renaissance cathedral fresco painted on plaster',
+      'faded ultramarine and cobalt pigments alongside burnished gold leaf',
+      'gentle painterly figures in flowing robes, devotional composition',
+      'soft cracked plaster texture, dust-stained and aged',
+      'humid wall, soft diffused light, sacred quietude',
+    ],
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'style_sc_cobalt_cyanotype',
+    name: 'Cobalt Cyanotype',
+    summary: 'A devotional cyanotype print — deep Prussian-blue and white photographic blueprint, soft halation, ghostly sacred figures captured by sunlight on coated paper.',
+    phrases: [
+      'a devotional cyanotype photographic print, deep Prussian-blue and white only',
+      'soft halation and gentle halftone-grain, paper texture showing through',
+      'ghostly sacred figures and architecture captured as blueprint silhouettes',
+      'sunlight-on-coated-paper aesthetic, antique photographic process',
+      'meditative monochrome blue',
+    ],
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1460,6 +1536,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V18, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V18_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V19) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V19, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V19_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

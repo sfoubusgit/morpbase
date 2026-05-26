@@ -18,6 +18,7 @@ const UNIVERSE_SEED_FLAG_KEY_V13 = 'morpbase:universes:seeded:v13';
 const UNIVERSE_SEED_FLAG_KEY_V14 = 'morpbase:universes:seeded:v14';
 const UNIVERSE_SEED_FLAG_KEY_V15 = 'morpbase:universes:seeded:v15';
 const UNIVERSE_SEED_FLAG_KEY_V16 = 'morpbase:universes:seeded:v16';
+const UNIVERSE_SEED_FLAG_KEY_V17 = 'morpbase:universes:seeded:v17';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -34,6 +35,7 @@ const SEED_TS_V13 = 1749340800000;
 const SEED_TS_V14 = 1749427200000;
 const SEED_TS_V15 = 1749513600000;
 const SEED_TS_V16 = 1749686400000;
+const SEED_TS_V17 = 1749772800000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -976,6 +978,11 @@ const SEED_UNIVERSE_SAINT_CIRCUIT: Universe = {
       'style_sc_iconic_halftone',
       'style_sc_sacred_realism',
       'style_sc_cathedral_photo',
+      'style_sc_illuminated_manuscript',
+      'style_sc_orthodox_icon',
+      'style_sc_dore_engraving',
+      'style_sc_cathedral_fresco',
+      'style_sc_cobalt_cyanotype',
     ],
     lighting: [
       'lighting_sc_cobalt_glass',
@@ -1008,6 +1015,37 @@ function maybeApplyUniverseSeedV16(universes: Universe[]): Universe[] {
     localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V16, 'true');
     if (universes.some(u => u.id === SEED_UNIVERSE_SAINT_CIRCUIT.id)) return universes;
     const next = [...universes, SEED_UNIVERSE_SAINT_CIRCUIT];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V17 — non-destructive: merge the 5 new Saint Circuit native styles into the
+// existing Saint Circuit universe style pool for users who already seeded V16.
+function maybeApplyUniverseSeedV17(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V17) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V17, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_SAINT_CIRCUIT.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    const additions = [
+      'style_sc_illuminated_manuscript',
+      'style_sc_orthodox_icon',
+      'style_sc_dore_engraving',
+      'style_sc_cathedral_fresco',
+      'style_sc_cobalt_cyanotype',
+    ].filter(id => !currentStyle.includes(id));
+    if (additions.length === 0) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, ...additions] },
+      updatedAt: SEED_TS_V17,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
     localStorage.setItem(KEY, JSON.stringify(next));
     return next;
   } catch {
@@ -1058,7 +1096,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV16(maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))))))))))))));
+    return maybeApplyUniverseSeedV17(maybeApplyUniverseSeedV16(maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))))))))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }
