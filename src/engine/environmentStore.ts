@@ -16,6 +16,7 @@ const ENVIRONMENT_SEED_FLAG_KEY_V9 = 'promptgen:environments:seeded:v9';
 const ENVIRONMENT_SEED_FLAG_KEY_V10 = 'promptgen:environments:seeded:v10';
 const ENVIRONMENT_SEED_FLAG_KEY_V11 = 'promptgen:environments:seeded:v11';
 const ENVIRONMENT_SEED_FLAG_KEY_V12 = 'promptgen:environments:seeded:v12';
+const ENVIRONMENT_SEED_FLAG_KEY_V13 = 'promptgen:environments:seeded:v13';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -116,6 +117,7 @@ const ENV_SEED_TS_9 = 1748563200000;
 const ENV_SEED_TS_10 = 1748649600000;
 const ENV_SEED_TS_11 = 1748736000000;
 const ENV_SEED_TS_12 = 1748822400000;
+const ENV_SEED_TS_13 = 1749600000000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -1800,6 +1802,231 @@ const V12_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V13 — Saint Circuit: a blue-saturated religious-cyberpunk cathedral-city.
+const V13_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_sc_great_nave',
+    name: 'The Great Nave',
+    summary: 'A vast cathedral nave drowned in cobalt stained-glass light — soaring ribbed vaults, neon halos suspended overhead, a long aisle of kneeling pilgrims under cobalt windows.',
+    phraseBundle: {
+      core: [
+        'a vast cathedral nave at night, soaring ribbed gothic vaults',
+        'towering stained-glass windows pouring cobalt and indigo light across the floor',
+        'rings of neon halos suspended in the air down the length of the aisle',
+        'a long avenue of dark wooden pews, pilgrims kneeling in cool blue light',
+        'incense smoke drifting through the cobalt beams',
+        'sacred, immense, lit almost entirely in blue',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_datapane_wall',
+    name: 'The Stained-Glass Datapane Wall',
+    summary: 'A towering wall of stained-glass panels backlit by living data — cobalt and indigo scenes that update in real time, scripture and code interleaved.',
+    phraseBundle: {
+      core: [
+        'a towering wall of stained-glass panels backlit by living data',
+        'cobalt and indigo leaded panes depicting saints, machines and scripture',
+        'subtle flicker as the panes update with new sigils and verses',
+        'a slim chrome scaffold of catwalks running across the wall',
+        'cool blue light flooding the floor in geometric pools',
+        'sacred and luminous, half cathedral half terminal',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_prayer_engine',
+    name: 'The Prayer Engine Chamber',
+    summary: 'Deep beneath the nave — a great humming machine of brass and cobalt cores, valves of glowing prayer, a slow electric hymn rising from the heart of the cathedral.',
+    phraseBundle: {
+      core: [
+        'a vast subterranean chamber housing the cathedral\'s great prayer engine',
+        'brass and cobalt cores rising in tiered rings, valves glowing cyan',
+        'thick cables and pipework looping like incense smoke',
+        'a low steady hum and a faint electric hymn rising from the machine',
+        'gantries and walkways of dark steel around the engine',
+        'industrial, sacred, electric-blue and brass',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_cloister',
+    name: 'The Cloister Walk',
+    summary: 'A long vaulted cloister around a central courtyard, blue light through narrow stained-glass slits, cyber-monks pacing slowly, the air still and cold.',
+    phraseBundle: {
+      core: [
+        'a long vaulted cloister around a central courtyard at night',
+        'narrow stained-glass slits casting cobalt light onto the worn flagstones',
+        'rows of slim columns and pointed arches receding into shadow',
+        'cyber-monks in dark blue habits pacing slowly along the walk',
+        'a small dry fountain at the center, faintly glowing',
+        'still, cold, devotional',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_confessional',
+    name: 'The Confessional Booth',
+    summary: 'A narrow dark-wood booth lined with wired ear-tubes — a sigil-screen between penitent and confessor, a single cobalt lamp inside.',
+    phraseBundle: {
+      core: [
+        'a narrow dark carved-wood confessional booth, two compartments separated by a sigil-screen',
+        'walls lined with wired ear-tubes feeding through the screen',
+        'a single small cobalt lamp glowing inside',
+        'a kneeling rail and a small data-relic offering shelf',
+        'faint cyan light pulsing through the wires',
+        'intimate, dim, and quietly invasive',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_bell_tower',
+    name: 'The Bell Tower of Wires',
+    summary: 'A high tower hung with great copper-and-blue electric bells, braided cables snaking up the walls, the bell-ringer suspended among them.',
+    phraseBundle: {
+      core: [
+        'the interior of a tall bell tower at night, hung with great copper-and-blue electric bells',
+        'braided cables snaking up the stone walls and across the rafters',
+        'a thick rope dropping from the bell yoke into the center of the space',
+        'cobalt moonlight pouring through narrow arched windows',
+        'a faint resonant hum from the bells, dust drifting',
+        'monumental, vibrating with current',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_crypt',
+    name: 'The Crypt of Saints',
+    summary: 'A low vaulted crypt of stone tombs and dormant machine-saints — chrome figures lying in repose, halos dark, a single candle-LED at each foot.',
+    phraseBundle: {
+      core: [
+        'a low vaulted crypt of dark stone, rows of carved tombs along the walls',
+        'dormant machine-saints in chrome and cobalt laid in repose on each tomb',
+        'dark unlit halos behind their heads, hands folded',
+        'a single small candle-LED burning blue at the foot of each saint',
+        'cool damp stone, drifting incense, deep shadow',
+        'sepulchral, sacred, and faintly humming',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_firmware_library',
+    name: 'The Library of Firmware',
+    summary: 'A great vaulted library of glowing scroll-cases and chip-wafer codices — shelves of relic data, rolling brass ladders, monks reading by cobalt lamp.',
+    phraseBundle: {
+      core: [
+        'a great vaulted library, floor-to-ceiling shelves of glowing scroll-cases and chip-wafer codices',
+        'rolling brass ladders on rails, monks reading at long reading tables',
+        'each table lit by a small cobalt-shaded lamp',
+        'a soft cool glow rising from every shelf',
+        'stained-glass clerestory windows pouring more blue light from above',
+        'hushed, reverent, archive of holy code',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_choir_loft',
+    name: 'The Choir Loft',
+    summary: 'A high loft above the nave — tiered seats of brushed chrome, a great pipe-organ inlaid with cyan light, the Choir AI standing center-stage.',
+    phraseBundle: {
+      core: [
+        'a high choir loft above the cathedral nave',
+        'tiered seats of brushed chrome and cobalt around a great pipe-organ',
+        'the organ pipes inlaid with strips of cyan light, glowing softly',
+        'sheet-music tablets glowing on each music stand',
+        'a long view down across the blue-lit nave below',
+        'acoustic, sacred, electric-cool',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_inquisition_hall',
+    name: 'The Inquisition Hall',
+    summary: 'A cold stone hall with a single cobalt spotlight pinning a kneeling figure — a high tribunal bench behind, sigil-banners hanging from the rafters.',
+    phraseBundle: {
+      core: [
+        'a cold stone hall with a single hard cobalt spotlight burning down at the center',
+        'a high carved tribunal bench at the far end, shadowed inquisitors above',
+        'sigil-banners of cobalt and gold hanging from the rafters',
+        'a kneeling rail in the spotlight, the rest of the room in deep shadow',
+        'thin smoke and a faint electric hum',
+        'cold, severe, judicial',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_outer_court',
+    name: 'The Outer Court',
+    summary: 'The public square before the cathedral at night — pilgrim crowds, vendors of relics, neon halos suspended like streetlamps over a sea of cobalt-lit faces.',
+    phraseBundle: {
+      core: [
+        'a vast public square before a great cathedral at night',
+        'crowds of pilgrims and vendors of holy relics moving across the stones',
+        'huge neon halos suspended overhead like streetlamps, lighting the square cobalt',
+        'the cathedral facade rising at the far end, stained-glass windows glowing',
+        'banners of sigils strung between lamp-posts',
+        'civic, devotional, and crowded',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_heretic_tunnels',
+    name: 'The Heretic Tunnels',
+    summary: 'Sub-cathedral catacombs taken over by heretics — broken halos, scratched-out sigils, a small graffiti shrine glowing rebel cyan in the dark.',
+    phraseBundle: {
+      core: [
+        'dim sub-cathedral catacomb tunnels claimed by heretics',
+        'broken halos and scratched-out church sigils on the walls',
+        'a small graffiti shrine glowing rebel cyan in the dark',
+        'salvaged data-relics and torn cobalt banners pinned up',
+        'a single jury-rigged cable feeding cobalt light into the space',
+        'forbidden, defiant, electric-blue underground',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+  {
+    id: 'environment_seed_sc_rooftop_spires',
+    name: 'The Rooftop Spires',
+    summary: 'The cathedral roof at night — a forest of antennae-crosses and gargoyles, blue lightning crawling between the spires, the city sprawl glowing far below.',
+    phraseBundle: {
+      core: [
+        'the cathedral roof at night, a forest of antennae-crosses and stone gargoyles',
+        'faint blue lightning crawling between the tallest spires',
+        'flying buttresses lit cobalt from beneath, leaded copper roofing',
+        'the cathedral-city sprawl glowing far below in deep blue light',
+        'a high cold wind, low clouds, scattered stars',
+        'vertiginous, holy, electric',
+      ],
+    },
+    createdAt: ENV_SEED_TS_13,
+    updatedAt: ENV_SEED_TS_13,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -1932,6 +2159,16 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V12, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V12_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V13) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V13, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V13_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

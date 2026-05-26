@@ -26,6 +26,7 @@ const CHARACTER_SEED_FLAG_KEY_V13 = 'promptgen:characters:seeded:v13';
 const CHARACTER_SEED_FLAG_KEY_V14 = 'promptgen:characters:seeded:v14';
 const CHARACTER_SEED_FLAG_KEY_V15 = 'promptgen:characters:seeded:v15';
 const CHARACTER_SEED_FLAG_KEY_V16 = 'promptgen:characters:seeded:v16';
+const CHARACTER_SEED_FLAG_KEY_V17 = 'promptgen:characters:seeded:v17';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -294,6 +295,7 @@ const SEED_TS_13 = 1748563200000;
 const SEED_TS_14 = 1748649600000;
 const SEED_TS_15 = 1748736000000;
 const SEED_TS_16 = 1748822400000;
+const SEED_TS_17 = 1749600000000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -3046,6 +3048,406 @@ const V16_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V17 — Saint Circuit: a blue-saturated religious-cyberpunk cathedral-city.
+const V17_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_sc_cardinal',
+    name: 'The Cyber-Cardinal',
+    summary: 'The head bishop of the cathedral-city — mediator between the human flock and the machine-saints, ornate cobalt vestments embroidered with circuit traces, a great neon halo above the mitre.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'cyber-cardinal',
+      presentation: 'clothed',
+      ageImpression: 'imposing elder',
+      personalityTone: 'serene, unhurried, absolutely certain',
+      visualAnchors: [
+        { id: 'anchor_sccc_1', label: 'Face', kind: 'face', text: 'a lined ascetic face, pale bone-white skin underlit by cobalt halo, calm grey eyes' },
+        { id: 'anchor_sccc_2', label: 'Halo', kind: 'accessory', text: 'a great neon-cobalt halo ring suspended above a tall mitre' },
+        { id: 'anchor_sccc_3', label: 'Vestments', kind: 'clothing', text: 'ornate cobalt robes with gold and cyan circuit embroidery, a long stole of glowing data-thread' },
+        { id: 'anchor_sccc_4', label: 'Hands', kind: 'other', text: 'thin pale hands clasping a chrome-and-blue rosary processor' },
+        { id: 'anchor_sccc_5', label: 'Detail', kind: 'other', text: 'a chrome ring with a stained-glass cabochon set into it' },
+      ],
+      motifs: [
+        { id: 'motif_sccc_1', label: 'Mediator of Machines', text: 'the cobalt halo, the circuit stole, devotion run on current' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, cardinal',
+        'a lined ascetic bone-white face underlit cobalt, calm grey eyes',
+        'a great neon-cobalt halo ring above a tall mitre',
+        'ornate cobalt robes with gold and cyan circuit embroidery, a stole of glowing data-thread',
+        'clasping a chrome-and-blue rosary processor in a vast cathedral nave',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_cyber_monk',
+    name: 'The Cyber-Monk',
+    summary: 'A humble servant of the cathedral — cobalt habit, prayer-bead processor in his hands, eyes closed in firmware meditation.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'cyber-monk',
+      presentation: 'clothed',
+      ageImpression: 'quiet adult',
+      personalityTone: 'humble, devoted, half-listening to inner code',
+      visualAnchors: [
+        { id: 'anchor_sccm_1', label: 'Hood', kind: 'clothing', text: 'a deep cobalt-blue habit and hood, the face in cool shadow' },
+        { id: 'anchor_sccm_2', label: 'Face', kind: 'face', text: 'pale bone-white skin, eyes closed in meditation, a faint cyan glow on the brow' },
+        { id: 'anchor_sccm_3', label: 'Beads', kind: 'accessory', text: 'a rosary of small glowing data-beads threaded between the fingers' },
+        { id: 'anchor_sccm_4', label: 'Tonsure', kind: 'hair', text: 'a shaved tonsure with a faint glowing circuit-sigil at the crown' },
+        { id: 'anchor_sccm_5', label: 'Detail', kind: 'other', text: 'a soft cobalt glow rising from inside the hood' },
+      ],
+      motifs: [
+        { id: 'motif_sccm_1', label: 'Firmware Meditation', text: 'glowing beads, the cobalt hood, prayer as quiet computation' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, monk',
+        'a deep cobalt-blue habit and hood, face in cool shadow',
+        'pale bone-white skin, eyes closed, a faint cyan glow on the brow',
+        'a rosary of small glowing data-beads between the fingers, a shaved tonsure with a sigil',
+        'standing in a cobalt-lit cloister, soft cobalt glow rising from the hood',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_stained_saint',
+    name: 'The Stained-Glass Saint',
+    summary: 'A living saint manifest in a cathedral window — a body of luminous cobalt and indigo glass with black leading, halo of light, gazing down from the great pane.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'stained-glass saint',
+      presentation: 'other',
+      ageImpression: 'eternal',
+      personalityTone: 'serene, watchful, faintly mournful',
+      visualAnchors: [
+        { id: 'anchor_scss_1', label: 'Body', kind: 'silhouette', text: 'a tall figure rendered as luminous stained glass with black leading, every limb a panel' },
+        { id: 'anchor_scss_2', label: 'Palette', kind: 'other', text: 'cobalt, ultramarine and indigo panes shot through with bright cyan and a single red sacred heart' },
+        { id: 'anchor_scss_3', label: 'Halo', kind: 'accessory', text: 'a gold-leaf halo behind the head, lit from within' },
+        { id: 'anchor_scss_4', label: 'Face', kind: 'face', text: 'serene leaded-glass features, eyes downcast in benediction' },
+        { id: 'anchor_scss_5', label: 'Hands', kind: 'other', text: 'glass hands raised in blessing, light pouring through the fingers' },
+      ],
+      motifs: [
+        { id: 'motif_scss_1', label: 'The Pane Watches', text: 'cobalt glass, gold halo, a saint that is a window' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, saint, stained glass',
+        'a tall figure rendered as luminous stained glass with black leading, every limb a panel',
+        'cobalt, ultramarine and indigo panes shot with bright cyan, a single red sacred heart at the chest',
+        'a gold-leaf halo lit from within, serene leaded-glass features',
+        'glass hands raised in blessing, in a great cathedral window',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_acolyte',
+    name: 'The Acolyte',
+    summary: 'A young initiate learning the prayer-firmware — a cobalt cassock, white collar, eyes wide at the great machinery of the faith.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'acolyte',
+      presentation: 'clothed',
+      ageImpression: 'young teen',
+      personalityTone: 'earnest, awed, just beginning',
+      visualAnchors: [
+        { id: 'anchor_scac_1', label: 'Outfit', kind: 'clothing', text: 'a simple cobalt cassock with a crisp white collar and a small chrome cross at the throat' },
+        { id: 'anchor_scac_2', label: 'Face', kind: 'face', text: 'a young pale face lit cool blue, eyes wide with reverent awe' },
+        { id: 'anchor_scac_3', label: 'Hair', kind: 'hair', text: 'short neat hair, a small fresh sigil-shave at the temple' },
+        { id: 'anchor_scac_4', label: 'Hands', kind: 'other', text: 'careful gloved hands holding a small data-thurible or hymn-tablet' },
+        { id: 'anchor_scac_5', label: 'Halo', kind: 'accessory', text: 'no halo yet — only a thin learner\'s ring of pale cobalt light at the brow' },
+      ],
+      motifs: [
+        { id: 'motif_scac_1', label: 'First Vigil', text: 'cassock and collar, a learner\'s ring of light, awe in the great nave' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1boy, solo, acolyte, child',
+        'a young pale face lit cool blue, eyes wide with awe',
+        'a simple cobalt cassock with a crisp white collar and a small chrome cross',
+        'short neat hair with a small sigil-shave, a thin learner ring of cobalt light at the brow',
+        'holding a small data-thurible in a vast cathedral nave',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_choir_ai',
+    name: 'The Choir AI',
+    summary: 'The cathedral\'s singing machine — a humanoid silhouette of brushed chrome and cobalt, a halo of small loudspeakers around a featureless face, voice impossibly pure.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk', 'machine'],
+    identity: {
+      archetype: 'choir AI',
+      presentation: 'other',
+      ageImpression: 'ageless',
+      personalityTone: 'pure, calm, unhuman',
+      visualAnchors: [
+        { id: 'anchor_scca_1', label: 'Body', kind: 'silhouette', text: 'a tall slender humanoid of brushed chrome and matte cobalt plates' },
+        { id: 'anchor_scca_2', label: 'Halo', kind: 'accessory', text: 'a halo of small loudspeakers arranged in a ring around the head, glowing cyan' },
+        { id: 'anchor_scca_3', label: 'Face', kind: 'face', text: 'a smooth featureless faceplate with a single soft glowing seam where a mouth would be' },
+        { id: 'anchor_scca_4', label: 'Hands', kind: 'other', text: 'long chrome hands raised in song' },
+        { id: 'anchor_scca_5', label: 'Detail', kind: 'other', text: 'visible sound-wave shimmer around the loudspeaker halo' },
+      ],
+      motifs: [
+        { id: 'motif_scca_1', label: 'The Pure Voice', text: 'speaker halo, chrome and cobalt, machine singing in a cathedral' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1robot, solo, android, machine',
+        'a tall slender humanoid of brushed chrome and matte cobalt plates',
+        'a halo of small glowing cyan loudspeakers around a smooth featureless faceplate',
+        'a single soft glowing seam where a mouth would be, sound-wave shimmer around the head',
+        'long chrome hands raised in song in a choir loft',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_inquisitor',
+    name: 'The Inquisitor',
+    summary: 'The cathedral\'s heretic-hunter — sleek cobalt plate armour, a thin neon halo, a sigil-blade of glowing circuit-script in her hand.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'inquisitor',
+      presentation: 'armored',
+      ageImpression: 'hard adult',
+      personalityTone: 'cold, exact, righteous',
+      visualAnchors: [
+        { id: 'anchor_scin_1', label: 'Armor', kind: 'clothing', text: 'sleek deep-cobalt plate armour with gold-and-cyan filigree, a long blue half-cape' },
+        { id: 'anchor_scin_2', label: 'Halo', kind: 'accessory', text: 'a thin sharp neon halo edged in cyan above her head' },
+        { id: 'anchor_scin_3', label: 'Face', kind: 'face', text: 'a hard pale face with cold ice-blue eyes, a small circuit-sigil branded between the brows' },
+        { id: 'anchor_scin_4', label: 'Weapon', kind: 'accessory', text: 'a slender sigil-blade glowing with circuit-script' },
+        { id: 'anchor_scin_5', label: 'Hair', kind: 'hair', text: 'pale hair pulled back severely beneath a circlet' },
+      ],
+      motifs: [
+        { id: 'motif_scin_1', label: 'Holy Geometry', text: 'cobalt plate, the sharp halo, the circuit-blade' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, knight, inquisitor',
+        'sleek deep-cobalt plate armour with gold-and-cyan filigree, a long blue half-cape',
+        'a thin sharp neon halo edged in cyan above her head, pale hair pulled back severely',
+        'a hard pale face with cold ice-blue eyes, a circuit-sigil branded between the brows',
+        'holding a slender sigil-blade glowing with circuit-script',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_confessor',
+    name: 'The Wired Confessor',
+    summary: 'A blindfolded priest who listens to whispered sins through wired ear-tubes — sits motionless behind a screen, taking confession as data.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'wired confessor',
+      presentation: 'clothed',
+      ageImpression: 'patient adult',
+      personalityTone: 'still, listening, infinitely patient',
+      visualAnchors: [
+        { id: 'anchor_sccf_1', label: 'Blindfold', kind: 'face', text: 'a wide cobalt-blue blindfold embroidered with a sigil over the eyes' },
+        { id: 'anchor_sccf_2', label: 'Ears', kind: 'accessory', text: 'wired ear-tubes feeding from both ears down into a small chrome console at the chest' },
+        { id: 'anchor_sccf_3', label: 'Robes', kind: 'clothing', text: 'a high-collared dark-blue confessor\'s robe, hands folded in the lap' },
+        { id: 'anchor_sccf_4', label: 'Skin', kind: 'other', text: 'pale skin lit cool by the small console-glow at the chest' },
+        { id: 'anchor_sccf_5', label: 'Detail', kind: 'other', text: 'faint cyan data-light pulsing through the ear-tubes' },
+      ],
+      motifs: [
+        { id: 'motif_sccf_1', label: 'Sin as Signal', text: 'the blindfold, the ear-tubes, confession captured as data' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, priest',
+        'a wide cobalt-blue sigil-embroidered blindfold over the eyes',
+        'wired ear-tubes feeding from both ears down to a small chrome chest-console',
+        'a high-collared dark-blue confessor robe, hands folded in the lap',
+        'pale skin lit cool by the console glow, in a dim confessional booth',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_bell_ringer',
+    name: 'The Bell-Ringer',
+    summary: 'The keeper of the electric bells — a wiry figure suspended in the tower among humming copper-and-blue chimes, eyes shut, listening to the hour.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'bell-ringer',
+      presentation: 'clothed',
+      ageImpression: 'wiry adult',
+      personalityTone: 'attentive, half-deaf, exalted by the toll',
+      visualAnchors: [
+        { id: 'anchor_scbr_1', label: 'Hair', kind: 'hair', text: 'wild dark hair tied back, hearing-coils threaded through it' },
+        { id: 'anchor_scbr_2', label: 'Face', kind: 'face', text: 'a lean pale face, eyes shut, lips parted, lit cool blue from below' },
+        { id: 'anchor_scbr_3', label: 'Outfit', kind: 'clothing', text: 'a worn dark-blue robe over a leather harness, hanging from a thick rope' },
+        { id: 'anchor_scbr_4', label: 'Hands', kind: 'other', text: 'calloused hands gripping a humming braided cable' },
+        { id: 'anchor_scbr_5', label: 'Detail', kind: 'other', text: 'great copper-and-blue electric bells hanging around him, faintly glowing' },
+      ],
+      motifs: [
+        { id: 'motif_scbr_1', label: 'The Electric Toll', text: 'humming bells, the braided cable, listening to the hour' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo',
+        'wild dark hair tied back with hearing-coils threaded through it, a lean pale face lit cool blue from below',
+        'eyes shut, lips parted, listening',
+        'a worn dark-blue robe over a leather harness, hanging from a thick rope',
+        'gripping a humming braided cable among great copper-and-blue electric bells',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_iconographer',
+    name: 'The Iconographer',
+    summary: 'The painter of living blue icons — pigment-stained gloves and a light-pen, a small stained-glass icon glowing on her workbench, her own face faintly haloed from below.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'iconographer',
+      presentation: 'clothed',
+      ageImpression: 'careful adult',
+      personalityTone: 'meticulous, devotional, lost in the work',
+      visualAnchors: [
+        { id: 'anchor_scig_1', label: 'Face', kind: 'face', text: 'a careful pale face underlit cobalt from her workbench, focused half-lidded eyes' },
+        { id: 'anchor_scig_2', label: 'Hair', kind: 'hair', text: 'dark hair pinned up, a fine paintbrush tucked behind one ear' },
+        { id: 'anchor_scig_3', label: 'Outfit', kind: 'clothing', text: 'a deep-blue work apron over a high-collared blouse, pigment-stained gloves' },
+        { id: 'anchor_scig_4', label: 'Hands', kind: 'other', text: 'one hand holding a glowing light-pen, the other steadying a small stained-glass icon panel' },
+        { id: 'anchor_scig_5', label: 'Detail', kind: 'other', text: 'jars of luminous pigment and a wall of finished blue icons behind her' },
+      ],
+      motifs: [
+        { id: 'motif_scig_1', label: 'Living Icons', text: 'the light-pen, the glowing icon panel, devotional craft' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a careful pale face underlit cobalt from her workbench, focused half-lidded eyes',
+        'dark hair pinned up with a paintbrush tucked behind one ear',
+        'a deep-blue work apron over a high-collared blouse, pigment-stained gloves',
+        'holding a glowing light-pen over a small stained-glass icon panel, jars of luminous pigment around her',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_penitent',
+    name: 'The Penitent Pilgrim',
+    summary: 'A traveller come to the cathedral barefoot — hooded blue robes, a halo of glowing prayer-coils, hands chained with a thin cyan light, looking up at the great nave.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'pilgrim',
+      presentation: 'clothed',
+      ageImpression: 'weary adult',
+      personalityTone: 'humble, hopeful, exhausted',
+      visualAnchors: [
+        { id: 'anchor_scpe_1', label: 'Robes', kind: 'clothing', text: 'hooded faded blue pilgrim robes, dust on the hem, barefoot' },
+        { id: 'anchor_scpe_2', label: 'Halo', kind: 'accessory', text: 'a delicate halo of glowing cyan prayer-coils above the brow' },
+        { id: 'anchor_scpe_3', label: 'Face', kind: 'face', text: 'a tired pale face, eyes raised in hope, lit cool blue' },
+        { id: 'anchor_scpe_4', label: 'Hands', kind: 'other', text: 'hands held together as if bound by a thin filament of cyan light' },
+        { id: 'anchor_scpe_5', label: 'Detail', kind: 'other', text: 'a small data-relic in a pouch at the belt' },
+      ],
+      motifs: [
+        { id: 'motif_scpe_1', label: 'Long Road to the Nave', text: 'dusty robes, the prayer-coil halo, the cyan thread of penance' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, pilgrim',
+        'hooded faded blue pilgrim robes, dust on the hem, barefoot',
+        'a delicate halo of glowing cyan prayer-coils above the brow',
+        'a tired pale face lit cool blue, eyes raised in hope',
+        'hands held together as if bound by a thin filament of cyan light, in a vast cathedral nave',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_machine_hermit',
+    name: 'The Machine-Hermit',
+    summary: 'A half-cyborg recluse meditating in a vault — a body grown into the cathedral wiring, cobalt cabling like vines through the flesh, eyes long closed.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'machine-hermit',
+      presentation: 'clothed',
+      ageImpression: 'ancient',
+      personalityTone: 'unmoving, transcendent, barely human',
+      visualAnchors: [
+        { id: 'anchor_scmh_1', label: 'Body', kind: 'silhouette', text: 'a gaunt seated figure with cobalt cabling growing through the flesh like vines' },
+        { id: 'anchor_scmh_2', label: 'Face', kind: 'face', text: 'a withered face, eyes long closed and stitched, a faint cyan glow leaking from the seams' },
+        { id: 'anchor_scmh_3', label: 'Robes', kind: 'clothing', text: 'tattered indigo robes fused into the wall-wiring' },
+        { id: 'anchor_scmh_4', label: 'Halo', kind: 'accessory', text: 'a soft drifting halo of dust and faint blue light' },
+        { id: 'anchor_scmh_5', label: 'Detail', kind: 'other', text: 'a small altar of melted candle-LEDs in front of him' },
+      ],
+      motifs: [
+        { id: 'motif_scmh_1', label: 'Grown Into the Wall', text: 'cabling-vines, stitched eyes, transcendence by current' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, old man',
+        'a gaunt seated figure with cobalt cabling growing through the flesh like vines',
+        'a withered face with eyes stitched closed and a faint cyan glow leaking from the seams',
+        'tattered indigo robes fused into the wall-wiring of a dim vault',
+        'a soft drifting halo of dust and faint blue light, a small altar of melted candle-LEDs in front',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+  {
+    id: 'character_seed_sc_heretic',
+    name: 'The Broken-Halo Heretic',
+    summary: 'An apostate who escaped the church — torn cobalt robes, a halo split and sparking above the head, blue circuit-stigmata bleeding pale cyan light, defiant.',
+    tags: ['solo', 'saint circuit', 'religious cyberpunk'],
+    identity: {
+      archetype: 'heretic',
+      presentation: 'clothed',
+      ageImpression: 'fierce adult',
+      personalityTone: 'defiant, wounded, refusing to kneel',
+      visualAnchors: [
+        { id: 'anchor_sche_1', label: 'Halo', kind: 'accessory', text: 'a broken halo above the head, one side cracked and sparking cyan' },
+        { id: 'anchor_sche_2', label: 'Face', kind: 'face', text: 'a defiant pale face with sharp ice-blue eyes, a small split lip' },
+        { id: 'anchor_sche_3', label: 'Stigmata', kind: 'other', text: 'blue circuit-stigmata on the palms and brow leaking pale cyan light' },
+        { id: 'anchor_sche_4', label: 'Robes', kind: 'clothing', text: 'torn cobalt robes with the church sigil scratched out, a rough hood' },
+        { id: 'anchor_sche_5', label: 'Hair', kind: 'hair', text: 'dark hair shaved on one side, the church-sigil scar visible' },
+      ],
+      motifs: [
+        { id: 'motif_sche_1', label: 'No Longer Kneeling', text: 'the broken halo, circuit-stigmata, the scratched-out sigil' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo',
+        'a defiant pale face with sharp ice-blue eyes',
+        'a broken halo above the head, one side cracked and sparking cyan',
+        'blue circuit-stigmata on the palms and brow leaking pale cyan light',
+        'torn cobalt robes with the church sigil scratched out, dark hair shaved on one side',
+      ],
+    },
+    createdAt: SEED_TS_17,
+    updatedAt: SEED_TS_17,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -3221,6 +3623,16 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     writeStorageItem(CHARACTER_SEED_FLAG_KEY_V16, true);
     const existingIds = new Set(result.map(c => c.id));
     const toAdd = V16_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V17) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V17, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V17_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
     if (toAdd.length > 0) {
       result = sortCharacters([...result, ...toAdd]);
       writeCharacters(result);

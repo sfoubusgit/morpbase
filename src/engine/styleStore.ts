@@ -18,6 +18,7 @@ const STYLE_SEED_FLAG_KEY_V14 = 'promptgen:styles:seeded:v14';
 const STYLE_SEED_FLAG_KEY_V15 = 'promptgen:styles:seeded:v15';
 const STYLE_SEED_FLAG_KEY_V16 = 'promptgen:styles:seeded:v16';
 const STYLE_SEED_FLAG_KEY_V17 = 'promptgen:styles:seeded:v17';
+const STYLE_SEED_FLAG_KEY_V18 = 'promptgen:styles:seeded:v18';
 // One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
 // actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
 // users who already seeded it. Id kept stable; only display name + phrases change.
@@ -118,6 +119,7 @@ const SEED_TS_14 = 1749168000000;
 const SEED_TS_15 = 1749254400000;
 const SEED_TS_16 = 1749340800000;
 const SEED_TS_17 = 1749427200000;
+const SEED_TS_18 = 1749600000000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1197,6 +1199,94 @@ const V17_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V18 — Saint Circuit: blue-saturated religious-cyberpunk art directions.
+const V18_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_sc_stained_glass_icon',
+    name: 'Stained-Glass Iconography',
+    summary: 'Flat religious stained-glass illustration — cobalt and indigo leaded panes, bone-white figures, gold halos, devotional and luminous.',
+    phrases: [
+      'flat religious stained-glass illustration, bold black leading framing every shape',
+      'jewel panes dominated by cobalt, ultramarine and indigo, accents of cyan and gold',
+      'bone-white figures with gold halos, hands raised in benediction',
+      'sacred geometry and Marian-blue palette, devotional composition',
+      'lit from behind as if by a holy lamp',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'style_sc_byzantine_mosaic',
+    name: 'Byzantine Cyber-Mosaic',
+    summary: 'Tessellated Byzantine mosaic of saints fused with circuit-traces — gold leaf and deep cobalt tiles, ornate halos, sacred and alien.',
+    phrases: [
+      'a Byzantine mosaic of small tessellated tiles, gold leaf and deep cobalt dominant',
+      'sacred figures with ornate halos, faces simplified and devotional',
+      'circuit-traces and sigils woven through the mosaic pattern',
+      'rich black grout lines between every tile, hieratic composition',
+      'sacred and alien, half iconostasis half motherboard',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'style_sc_gothic_render',
+    name: 'Gothic Cathedral Render',
+    summary: 'Cinematic gothic-cathedral render — soaring ribbed vaults, cobalt stained-glass volumetrics, incense haze, deep blue cinematic grade.',
+    phrases: [
+      'cinematic gothic cathedral interior render, soaring ribbed vaults',
+      'cobalt and indigo stained-glass light pouring through volumetric haze',
+      'long aisles and deep shadow, candle-and-LED highlights on stone',
+      'shallow depth of field, atmospheric incense smoke',
+      'deep-blue cinematic colour grade, sacred and immense',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'style_sc_iconic_halftone',
+    name: 'Sacred Halftone Print',
+    summary: 'Old religious halftone print fused with circuit pattern — cobalt-and-cream tones, dotted shading, the look of a holy pamphlet from a cathedral that runs on code.',
+    phrases: [
+      'old religious halftone print aesthetic, cobalt-and-cream limited palette',
+      'dense dotted halftone shading and visible registration offset',
+      'circuit-trace patterns interleaved with sacred linework',
+      'a worn paper feel, faint folds and ink bleed',
+      'devotional pamphlet meets motherboard print',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'style_sc_sacred_realism',
+    name: 'Painterly Sacred Realism',
+    summary: 'Caravaggio-meets-neon painterly realism — deep velvety blacks, hot cyan key-light from a halo or pane, bone-white skin against indigo shadow.',
+    phrases: [
+      'painterly sacred realism in the manner of Caravaggio, deep velvety blacks',
+      'a hot cyan key-light from a halo or stained-glass pane carving the figure',
+      'bone-white skin against indigo shadow, rich oil-paint texture',
+      'dramatic tenebrism, devotional composition',
+      'cinematic, intimate, solemnly beautiful',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'style_sc_cathedral_photo',
+    name: 'Cold Cathedral Photograph',
+    summary: 'Cinematic photoreal cathedral photograph — deep blue colour grade, soft volumetric god-rays through stained glass, 35mm grain and bloom.',
+    phrases: [
+      'cinematic photoreal cathedral photograph, deep blue colour grade',
+      'soft volumetric god-rays of cobalt and indigo light through stained-glass windows',
+      'shallow depth of field, gentle lens bloom around the halos',
+      'subtle 35mm grain, hand-painted background detail',
+      'cold, sacred, and photographically precise',
+    ],
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1360,6 +1450,16 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V17, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V17_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V18) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V18, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V18_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

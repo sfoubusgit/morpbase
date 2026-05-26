@@ -23,12 +23,14 @@ const SEED_FLAG_KEY_V3 = 'promptgen:objects:seeded:v3';
 const SEED_FLAG_KEY_V4 = 'promptgen:objects:seeded:v4';
 const SEED_FLAG_KEY_V5 = 'promptgen:objects:seeded:v5';
 const SEED_FLAG_KEY_V6 = 'promptgen:objects:seeded:v6';
+const SEED_FLAG_KEY_V7 = 'promptgen:objects:seeded:v7';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
 const SEED_TS_3 = 1748563200000;
 const SEED_TS_4 = 1748649600000;
 const SEED_TS_5 = 1748736000000;
 const SEED_TS_6 = 1748822400000;
+const SEED_TS_7 = 1749600000000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -712,6 +714,101 @@ const V6_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V7 — Saint Circuit: blue religious-cyberpunk props.
+const V7_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_sc_rosary_processor',
+    name: 'Rosary-Bead Processor',
+    summary: 'A rosary whose beads are small glowing cyan data-nodes — a chrome crucifix-chip at the end, prayer counted in current.',
+    phrases: [
+      'a rosary whose beads are small glowing cyan data-nodes',
+      'a chrome crucifix-chip at the end, faint circuit traces in the metal',
+      'a fine silver chain linking the beads',
+      'prayer counted in current, sacred and luminous',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_sigil_blade',
+    name: 'Sigil-Blade',
+    summary: 'A slender inquisitor\'s sword etched with glowing cyan circuit-script — chrome and cobalt fittings, a small halo-pommel.',
+    phrases: [
+      'a slender inquisitor sword etched with glowing cyan circuit-script along the blade',
+      'chrome and cobalt fittings on the hilt',
+      'a small halo-pommel at the end of the grip',
+      'the blade humming faintly with holy current',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_halo_crown',
+    name: 'Neon Halo Crown',
+    summary: 'A wearable LED halo ring — thin chrome arc with a luminous cyan-cobalt edge, suspended above the wearer\'s head by an unseen brace.',
+    phrases: [
+      'a wearable LED halo ring, a thin chrome arc with a luminous cyan-cobalt edge',
+      'suspended above the wearer\'s head as if floating',
+      'tiny circuit-traces visible along the inner rim',
+      'sacred adornment, electric blue',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_datapane',
+    name: 'Stained-Glass Datapane',
+    summary: 'A small LED-backed stained-glass tablet — cobalt and indigo panes forming a living icon that updates with scripture and code.',
+    phrases: [
+      'a small LED-backed stained-glass tablet held like a holy book',
+      'cobalt and indigo panes forming a living icon, faint sigils flickering',
+      'a slim chrome frame, black leading between the panes',
+      'sacred and luminous, half icon half terminal',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_censer_drone',
+    name: 'Censer-Drone',
+    summary: 'A floating thurible-drone trailing pale blue incense smoke — three small rotors and a glowing cyan core, drifting through the nave.',
+    phrases: [
+      'a small floating thurible-drone trailing pale blue incense smoke',
+      'three small chrome rotors and a glowing cyan core',
+      'ornate gold filigree around the body',
+      'drifting through a vast cathedral nave',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_bell_wires',
+    name: 'Bell-of-Wires',
+    summary: 'A small copper electric tuning-bell wrapped in cobalt wire — humming faintly, used to summon the next office.',
+    phrases: [
+      'a small copper electric tuning-bell wrapped in fine cobalt wire',
+      'a slim wooden handle, a humming faint blue glow inside',
+      'sigil-engraving around the lip',
+      'used to summon the next office, sacred and electric',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+  {
+    id: 'object_sc_icono_stylus',
+    name: "Iconographer's Stylus",
+    summary: 'A slim chrome light-pen with a cobalt tip — used to print living blue icons onto stained-glass panels.',
+    phrases: [
+      'a slim chrome light-pen with a glowing cobalt tip',
+      'fine sigil-engraving along the barrel',
+      'a small cap of cyan light at the rear',
+      'used to print living blue icons onto stained-glass panels',
+    ],
+    createdAt: SEED_TS_7,
+    updatedAt: SEED_TS_7,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -769,6 +866,16 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V6, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V6_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V7) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V7, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V7_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

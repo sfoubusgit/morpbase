@@ -9,6 +9,7 @@ const WARDROBE_SEED_FLAG_KEY_V6 = 'promptgen:wardrobe:seeded:v6';
 const WARDROBE_SEED_FLAG_KEY_V7 = 'promptgen:wardrobe:seeded:v7';
 const WARDROBE_SEED_FLAG_KEY_V8 = 'promptgen:wardrobe:seeded:v8';
 const WARDROBE_SEED_FLAG_KEY_V9 = 'promptgen:wardrobe:seeded:v9';
+const WARDROBE_SEED_FLAG_KEY_V10 = 'promptgen:wardrobe:seeded:v10';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -97,6 +98,7 @@ const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
+const SEED_TS_10 = 1749600000000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -730,6 +732,88 @@ const V9_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V10 — Saint Circuit: blue religious-cyberpunk dress.
+const V10_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_sc_cardinal_vestments',
+    name: 'Cardinal Vestments',
+    summary: 'Ornate cobalt-blue cardinal robes embroidered with gold and cyan circuit traces — long data-thread stole, tall mitre, neon halo above.',
+    phrases: [
+      'ornate cobalt-blue cardinal vestments embroidered with gold and cyan circuit traces',
+      'a long stole of glowing data-thread draped over the shoulders',
+      'a tall ornate mitre and a great neon-cobalt halo ring above it',
+      'rings and a chrome-and-blue rosary processor in the hand',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'outfit_sc_monk_habit',
+    name: 'Cyber-Monk Habit',
+    summary: 'A deep cobalt-blue monastic habit with a deep hood — a small glowing sigil at the breast, a rosary of data-beads at the belt.',
+    phrases: [
+      'a deep cobalt-blue monastic habit with a deep hood',
+      'a small glowing cyan sigil embroidered at the breast',
+      'a rosary of softly-glowing data-beads at the belt',
+      'a simple cord cincture, plain dark sandals',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'outfit_sc_inquisitor_armor',
+    name: 'Inquisitor Armor',
+    summary: 'Sleek deep-cobalt plate armour with gold-and-cyan filigree — a long blue half-cape, a thin sharp neon halo, a sigil-blade on the hip.',
+    phrases: [
+      'sleek deep-cobalt plate armour with gold-and-cyan filigree',
+      'a long blue half-cape clasped at one shoulder with a sigil-pin',
+      'a thin sharp neon halo edged in cyan above the head',
+      'a slender sigil-blade glowing with circuit-script at the hip',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'outfit_sc_acolyte_cassock',
+    name: 'Acolyte Cassock',
+    summary: 'A simple cobalt cassock with a crisp white collar and a small chrome cross — a thin learner\'s ring of cobalt light at the brow.',
+    phrases: [
+      'a simple cobalt cassock with a crisp white collar',
+      'a small chrome cross worn at the throat',
+      'a thin learner\'s ring of pale cobalt light at the brow',
+      'gloved hands, neat and reverent',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'outfit_sc_penitent_robes',
+    name: 'Penitent Pilgrim Robes',
+    summary: 'Hooded faded blue pilgrim robes, dusty hem, barefoot — a delicate halo of glowing cyan prayer-coils and a data-relic pouch at the belt.',
+    phrases: [
+      'hooded faded blue pilgrim robes, dust on the hem, barefoot',
+      'a delicate halo of glowing cyan prayer-coils above the brow',
+      'a small data-relic pouch at a knotted belt',
+      'hands held together as if bound by a thin filament of cyan light',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'outfit_sc_heretic_rags',
+    name: 'Broken-Halo Heretic Rags',
+    summary: 'Torn cobalt robes with the church sigil scratched out — a cracked halo sparking cyan, blue circuit-stigmata visible on the palms.',
+    phrases: [
+      'torn cobalt robes with the church sigil scratched out, a rough hood',
+      'a broken halo above the head, one side cracked and sparking cyan',
+      'blue circuit-stigmata on the palms and brow leaking pale cyan light',
+      'a salvaged chrome relic on a cord at the neck',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -803,6 +887,16 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V9_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V10_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

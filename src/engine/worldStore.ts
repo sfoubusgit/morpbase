@@ -20,6 +20,7 @@ const WORLD_SEED_FLAG_KEY_V6 = 'promptgen:worlds:seeded:v6';
 const WORLD_SEED_FLAG_KEY_V7 = 'promptgen:worlds:seeded:v7';
 const WORLD_SEED_FLAG_KEY_V8 = 'promptgen:worlds:seeded:v8';
 const WORLD_SEED_FLAG_KEY_V9 = 'promptgen:worlds:seeded:v9';
+const WORLD_SEED_FLAG_KEY_V10 = 'promptgen:worlds:seeded:v10';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
@@ -30,6 +31,7 @@ const WORLD_SEED_TS_V6 = 1748563200000;
 const WORLD_SEED_TS_V7 = 1748649600000;
 const WORLD_SEED_TS_V8 = 1748736000000;
 const WORLD_SEED_TS_V9 = 1748822400000;
+const WORLD_SEED_TS_V10 = 1749600000000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -404,6 +406,48 @@ const SEED_WORLDS_V9: World[] = [
   },
 ];
 
+const SEED_WORLDS_V10: World[] = [
+  {
+    id: 'world_seed_sc_saint_circuit',
+    name: 'Saint Circuit',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_sc_01', text: 'a cathedral-city where the machine is holy, devotion measured in current and prayer counted in glowing beads' },
+      { id: 'wp_sc_02', text: 'a palette dominated by Marian-blue, ultramarine and electric cyan, with bone-white skin and halo-gold reserved for accents' },
+      { id: 'wp_sc_03', text: 'towering stained-glass windows pouring saturated cobalt and indigo light across vast cathedral floors' },
+      { id: 'wp_sc_04', text: 'rings of neon halos suspended in the air down the length of the nave, each one humming faintly' },
+      { id: 'wp_sc_05', text: 'cyber-monks pacing the cloister in deep cobalt habits, prayer-bead processors threaded between their fingers' },
+      { id: 'wp_sc_06', text: 'a living stained-glass saint in the great window, a body of luminous cobalt panes and a sacred-red heart at the chest' },
+      { id: 'wp_sc_07', text: 'the deep humming prayer engine beneath the nave, brass and cobalt cores rising in tiered rings, valves glowing cyan' },
+      { id: 'wp_sc_08', text: 'a wall of stained-glass datapanes, sacred icons updating in real time with scripture and code' },
+      { id: 'wp_sc_09', text: 'a choir AI in chrome and cobalt with a halo of small loudspeakers, voice impossibly pure' },
+      { id: 'wp_sc_10', text: 'inquisitors in sleek deep-cobalt plate with thin sharp halos and sigil-blades that glow with circuit-script' },
+      { id: 'wp_sc_11', text: 'a wired confessor blindfolded in cobalt, ear-tubes carrying whispered sins down to a small chest-console' },
+      { id: 'wp_sc_12', text: 'a high bell tower hung with great copper-and-blue electric bells, braided cables snaking up the stone' },
+      { id: 'wp_sc_13', text: 'a crypt of saints — dormant chrome figures laid in repose, halos dark, a single candle-LED burning blue at each foot' },
+      { id: 'wp_sc_14', text: 'a great vaulted library of glowing scroll-cases and chip-wafer codices, monks reading by cobalt lamp' },
+      { id: 'wp_sc_15', text: 'an inquisition hall lit by a single hard cobalt spotlight, sigil-banners hanging from the rafters in deep shadow' },
+      { id: 'wp_sc_16', text: 'a public square before the cathedral at night, huge neon halos suspended overhead like streetlamps' },
+      { id: 'wp_sc_17', text: 'heretic catacombs beneath the cathedral, broken halos and scratched-out sigils, a rebel-cyan shrine in the dark' },
+      { id: 'wp_sc_18', text: 'a rooftop forest of antennae-crosses and stone gargoyles, faint blue lightning crawling between the spires' },
+      { id: 'wp_sc_19', text: 'censer-drones drifting through the nave trailing pale blue incense smoke, glowing cyan cores at their hearts' },
+      { id: 'wp_sc_20', text: 'a wearable LED halo crown, a thin chrome arc with a luminous cobalt edge, floating above the wearer\'s head' },
+      { id: 'wp_sc_21', text: 'an iconographer at her workbench printing a living blue icon with a glowing light-pen' },
+      { id: 'wp_sc_22', text: 'pilgrims kneeling barefoot in dusty cobalt robes, delicate halos of cyan prayer-coils at their brows' },
+      { id: 'wp_sc_23', text: 'a machine-hermit grown into the cathedral wiring, cobalt cabling like vines through the flesh, eyes stitched closed' },
+      { id: 'wp_sc_24', text: 'a broken-halo heretic with the church sigil scratched out and circuit-stigmata bleeding pale cyan light' },
+      { id: 'wp_sc_25', text: 'a faint electric hymn rising from beneath every floor, the steady devotional hum of the prayer engine' },
+      { id: 'wp_sc_26', text: 'the smell the image implies — old incense, hot solder, beeswax, ozone, cold stone, the sweet rot of holy current' },
+      { id: 'wp_sc_27', text: 'mosaics of saints fused with circuit-traces, gold leaf and deep cobalt tiles set in black grout' },
+      { id: 'wp_sc_28', text: 'a sigil-blade humming with holy current, circuit-script glowing along the edge' },
+      { id: 'wp_sc_29', text: 'devotion as protocol — measured ritual, precise gestures, no warmth in the prayer, only cool light' },
+      { id: 'wp_sc_30', text: 'the whole city sacred and electric and blue — a faith run on machinery, faces lifted into the cobalt' },
+    ],
+    createdAt: WORLD_SEED_TS_V10,
+    updatedAt: WORLD_SEED_TS_V10,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -493,6 +537,16 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V9, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V9.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V10) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V10, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V10.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

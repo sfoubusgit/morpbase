@@ -10,6 +10,7 @@ const LIGHTING_SEED_FLAG_KEY_V6 = 'promptgen:lightings:seeded:v6';
 const LIGHTING_SEED_FLAG_KEY_V7 = 'promptgen:lightings:seeded:v7';
 const LIGHTING_SEED_FLAG_KEY_V8 = 'promptgen:lightings:seeded:v8';
 const LIGHTING_SEED_FLAG_KEY_V9 = 'promptgen:lightings:seeded:v9';
+const LIGHTING_SEED_FLAG_KEY_V10 = 'promptgen:lightings:seeded:v10';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -98,6 +99,7 @@ const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
+const SEED_TS_10 = 1749600000000;
 
 const V5_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -707,6 +709,88 @@ const V9_SEED_LIGHTINGS: LightingSetup[] = [
   },
 ];
 
+// V10 — Saint Circuit: blue-saturated religious-cyberpunk light.
+const V10_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_sc_cobalt_glass',
+    name: 'Cobalt Stained-Glass Light',
+    summary: 'Saturated cobalt and indigo light pouring through tall stained-glass windows — coloured pools across stone, dust in the beams, devotional.',
+    phrases: [
+      'saturated cobalt and indigo light pouring through tall stained-glass windows',
+      'coloured pools of blue across stone floors, gentle volumetric haze',
+      'dust drifting visibly through the beams',
+      'sacred, cinematic, deep-blue dominant',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'lighting_sc_neon_halo',
+    name: 'Neon Halo Glow',
+    summary: 'Soft cyan light from a neon halo ring behind the head — gentle backlight tracing the silhouette, intimate and devotional.',
+    phrases: [
+      'soft cyan light from a neon halo ring behind the head',
+      'gentle backlight tracing the silhouette and hair',
+      'faint colour spill onto the shoulders, deep shadow elsewhere',
+      'intimate, devotional, electric-blue',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'lighting_sc_engine_underglow',
+    name: 'Prayer-Engine Underglow',
+    summary: 'Cool cobalt and cyan glow rising from below — the great prayer-engine lighting a vault from beneath, dramatic up-lighting and deep upper shadow.',
+    phrases: [
+      'cool cobalt and cyan glow rising from below, the prayer engine lighting the vault',
+      'dramatic up-lighting on figures and pipework',
+      'deep shadow gathered in the upper space',
+      'industrial, sacred, electric',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'lighting_sc_candle_led',
+    name: 'Candle-and-LED Mix',
+    summary: 'Warm candle flame mixed with cold cobalt LED — twin colour temperatures meeting on a face, sacred flame against holy current.',
+    phrases: [
+      'a mix of warm candle flame and cold cobalt LED light',
+      'two colour temperatures meeting on a face, gold on one side, blue on the other',
+      'small flickering highlights and steady electric glow',
+      'sacred flame against holy current, intimate',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'lighting_sc_inquisitor_spot',
+    name: 'Inquisitor Spotlight',
+    summary: 'A single hard cobalt spotlight pinning the subject — surrounding darkness absolute, the cone of light interrogating.',
+    phrases: [
+      'a single hard cobalt spotlight pinning the subject in a stone hall',
+      'absolute darkness around the cone of light',
+      'sharp directional shadow, harsh interrogation feel',
+      'cold, severe, judicial',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'lighting_sc_bell_moonlight',
+    name: 'Bell-Tower Moonlight',
+    summary: 'Cool blue moonlight through arched tower windows — long pale bars across stone, glints on copper bells, vast cold quiet.',
+    phrases: [
+      'cool blue moonlight pouring through tall arched bell-tower windows',
+      'long pale window-bars laid across stone and copper bells',
+      'soft moonlit glints on the bell rims',
+      'still, vast, cold-blue',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+];
+
 const writeItems = (items: LightingSetup[]) => {
   const payload: LightingStore = { version: 1, items: sortItems(items) };
   writeStorageItem(LIGHTING_STORE_KEY, payload);
@@ -790,6 +874,16 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V9_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V10_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

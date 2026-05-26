@@ -17,6 +17,7 @@ const UNIVERSE_SEED_FLAG_KEY_V12 = 'morpbase:universes:seeded:v12';
 const UNIVERSE_SEED_FLAG_KEY_V13 = 'morpbase:universes:seeded:v13';
 const UNIVERSE_SEED_FLAG_KEY_V14 = 'morpbase:universes:seeded:v14';
 const UNIVERSE_SEED_FLAG_KEY_V15 = 'morpbase:universes:seeded:v15';
+const UNIVERSE_SEED_FLAG_KEY_V16 = 'morpbase:universes:seeded:v16';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -32,6 +33,7 @@ const SEED_TS_V12 = 1749254400000;
 const SEED_TS_V13 = 1749340800000;
 const SEED_TS_V14 = 1749427200000;
 const SEED_TS_V15 = 1749513600000;
+const SEED_TS_V16 = 1749686400000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -916,6 +918,103 @@ function maybeApplyUniverseSeedV15(universes: Universe[]): Universe[] {
   }
 }
 
+// V16 — Saint Circuit: a full in-app universe, a blue-saturated religious-cyberpunk cathedral-city.
+const SEED_UNIVERSE_SAINT_CIRCUIT: Universe = {
+  id: 'universe_seed_saint_circuit',
+  name: 'Saint Circuit',
+  description: 'A cathedral-city where the machine is holy — cyber-monks in cobalt robes, machine-saints with neon halos, stained-glass screens broadcasting liturgy, and the steady electric-blue hum of the great prayer-engines beneath the nave. Devotion runs on current. Lit almost entirely in Marian-blue and electric cyan.',
+  pools: {
+    character: [
+      'character_seed_sc_cardinal',
+      'character_seed_sc_cyber_monk',
+      'character_seed_sc_stained_saint',
+      'character_seed_sc_acolyte',
+      'character_seed_sc_choir_ai',
+      'character_seed_sc_inquisitor',
+      'character_seed_sc_confessor',
+      'character_seed_sc_bell_ringer',
+      'character_seed_sc_iconographer',
+      'character_seed_sc_penitent',
+      'character_seed_sc_machine_hermit',
+      'character_seed_sc_heretic',
+    ],
+    environment: [
+      'environment_seed_sc_great_nave',
+      'environment_seed_sc_datapane_wall',
+      'environment_seed_sc_prayer_engine',
+      'environment_seed_sc_cloister',
+      'environment_seed_sc_confessional',
+      'environment_seed_sc_bell_tower',
+      'environment_seed_sc_crypt',
+      'environment_seed_sc_firmware_library',
+      'environment_seed_sc_choir_loft',
+      'environment_seed_sc_inquisition_hall',
+      'environment_seed_sc_outer_court',
+      'environment_seed_sc_heretic_tunnels',
+      'environment_seed_sc_rooftop_spires',
+    ],
+    wardrobe: [
+      'outfit_sc_cardinal_vestments',
+      'outfit_sc_monk_habit',
+      'outfit_sc_inquisitor_armor',
+      'outfit_sc_acolyte_cassock',
+      'outfit_sc_penitent_robes',
+      'outfit_sc_heretic_rags',
+    ],
+    mood: [
+      'mood_sc_sacred_awe',
+      'mood_sc_cold_liturgy',
+      'mood_sc_electric_penitence',
+      'mood_sc_inquisitorial_menace',
+      'mood_sc_holy_stillness',
+      'mood_sc_heretic_defiance',
+    ],
+    style: [
+      'style_sc_stained_glass_icon',
+      'style_sc_byzantine_mosaic',
+      'style_sc_gothic_render',
+      'style_sc_iconic_halftone',
+      'style_sc_sacred_realism',
+      'style_sc_cathedral_photo',
+    ],
+    lighting: [
+      'lighting_sc_cobalt_glass',
+      'lighting_sc_neon_halo',
+      'lighting_sc_engine_underglow',
+      'lighting_sc_candle_led',
+      'lighting_sc_inquisitor_spot',
+      'lighting_sc_bell_moonlight',
+    ],
+    object: [
+      'object_sc_rosary_processor',
+      'object_sc_sigil_blade',
+      'object_sc_halo_crown',
+      'object_sc_datapane',
+      'object_sc_censer_drone',
+      'object_sc_bell_wires',
+      'object_sc_icono_stylus',
+    ],
+    aura: [
+      'world_seed_sc_saint_circuit',
+    ],
+  },
+  createdAt: SEED_TS_V16,
+  updatedAt: SEED_TS_V16,
+};
+
+function maybeApplyUniverseSeedV16(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V16) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V16, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_SAINT_CIRCUIT.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_SAINT_CIRCUIT];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -959,7 +1058,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))))))))));
+    return maybeApplyUniverseSeedV16(maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes)))))))))))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

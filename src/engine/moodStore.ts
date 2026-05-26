@@ -10,6 +10,7 @@ const MOOD_SEED_FLAG_KEY_V6 = 'promptgen:moods:seeded:v6';
 const MOOD_SEED_FLAG_KEY_V7 = 'promptgen:moods:seeded:v7';
 const MOOD_SEED_FLAG_KEY_V8 = 'promptgen:moods:seeded:v8';
 const MOOD_SEED_FLAG_KEY_V9 = 'promptgen:moods:seeded:v9';
+const MOOD_SEED_FLAG_KEY_V10 = 'promptgen:moods:seeded:v10';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -98,6 +99,7 @@ const SEED_TS_6 = 1748563200000;
 const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
+const SEED_TS_10 = 1749600000000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -746,6 +748,88 @@ const V9_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V10 — Saint Circuit: religious-cyberpunk emotional registers.
+const V10_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_sc_sacred_awe',
+    name: 'Sacred Awe',
+    summary: 'The hush of standing in a vast and holy place — small under the vaults, breath caught, the weight of devotion.',
+    phrases: [
+      'the hush of standing in a vast and holy place',
+      'small under the vaults, breath caught, devotion in the air',
+      'reverent stillness, eyes lifted',
+      'sacred, immense, lit by cool blue light',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'mood_sc_cold_liturgy',
+    name: 'Cold Liturgy',
+    summary: 'The clinical reverence of a faith run on machinery — measured ritual, precise gestures, no warmth in the prayer.',
+    phrases: [
+      'the clinical reverence of a faith run on machinery',
+      'measured ritual and precise gestures, no warmth in the prayer',
+      'detached devotion, faith as protocol',
+      'sterile, exact, sacred-cool',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'mood_sc_electric_penitence',
+    name: 'Electric Penitence',
+    summary: 'Guilt and prayer wired together — a kneeling hush threaded with cyan light, sin acknowledged and offered up as signal.',
+    phrases: [
+      'guilt and prayer wired together, a kneeling hush threaded with cyan light',
+      'quiet contrition, hands clasped, eyes closed',
+      'sin offered up as signal, repentance through current',
+      'humble, electric, devotional',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'mood_sc_inquisitorial_menace',
+    name: 'Inquisitorial Menace',
+    summary: 'Sharp righteous threat under a cold spotlight — judgment already passed, the verdict only waiting to be read.',
+    phrases: [
+      'sharp righteous threat under a cold spotlight',
+      'judgment already passed in someone\'s mind, only waiting to be read aloud',
+      'precise cruelty wearing the shape of faith',
+      'cold, sharp, dangerous',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'mood_sc_holy_stillness',
+    name: 'Holy Stillness',
+    summary: 'The deep quiet of a vault long-meditating — time slowed, breath barely moving, faint hum of holy current beneath everything.',
+    phrases: [
+      'the deep quiet of a vault long-meditating',
+      'time slowed, breath barely moving, body almost a fixture of the wall',
+      'a faint hum of holy current beneath everything',
+      'still, transcendent, blue-cool',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+  {
+    id: 'mood_sc_heretic_defiance',
+    name: 'Heretic Defiance',
+    summary: 'Refusal under the eye of the church — broken halo held high, ice-blue gaze that will not lower, sin worn proudly as light.',
+    phrases: [
+      'refusal under the eye of the church',
+      'broken halo held high, ice-blue gaze that will not lower',
+      'sin worn proudly as light, jaw set',
+      'fierce, electric, unkneeling',
+    ],
+    createdAt: SEED_TS_10,
+    updatedAt: SEED_TS_10,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -829,6 +913,16 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V9, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V9_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V10) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V10, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V10_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
