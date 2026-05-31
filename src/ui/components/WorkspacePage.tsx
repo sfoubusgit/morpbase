@@ -193,6 +193,7 @@ type WorkspacePageProps = {
   onRandomize?: () => void;
   onOpenLaneSets?: () => void;
   onOpenUniverses?: () => void;
+  onOpenRecipes?: () => void;
   activeUniverseName?: string | null;
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
@@ -270,6 +271,7 @@ export function WorkspacePage({
   onRandomize,
   onOpenLaneSets,
   onOpenUniverses,
+  onOpenRecipes,
   activeUniverseName,
   onDeactivateUniverse,
   lockedLanes,
@@ -562,6 +564,16 @@ export function WorkspacePage({
                     title="Browse Universes"
                   >
                     ◈ Universes
+                  </button>
+                )}
+                {onOpenRecipes && (
+                  <button
+                    type="button"
+                    className="ws-universes-btn"
+                    onClick={onOpenRecipes}
+                    title="Browse Recipes"
+                  >
+                    ◉ Recipes
                   </button>
                 )}
               </div>

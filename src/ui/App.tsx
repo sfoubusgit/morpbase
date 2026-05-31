@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, SelectedPromptFragment, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, Recipe, RecipeInput, SelectedPromptFragment, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
@@ -103,6 +103,7 @@ import {
 import { WardrobeModal } from './components/WardrobeModal';
 import { WorkspacePage } from './components/WorkspacePage';
 import { StyleModal } from './components/StyleModal';
+import { RecipeLibraryModal } from './components/RecipeLibraryModal';
 import { LightingModal } from './components/LightingModal';
 import { CompositionModal } from './components/CompositionModal';
 import { MoodModal } from './components/MoodModal';
@@ -115,6 +116,7 @@ import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
 import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
 import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
+import { listRecipes, createRecipe, updateRecipe, deleteRecipe } from '../engine/recipeStore';
 import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
 import { getIdentityById } from '../engine/communityStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
@@ -514,6 +516,8 @@ export function App() {
   const [activeStyleIds, setActiveStyleIds] = useState<string[]>(initialBuilderSession?.activeStyleIds ?? []);
   const [stylePresets, setStylePresets] = useState<StylePreset[]>([]);
   const [isStyleOpen, setIsStyleOpen] = useState(false);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [isRecipesOpen, setIsRecipesOpen] = useState(false);
   const [activeLightingIds, setActiveLightingIds] = useState<string[]>(initialBuilderSession?.activeLightingIds ?? []);
   const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
   const [isLightingOpen, setIsLightingOpen] = useState(false);
@@ -1822,6 +1826,32 @@ export function App() {
     }
   }, []);
 
+  const refreshRecipes = useCallback(async () => {
+    try {
+      const next = await listRecipes();
+      setRecipes(next);
+    } catch {
+      setRecipes([]);
+    }
+  }, []);
+
+  const handleCreateRecipe = useCallback(async (input: RecipeInput) => {
+    const created = await createRecipe(input);
+    await refreshRecipes();
+    return created;
+  }, [refreshRecipes]);
+
+  const handleUpdateRecipe = useCallback(async (id: string, input: RecipeInput) => {
+    const updated = await updateRecipe(id, input);
+    await refreshRecipes();
+    return updated;
+  }, [refreshRecipes]);
+
+  const handleDeleteRecipe = useCallback(async (id: string) => {
+    await deleteRecipe(id);
+    await refreshRecipes();
+  }, [refreshRecipes]);
+
   const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
     const created = await createStylePreset(input);
     await refreshStylePresets();
@@ -2293,6 +2323,10 @@ export function App() {
   useEffect(() => {
     void refreshStylePresets();
   }, [refreshStylePresets]);
+
+  useEffect(() => {
+    void refreshRecipes();
+  }, [refreshRecipes]);
 
   useEffect(() => {
     void refreshLightingSetups();
@@ -4126,6 +4160,7 @@ export function App() {
           onRandomize={handleRandomizeLanes}
           onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           onOpenUniverses={() => setIsUniversesOpen(true)}
+          onOpenRecipes={() => setIsRecipesOpen(true)}
           activeUniverseName={activeUniverseName}
           onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}
@@ -4228,6 +4263,14 @@ export function App() {
         onDeleteItem={async (id) => { await handleDeleteStylePreset(id); removeFromAllUniverses('style', id); }}
         universeFilter={activeUniverse ? (activeUniverse.style ?? []) : undefined}
         universeName={activeUniverseName}
+      />
+      <RecipeLibraryModal
+        isOpen={isRecipesOpen}
+        onClose={() => setIsRecipesOpen(false)}
+        recipes={recipes}
+        onCreate={handleCreateRecipe}
+        onUpdate={handleUpdateRecipe}
+        onDelete={handleDeleteRecipe}
       />
       <LightingModal
         isOpen={isLightingOpen}
