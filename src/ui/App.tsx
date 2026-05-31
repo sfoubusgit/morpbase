@@ -2050,54 +2050,54 @@ export function App() {
       return [...pinnedActive, ...pickN(candidates, need)];
     };
 
-    if (rollAll || locked.has('character')) {
+    if (rollAll || !locked.has('character')) {
       const next = rollMulti(characters, activeCharacterIds, activeUniverse?.character);
       if (next) setActiveCharacterIds(next);
     }
 
-    if (rollAll || locked.has('environment')) {
+    if (rollAll || !locked.has('environment')) {
       const next = rollMulti(environments, activeEnvironmentIds, activeUniverse?.environment);
       if (next) setActiveEnvironmentIds(next);
     }
 
-    if (rollAll || locked.has('wardrobe')) {
+    if (rollAll || !locked.has('wardrobe')) {
       const next = rollMulti(outfits, activeOutfitIds, activeUniverse?.wardrobe);
       if (next) setActiveOutfitIds(next);
     }
 
-    if (rollAll || locked.has('style')) {
+    if (rollAll || !locked.has('style')) {
       const next = rollMulti(stylePresets, activeStyleIds, activeUniverse?.style);
       if (next) setActiveStyleIds(next);
     }
 
-    if (rollAll || locked.has('lighting')) {
+    if (rollAll || !locked.has('lighting')) {
       const next = rollMulti(lightingSetups, activeLightingIds, activeUniverse?.lighting);
       if (next) setActiveLightingIds(next);
     }
 
-    if (rollAll || locked.has('composition')) {
+    if (rollAll || !locked.has('composition')) {
       const next = rollMulti(compositionFrames, activeCompositionIds, activeUniverse?.composition);
       if (next) setActiveCompositionIds(next);
     }
 
-    if (rollAll || locked.has('mood')) {
+    if (rollAll || !locked.has('mood')) {
       const next = rollMulti(moodPresets, activeMoodIds, activeUniverse?.mood);
       if (next) setActiveMoodIds(next);
     }
 
-    if (rollAll || locked.has('object')) {
+    if (rollAll || !locked.has('object')) {
       const next = rollMulti(objects, activeObjectIds, activeUniverse?.object);
       if (next) setActiveObjectIds(next);
     }
 
-    if (rollAll || locked.has('dynamics')) {
+    if (rollAll || !locked.has('dynamics')) {
       const others = INTERACTION_PHRASES.filter(p => p.id !== activeInteractionPhraseId);
       const pool = others.length > 0 ? others : INTERACTION_PHRASES;
       const picked = pool[Math.floor(Math.random() * pool.length)];
       setActiveInteractionPhraseId(picked.id);
     }
 
-    if (rollAll || locked.has('aura')) {
+    if (rollAll || !locked.has('aura')) {
       if (auraVariationEnabled && activeWorld && activeWorld.phrases.length > 0) {
         // Variation ON: re-roll the phrase subset within range, like the → arrow.
         const phrases = activeWorld.phrases;

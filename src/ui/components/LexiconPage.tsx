@@ -46,6 +46,10 @@ const SECTIONS: Section[] = [
         term: 'Mark Combo',
         body: 'A workspace toolbar action that opens the Combo Matrix pre-focused on whatever Universe + Style you currently have active. Use it after you have just confirmed a render works (or does not) — annotate in one click, no navigation required.',
       },
+      {
+        term: 'Lock + Randomize',
+        body: 'The intended iteration workflow. Lock the lanes whose active items you want to preserve (the lock icon next to each lane), then hit Randomize — every unlocked lane re-rolls from its pool, the locked ones stay put. This is faster than picking which lanes to re-roll because the usual creative case is "vary most things, keep 1–2 that are working." Lock what you love, roll the rest.',
+      },
     ],
   },
   {

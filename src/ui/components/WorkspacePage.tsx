@@ -82,7 +82,7 @@ function LaneSlot({
     <div
       className={`ws-lane-slot ws-lane-slot-${variant}${isActive ? ' ws-lane-slot-active' : ''}${locked ? ' ws-lane-slot-locked' : ''}${onToggleLock ? ' ws-lane-slot-lockable' : ''}${entryPoint ? ' ws-lane-slot-entry' : ''}`}
       onClick={onToggleLock}
-      title={onToggleLock ? (locked ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+      title={onToggleLock ? (locked ? 'Click to unlock — this lane will roll again' : 'Click to lock — keep this lane stable when rolling') : undefined}
       role={onToggleLock ? 'button' : undefined}
     >
       <div className="ws-lane-label">{label}</div>
@@ -647,16 +647,18 @@ export function WorkspacePage({
                       type="button"
                       className="ws-randomize-btn"
                       onClick={onRandomize}
-                      title={lockedLanes && lockedLanes.size > 0 ? `Rolling ${lockedLanes.size} targeted lane${lockedLanes.size === 1 ? '' : 's'}` : 'Click any lane to target it for rolling'}
+                      title={lockedLanes && lockedLanes.size > 0
+                        ? `Re-rolls every lane except the ${lockedLanes.size} you have locked. Click any lane's lock icon to add or remove a lock.`
+                        : 'Re-rolls every lane. Lock a lane (its lock icon) to keep it stable while the rest roll.'}
                     >
                       {lockedLanes && lockedLanes.size > 0
-                        ? `⚄ Roll ${lockedLanes.size} Lane${lockedLanes.size === 1 ? '' : 's'}`
+                        ? `⚄ Roll Unlocked (${lockedLanes.size} locked)`
                         : '⚄ Roll All'}
                     </button>
                     <div className="ws-roll-hint">
                       {lockedLanes && lockedLanes.size > 0
-                        ? `${lockedLanes.size} lane${lockedLanes.size === 1 ? '' : 's'} targeted`
-                        : 'click a lane to target it'}
+                        ? `${lockedLanes.size} lane${lockedLanes.size === 1 ? '' : 's'} locked — won't roll`
+                        : 'click a lane to lock it'}
                     </div>
                   </div>
                 )}
@@ -707,7 +709,7 @@ export function WorkspacePage({
                   className={`ws-lane-slot ws-lane-slot-interaction${activeInteractionPhrase && !needsMoreChars ? ' ws-lane-slot-active' : ''}${needsMoreChars ? ' ws-lane-slot-inactive' : ''}${lockedLanes?.has('dynamics') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock && !needsMoreChars ? ' ws-lane-slot-lockable' : ''}${dynamicsAnnounced ? ' ws-lane-slot-dynamics-announced' : ''}`}
                   onClick={onToggleLaneLock && !needsMoreChars ? () => onToggleLaneLock('dynamics') : undefined}
                   role={onToggleLaneLock && !needsMoreChars ? 'button' : undefined}
-                  title={onToggleLaneLock && !needsMoreChars ? (lockedLanes?.has('dynamics') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+                  title={onToggleLaneLock && !needsMoreChars ? (lockedLanes?.has('dynamics') ? 'Click to unlock — this lane will roll again' : 'Click to lock — keep this lane stable when rolling') : undefined}
                 >
                   <div className="ws-lane-label">
                     Dynamics
@@ -743,7 +745,7 @@ export function WorkspacePage({
             <div
               className={`ws-lane-slot ws-lane-slot-environment${activeEnvironmentItems.length > 0 ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('environment') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('environment') : undefined}
-              title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+              title={onToggleLaneLock ? (lockedLanes?.has('environment') ? 'Click to unlock — this lane will roll again' : 'Click to lock — keep this lane stable when rolling') : undefined}
               role={onToggleLaneLock ? 'button' : undefined}
             >
               <div className="ws-lane-label">Environment</div>
@@ -867,7 +869,7 @@ export function WorkspacePage({
               className={`ws-lane-slot ws-lane-slot-aura${activeWorldName ? ' ws-lane-slot-active' : ''}${lockedLanes?.has('aura') ? ' ws-lane-slot-locked' : ''}${onToggleLaneLock ? ' ws-lane-slot-lockable' : ''}`}
               onClick={onToggleLaneLock ? () => onToggleLaneLock('aura') : undefined}
               role={onToggleLaneLock ? 'button' : undefined}
-              title={onToggleLaneLock ? (lockedLanes?.has('aura') ? 'Click to remove from roll' : 'Click to include in roll') : undefined}
+              title={onToggleLaneLock ? (lockedLanes?.has('aura') ? 'Click to unlock — this lane will roll again' : 'Click to lock — keep this lane stable when rolling') : undefined}
             >
               <div className="ws-lane-label">Aura</div>
               <div className="ws-lane-name">{activeWorldName ?? <span className="ws-lane-name-empty">None</span>}</div>
