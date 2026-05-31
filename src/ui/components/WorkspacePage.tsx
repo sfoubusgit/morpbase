@@ -582,36 +582,17 @@ export function WorkspacePage({
                     ◉ Recipes
                   </button>
                 )}
-                {onOpenDrops && (
-                  <button
-                    type="button"
-                    className="ws-universes-btn"
-                    onClick={onOpenDrops}
-                    title="Browse Drops"
-                  >
-                    ◆ Drops
-                  </button>
-                )}
-                {onOpenWorkflowTemplates && (
-                  <button
-                    type="button"
-                    className="ws-universes-btn"
-                    onClick={onOpenWorkflowTemplates}
-                    title="Browse Workflow Templates"
-                  >
-                    ▣ Templates
-                  </button>
-                )}
-                {onOpenPostTemplates && (
-                  <button
-                    type="button"
-                    className="ws-universes-btn"
-                    onClick={onOpenPostTemplates}
-                    title="Browse Post Templates"
-                  >
-                    ▼ Posts
-                  </button>
-                )}
+                {/*
+                  Drops / Workflow Templates / Post Templates toolbar buttons
+                  are hidden — the spine code stays in place (props, handlers,
+                  modals, stores). To re-enable a surface, restore its
+                  {onOpenX && (<button .../>)} block here.
+
+                  Hidden 2026-05-31: user feedback "way too complicated" —
+                  MorpBase reverted to library-of-validated-combos shape
+                  (Recipes + Apply only). See onOpenDrops /
+                  onOpenWorkflowTemplates / onOpenPostTemplates props.
+                */}
               </div>
             </div>
             {(onClearAllLanes || onRandomize || onCapture) && (
