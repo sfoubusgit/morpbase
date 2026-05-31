@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, Recipe, RecipeInput, SelectedPromptFragment, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, Drop, DropInput, Recipe, RecipeInput, SelectedPromptFragment, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
@@ -104,6 +104,7 @@ import { WardrobeModal } from './components/WardrobeModal';
 import { WorkspacePage } from './components/WorkspacePage';
 import { StyleModal } from './components/StyleModal';
 import { RecipeLibraryModal } from './components/RecipeLibraryModal';
+import { DropLibraryModal } from './components/DropLibraryModal';
 import { LightingModal } from './components/LightingModal';
 import { CompositionModal } from './components/CompositionModal';
 import { MoodModal } from './components/MoodModal';
@@ -117,6 +118,7 @@ import { listWorlds } from '../engine/worldStore';
 import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
 import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
 import { listRecipes, createRecipe, updateRecipe, deleteRecipe } from '../engine/recipeStore';
+import { listDrops, createDrop, updateDrop, deleteDrop } from '../engine/dropStore';
 import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
 import { getIdentityById } from '../engine/communityStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
@@ -518,6 +520,8 @@ export function App() {
   const [isStyleOpen, setIsStyleOpen] = useState(false);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [isRecipesOpen, setIsRecipesOpen] = useState(false);
+  const [drops, setDrops] = useState<Drop[]>([]);
+  const [isDropsOpen, setIsDropsOpen] = useState(false);
   const [activeLightingIds, setActiveLightingIds] = useState<string[]>(initialBuilderSession?.activeLightingIds ?? []);
   const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
   const [isLightingOpen, setIsLightingOpen] = useState(false);
@@ -1863,6 +1867,32 @@ export function App() {
     setIsRecipesOpen(false);
   }, []);
 
+  const refreshDrops = useCallback(async () => {
+    try {
+      const next = await listDrops();
+      setDrops(next);
+    } catch {
+      setDrops([]);
+    }
+  }, []);
+
+  const handleCreateDrop = useCallback(async (input: DropInput) => {
+    const created = await createDrop(input);
+    await refreshDrops();
+    return created;
+  }, [refreshDrops]);
+
+  const handleUpdateDrop = useCallback(async (id: string, input: DropInput) => {
+    const updated = await updateDrop(id, input);
+    await refreshDrops();
+    return updated;
+  }, [refreshDrops]);
+
+  const handleDeleteDrop = useCallback(async (id: string) => {
+    await deleteDrop(id);
+    await refreshDrops();
+  }, [refreshDrops]);
+
   const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
     const created = await createStylePreset(input);
     await refreshStylePresets();
@@ -2338,6 +2368,10 @@ export function App() {
   useEffect(() => {
     void refreshRecipes();
   }, [refreshRecipes]);
+
+  useEffect(() => {
+    void refreshDrops();
+  }, [refreshDrops]);
 
   useEffect(() => {
     void refreshLightingSetups();
@@ -4172,6 +4206,7 @@ export function App() {
           onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           onOpenUniverses={() => setIsUniversesOpen(true)}
           onOpenRecipes={() => setIsRecipesOpen(true)}
+          onOpenDrops={() => setIsDropsOpen(true)}
           activeUniverseName={activeUniverseName}
           onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}
@@ -4283,6 +4318,15 @@ export function App() {
         onUpdate={handleUpdateRecipe}
         onDelete={handleDeleteRecipe}
         onApply={handleApplyRecipe}
+      />
+      <DropLibraryModal
+        isOpen={isDropsOpen}
+        onClose={() => setIsDropsOpen(false)}
+        drops={drops}
+        recipes={recipes}
+        onCreate={handleCreateDrop}
+        onUpdate={handleUpdateDrop}
+        onDelete={handleDeleteDrop}
       />
       <LightingModal
         isOpen={isLightingOpen}

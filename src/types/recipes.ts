@@ -101,3 +101,54 @@ export type RecipeStore = {
   version: 1;
   items: Recipe[];
 };
+
+// ----- Drop -----
+//
+// A Drop is a named batch of prompts bound to a Recipe. Each prompt is a
+// complete text (subject + style detail + style tail, all woven together —
+// matching the format of the existing drops/*.md catalogs).
+
+export type DropStatus = 'draft' | 'ready' | 'rendered' | 'shipped';
+
+export type DropPrompt = {
+  id: string;
+  name: string;
+  saveAs?: string;
+  prompt: string;
+  resolution?: RenderResolution;
+};
+
+export type Drop = {
+  id: string;
+  name: string;
+  recipeId: string;
+  summary?: string;
+  notes?: string;
+  prompts: DropPrompt[];
+  projectTags: string[];
+  status: DropStatus;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type DropPromptInput = {
+  name: string;
+  saveAs?: string;
+  prompt: string;
+  resolution?: RenderResolution;
+};
+
+export type DropInput = {
+  name: string;
+  recipeId: string;
+  summary?: string;
+  notes?: string;
+  prompts?: DropPromptInput[];
+  projectTags?: string[];
+  status?: DropStatus;
+};
+
+export type DropStore = {
+  version: 1;
+  items: Drop[];
+};
