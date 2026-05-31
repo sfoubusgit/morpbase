@@ -227,6 +227,45 @@
   color: var(--drop-accent-text);
 }
 
+.drop-lib__form-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drop-lib__export-all-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(158, 255, 196, 0.45);
+  background: rgba(158, 255, 196, 0.1);
+  color: #9effc4;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.drop-lib__export-all-btn:hover {
+  background: rgba(158, 255, 196, 0.18);
+}
+
+.drop-lib__template-hint {
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 195, 120, 0.06);
+  border: 1px solid rgba(255, 195, 120, 0.25);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-normal);
+}
+
+.drop-lib__template-hint code {
+  font-family: var(--font-family-mono, monospace);
+  background: rgba(255, 195, 120, 0.14);
+  color: #ffc378;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
 .drop-lib__delete-btn {
   padding: 6px 12px;
   border-radius: var(--radius-md);
@@ -378,7 +417,7 @@
 
 .drop-lib__prompt-head {
   display: grid;
-  grid-template-columns: auto 1.4fr 1fr auto auto;
+  grid-template-columns: auto 1.4fr 1fr auto auto auto;
   gap: 6px;
   align-items: center;
 }
@@ -411,6 +450,7 @@
 }
 
 .drop-lib__prompt-copy,
+.drop-lib__prompt-export,
 .drop-lib__prompt-remove {
   width: 28px;
   height: 28px;
@@ -429,6 +469,12 @@
   background: rgba(var(--drop-accent-rgb), 0.14);
   color: var(--drop-accent-text);
   border-color: rgba(var(--drop-accent-rgb), 0.4);
+}
+
+.drop-lib__prompt-export:hover {
+  background: rgba(158, 255, 196, 0.14);
+  color: #9effc4;
+  border-color: rgba(158, 255, 196, 0.4);
 }
 
 .drop-lib__prompt-remove:hover {

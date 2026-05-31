@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import type {
   Drop,
   DropInput,
+  DropPrompt,
   DropPromptInput,
   DropStatus,
   Recipe,
+  WorkflowTemplate,
 } from '../../types';
 import { Modal } from './Modal';
+import { buildExportFilename, substituteWorkflow, triggerDownload } from '../../engine/workflowSubstitute';
 import './DropLibraryModal.css';
 
 type PromptDraft = {
@@ -89,6 +92,7 @@ type DropLibraryModalProps = {
   onClose: () => void;
   drops: Drop[];
   recipes: Recipe[];
+  templates?: WorkflowTemplate[];
   isLoading?: boolean;
   onCreate: (input: DropInput) => Promise<Drop>;
   onUpdate: (id: string, input: DropInput) => Promise<Drop>;
@@ -100,6 +104,7 @@ export function DropLibraryModal({
   onClose,
   drops,
   recipes,
+  templates = [],
   isLoading = false,
   onCreate,
   onUpdate,
@@ -202,6 +207,78 @@ export function DropLibraryModal({
     } catch {
       // ignore
     }
+  };
+
+  const activeRecipe = form.recipeId ? recipeById.get(form.recipeId) ?? null : null;
+  const matchingTemplate = useMemo(() => {
+    if (!activeRecipe) return null;
+    return templates.find(t => t.modelFamily === activeRecipe.settings.model) ?? null;
+  }, [activeRecipe, templates]);
+
+  const dropForExport: Drop = useMemo(() => ({
+    id: selected?.id ?? 'draft',
+    name: form.name.trim() || 'untitled_drop',
+    recipeId: form.recipeId,
+    summary: form.summary.trim() || undefined,
+    notes: form.notes.trim() || undefined,
+    prompts: [],
+    projectTags: [],
+    status: form.status,
+    createdAt: selected?.createdAt ?? 0,
+    updatedAt: selected?.updatedAt ?? 0,
+  }), [selected, form.name, form.recipeId, form.summary, form.notes, form.status]);
+
+  const promptDraftToDropPrompt = (idx: number): DropPrompt => {
+    const p = form.prompts[idx];
+    return {
+      id: p.key,
+      name: p.name.trim() || `Prompt ${idx + 1}`,
+      saveAs: p.saveAs.trim() || undefined,
+      prompt: p.prompt.trim(),
+    };
+  };
+
+  const handleExportPrompt = (idx: number) => {
+    if (!activeRecipe) {
+      setError('Pick a recipe before exporting workflows.');
+      return;
+    }
+    if (!matchingTemplate) {
+      setError(`No workflow template for model "${activeRecipe.settings.model}". Create one in ▣ Templates.`);
+      return;
+    }
+    const p = form.prompts[idx];
+    if (!p || !p.prompt.trim()) {
+      setError('This prompt has no text yet.');
+      return;
+    }
+    const dp = promptDraftToDropPrompt(idx);
+    const json = substituteWorkflow(matchingTemplate, activeRecipe, dp);
+    const fname = buildExportFilename(dropForExport, dp);
+    triggerDownload(`${fname.base}${fname.extension}`, json);
+    setError(null);
+    flashCopied(`export_${p.key}`);
+  };
+
+  const handleExportAll = () => {
+    if (!activeRecipe) {
+      setError('Pick a recipe before exporting workflows.');
+      return;
+    }
+    if (!matchingTemplate) {
+      setError(`No workflow template for model "${activeRecipe.settings.model}". Create one in ▣ Templates.`);
+      return;
+    }
+    const filled = form.prompts.filter(p => p.prompt.trim());
+    if (filled.length === 0) {
+      setError('No prompts have text to export.');
+      return;
+    }
+    setError(null);
+    filled.forEach((_, idx) => {
+      // small stagger so the browser doesn't drop the back half of the batch
+      window.setTimeout(() => handleExportPrompt(form.prompts.indexOf(filled[idx])), idx * 120);
+    });
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -323,17 +400,36 @@ export function DropLibraryModal({
             <form className="drop-lib__form" onSubmit={handleSubmit}>
               <div className="drop-lib__form-head">
                 <h3>{isCreating ? 'New Drop' : selected?.name}</h3>
-                {selected && !isCreating && (
-                  <button
-                    type="button"
-                    className="drop-lib__delete-btn"
-                    onClick={handleDelete}
-                    disabled={isSaving}
-                  >
-                    Delete
-                  </button>
-                )}
+                <div className="drop-lib__form-head-actions">
+                  {matchingTemplate && form.prompts.some(p => p.prompt.trim()) && (
+                    <button
+                      type="button"
+                      className="drop-lib__export-all-btn"
+                      onClick={handleExportAll}
+                      title={`Export all prompts as ${matchingTemplate.name} workflows`}
+                    >
+                      ⬇ Export All ({form.prompts.filter(p => p.prompt.trim()).length})
+                    </button>
+                  )}
+                  {selected && !isCreating && (
+                    <button
+                      type="button"
+                      className="drop-lib__delete-btn"
+                      onClick={handleDelete}
+                      disabled={isSaving}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {activeRecipe && !matchingTemplate && (
+                <div className="drop-lib__template-hint">
+                  No workflow template for <code>{activeRecipe.settings.model}</code> yet —
+                  open <strong>▣ Templates</strong> and paste your ComfyUI workflow JSON to enable export.
+                </div>
+              )}
 
               {selectedRecipe && !isCreating && (
                 <div className="drop-lib__recipe-card">
@@ -461,6 +557,16 @@ export function DropLibraryModal({
                           title="Copy this prompt to clipboard"
                         >
                           {copyFlash === `prompt_${p.key}` ? '✓' : '⎘'}
+                        </button>
+                      )}
+                      {p.prompt.trim() && matchingTemplate && (
+                        <button
+                          type="button"
+                          className="drop-lib__prompt-export"
+                          onClick={() => handleExportPrompt(idx)}
+                          title={`Export as ${matchingTemplate.name} workflow JSON`}
+                        >
+                          {copyFlash === `export_${p.key}` ? '✓' : '⬇'}
                         </button>
                       )}
                       {form.prompts.length > 1 && (

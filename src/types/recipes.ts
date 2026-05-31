@@ -152,3 +152,54 @@ export type DropStore = {
   version: 1;
   items: Drop[];
 };
+
+// ----- WorkflowTemplate -----
+//
+// A WorkflowTemplate is a ComfyUI workflow JSON (UI graph format or API
+// format — either works) with placeholder tokens like `{{positive}}`,
+// `{{negative}}`, `{{seed}}`, `{{steps}}`, `{{cfg}}`, `{{width}}`,
+// `{{height}}`, `{{sampler}}`, `{{scheduler}}` embedded where prompt /
+// settings values should be injected at export time.
+//
+// At export, substituteWorkflow() does plain string-replacement on the
+// body to produce a ready-to-load workflow file. String placeholders go
+// inside JSON quotes ("text": "{{positive}}"); numeric placeholders go
+// without quotes ("steps": {{steps}}).
+
+export type WorkflowPlaceholderKey =
+  | 'positive'
+  | 'negative'
+  | 'seed'
+  | 'steps'
+  | 'cfg'
+  | 'width'
+  | 'height'
+  | 'sampler'
+  | 'scheduler'
+  | 'model'
+  | 'promptName'
+  | 'saveAs';
+
+export type WorkflowTemplate = {
+  id: string;
+  name: string;
+  modelFamily: LoraModelFamily;
+  summary?: string;
+  notes?: string;
+  body: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type WorkflowTemplateInput = {
+  name: string;
+  modelFamily: LoraModelFamily;
+  summary?: string;
+  notes?: string;
+  body: string;
+};
+
+export type WorkflowTemplateStore = {
+  version: 1;
+  items: WorkflowTemplate[];
+};
