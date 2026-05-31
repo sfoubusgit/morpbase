@@ -151,25 +151,30 @@
   background: var(--surface-overlay);
   border-bottom: 1px solid var(--border-subtle);
   border-right: 1px solid var(--border-subtle);
-  padding: 8px 6px;
-  vertical-align: bottom;
-  height: 140px;
-  min-width: 36px;
-  max-width: 36px;
+  padding: 0;
+  height: 180px;
+  min-width: 32px;
+  max-width: 32px;
   text-align: center;
+  vertical-align: middle;
 }
 
+/* Column header label: rotated -90° so each style name reads vertically
+   bottom-to-top inside its own 32px-wide column. Long names truncate
+   with an ellipsis — the title attribute on the <th> still exposes the
+   full name on hover. */
 .combo-mtx__col-head span {
   display: inline-block;
-  transform: rotate(-60deg);
-  transform-origin: bottom left;
+  transform: rotate(-90deg);
+  transform-origin: center;
   white-space: nowrap;
   font-size: 11px;
   font-weight: var(--font-weight-bold);
   color: var(--text-secondary);
   letter-spacing: 0.02em;
-  margin-left: 16px;
-  padding-bottom: 4px;
+  max-width: 168px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .combo-mtx__row-head {
