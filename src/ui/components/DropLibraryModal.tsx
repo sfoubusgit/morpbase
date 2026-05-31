@@ -5,11 +5,14 @@ import type {
   DropPrompt,
   DropPromptInput,
   DropStatus,
+  PostDraftInputs,
+  PostTemplate,
   Recipe,
   WorkflowTemplate,
 } from '../../types';
 import { Modal } from './Modal';
 import { buildExportFilename, substituteWorkflow, triggerDownload } from '../../engine/workflowSubstitute';
+import { substitutePost } from '../../engine/postSubstitute';
 import './DropLibraryModal.css';
 
 type PromptDraft = {
@@ -87,12 +90,17 @@ const formToInput = (f: FormState): DropInput => ({
     .filter(p => p.name && p.prompt),
 });
 
+type NameRef = { id: string; name: string };
+
 type DropLibraryModalProps = {
   isOpen: boolean;
   onClose: () => void;
   drops: Drop[];
   recipes: Recipe[];
   templates?: WorkflowTemplate[];
+  postTemplates?: PostTemplate[];
+  universes?: NameRef[];
+  styles?: NameRef[];
   isLoading?: boolean;
   onCreate: (input: DropInput) => Promise<Drop>;
   onUpdate: (id: string, input: DropInput) => Promise<Drop>;
@@ -105,6 +113,9 @@ export function DropLibraryModal({
   drops,
   recipes,
   templates = [],
+  postTemplates = [],
+  universes = [],
+  styles = [],
   isLoading = false,
   onCreate,
   onUpdate,
@@ -117,6 +128,14 @@ export function DropLibraryModal({
   const [isSaving, setIsSaving] = useState(false);
   const [query, setQuery] = useState('');
   const [copyFlash, setCopyFlash] = useState<string | null>(null);
+  const [mode, setMode] = useState<'edit' | 'draftPost'>('edit');
+  const [draftTemplateId, setDraftTemplateId] = useState<string>('');
+  const [draftInputs, setDraftInputs] = useState<PostDraftInputs>({
+    loreCaption: '',
+    cta: '',
+    styleNotes: '',
+    extraTags: '',
+  });
 
   useEffect(() => {
     if (isOpen) {
@@ -125,6 +144,9 @@ export function DropLibraryModal({
       setForm(EMPTY_FORM);
       setError(null);
       setQuery('');
+      setMode('edit');
+      setDraftTemplateId('');
+      setDraftInputs({ loreCaption: '', cta: '', styleNotes: '', extraTags: '' });
     }
   }, [isOpen]);
 
@@ -158,6 +180,7 @@ export function DropLibraryModal({
     const d = drops.find(x => x.id === id);
     setSelectedId(id);
     setIsCreating(false);
+    setMode('edit');
     if (d) setForm(formFromDrop(d));
     setError(null);
   };
@@ -165,6 +188,7 @@ export function DropLibraryModal({
   const handleStartCreate = () => {
     setSelectedId(null);
     setIsCreating(true);
+    setMode('edit');
     const defaultRecipe = recipes[0]?.id ?? '';
     setForm({ ...EMPTY_FORM, recipeId: defaultRecipe, prompts: [blankPrompt()] });
     setError(null);
@@ -173,7 +197,25 @@ export function DropLibraryModal({
   const handleCancel = () => {
     setSelectedId(null);
     setIsCreating(false);
+    setMode('edit');
     setForm(EMPTY_FORM);
+    setError(null);
+  };
+
+  const handleStartDraftPost = () => {
+    setMode('draftPost');
+    setError(null);
+    // Auto-pick the first post template whose target matches a project tag,
+    // else the first one. (Best-effort default.)
+    if (!draftTemplateId && postTemplates.length > 0) {
+      const tags = form.projectTags.toLowerCase();
+      const matched = postTemplates.find(t => tags.includes(t.target));
+      setDraftTemplateId(matched?.id ?? postTemplates[0].id);
+    }
+  };
+
+  const handleBackFromDraft = () => {
+    setMode('edit');
     setError(null);
   };
 
@@ -329,6 +371,45 @@ export function DropLibraryModal({
 
   const selectedRecipe = selected ? recipeById.get(selected.recipeId) : null;
 
+  const universeName = useMemo(() => {
+    const uid = selectedRecipe?.universeId;
+    if (!uid) return undefined;
+    return universes.find(u => u.id === uid)?.name;
+  }, [selectedRecipe, universes]);
+
+  const styleName = useMemo(() => {
+    const sid = selectedRecipe?.styleId;
+    if (!sid) return undefined;
+    return styles.find(s => s.id === sid)?.name;
+  }, [selectedRecipe, styles]);
+
+  const draftTemplate = useMemo(
+    () => (draftTemplateId ? postTemplates.find(t => t.id === draftTemplateId) ?? null : null),
+    [draftTemplateId, postTemplates]
+  );
+
+  const draftPreview = useMemo(() => {
+    if (!draftTemplate || !selected || !selectedRecipe) return '';
+    return substitutePost({
+      template: draftTemplate,
+      drop: selected,
+      recipe: selectedRecipe,
+      universeName,
+      styleName,
+      draft: draftInputs,
+    });
+  }, [draftTemplate, selected, selectedRecipe, universeName, styleName, draftInputs]);
+
+  const handleCopyDraft = async () => {
+    if (!draftPreview) return;
+    try {
+      await navigator.clipboard.writeText(draftPreview);
+      flashCopied('draftPost');
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Drops" className="drop-library-modal">
       <div className="drop-lib">
@@ -401,7 +482,7 @@ export function DropLibraryModal({
               <div className="drop-lib__form-head">
                 <h3>{isCreating ? 'New Drop' : selected?.name}</h3>
                 <div className="drop-lib__form-head-actions">
-                  {matchingTemplate && form.prompts.some(p => p.prompt.trim()) && (
+                  {mode === 'edit' && matchingTemplate && form.prompts.some(p => p.prompt.trim()) && (
                     <button
                       type="button"
                       className="drop-lib__export-all-btn"
@@ -411,7 +492,26 @@ export function DropLibraryModal({
                       ⬇ Export All ({form.prompts.filter(p => p.prompt.trim()).length})
                     </button>
                   )}
-                  {selected && !isCreating && (
+                  {mode === 'edit' && selected && !isCreating && postTemplates.length > 0 && (
+                    <button
+                      type="button"
+                      className="drop-lib__draft-post-btn"
+                      onClick={handleStartDraftPost}
+                      title="Draft a post for this drop"
+                    >
+                      📋 Draft Post
+                    </button>
+                  )}
+                  {mode === 'draftPost' && (
+                    <button
+                      type="button"
+                      className="drop-lib__back-btn"
+                      onClick={handleBackFromDraft}
+                    >
+                      ← Back to drop
+                    </button>
+                  )}
+                  {mode === 'edit' && selected && !isCreating && (
                     <button
                       type="button"
                       className="drop-lib__delete-btn"
@@ -424,6 +524,8 @@ export function DropLibraryModal({
                 </div>
               </div>
 
+              {mode === 'edit' && (
+                <>
               {activeRecipe && !matchingTemplate && (
                 <div className="drop-lib__template-hint">
                   No workflow template for <code>{activeRecipe.settings.model}</code> yet —
@@ -601,6 +703,103 @@ export function DropLibraryModal({
                   {isSaving ? 'Saving…' : isCreating ? 'Create Drop' : 'Save Changes'}
                 </button>
               </div>
+                </>
+              )}
+
+              {mode === 'draftPost' && selected && selectedRecipe && (
+                <div className="drop-lib__draft-post">
+                  <div className="drop-lib__draft-context">
+                    <div className="drop-lib__draft-context-row">
+                      <span>Recipe:</span> <strong>{selectedRecipe.name}</strong>
+                    </div>
+                    {universeName && (
+                      <div className="drop-lib__draft-context-row">
+                        <span>Universe:</span> <strong>{universeName}</strong>
+                      </div>
+                    )}
+                    {styleName && (
+                      <div className="drop-lib__draft-context-row">
+                        <span>Style:</span> <strong>{styleName}</strong>
+                      </div>
+                    )}
+                  </div>
+
+                  <label className="drop-lib__field">
+                    <span>Post template</span>
+                    <select
+                      value={draftTemplateId}
+                      onChange={e => setDraftTemplateId(e.target.value)}
+                    >
+                      <option value="">— pick a template —</option>
+                      {postTemplates.map(t => (
+                        <option key={t.id} value={t.id}>
+                          {t.name} ({t.target})
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="drop-lib__field">
+                    <span>Lore caption</span>
+                    <textarea
+                      rows={4}
+                      value={draftInputs.loreCaption ?? ''}
+                      onChange={e => setDraftInputs(d => ({ ...d, loreCaption: e.target.value }))}
+                      placeholder="The narrative voice line / lore beat for this drop."
+                    />
+                  </label>
+
+                  <div className="drop-lib__row">
+                    <label className="drop-lib__field">
+                      <span>CTA</span>
+                      <input
+                        type="text"
+                        value={draftInputs.cta ?? ''}
+                        onChange={e => setDraftInputs(d => ({ ...d, cta: e.target.value }))}
+                        placeholder="Build your own at https://morpbase.com"
+                      />
+                    </label>
+                    <label className="drop-lib__field">
+                      <span>Style notes</span>
+                      <input
+                        type="text"
+                        value={draftInputs.styleNotes ?? ''}
+                        onChange={e => setDraftInputs(d => ({ ...d, styleNotes: e.target.value }))}
+                        placeholder="One-line note on the style read"
+                      />
+                    </label>
+                  </div>
+
+                  <label className="drop-lib__field">
+                    <span>Extra tags (comma-separated)</span>
+                    <input
+                      type="text"
+                      value={draftInputs.extraTags ?? ''}
+                      onChange={e => setDraftInputs(d => ({ ...d, extraTags: e.target.value }))}
+                      placeholder="goth, boudoir, stop_motion"
+                    />
+                  </label>
+
+                  <div className="drop-lib__draft-preview-head">
+                    <span>Rendered preview</span>
+                    {draftPreview && (
+                      <button
+                        type="button"
+                        className="drop-lib__draft-copy"
+                        onClick={handleCopyDraft}
+                      >
+                        {copyFlash === 'draftPost' ? '✓ Copied' : 'Copy Post'}
+                      </button>
+                    )}
+                  </div>
+                  <textarea
+                    className="drop-lib__draft-preview"
+                    rows={12}
+                    readOnly
+                    value={draftPreview || (draftTemplate ? '(fill in fields above)' : '(pick a post template)')}
+                  />
+                </div>
+              )}
             </form>
           )}
         </section>

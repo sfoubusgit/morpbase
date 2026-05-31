@@ -196,6 +196,7 @@ type WorkspacePageProps = {
   onOpenRecipes?: () => void;
   onOpenDrops?: () => void;
   onOpenWorkflowTemplates?: () => void;
+  onOpenPostTemplates?: () => void;
   activeUniverseName?: string | null;
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
@@ -276,6 +277,7 @@ export function WorkspacePage({
   onOpenRecipes,
   onOpenDrops,
   onOpenWorkflowTemplates,
+  onOpenPostTemplates,
   activeUniverseName,
   onDeactivateUniverse,
   lockedLanes,
@@ -598,6 +600,16 @@ export function WorkspacePage({
                     title="Browse Workflow Templates"
                   >
                     ▣ Templates
+                  </button>
+                )}
+                {onOpenPostTemplates && (
+                  <button
+                    type="button"
+                    className="ws-universes-btn"
+                    onClick={onOpenPostTemplates}
+                    title="Browse Post Templates"
+                  >
+                    ▼ Posts
                   </button>
                 )}
               </div>

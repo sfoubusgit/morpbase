@@ -203,3 +203,65 @@ export type WorkflowTemplateStore = {
   version: 1;
   items: WorkflowTemplate[];
 };
+
+// ----- PostTemplate -----
+//
+// A PostTemplate is a prose template for the copy that accompanies a Drop
+// when it's posted (CivitAI Atlas-of-Made-Worlds post, IG caption, etc.).
+// Placeholder tokens are filled at draft time from:
+//   - the Drop (name, project tags, prompt count)
+//   - the Recipe (name, model)
+//   - the resolved universe / style names
+//   - the user's draft-time inputs (lore caption, CTA, style notes, extra tags)
+//
+// Substitution is plain string-replace, no JSON escaping (output is prose).
+
+export type PostTarget = 'civitai' | 'instagram' | 'twitter' | 'other';
+
+export type PostPlaceholderKey =
+  | 'dropName'
+  | 'recipeName'
+  | 'universeName'
+  | 'styleName'
+  | 'model'
+  | 'promptCount'
+  | 'projectTagsCsv'
+  | 'projectTagsHashtags'
+  | 'loreCaption'
+  | 'cta'
+  | 'styleNotes'
+  | 'extraTags'
+  | 'extraTagsHashtags';
+
+export type PostTemplate = {
+  id: string;
+  name: string;
+  target: PostTarget;
+  summary?: string;
+  notes?: string;
+  body: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type PostTemplateInput = {
+  name: string;
+  target: PostTarget;
+  summary?: string;
+  notes?: string;
+  body: string;
+};
+
+export type PostTemplateStore = {
+  version: 1;
+  items: PostTemplate[];
+};
+
+// Optional draft-time inputs the user fills at "Draft Post" time. These
+// aren't persisted on the Drop in v1; they live in the dialog form only.
+export type PostDraftInputs = {
+  loreCaption?: string;
+  cta?: string;
+  styleNotes?: string;
+  extraTags?: string;
+};
