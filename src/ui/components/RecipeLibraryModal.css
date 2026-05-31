@@ -212,6 +212,62 @@
   cursor: not-allowed;
 }
 
+.recipe-lib__apply {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: rgba(var(--recipe-accent-rgb), 0.06);
+  border: 1px solid rgba(var(--recipe-accent-rgb), 0.22);
+}
+
+.recipe-lib__apply-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--recipe-accent-text);
+}
+
+.recipe-lib__apply-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recipe-lib__apply-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--recipe-accent-rgb), 0.55);
+  background: rgba(var(--recipe-accent-rgb), 0.18);
+  color: var(--recipe-accent-text);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.recipe-lib__apply-btn:hover {
+  background: rgba(var(--recipe-accent-rgb), 0.28);
+}
+
+.recipe-lib__copy-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.recipe-lib__copy-btn:hover {
+  background: var(--surface-overlay);
+  border-color: rgba(var(--recipe-accent-rgb), 0.35);
+}
+
 .recipe-lib__field {
   display: flex;
   flex-direction: column;

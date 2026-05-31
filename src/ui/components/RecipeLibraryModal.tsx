@@ -108,6 +108,7 @@ type RecipeLibraryModalProps = {
   onCreate: (input: RecipeInput) => Promise<Recipe>;
   onUpdate: (id: string, input: RecipeInput) => Promise<Recipe>;
   onDelete: (id: string) => Promise<void>;
+  onApply?: (recipe: Recipe) => void;
 };
 
 export function RecipeLibraryModal({
@@ -118,7 +119,9 @@ export function RecipeLibraryModal({
   onCreate,
   onUpdate,
   onDelete,
+  onApply,
 }: RecipeLibraryModalProps) {
+  const [copyFlash, setCopyFlash] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -203,6 +206,26 @@ export function RecipeLibraryModal({
     }
   };
 
+  const flashCopied = (label: string) => {
+    setCopyFlash(label);
+    window.setTimeout(() => setCopyFlash(prev => (prev === label ? null : prev)), 1400);
+  };
+
+  const handleCopy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      flashCopied(label);
+    } catch {
+      // ignore — older browsers / non-secure contexts
+    }
+  };
+
+  const handleApply = () => {
+    if (selected && onApply) {
+      onApply(selected);
+    }
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
     if (!window.confirm(`Delete recipe "${selected.name}"? This cannot be undone.`)) return;
@@ -280,6 +303,42 @@ export function RecipeLibraryModal({
                   </button>
                 )}
               </div>
+
+              {selected && !isCreating && (
+                <div className="recipe-lib__apply">
+                  <div className="recipe-lib__apply-label">Apply to workspace</div>
+                  <div className="recipe-lib__apply-actions">
+                    {onApply && (selected.universeId || selected.styleId) && (
+                      <button
+                        type="button"
+                        className="recipe-lib__apply-btn"
+                        onClick={handleApply}
+                        title="Activate this recipe's universe and style in the workspace"
+                      >
+                        ◉ Apply Recipe
+                      </button>
+                    )}
+                    {selected.styleTail && (
+                      <button
+                        type="button"
+                        className="recipe-lib__copy-btn"
+                        onClick={() => handleCopy(selected.styleTail, 'styleTail')}
+                      >
+                        {copyFlash === 'styleTail' ? '✓ Copied' : 'Copy Style Tail'}
+                      </button>
+                    )}
+                    {selected.negative && (
+                      <button
+                        type="button"
+                        className="recipe-lib__copy-btn"
+                        onClick={() => handleCopy(selected.negative, 'negative')}
+                      >
+                        {copyFlash === 'negative' ? '✓ Copied' : 'Copy Negative'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <label className="recipe-lib__field">
                 <span>Name</span>

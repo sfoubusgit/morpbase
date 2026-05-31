@@ -1852,6 +1852,17 @@ export function App() {
     await refreshRecipes();
   }, [refreshRecipes]);
 
+  const handleApplyRecipe = useCallback((recipe: Recipe) => {
+    if (recipe.universeId) {
+      setActiveUniverseId(recipe.universeId);
+    }
+    if (recipe.styleId) {
+      const sid = recipe.styleId;
+      setActiveStyleIds(prev => prev.includes(sid) ? prev : [...prev, sid]);
+    }
+    setIsRecipesOpen(false);
+  }, []);
+
   const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
     const created = await createStylePreset(input);
     await refreshStylePresets();
@@ -4271,6 +4282,7 @@ export function App() {
         onCreate={handleCreateRecipe}
         onUpdate={handleUpdateRecipe}
         onDelete={handleDeleteRecipe}
+        onApply={handleApplyRecipe}
       />
       <LightingModal
         isOpen={isLightingOpen}
