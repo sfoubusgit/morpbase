@@ -475,6 +475,106 @@
   gap: 12px;
 }
 
+.drop-lib__bulk-paste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(var(--drop-accent-rgb), 0.32);
+  background: rgba(var(--drop-accent-rgb), 0.04);
+}
+
+.drop-lib__bulk-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: var(--drop-accent-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drop-lib__bulk-hint {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.drop-lib__bulk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drop-lib__bulk-textarea {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: var(--font-family-mono, monospace);
+  line-height: 1.45;
+  resize: vertical;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.drop-lib__bulk-textarea:focus {
+  outline: none;
+  border-color: rgba(var(--drop-accent-rgb), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--drop-accent-rgb), 0.18);
+}
+
+.drop-lib__bulk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.drop-lib__bulk-parse,
+.drop-lib__bulk-append {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--drop-accent-rgb), 0.45);
+  background: rgba(var(--drop-accent-rgb), 0.1);
+  color: var(--drop-accent-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.drop-lib__bulk-parse:hover,
+.drop-lib__bulk-append:hover {
+  background: rgba(var(--drop-accent-rgb), 0.18);
+}
+
+.drop-lib__bulk-append {
+  background: var(--surface-base);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+.drop-lib__bulk-append:hover {
+  background: var(--surface-overlay);
+}
+
+.drop-lib__bulk-status {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
 .drop-lib__prompts-head {
   display: flex;
   align-items: center;

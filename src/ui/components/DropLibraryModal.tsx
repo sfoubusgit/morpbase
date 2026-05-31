@@ -13,6 +13,7 @@ import type {
 import { Modal } from './Modal';
 import { buildExportFilename, substituteWorkflow, triggerDownload } from '../../engine/workflowSubstitute';
 import { substitutePost } from '../../engine/postSubstitute';
+import { parseDropMarkdown } from '../../engine/dropMarkdownParser';
 import './DropLibraryModal.css';
 
 type PromptDraft = {
@@ -136,6 +137,9 @@ export function DropLibraryModal({
     styleNotes: '',
     extraTags: '',
   });
+  const [bulkPasteOpen, setBulkPasteOpen] = useState(false);
+  const [bulkPasteText, setBulkPasteText] = useState('');
+  const [bulkPasteStatus, setBulkPasteStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -147,6 +151,9 @@ export function DropLibraryModal({
       setMode('edit');
       setDraftTemplateId('');
       setDraftInputs({ loreCaption: '', cta: '', styleNotes: '', extraTags: '' });
+      setBulkPasteOpen(false);
+      setBulkPasteText('');
+      setBulkPasteStatus(null);
     }
   }, [isOpen]);
 
@@ -200,6 +207,37 @@ export function DropLibraryModal({
     setMode('edit');
     setForm(EMPTY_FORM);
     setError(null);
+  };
+
+  const handleParseBulkPaste = (mode: 'replace' | 'append') => {
+    const md = bulkPasteText.trim();
+    if (!md) {
+      setBulkPasteStatus('Paste some drop markdown first.');
+      return;
+    }
+    const parsed = parseDropMarkdown(md);
+    if (parsed.prompts.length === 0) {
+      setBulkPasteStatus('No prompt sections found. Expected ## NN — Name headers with code blocks.');
+      return;
+    }
+    const drafts: PromptDraft[] = parsed.prompts.map(p => ({
+      key: newDraftKey(),
+      name: p.name,
+      saveAs: p.saveAs ?? '',
+      prompt: p.prompt,
+    }));
+    setForm(f => {
+      const nextPrompts = mode === 'replace'
+        ? drafts
+        : [...f.prompts.filter(x => x.name.trim() || x.prompt.trim()), ...drafts];
+      const next = { ...f, prompts: nextPrompts };
+      if (!f.name.trim() && parsed.title) next.name = parsed.title;
+      return next;
+    });
+    setBulkPasteStatus(
+      `Parsed ${parsed.prompts.length} prompt${parsed.prompts.length === 1 ? '' : 's'}` +
+      (parsed.title && !form.name.trim() ? ` · title auto-filled` : '')
+    );
   };
 
   const handleStartDraftPost = () => {
@@ -624,6 +662,48 @@ export function DropLibraryModal({
                   placeholder="Drop-level notes (e.g. universe variations, special subject roster)"
                 />
               </label>
+
+              <div className="drop-lib__bulk-paste">
+                <button
+                  type="button"
+                  className="drop-lib__bulk-toggle"
+                  onClick={() => setBulkPasteOpen(o => !o)}
+                  aria-expanded={bulkPasteOpen}
+                >
+                  {bulkPasteOpen ? '▼' : '▶'} Paste from markdown
+                  <span className="drop-lib__bulk-hint">(import a drops/*.md file or chat output)</span>
+                </button>
+                {bulkPasteOpen && (
+                  <div className="drop-lib__bulk-body">
+                    <textarea
+                      rows={8}
+                      className="drop-lib__bulk-textarea"
+                      placeholder={'Paste a full drop markdown block here. Parser looks for ## NN — Name headers, **Save as:** `filename`, and the first code block under each section.'}
+                      value={bulkPasteText}
+                      onChange={e => { setBulkPasteText(e.target.value); setBulkPasteStatus(null); }}
+                    />
+                    <div className="drop-lib__bulk-actions">
+                      <button
+                        type="button"
+                        className="drop-lib__bulk-parse"
+                        onClick={() => handleParseBulkPaste('replace')}
+                      >
+                        Parse → Replace
+                      </button>
+                      <button
+                        type="button"
+                        className="drop-lib__bulk-append"
+                        onClick={() => handleParseBulkPaste('append')}
+                      >
+                        Parse → Append
+                      </button>
+                      {bulkPasteStatus && (
+                        <span className="drop-lib__bulk-status">{bulkPasteStatus}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
 
               <div className="drop-lib__prompts-head">
                 <h4>Prompts ({form.prompts.length})</h4>
