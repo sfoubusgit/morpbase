@@ -26,4 +26,4 @@ export * from './moods';
 export * from './negatives';
 export * from './community';
 export * from './laneSets';
-export * from './recipes';
+export * from './combos';

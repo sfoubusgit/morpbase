@@ -193,11 +193,7 @@ type WorkspacePageProps = {
   onRandomize?: () => void;
   onOpenLaneSets?: () => void;
   onOpenUniverses?: () => void;
-  onOpenRecipes?: () => void;
   onOpenCombos?: () => void;
-  onOpenDrops?: () => void;
-  onOpenWorkflowTemplates?: () => void;
-  onOpenPostTemplates?: () => void;
   activeUniverseName?: string | null;
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
@@ -275,11 +271,7 @@ export function WorkspacePage({
   onRandomize,
   onOpenLaneSets,
   onOpenUniverses,
-  onOpenRecipes,
   onOpenCombos,
-  onOpenDrops,
-  onOpenWorkflowTemplates,
-  onOpenPostTemplates,
   activeUniverseName,
   onDeactivateUniverse,
   lockedLanes,
@@ -584,17 +576,6 @@ export function WorkspacePage({
                     ▦ Combos
                   </button>
                 )}
-                {/*
-                  Drops / Workflow Templates / Post Templates toolbar buttons
-                  are hidden — the spine code stays in place (props, handlers,
-                  modals, stores). To re-enable a surface, restore its
-                  {onOpenX && (<button .../>)} block here.
-
-                  Hidden 2026-05-31: user feedback "way too complicated" —
-                  MorpBase reverted to library-of-validated-combos shape
-                  (Recipes + Apply only). See onOpenDrops /
-                  onOpenWorkflowTemplates / onOpenPostTemplates props.
-                */}
               </div>
             </div>
             {(onClearAllLanes || onRandomize || onCapture) && (
