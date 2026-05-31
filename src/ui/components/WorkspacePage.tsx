@@ -194,6 +194,7 @@ type WorkspacePageProps = {
   onOpenLaneSets?: () => void;
   onOpenUniverses?: () => void;
   onOpenRecipes?: () => void;
+  onOpenCombos?: () => void;
   onOpenDrops?: () => void;
   onOpenWorkflowTemplates?: () => void;
   onOpenPostTemplates?: () => void;
@@ -275,6 +276,7 @@ export function WorkspacePage({
   onOpenLaneSets,
   onOpenUniverses,
   onOpenRecipes,
+  onOpenCombos,
   onOpenDrops,
   onOpenWorkflowTemplates,
   onOpenPostTemplates,
@@ -572,14 +574,14 @@ export function WorkspacePage({
                     ◈ Universes
                   </button>
                 )}
-                {onOpenRecipes && (
+                {onOpenCombos && (
                   <button
                     type="button"
                     className="ws-universes-btn"
-                    onClick={onOpenRecipes}
-                    title="Browse Recipes"
+                    onClick={onOpenCombos}
+                    title="Browse Combos (universe × style matrix)"
                   >
-                    ◉ Recipes
+                    ▦ Combos
                   </button>
                 )}
                 {/*

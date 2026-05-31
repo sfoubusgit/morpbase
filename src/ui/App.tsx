@@ -15,7 +15,7 @@
  */
 
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, Drop, DropInput, PostTemplate, PostTemplateInput, Recipe, RecipeInput, SelectedPromptFragment, WorkflowTemplate, WorkflowTemplateInput, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
+import { AttributeDefinition, AttributeSelection, BuilderCategoryId, BuilderModeId, BUILDER_CATEGORY_IDS, CharacterIdentity, CharacterIdentityInput, CompositionFrame, CompositionFrameInput, EnvironmentIdentity, EnvironmentIdentityInput, LightingSetup, LightingSetupInput, Modifier, ModelProfile, MoodPreset, MoodPresetInput, NegativePreset, NegativePresetInput, OutfitIdentity, OutfitIdentityInput, Pool, Prompt, PromptAdditionEntry, ComboNote, ComboNoteInput, Drop, DropInput, PostTemplate, PostTemplateInput, Recipe, RecipeInput, SelectedPromptFragment, WorkflowTemplate, WorkflowTemplateInput, StylePreset, StylePresetInput, Territory, TerritorySourceInput, ValidationError } from '../types';
 import { generatePrompt, EngineInput } from '../engine';
 import { loadAttributeDefinitions } from '../data/loadAttributeDefinitions';
 import { BUILDER_MODE_CONFIGS, BUILDER_MODE_ORDER, DEFAULT_BUILDER_MODE_ID } from '../data/builderModes';
@@ -107,6 +107,7 @@ import { RecipeLibraryModal } from './components/RecipeLibraryModal';
 import { DropLibraryModal } from './components/DropLibraryModal';
 import { WorkflowTemplateModal } from './components/WorkflowTemplateModal';
 import { PostTemplateModal } from './components/PostTemplateModal';
+import { ComboMatrixModal } from './components/ComboMatrixModal';
 import { LightingModal } from './components/LightingModal';
 import { CompositionModal } from './components/CompositionModal';
 import { MoodModal } from './components/MoodModal';
@@ -123,6 +124,7 @@ import { listRecipes, createRecipe, updateRecipe, deleteRecipe } from '../engine
 import { listDrops, createDrop, updateDrop, deleteDrop } from '../engine/dropStore';
 import { listWorkflowTemplates, createWorkflowTemplate, updateWorkflowTemplate, deleteWorkflowTemplate } from '../engine/workflowTemplateStore';
 import { listPostTemplates, createPostTemplate, updatePostTemplate, deletePostTemplate } from '../engine/postTemplateStore';
+import { listComboNotes, upsertComboNote, deleteComboNote } from '../engine/comboNoteStore';
 import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
 import { getIdentityById } from '../engine/communityStore';
 import type { LaneSet, LaneSetLanes } from '../types/laneSets';
@@ -530,6 +532,8 @@ export function App() {
   const [isWorkflowTemplatesOpen, setIsWorkflowTemplatesOpen] = useState(false);
   const [postTemplates, setPostTemplates] = useState<PostTemplate[]>([]);
   const [isPostTemplatesOpen, setIsPostTemplatesOpen] = useState(false);
+  const [comboNotes, setComboNotes] = useState<ComboNote[]>([]);
+  const [isCombosOpen, setIsCombosOpen] = useState(false);
   const [activeLightingIds, setActiveLightingIds] = useState<string[]>(initialBuilderSession?.activeLightingIds ?? []);
   const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
   const [isLightingOpen, setIsLightingOpen] = useState(false);
@@ -1953,6 +1957,34 @@ export function App() {
     await refreshPostTemplates();
   }, [refreshPostTemplates]);
 
+  const refreshComboNotes = useCallback(async () => {
+    try {
+      const next = await listComboNotes();
+      setComboNotes(next);
+    } catch {
+      setComboNotes([]);
+    }
+  }, []);
+
+  const handleUpsertComboNote = useCallback(async (input: ComboNoteInput) => {
+    const saved = await upsertComboNote(input);
+    await refreshComboNotes();
+    return saved;
+  }, [refreshComboNotes]);
+
+  const handleDeleteComboNote = useCallback(async (id: string) => {
+    await deleteComboNote(id);
+    await refreshComboNotes();
+  }, [refreshComboNotes]);
+
+  const handleActivateCombo = useCallback((universeId: string, styleId: string) => {
+    if (universeId) setActiveUniverseId(universeId);
+    if (styleId) {
+      setActiveStyleIds(prev => prev.includes(styleId) ? prev : [...prev, styleId]);
+    }
+    setIsCombosOpen(false);
+  }, []);
+
   const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
     const created = await createStylePreset(input);
     await refreshStylePresets();
@@ -2440,6 +2472,10 @@ export function App() {
   useEffect(() => {
     void refreshPostTemplates();
   }, [refreshPostTemplates]);
+
+  useEffect(() => {
+    void refreshComboNotes();
+  }, [refreshComboNotes]);
 
   useEffect(() => {
     void refreshLightingSetups();
@@ -4273,7 +4309,7 @@ export function App() {
           onRandomize={handleRandomizeLanes}
           onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           onOpenUniverses={() => setIsUniversesOpen(true)}
-          onOpenRecipes={() => setIsRecipesOpen(true)}
+          onOpenCombos={() => setIsCombosOpen(true)}
           onOpenDrops={() => setIsDropsOpen(true)}
           onOpenWorkflowTemplates={() => setIsWorkflowTemplatesOpen(true)}
           onOpenPostTemplates={() => setIsPostTemplatesOpen(true)}
@@ -4409,6 +4445,16 @@ export function App() {
         onCreate={handleCreatePostTemplate}
         onUpdate={handleUpdatePostTemplate}
         onDelete={handleDeletePostTemplate}
+      />
+      <ComboMatrixModal
+        isOpen={isCombosOpen}
+        onClose={() => setIsCombosOpen(false)}
+        universes={universes.map(u => ({ id: u.id, name: u.name }))}
+        styles={stylePresets.map(s => ({ id: s.id, name: s.name }))}
+        notes={comboNotes}
+        onUpsert={handleUpsertComboNote}
+        onDelete={handleDeleteComboNote}
+        onActivate={handleActivateCombo}
       />
       <WorkflowTemplateModal
         isOpen={isWorkflowTemplatesOpen}

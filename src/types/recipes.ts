@@ -265,3 +265,36 @@ export type PostDraftInputs = {
   styleNotes?: string;
   extraTags?: string;
 };
+
+// ----- ComboNote -----
+//
+// A ComboNote is a tiny annotation on a (Universe, Style) pair. This is the
+// "library of validated combos" surface — replaces the heavier Recipe entity
+// that was over-engineered for the user's actual workflow.
+//
+// Identity: a ComboNote is uniquely identified by its (universeId, styleId)
+// pair. The store upserts on that pair rather than allowing duplicates.
+
+export type ComboStatus = 'untried' | 'sampled' | 'won' | 'failed';
+
+export type ComboNote = {
+  id: string;
+  universeId: string;
+  styleId: string;
+  status: ComboStatus;
+  notes: string;
+  createdAt: number;
+  updatedAt: number;
+};
+
+export type ComboNoteInput = {
+  universeId: string;
+  styleId: string;
+  status?: ComboStatus;
+  notes?: string;
+};
+
+export type ComboNoteStore = {
+  version: 1;
+  items: ComboNote[];
+};

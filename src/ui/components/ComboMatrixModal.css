@@ -1,0 +1,384 @@
+/* Combo Matrix accent — soft violet, distinct from the old palette. */
+.modal-content.combo-matrix-modal {
+  --combo-accent-rgb: 200, 175, 255;
+  --combo-accent-text: #c8afff;
+  --combo-won-rgb: 158, 255, 196;
+  --combo-won-text: #9effc4;
+  --combo-failed-rgb: 255, 130, 130;
+  --combo-failed-text: #ff9090;
+  --combo-sampled-rgb: 255, 195, 120;
+  --combo-sampled-text: #ffc378;
+  max-width: 1280px;
+  width: min(1280px, 96vw);
+  max-height: 92vh;
+}
+
+.combo-mtx {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 0;
+}
+
+/* ---------- Toolbar ---------- */
+
+.combo-mtx__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-subtle);
+}
+
+.combo-mtx__search {
+  flex: 1 1 220px;
+  min-width: 200px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.combo-mtx__search:focus {
+  outline: none;
+  border-color: rgba(var(--combo-accent-rgb), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--combo-accent-rgb), 0.18);
+}
+
+.combo-mtx__filters {
+  display: flex;
+  gap: 4px;
+}
+
+.combo-mtx__filter {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.combo-mtx__filter:hover {
+  color: var(--text-primary);
+}
+
+.combo-mtx__filter.is-active {
+  background: rgba(var(--combo-accent-rgb), 0.14);
+  color: var(--combo-accent-text);
+  border-color: rgba(var(--combo-accent-rgb), 0.4);
+}
+
+.combo-mtx__summary {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.combo-mtx__chip {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  border: 1px solid var(--border-subtle);
+}
+
+.combo-mtx__chip--won {
+  background: rgba(var(--combo-won-rgb), 0.14);
+  color: var(--combo-won-text);
+  border-color: rgba(var(--combo-won-rgb), 0.36);
+}
+
+.combo-mtx__chip--sampled {
+  background: rgba(var(--combo-sampled-rgb), 0.12);
+  color: var(--combo-sampled-text);
+  border-color: rgba(var(--combo-sampled-rgb), 0.32);
+}
+
+.combo-mtx__chip--failed {
+  background: rgba(var(--combo-failed-rgb), 0.12);
+  color: var(--combo-failed-text);
+  border-color: rgba(var(--combo-failed-rgb), 0.32);
+}
+
+.combo-mtx__status {
+  padding: 16px;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ---------- Matrix grid ---------- */
+
+.combo-mtx__grid-wrap {
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-overlay);
+  max-height: 56vh;
+}
+
+.combo-mtx__grid {
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+}
+
+.combo-mtx__corner {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  background: var(--surface-overlay);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  min-width: 180px;
+}
+
+.combo-mtx__col-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-overlay);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  padding: 8px 6px;
+  vertical-align: bottom;
+  height: 140px;
+  min-width: 36px;
+  max-width: 36px;
+  text-align: center;
+}
+
+.combo-mtx__col-head span {
+  display: inline-block;
+  transform: rotate(-60deg);
+  transform-origin: bottom left;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  margin-left: 16px;
+  padding-bottom: 4px;
+}
+
+.combo-mtx__row-head {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--surface-overlay);
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  padding: 6px 12px;
+  text-align: left;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-xs);
+  color: var(--text-primary);
+  min-width: 180px;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combo-mtx__cell {
+  width: 36px;
+  height: 36px;
+  text-align: center;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  font-size: 16px;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+  transition: background 0.1s ease;
+}
+
+.combo-mtx__cell:hover {
+  background: rgba(var(--combo-accent-rgb), 0.08);
+}
+
+.combo-mtx__cell.is-selected {
+  background: rgba(var(--combo-accent-rgb), 0.2) !important;
+  box-shadow: inset 0 0 0 2px rgba(var(--combo-accent-rgb), 0.6);
+}
+
+.combo-mtx__cell--empty {
+  color: var(--border-subtle);
+}
+
+.combo-mtx__cell--untried {
+  color: var(--text-secondary);
+}
+
+.combo-mtx__cell--sampled {
+  background: rgba(var(--combo-sampled-rgb), 0.08);
+  color: var(--combo-sampled-text);
+}
+
+.combo-mtx__cell--won {
+  background: rgba(var(--combo-won-rgb), 0.12);
+  color: var(--combo-won-text);
+}
+
+.combo-mtx__cell--failed {
+  background: rgba(var(--combo-failed-rgb), 0.1);
+  color: var(--combo-failed-text);
+}
+
+/* ---------- Editor panel ---------- */
+
+.combo-mtx__editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface-overlay);
+  border: 1px solid rgba(var(--combo-accent-rgb), 0.32);
+}
+
+.combo-mtx__editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.combo-mtx__editor-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--combo-accent-text);
+}
+
+.combo-mtx__editor-title {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  margin-top: 2px;
+}
+
+.combo-mtx__editor-title strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+}
+
+.combo-mtx__activate-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--combo-accent-rgb), 0.55);
+  background: rgba(var(--combo-accent-rgb), 0.18);
+  color: var(--combo-accent-text);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.combo-mtx__activate-btn:hover {
+  background: rgba(var(--combo-accent-rgb), 0.28);
+}
+
+.combo-mtx__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.combo-mtx__field > span {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.combo-mtx__field select,
+.combo-mtx__field textarea {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: inherit;
+  resize: vertical;
+}
+
+.combo-mtx__field select:focus,
+.combo-mtx__field textarea:focus {
+  outline: none;
+  border-color: rgba(var(--combo-accent-rgb), 0.6);
+  box-shadow: 0 0 0 2px rgba(var(--combo-accent-rgb), 0.18);
+}
+
+.combo-mtx__error {
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(var(--combo-failed-rgb), 0.1);
+  border: 1px solid rgba(var(--combo-failed-rgb), 0.3);
+  color: var(--combo-failed-text);
+  font-size: var(--font-size-sm);
+}
+
+.combo-mtx__editor-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.combo-mtx__editor-spacer {
+  flex: 1;
+}
+
+.combo-mtx__editor-actions button {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.combo-mtx__editor-actions button:hover:not(:disabled) {
+  background: var(--surface-overlay);
+}
+
+.combo-mtx__editor-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.combo-mtx__save-btn {
+  background: rgba(var(--combo-accent-rgb), 0.16) !important;
+  border-color: rgba(var(--combo-accent-rgb), 0.5) !important;
+  color: var(--combo-accent-text) !important;
+  font-weight: var(--font-weight-bold);
+}
+
+.combo-mtx__save-btn:hover:not(:disabled) {
+  background: rgba(var(--combo-accent-rgb), 0.26) !important;
+}
+
+.combo-mtx__clear-btn {
+  background: rgba(var(--combo-failed-rgb), 0.08) !important;
+  border-color: rgba(var(--combo-failed-rgb), 0.32) !important;
+  color: var(--combo-failed-text) !important;
+}
+
+.combo-mtx__clear-btn:hover:not(:disabled) {
+  background: rgba(var(--combo-failed-rgb), 0.16) !important;
+}
