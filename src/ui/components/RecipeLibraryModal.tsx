@@ -226,6 +226,19 @@ export function RecipeLibraryModal({
     }
   };
 
+  const handleClone = () => {
+    if (!selected) return;
+    // Switch to create mode but pre-fill from selected. Name gets "Copy of X"
+    // so it's obviously distinct before save.
+    setForm({
+      ...formFromRecipe(selected),
+      name: `Copy of ${selected.name}`,
+    });
+    setSelectedId(null);
+    setIsCreating(true);
+    setError(null);
+  };
+
   const handleDelete = async () => {
     if (!selected) return;
     if (!window.confirm(`Delete recipe "${selected.name}"? This cannot be undone.`)) return;
@@ -292,16 +305,29 @@ export function RecipeLibraryModal({
             <form className="recipe-lib__form" onSubmit={handleSubmit}>
               <div className="recipe-lib__form-head">
                 <h3>{isCreating ? 'New Recipe' : selected?.name}</h3>
-                {selected && !isCreating && (
-                  <button
-                    type="button"
-                    className="recipe-lib__delete-btn"
-                    onClick={handleDelete}
-                    disabled={isSaving}
-                  >
-                    Delete
-                  </button>
-                )}
+                <div className="recipe-lib__form-head-actions">
+                  {selected && !isCreating && (
+                    <button
+                      type="button"
+                      className="recipe-lib__clone-btn"
+                      onClick={handleClone}
+                      disabled={isSaving}
+                      title="Start a new recipe pre-filled from this one"
+                    >
+                      ⎘ Clone
+                    </button>
+                  )}
+                  {selected && !isCreating && (
+                    <button
+                      type="button"
+                      className="recipe-lib__delete-btn"
+                      onClick={handleDelete}
+                      disabled={isSaving}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
 
               {selected && !isCreating && (

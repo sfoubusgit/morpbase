@@ -193,6 +193,32 @@
   color: var(--recipe-accent-text);
 }
 
+.recipe-lib__form-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recipe-lib__clone-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(var(--recipe-accent-rgb), 0.45);
+  background: rgba(var(--recipe-accent-rgb), 0.1);
+  color: var(--recipe-accent-text);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.recipe-lib__clone-btn:hover:not(:disabled) {
+  background: rgba(var(--recipe-accent-rgb), 0.18);
+}
+
+.recipe-lib__clone-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .recipe-lib__delete-btn {
   padding: 6px 12px;
   border-radius: var(--radius-md);
