@@ -17,16 +17,13 @@ type ComboMatrixModalProps = {
   styles: StyleRef[];
   notes: ComboNote[];
   isLoading?: boolean;
-  // When set, the matrix opens with this cell pre-selected so the editor
-  // is ready to annotate immediately. Useful for the workspace "Mark Combo"
-  // entry point.
+  // When set, the modal opens with this (universeId, styleId) pre-selected
+  // and the editor pre-filled. Used by the workspace "★ Mark Combo" button.
   initialSelection?: { universeId: string; styleId: string } | null;
   onUpsert: (input: ComboNoteInput) => Promise<ComboNote>;
   onDelete: (id: string) => Promise<void>;
   onActivate: (universeId: string, styleId: string) => void;
 };
-
-type FilterMode = 'all' | 'tried' | 'untried';
 
 const STATUS_OPTIONS: ComboStatus[] = ['untried', 'sampled', 'won', 'failed'];
 
@@ -65,74 +62,127 @@ export function ComboMatrixModal({
   const [editNotes, setEditNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FilterMode>('all');
   const [query, setQuery] = useState('');
+  const [expandedUniverses, setExpandedUniverses] = useState<Set<string>>(() => new Set());
+  const [expandedUntried, setExpandedUntried] = useState<Set<string>>(() => new Set());
 
-  useEffect(() => {
-    if (isOpen) {
-      setError(null);
-      setFilter('all');
-      setQuery('');
-      if (initialSelection && initialSelection.universeId && initialSelection.styleId) {
-        // Pre-select the cell + load its existing note (if any) so the editor
-        // is ready for the user. Used by the workspace "★ Mark Combo" button.
-        setSelected({ universeId: initialSelection.universeId, styleId: initialSelection.styleId });
-        const existing = notes.find(
-          n => n.universeId === initialSelection.universeId && n.styleId === initialSelection.styleId
-        );
-        setEditStatus(existing?.status ?? 'sampled');
-        setEditNotes(existing?.notes ?? '');
-      } else {
-        setSelected(null);
-        setEditStatus('sampled');
-        setEditNotes('');
-      }
+  // Index notes by universeId for fast section lookups.
+  const notesByUniverse = useMemo(() => {
+    const map = new Map<string, ComboNote[]>();
+    for (const u of universes) map.set(u.id, []);
+    for (const n of notes) {
+      const arr = map.get(n.universeId);
+      if (arr) arr.push(n);
     }
+    // Newest-updated first inside each universe
+    for (const arr of map.values()) {
+      arr.sort((a, b) => b.updatedAt - a.updatedAt);
+    }
+    return map;
+  }, [universes, notes]);
+
+  const styleById = useMemo(() => {
+    const map = new Map<string, StyleRef>();
+    for (const s of styles) map.set(s.id, s);
+    return map;
+  }, [styles]);
+
+  // Reset transient state on open. Auto-expand any universe that has at
+  // least one noted combo so users land on their existing data without an
+  // extra click.
+  useEffect(() => {
+    if (!isOpen) return;
+    setError(null);
+    setQuery('');
+
+    const autoExpand = new Set<string>();
+    for (const u of universes) {
+      if ((notesByUniverse.get(u.id) ?? []).length > 0) autoExpand.add(u.id);
+    }
+    setExpandedUntried(new Set());
+
+    if (initialSelection && initialSelection.universeId && initialSelection.styleId) {
+      // Always expand the initial selection's universe so the editor surface
+      // is contextual, even if it has no notes yet.
+      autoExpand.add(initialSelection.universeId);
+      const existing = notes.find(
+        n => n.universeId === initialSelection.universeId && n.styleId === initialSelection.styleId
+      );
+      // If the chosen style is currently untried for that universe, expand
+      // the Untried sub-section too so the user can see the row.
+      if (!existing) {
+        setExpandedUntried(prev => {
+          const next = new Set(prev);
+          next.add(initialSelection.universeId);
+          return next;
+        });
+      }
+      setSelected({ universeId: initialSelection.universeId, styleId: initialSelection.styleId });
+      setEditStatus(existing?.status ?? 'sampled');
+      setEditNotes(existing?.notes ?? '');
+    } else {
+      setSelected(null);
+      setEditStatus('sampled');
+      setEditNotes('');
+    }
+
+    setExpandedUniverses(autoExpand);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, initialSelection]);
 
-  // Index notes by (universeId, styleId) for O(1) cell lookups.
-  const noteByPair = useMemo(() => {
-    const map = new Map<string, ComboNote>();
-    for (const n of notes) {
-      map.set(`${n.universeId}::${n.styleId}`, n);
-    }
-    return map;
+  // Summary counts for the toolbar.
+  const summary = useMemo(() => {
+    const counts = { won: 0, sampled: 0, failed: 0, untried: 0 };
+    for (const n of notes) counts[n.status] += 1;
+    return counts;
   }, [notes]);
 
-  const cellNote = (uId: string, sId: string): ComboNote | undefined =>
-    noteByPair.get(`${uId}::${sId}`);
-
-  // Apply text query and tried/untried filter.
+  // Apply the search query at the universe level — show a universe if its
+  // name matches, or if any of its noted-combo style names / notes match,
+  // or if any of its still-untried style names match.
   const q = query.trim().toLowerCase();
-  const filteredUniverses = useMemo(() => {
-    let list = universes;
-    if (q) list = list.filter(u => u.name.toLowerCase().includes(q));
-    if (filter === 'tried') {
-      list = list.filter(u => notes.some(n => n.universeId === u.id && n.status !== 'untried'));
-    }
-    return list;
-  }, [universes, notes, filter, q]);
+  const visibleUniverses = useMemo(() => {
+    if (!q) return universes;
+    return universes.filter(u => {
+      if (u.name.toLowerCase().includes(q)) return true;
+      const universeNotes = notesByUniverse.get(u.id) ?? [];
+      for (const n of universeNotes) {
+        const s = styleById.get(n.styleId);
+        if (s && s.name.toLowerCase().includes(q)) return true;
+        if (n.notes.toLowerCase().includes(q)) return true;
+      }
+      // Match against still-untried style names too
+      const notedStyleIds = new Set(universeNotes.map(n => n.styleId));
+      for (const s of styles) {
+        if (notedStyleIds.has(s.id)) continue;
+        if (s.name.toLowerCase().includes(q)) return true;
+      }
+      return false;
+    });
+  }, [universes, q, notesByUniverse, styleById, styles]);
 
-  const filteredStyles = useMemo(() => {
-    let list = styles;
-    if (q) list = list.filter(s => s.name.toLowerCase().includes(q));
-    if (filter === 'tried') {
-      list = list.filter(s => notes.some(n => n.styleId === s.id && n.status !== 'untried'));
-    }
-    return list;
-  }, [styles, notes, filter, q]);
-
-  const selectedNote = selected ? cellNote(selected.universeId, selected.styleId) : undefined;
-  const selectedUniverse = selected ? universes.find(u => u.id === selected.universeId) : null;
-  const selectedStyle = selected ? styles.find(s => s.id === selected.styleId) : null;
-
-  const handleSelectCell = (universeId: string, styleId: string) => {
+  const handleSelectRow = (universeId: string, styleId: string) => {
+    const existing = notes.find(n => n.universeId === universeId && n.styleId === styleId);
     setSelected({ universeId, styleId });
-    const existing = cellNote(universeId, styleId);
     setEditStatus(existing?.status ?? 'sampled');
     setEditNotes(existing?.notes ?? '');
     setError(null);
+  };
+
+  const handleToggleUniverse = (id: string) => {
+    setExpandedUniverses(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleToggleUntried = (id: string) => {
+    setExpandedUntried(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   };
 
   const handleSave = async () => {
@@ -154,12 +204,14 @@ export function ComboMatrixModal({
   };
 
   const handleClear = async () => {
-    if (!selectedNote) return;
-    if (!window.confirm('Remove this combo note? The (universe, style) pair will go back to untried.')) return;
+    if (!selected) return;
+    const existing = notes.find(n => n.universeId === selected.universeId && n.styleId === selected.styleId);
+    if (!existing) return;
+    if (!window.confirm('Remove this combo note? The pair will go back to untried.')) return;
     setIsSaving(true);
     setError(null);
     try {
-      await onDelete(selectedNote.id);
+      await onDelete(existing.id);
       setSelected(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to clear combo note.');
@@ -173,14 +225,11 @@ export function ComboMatrixModal({
     onActivate(selected.universeId, selected.styleId);
   };
 
-  // Summary counts for the toolbar.
-  const summary = useMemo(() => {
-    const counts = { won: 0, sampled: 0, failed: 0, untried: 0 };
-    for (const n of notes) {
-      counts[n.status] += 1;
-    }
-    return counts;
-  }, [notes]);
+  const selectedNote = selected
+    ? notes.find(n => n.universeId === selected.universeId && n.styleId === selected.styleId) ?? null
+    : null;
+  const selectedUniverse = selected ? universes.find(u => u.id === selected.universeId) ?? null : null;
+  const selectedStyle = selected ? styleById.get(selected.styleId) ?? null : null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Combos" className="combo-matrix-modal">
@@ -189,33 +238,10 @@ export function ComboMatrixModal({
           <input
             type="search"
             className="combo-mtx__search"
-            placeholder="Filter universes/styles by name…"
+            placeholder="Search universes, styles, or notes…"
             value={query}
             onChange={e => setQuery(e.target.value)}
           />
-          <div className="combo-mtx__filters">
-            <button
-              type="button"
-              className={`combo-mtx__filter${filter === 'all' ? ' is-active' : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              className={`combo-mtx__filter${filter === 'tried' ? ' is-active' : ''}`}
-              onClick={() => setFilter('tried')}
-            >
-              Tried only
-            </button>
-            <button
-              type="button"
-              className={`combo-mtx__filter${filter === 'untried' ? ' is-active' : ''}`}
-              onClick={() => setFilter('untried')}
-            >
-              Untried only
-            </button>
-          </div>
           <div className="combo-mtx__summary">
             <span className="combo-mtx__chip combo-mtx__chip--won">✓ {summary.won}</span>
             <span className="combo-mtx__chip combo-mtx__chip--sampled">○ {summary.sampled}</span>
@@ -225,64 +251,110 @@ export function ComboMatrixModal({
 
         {isLoading && <div className="combo-mtx__status">Loading combos…</div>}
 
-        {!isLoading && (filteredUniverses.length === 0 || filteredStyles.length === 0) && (
+        {!isLoading && universes.length === 0 && (
           <div className="combo-mtx__status">
-            {universes.length === 0
-              ? 'No universes yet — create one in ◈ Universes to start tracking combos.'
-              : styles.length === 0
-                ? 'No styles yet — create some in the Style lane to start tracking combos.'
-                : 'No matches for the current filter.'}
+            No universes yet — create one in ◈ Universes to start tracking combos.
           </div>
         )}
 
-        {!isLoading && filteredUniverses.length > 0 && filteredStyles.length > 0 && (
-          <div className="combo-mtx__grid-wrap">
-            <table className="combo-mtx__grid">
-              <thead>
-                <tr>
-                  <th className="combo-mtx__corner"></th>
-                  {filteredStyles.map(s => (
-                    <th
-                      key={s.id}
-                      className="combo-mtx__col-head"
-                      title={s.name}
-                    >
-                      <span>{s.name}</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUniverses.map(u => (
-                  <tr key={u.id}>
-                    <th className="combo-mtx__row-head" title={u.name}>{u.name}</th>
-                    {filteredStyles.map(s => {
-                      const note = cellNote(u.id, s.id);
-                      const status = note?.status;
-                      const isSel = selected?.universeId === u.id && selected?.styleId === s.id;
-                      const klass = [
-                        'combo-mtx__cell',
-                        status ? `combo-mtx__cell--${status}` : 'combo-mtx__cell--empty',
-                        isSel ? 'is-selected' : '',
-                      ].filter(Boolean).join(' ');
-                      const title = note
-                        ? `${u.name} × ${s.name}\n${statusLabel(status!)}${note.notes ? '\n— ' + note.notes : ''}`
-                        : `${u.name} × ${s.name}\nUntried`;
-                      return (
-                        <td
-                          key={s.id}
-                          className={klass}
-                          onClick={() => handleSelectCell(u.id, s.id)}
-                          title={title}
-                        >
-                          {statusGlyph(status)}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {!isLoading && universes.length > 0 && visibleUniverses.length === 0 && (
+          <div className="combo-mtx__status">No universes match.</div>
+        )}
+
+        {!isLoading && visibleUniverses.length > 0 && (
+          <div className="combo-mtx__list">
+            {visibleUniverses.map(u => {
+              const universeNotes = notesByUniverse.get(u.id) ?? [];
+              const notedStyleIds = new Set(universeNotes.map(n => n.styleId));
+              const untriedStyles = styles.filter(s => !notedStyleIds.has(s.id));
+              const isOpen = expandedUniverses.has(u.id);
+              const isUntriedOpen = expandedUntried.has(u.id);
+
+              return (
+                <section key={u.id} className="combo-mtx__universe">
+                  <button
+                    type="button"
+                    className="combo-mtx__universe-head"
+                    onClick={() => handleToggleUniverse(u.id)}
+                    aria-expanded={isOpen}
+                  >
+                    <span className="combo-mtx__chevron">{isOpen ? '▾' : '▸'}</span>
+                    <span className="combo-mtx__universe-name">{u.name}</span>
+                    <span className="combo-mtx__universe-meta">
+                      {universeNotes.length > 0
+                        ? `${universeNotes.length} noted`
+                        : 'none noted'}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="combo-mtx__rows">
+                      {universeNotes.map(n => {
+                        const s = styleById.get(n.styleId);
+                        const isSelected =
+                          selected?.universeId === n.universeId && selected?.styleId === n.styleId;
+                        return (
+                          <button
+                            type="button"
+                            key={n.id}
+                            className={`combo-mtx__row combo-mtx__row--${n.status}${isSelected ? ' is-selected' : ''}`}
+                            onClick={() => handleSelectRow(n.universeId, n.styleId)}
+                            title={statusLabel(n.status)}
+                          >
+                            <span className="combo-mtx__row-status">{statusGlyph(n.status)}</span>
+                            <span className="combo-mtx__row-style">
+                              {s ? s.name : <em>(missing style: {n.styleId})</em>}
+                            </span>
+                            <span className="combo-mtx__row-notes">
+                              {n.notes || <em className="combo-mtx__row-notes-empty">no note</em>}
+                            </span>
+                          </button>
+                        );
+                      })}
+
+                      {untriedStyles.length > 0 && (
+                        <div className="combo-mtx__untried">
+                          <button
+                            type="button"
+                            className="combo-mtx__untried-head"
+                            onClick={() => handleToggleUntried(u.id)}
+                            aria-expanded={isUntriedOpen}
+                          >
+                            <span className="combo-mtx__chevron combo-mtx__chevron--small">
+                              {isUntriedOpen ? '▾' : '▸'}
+                            </span>
+                            <span>Untried ({untriedStyles.length})</span>
+                          </button>
+                          {isUntriedOpen && (
+                            <div className="combo-mtx__untried-rows">
+                              {untriedStyles.map(s => {
+                                const isSelected =
+                                  selected?.universeId === u.id && selected?.styleId === s.id;
+                                return (
+                                  <button
+                                    type="button"
+                                    key={s.id}
+                                    className={`combo-mtx__row combo-mtx__row--untried${isSelected ? ' is-selected' : ''}`}
+                                    onClick={() => handleSelectRow(u.id, s.id)}
+                                    title="Untried — click to mark"
+                                  >
+                                    <span className="combo-mtx__row-status">·</span>
+                                    <span className="combo-mtx__row-style">{s.name}</span>
+                                    <span className="combo-mtx__row-notes combo-mtx__row-notes-untried">
+                                      mark as tried…
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
 
