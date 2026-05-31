@@ -191,7 +191,6 @@ type WorkspacePageProps = {
   userName?: string | null;
   activeIdentityTags?: WallPostIdentityTag[];
   onRandomize?: () => void;
-  onOpenLaneSets?: () => void;
   onOpenUniverses?: () => void;
   onOpenCombos?: () => void;
   canMarkCombo?: boolean;
@@ -271,7 +270,6 @@ export function WorkspacePage({
   userName = null,
   activeIdentityTags = [],
   onRandomize,
-  onOpenLaneSets,
   onOpenUniverses,
   onOpenCombos,
   canMarkCombo,
@@ -556,11 +554,6 @@ export function WorkspacePage({
             <div className="ws-panel-header-top">
               <span className="workspace-panel-title">Identities</span>
               <div className="ws-panel-header-pickers">
-                {onOpenLaneSets && (
-                  <button type="button" className="ws-lane-sets-btn" onClick={onOpenLaneSets} title="Browse Lane Sets">
-                    ☰ Sets
-                  </button>
-                )}
                 {onOpenUniverses && (
                   <button
                     type="button"

@@ -108,16 +108,13 @@ import { MoodModal } from './components/MoodModal';
 import { NegativeModal } from './components/NegativeModal';
 import { WorldModal } from './components/WorldModal';
 import { InteractionModal } from './components/InteractionModal';
-import { LaneSetsModal } from './components/LaneSetsModal';
 import { UniversesModal } from './components/UniversesModal';
 import { INTERACTION_PHRASES } from '../data/interactionPhrases';
 import { listWorlds } from '../engine/worldStore';
-import { listLaneSets, createLaneSet, deleteLaneSet } from '../engine/laneSetStore';
 import { listUniverses, createUniverse, updateUniversePools, deleteUniverse } from '../engine/universeStore';
 import { listComboNotes, upsertComboNote, deleteComboNote } from '../engine/comboNoteStore';
 import { initPresence, destroyPresence, updateStudioState } from '../engine/presenceStore';
 import { getIdentityById } from '../engine/communityStore';
-import type { LaneSet, LaneSetLanes } from '../types/laneSets';
 import type { Universe, UniverseInput } from '../types/universe';
 import {
   changeUserPassword,
@@ -234,7 +231,6 @@ type BuilderSessionSnapshot = {
   envScale: string | null;
   envCondition: string | null;
   captureBuffer: string[];
-  activeLaneSetId: string | null;
   activeUniverseId: string | null;
   pinnedItems: string[];
   targetModel: 'z-image' | 'illustrious';
@@ -358,7 +354,6 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
       captureBuffer: Array.isArray(parsed.captureBuffer)
         ? (parsed.captureBuffer as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
-      activeLaneSetId: typeof parsed.activeLaneSetId === 'string' ? parsed.activeLaneSetId : null,
       activeUniverseId: typeof parsed.activeUniverseId === 'string' ? parsed.activeUniverseId : null,
       pinnedItems: Array.isArray(parsed.pinnedItems)
         ? (parsed.pinnedItems as unknown[]).filter((x): x is string => typeof x === 'string')
@@ -540,8 +535,6 @@ export function App() {
   const [worlds, setWorlds] = useState<{ id: string; name: string; phrases: string[] }[]>(() =>
     listWorlds().map(w => ({ id: w.id, name: w.name, phrases: w.phrases.map(p => p.text) }))
   );
-  const [laneSets, setLaneSets] = useState<LaneSet[]>(() => listLaneSets());
-  const [isLaneSetsOpen, setIsLaneSetsOpen] = useState(false);
   const [poseFraming, setPoseFraming] = useState<string | null>(initialBuilderSession?.poseFraming ?? null);
   const [poseOrientation, setPoseOrientation] = useState<string | null>(initialBuilderSession?.poseOrientation ?? null);
   const [poseEnergy, setPoseEnergy] = useState<string | null>(initialBuilderSession?.poseEnergy ?? null);
@@ -558,7 +551,6 @@ export function App() {
   const [auraVariationMin, setAuraVariationMin] = useState(1);
   const [auraVariationMax, setAuraVariationMax] = useState(3);
   const [captureBuffer, setCaptureBuffer] = useState<string[]>(initialBuilderSession?.captureBuffer ?? []);
-  const [activeLaneSetId, setActiveLaneSetId] = useState<string | null>(initialBuilderSession?.activeLaneSetId ?? null);
   const [universes, setUniverses] = useState<Universe[]>(() => listUniverses());
   const [activeUniverseId, setActiveUniverseId] = useState<string | null>(initialBuilderSession?.activeUniverseId ?? null);
   const [isUniversesOpen, setIsUniversesOpen] = useState(false);
@@ -2120,71 +2112,9 @@ export function App() {
     }
   }, [lockedLanes, pinnedItems, characters, environments, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, objects, activeCharacterIds, activeEnvironmentIds, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeObjectIds, activeInteractionPhraseId, worlds, activeUniverseId, universes, auraVariationEnabled, activeWorld, auraVariationMin, auraVariationMax, pickAuraPhrases]);
 
-  const handleApplyLaneSet = useCallback((set: LaneSet) => {
-    const { lanes } = set;
-    const pickN = <T extends { id: string }>(pool: T[], n: number): string[] => {
-      const shuffled = [...pool].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, Math.min(n, shuffled.length)).map(x => x.id);
-    };
-
-    if (lanes.character.mode === 'fixed') setActiveCharacterIds(lanes.character.ids);
-    else if (lanes.character.mode === 'random') setActiveCharacterIds(pickN(characters, lanes.character.count));
-    else setActiveCharacterIds([]);
-
-    if (lanes.dynamics.mode === 'fixed') setActiveInteractionPhraseId(lanes.dynamics.id);
-    else if (lanes.dynamics.mode === 'random') {
-      const picked = INTERACTION_PHRASES[Math.floor(Math.random() * INTERACTION_PHRASES.length)];
-      setActiveInteractionPhraseId(picked.id);
-    } else setActiveInteractionPhraseId(null);
-
-    if (lanes.wardrobe.mode === 'fixed') setActiveOutfitIds(lanes.wardrobe.ids);
-    else if (lanes.wardrobe.mode === 'random') setActiveOutfitIds(pickN(outfits, lanes.wardrobe.count));
-    else setActiveOutfitIds([]);
-
-    if (lanes.style.mode === 'fixed') setActiveStyleIds(lanes.style.ids);
-    else if (lanes.style.mode === 'random') setActiveStyleIds(pickN(stylePresets, lanes.style.count));
-    else setActiveStyleIds([]);
-
-    if (lanes.lighting.mode === 'fixed') setActiveLightingIds(lanes.lighting.ids);
-    else if (lanes.lighting.mode === 'random') setActiveLightingIds(pickN(lightingSetups, lanes.lighting.count));
-    else setActiveLightingIds([]);
-
-    if (lanes.composition.mode === 'fixed') setActiveCompositionIds(lanes.composition.ids);
-    else if (lanes.composition.mode === 'random') setActiveCompositionIds(pickN(compositionFrames, lanes.composition.count));
-    else setActiveCompositionIds([]);
-
-    if (lanes.mood.mode === 'fixed') setActiveMoodIds(lanes.mood.ids);
-    else if (lanes.mood.mode === 'random') setActiveMoodIds(pickN(moodPresets, lanes.mood.count));
-    else setActiveMoodIds([]);
-
-    if (lanes.environment.mode === 'fixed') setActiveEnvironmentIds(lanes.environment.ids);
-    else if (lanes.environment.mode === 'random') setActiveEnvironmentIds(pickN(environments, lanes.environment.count));
-    else setActiveEnvironmentIds([]);
-
-    if (lanes.aura.mode === 'fixed') {
-      const auraId = lanes.aura.id;
-      const world = auraId ? worlds.find(w => w.id === auraId) : null;
-      if (world) {
-        setActiveWorld({ id: world.id, name: world.name, phrases: world.phrases });
-      } else {
-        setActiveWorld(null);
-      }
-      setActiveChipTexts([]);
-      setAuraVariationEnabled(false);
-    } else if (lanes.aura.mode === 'random') {
-      if (worlds.length > 0) {
-        const picked = worlds[Math.floor(Math.random() * worlds.length)];
-        setActiveWorld({ id: picked.id, name: picked.name, phrases: picked.phrases });
-        setActiveChipTexts([]);
-        setAuraVariationEnabled(false);
-      }
-    } else {
-      setActiveWorld(null);
-      setActiveChipTexts([]);
-      setAuraVariationEnabled(false);
-    }
-    setActiveLaneSetId(set.id);
-  }, [characters, outfits, stylePresets, lightingSetups, compositionFrames, moodPresets, environments, worlds]);
+  // LaneSets feature removed in audit Phase 5 (cut, not merged). The
+  // handleApplyLaneSet / handleSaveCurrentAsLaneSet / handleDeleteLaneSet
+  // callbacks lived here; all deleted along with the modal and store.
 
   const handleClearAllLanes = useCallback(() => {
     setActiveCharacterIds([]);
@@ -2202,30 +2132,8 @@ export function App() {
     setWorldVariationEnabled(false);
     setWorldVariationPhrases([]);
     setAuraVariationEnabled(false);
-    setActiveLaneSetId(null);
     setPinnedItems(new Set());
     setLockedLanes(new Set());
-  }, []);
-
-  const handleSaveCurrentAsLaneSet = useCallback((name: string, description?: string) => {
-    const lanes: LaneSetLanes = {
-      character: activeCharacterIds.length > 0 ? { mode: 'fixed', ids: activeCharacterIds } : { mode: 'off' },
-      dynamics: activeInteractionPhraseId ? { mode: 'fixed', id: activeInteractionPhraseId } : { mode: 'off' },
-      wardrobe: activeOutfitIds.length > 0 ? { mode: 'fixed', ids: activeOutfitIds } : { mode: 'off' },
-      style: activeStyleIds.length > 0 ? { mode: 'fixed', ids: activeStyleIds } : { mode: 'off' },
-      lighting: activeLightingIds.length > 0 ? { mode: 'fixed', ids: activeLightingIds } : { mode: 'off' },
-      composition: activeCompositionIds.length > 0 ? { mode: 'fixed', ids: activeCompositionIds } : { mode: 'off' },
-      mood: activeMoodIds.length > 0 ? { mode: 'fixed', ids: activeMoodIds } : { mode: 'off' },
-      environment: activeEnvironmentIds.length > 0 ? { mode: 'fixed', ids: activeEnvironmentIds } : { mode: 'off' },
-      aura: activeWorld ? { mode: 'fixed', id: activeWorld.id } : { mode: 'off' },
-    };
-    const created = createLaneSet({ name, description, lanes });
-    setLaneSets(prev => [...prev, created]);
-  }, [activeCharacterIds, activeInteractionPhraseId, activeOutfitIds, activeStyleIds, activeLightingIds, activeCompositionIds, activeMoodIds, activeEnvironmentIds, activeWorld]);
-
-  const handleDeleteLaneSet = useCallback((id: string) => {
-    deleteLaneSet(id);
-    setLaneSets(prev => prev.filter(s => s.id !== id));
   }, []);
 
   const handleCreateUniverse = useCallback((input: UniverseInput) => {
@@ -3144,7 +3052,6 @@ export function App() {
         envScale,
         envCondition,
         captureBuffer,
-        activeLaneSetId,
         activeUniverseId,
         pinnedItems: Array.from(pinnedItems),
         targetModel,
@@ -3187,7 +3094,6 @@ export function App() {
     envScale,
     envCondition,
     captureBuffer,
-    activeLaneSetId,
     activeUniverseId,
     pinnedItems,
     targetModel,
@@ -4180,7 +4086,6 @@ export function App() {
           userName={authUser?.name ?? null}
           activeIdentityTags={activeIdentityTags}
           onRandomize={handleRandomizeLanes}
-          onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           onOpenUniverses={() => setIsUniversesOpen(true)}
           onOpenCombos={() => setIsCombosOpen(true)}
           canMarkCombo={Boolean(activeUniverseId && activeStyleIds[0])}
@@ -4222,14 +4127,6 @@ export function App() {
         onClose={() => setIsInteractionOpen(false)}
         activeId={activeInteractionPhraseId}
         onSelect={setActiveInteractionPhraseId}
-      />
-      <LaneSetsModal
-        isOpen={isLaneSetsOpen}
-        onClose={() => setIsLaneSetsOpen(false)}
-        laneSets={laneSets}
-        onApply={handleApplyLaneSet}
-        onDelete={handleDeleteLaneSet}
-        onSaveCurrent={handleSaveCurrentAsLaneSet}
       />
       <UniversesModal
         isOpen={isUniversesOpen}

@@ -1,26 +1,8 @@
-// A multi-select lane (character, style, lighting, etc.) — stores an array of IDs
-export type MultiLaneConfig =
-  | { mode: 'fixed'; ids: string[] }
-  | { mode: 'random'; count: number }
-  | { mode: 'off' };
-
-// A single-select lane (dynamics, aura) — stores one ID or null
-export type SingleLaneConfig =
-  | { mode: 'fixed'; id: string | null }
-  | { mode: 'random' }
-  | { mode: 'off' };
-
-export type LaneSetLanes = {
-  character: MultiLaneConfig;
-  dynamics: SingleLaneConfig;
-  wardrobe: MultiLaneConfig;
-  style: MultiLaneConfig;
-  lighting: MultiLaneConfig;
-  composition: MultiLaneConfig;
-  mood: MultiLaneConfig;
-  environment: MultiLaneConfig;
-  aura: SingleLaneConfig;
-};
+// Pool structure carried on a Universe — arrays of curated lane-item IDs.
+// This is the only thing left in this file after the LaneSet feature was
+// cut in audit Phase 5 (2026-05-31). The MultiLaneConfig / SingleLaneConfig
+// / LaneSet / LaneSetLanes types lived here too but were only consumed by
+// the removed LaneSetsModal + laneSetStore.
 
 export type LaneUniverse = {
   character?: string[];
@@ -33,21 +15,4 @@ export type LaneUniverse = {
   object?: string[];
   negative?: string[];
   aura?: string[];
-};
-
-export type LaneSet = {
-  id: string;
-  name: string;
-  description?: string;
-  tags?: string[];
-  lanes: LaneSetLanes;
-  createdAt: number;
-  updatedAt: number;
-};
-
-export type LaneSetInput = {
-  name: string;
-  description?: string;
-  tags?: string[];
-  lanes: LaneSetLanes;
 };
