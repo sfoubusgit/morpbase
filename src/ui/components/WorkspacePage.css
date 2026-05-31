@@ -870,32 +870,42 @@
   letter-spacing: 0.01em;
 }
 
-/* Per-lane hover glow + locked glow */
-.ws-lane-slot { transition: box-shadow 0.2s; }
+/* Per-lane hover glow (subtle, accent-tinted) */
+.ws-lane-slot { transition: box-shadow 0.2s, background 0.15s; position: relative; }
 
 .ws-lane-slot-character:hover          { box-shadow: 0 0 0 1px rgba(147,197,253,0.45), 0 0 14px rgba(147,197,253,0.2); }
-.ws-lane-slot-character.ws-lane-slot-locked { box-shadow: 0 0 0 1px rgba(147,197,253,0.75), 0 0 18px rgba(147,197,253,0.35); }
-
 .ws-lane-slot-environment:hover        { box-shadow: 0 0 0 1px rgba(110,231,183,0.45), 0 0 14px rgba(110,231,183,0.2); }
-.ws-lane-slot-environment.ws-lane-slot-locked { box-shadow: 0 0 0 1px rgba(110,231,183,0.75), 0 0 18px rgba(110,231,183,0.35); }
-
 .ws-lane-slot-wardrobe:hover           { box-shadow: 0 0 0 1px rgba(255,243,188,0.45), 0 0 14px rgba(255,243,188,0.2); }
-.ws-lane-slot-wardrobe.ws-lane-slot-locked  { box-shadow: 0 0 0 1px rgba(255,243,188,0.75), 0 0 18px rgba(255,243,188,0.35); }
-
 .ws-lane-slot-style:hover              { box-shadow: 0 0 0 1px rgba(168,216,255,0.45), 0 0 14px rgba(168,216,255,0.2); }
-.ws-lane-slot-style.ws-lane-slot-locked     { box-shadow: 0 0 0 1px rgba(168,216,255,0.75), 0 0 18px rgba(168,216,255,0.35); }
-
 .ws-lane-slot-lighting:hover           { box-shadow: 0 0 0 1px rgba(255,213,128,0.45), 0 0 14px rgba(255,213,128,0.2); }
-.ws-lane-slot-lighting.ws-lane-slot-locked  { box-shadow: 0 0 0 1px rgba(255,213,128,0.75), 0 0 18px rgba(255,213,128,0.35); }
-
 .ws-lane-slot-composition:hover        { box-shadow: 0 0 0 1px rgba(158,255,216,0.45), 0 0 14px rgba(158,255,216,0.2); }
-.ws-lane-slot-composition.ws-lane-slot-locked { box-shadow: 0 0 0 1px rgba(158,255,216,0.75), 0 0 18px rgba(158,255,216,0.35); }
-
 .ws-lane-slot-mood:hover               { box-shadow: 0 0 0 1px rgba(196,181,253,0.45), 0 0 14px rgba(196,181,253,0.2); }
-.ws-lane-slot-mood.ws-lane-slot-locked      { box-shadow: 0 0 0 1px rgba(196,181,253,0.75), 0 0 18px rgba(196,181,253,0.35); }
-
 .ws-lane-slot-aura:hover               { box-shadow: 0 0 0 1px rgba(167,139,250,0.45), 0 0 14px rgba(167,139,250,0.2); }
-.ws-lane-slot-aura.ws-lane-slot-locked      { box-shadow: 0 0 0 1px rgba(167,139,250,0.75), 0 0 18px rgba(167,139,250,0.35); }
+
+/* Locked state — unified treatment across all lanes.
+   Reads as "anchored / fixed / preserved" rather than "selected / spotlit":
+   - warm-amber border (not the lane's own accent — different visual language)
+   - subtle amber tint in the background
+   - explicit 🔒 lock icon in the top-right corner
+   The hover glow is overridden so locked lanes don't get the "active" spotlight. */
+.ws-lane-slot.ws-lane-slot-locked,
+.ws-lane-slot.ws-lane-slot-locked:hover {
+  box-shadow: inset 0 0 0 1px rgba(255, 198, 109, 0.55), 0 0 0 1px rgba(255, 198, 109, 0.25);
+  background-color: rgba(255, 198, 109, 0.05);
+}
+
+.ws-lane-slot.ws-lane-slot-locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.85;
+  pointer-events: none;
+  /* the emoji renders at native size; this opacity + size keeps it readable
+     but not loud, matching the "settled" feeling of a locked lane. */
+}
 
 
 .ws-lane-name {
