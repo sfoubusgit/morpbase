@@ -1091,6 +1091,81 @@
   margin: 4px 2px;
 }
 
+/* ── Advanced overrides group (Lighting / Composition / Mood) ────── */
+
+.ws-advanced-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 2px 0;
+}
+
+.ws-advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+
+.ws-advanced-toggle:hover {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+  border-color: var(--border-strong, var(--border-subtle));
+}
+
+.ws-advanced-toggle[aria-expanded="true"] {
+  background: var(--surface-overlay);
+  color: var(--text-primary);
+  border-style: solid;
+}
+
+.ws-advanced-chevron {
+  display: inline-block;
+  font-size: 10px;
+  width: 10px;
+  text-align: center;
+}
+
+.ws-advanced-label {
+  flex: 1;
+  text-align: left;
+}
+
+.ws-advanced-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(140, 220, 240, 0.16);
+  color: #8cdcf0;
+  border: 1px solid rgba(140, 220, 240, 0.4);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+}
+
+.ws-advanced-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 0 4px 14px;
+  border-left: 2px solid var(--border-subtle);
+  margin-left: 6px;
+}
+
 /* ── Negative field label ────────────────────────── */
 
 .workspace-field-label-negative {

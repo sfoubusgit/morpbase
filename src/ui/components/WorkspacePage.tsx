@@ -294,6 +294,7 @@ export function WorkspacePage({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const [dynamicsAnnounced, setDynamicsAnnounced] = useState(false);
+  const [isAdvancedLanesOpen, setIsAdvancedLanesOpen] = useState(false);
   const prevCharCountRef = useRef(activeCharacterItems.length);
 
   useEffect(() => {
@@ -775,39 +776,60 @@ export function WorkspacePage({
               pinnedItems={pinnedItems}
               onTogglePin={onTogglePin}
             />
-            <LaneSlot
-              label="Lighting"
-              activeItems={activeLightingItems}
-              variant="lighting"
-              onRemoveItem={onRemoveLighting}
-              onChoose={onChooseLighting}
-              locked={lockedLanes?.has('lighting')}
-              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('lighting') : undefined}
-              pinnedItems={pinnedItems}
-              onTogglePin={onTogglePin}
-            />
-            <LaneSlot
-              label="Composition"
-              activeItems={activeCompositionItems}
-              variant="composition"
-              onRemoveItem={onRemoveComposition}
-              onChoose={onChooseComposition}
-              locked={lockedLanes?.has('composition')}
-              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('composition') : undefined}
-              pinnedItems={pinnedItems}
-              onTogglePin={onTogglePin}
-            />
-            <LaneSlot
-              label="Mood"
-              activeItems={activeMoodItems}
-              variant="mood"
-              onRemoveItem={onRemoveMood}
-              onChoose={onChooseMood}
-              locked={lockedLanes?.has('mood')}
-              onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('mood') : undefined}
-              pinnedItems={pinnedItems}
-              onTogglePin={onTogglePin}
-            />
+            <div className="ws-advanced-group">
+              <button
+                type="button"
+                className="ws-advanced-toggle"
+                onClick={() => setIsAdvancedLanesOpen(o => !o)}
+                aria-expanded={isAdvancedLanesOpen}
+                title="Advanced overrides — these dimensions are usually already encoded in your Style. Override them only when you want something different."
+              >
+                <span className="ws-advanced-chevron">{isAdvancedLanesOpen ? '▾' : '▸'}</span>
+                <span className="ws-advanced-label">Advanced overrides</span>
+                {(activeLightingItems.length > 0 || activeCompositionItems.length > 0 || activeMoodItems.length > 0) && (
+                  <span className="ws-advanced-count">
+                    {activeLightingItems.length + activeCompositionItems.length + activeMoodItems.length}
+                  </span>
+                )}
+              </button>
+              {isAdvancedLanesOpen && (
+                <div className="ws-advanced-body">
+                  <LaneSlot
+                    label="Lighting"
+                    activeItems={activeLightingItems}
+                    variant="lighting"
+                    onRemoveItem={onRemoveLighting}
+                    onChoose={onChooseLighting}
+                    locked={lockedLanes?.has('lighting')}
+                    onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('lighting') : undefined}
+                    pinnedItems={pinnedItems}
+                    onTogglePin={onTogglePin}
+                  />
+                  <LaneSlot
+                    label="Composition"
+                    activeItems={activeCompositionItems}
+                    variant="composition"
+                    onRemoveItem={onRemoveComposition}
+                    onChoose={onChooseComposition}
+                    locked={lockedLanes?.has('composition')}
+                    onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('composition') : undefined}
+                    pinnedItems={pinnedItems}
+                    onTogglePin={onTogglePin}
+                  />
+                  <LaneSlot
+                    label="Mood"
+                    activeItems={activeMoodItems}
+                    variant="mood"
+                    onRemoveItem={onRemoveMood}
+                    onChoose={onChooseMood}
+                    locked={lockedLanes?.has('mood')}
+                    onToggleLock={onToggleLaneLock ? () => onToggleLaneLock('mood') : undefined}
+                    pinnedItems={pinnedItems}
+                    onTogglePin={onTogglePin}
+                  />
+                </div>
+              )}
+            </div>
             <div className="ws-lane-divider" />
             <MultiLaneSlot
               label="Objects"
