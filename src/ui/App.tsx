@@ -29,7 +29,6 @@ import { ErrorDisplay } from './components/ErrorDisplay';
 import { CategorySidebar } from './components/CategorySidebar';
 import { RandomPromptGenerator } from './components/RandomPromptGenerator';
 import { Modal } from './components/Modal';
-import { WorldsPage } from './components/WorldsPage';
 import { CommunityPage } from './components/CommunityPage';
 import { PromptLibrary } from './components/PromptLibrary';
 import { CharacterLibraryModal } from './components/CharacterLibraryModal';
@@ -46,7 +45,6 @@ import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
 import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
-import { getUnreadDMCount, subscribeToIncomingDMs } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import { IdentityDetailPage, type SharedIdentityData } from './components/community/IdentityDetailPage';
 import type { Notification } from '../types/community';
@@ -372,13 +370,12 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-type PageId = 'generator' | 'identity-systems' | 'prompts' | 'user-pools' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'identity-detail' | 'admin';
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'identity-detail' | 'admin';
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
   'identity-systems': 'lexicon',
   'prompts': 'memory',
-  'user-pools': 'auras',
   'community': 'community',
   'messages': 'messages',
   'my-profile': 'profile',
@@ -463,7 +460,8 @@ export function App() {
       const saved = window.localStorage.getItem('promptgen:active_page');
       if (saved === 'identity-systems') return 'identity-systems';
       if (saved === 'prompts') return 'prompts';
-      if (saved === 'user-pools') return 'user-pools';
+      // 'user-pools' was the Auras page, cut in audit Phase 2; fall back to generator
+      if (saved === 'user-pools') return 'generator';
       if (saved === 'pool-hub' || saved === 'community') return 'community';
       if (saved === 'my-profile') return 'my-profile';
       if (saved === 'creator-profile') return 'creator-profile';
@@ -695,7 +693,6 @@ export function App() {
   const [characters, setCharacters] = useState<CharacterIdentity[]>([]);
   const [charactersLoading, setCharactersLoading] = useState(true);
   const [activeTerritoryId, setActiveTerritory] = useState<string | null>(() => getActiveTerritoryId());
-  const [territoryEditTargetId, setTerritoryEditTargetId] = useState<string | null>(null);
   const [territoryNavigationMode, setTerritoryNavigationMode] = useState<'biased' | 'full'>('biased');
   const [builderTerritoryPickerId, setBuilderTerritoryPickerId] = useState<string>('');
   const [savePromptOpenSignal, setSavePromptOpenSignal] = useState(0);
@@ -2365,7 +2362,10 @@ export function App() {
   }, []);
 
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
-  const [dmUnreadCount, setDmUnreadCount] = useState(0);
+  // dmUnreadCount removed in audit Phase 2 (Messages icon hidden).
+  // To restore: re-add `const [dmUnreadCount, setDmUnreadCount] = useState(0);`
+  // here, restore the subscription useEffect below, and uncomment the
+  // Messages icon button in the nav-right block.
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedIdentity, setSelectedIdentity] = useState<SharedIdentityData | null>(null);
 
@@ -2381,20 +2381,23 @@ export function App() {
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
     setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
-    setDmUnreadCount(0);
     setActivePage('messages');
   }, []);
 
-  useEffect(() => {
-    if (!authUser) { setDmUnreadCount(0); return; }
-    if (activePage === 'messages') { setDmUnreadCount(0); return; }
-    const uid = authUser.authUid;
-    void getUnreadDMCount(uid).then(setDmUnreadCount);
-    const unsubscribe = subscribeToIncomingDMs(uid, () => {
-      setDmUnreadCount(prev => prev + 1);
-    });
-    return unsubscribe;
-  }, [authUser, activePage]);
+  // Removed in audit Phase 2: DM unread-count subscription (icon button is
+  // hidden, so polling for unread DMs is wasted network). To restore alongside
+  // the Messages icon button, re-add the dmUnreadCount state and this effect:
+  //
+  //   useEffect(() => {
+  //     if (!authUser) { setDmUnreadCount(0); return; }
+  //     if (activePage === 'messages') { setDmUnreadCount(0); return; }
+  //     const uid = authUser.authUid;
+  //     void getUnreadDMCount(uid).then(setDmUnreadCount);
+  //     const unsubscribe = subscribeToIncomingDMs(uid, () => {
+  //       setDmUnreadCount(prev => prev + 1);
+  //     });
+  //     return unsubscribe;
+  //   }, [authUser, activePage]);
 
   const handleNotificationNavigate = useCallback((n: Notification) => {
     const p = n.payload;
@@ -2535,15 +2538,9 @@ export function App() {
     lastTerritoryRepositionKeyRef.current = key;
   }, [activeTerritoryCategoryIds, activeTerritoryId, currentNodeId, getCategoryForNode, getPreferredTerritoryStartNodeId, territoryNavigationMode]);
 
-  const handleOpenTerritoryEditor = (territoryId: string) => {
-    setTerritoryEditTargetId(territoryId);
-    setActivePage('user-pools');
-  };
-
-  const handleOpenTerritoryWorkspaceSources = useCallback(() => {
-    setTerritoryEditTargetId(null);
-    setActivePage('user-pools');
-  }, []);
+  // Audit Phase 2: handleOpenTerritoryEditor and
+  // handleOpenTerritoryWorkspaceSources removed — both navigated to the
+  // user-pools (Auras) page which has been cut. Functions had no callers.
 
   const handleCreateTerritory = async (
     name: string,
@@ -3857,7 +3854,9 @@ export function App() {
   };
 
   useEffect(() => {
-    if (activePage === 'user-pools' || activePage === 'generator') {
+    // 'user-pools' was cut in audit Phase 2 (Auras page); territory refresh
+    // now only triggers on the workspace.
+    if (activePage === 'generator') {
       if (authUser) {
         refreshTerritories();
         refreshTerritoryPools();
@@ -3950,8 +3949,13 @@ export function App() {
             <button type="button" className={`nav-tab${activePage === 'generator' ? ' active' : ''}`} onClick={() => setActivePage('generator')}>Workspace</button>
             <button type="button" className={`nav-tab${activePage === 'identity-systems' ? ' active' : ''}`} onClick={() => setActivePage('identity-systems')}>Lexicon</button>
             <button type="button" className={`nav-tab${activePage === 'prompts' ? ' active' : ''}`} onClick={() => setActivePage('prompts')}>Memory</button>
-            <button type="button" className={`nav-tab${activePage === 'user-pools' ? ' active' : ''}`} onClick={() => setActivePage('user-pools')}>Auras</button>
-            <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
+            {/*
+              Hidden by audit Phase 2 (2026-05-31): Community tab. The page code
+              and routing case stay reachable for deep links / admin re-enable.
+              To restore, uncomment.
+
+              <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
+            */}
             <button type="button" className={`nav-tab${activePage === 'my-profile' ? ' active' : ''}`} onClick={() => setActivePage('my-profile')}>Profile</button>
             {isAdmin && (
               <button type="button" className={`nav-tab${activePage === 'admin' ? ' active' : ''}`} onClick={() => setActivePage('admin')}>Admin</button>
@@ -3974,19 +3978,25 @@ export function App() {
             <>
               <OnlinePresenceBadge selfAuthUid={authUser.authUid} onViewUser={handleViewCreator} />
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
-              <button
-                type="button"
-                className={`nav-icon-btn nav-icon-btn--badge${activePage === 'messages' ? ' active' : ''}`}
-                title="Messages"
-                onClick={() => { setDmUnreadCount(0); setActivePage('messages'); }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                {dmUnreadCount > 0 && (
-                  <span className="nav-icon-badge">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>
-                )}
-              </button>
+              {/*
+                Hidden by audit Phase 2 (2026-05-31): Messages icon button.
+                The DMInbox component + routing case stay reachable for deep
+                links / admin re-enable. To restore, uncomment.
+
+                <button
+                  type="button"
+                  className={`nav-icon-btn nav-icon-btn--badge${activePage === 'messages' ? ' active' : ''}`}
+                  title="Messages"
+                  onClick={() => { setDmUnreadCount(0); setActivePage('messages'); }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {dmUnreadCount > 0 && (
+                    <span className="nav-icon-badge">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>
+                  )}
+                </button>
+              */}
               <button
                 type="button"
                 className="nav-user-chip"
@@ -4014,12 +4024,6 @@ export function App() {
         <AdminPage userName={authUser?.name ?? null} />
       ) : activePage === 'identity-systems' ? (
         <LexiconPage />
-      ) : activePage === 'user-pools' ? (
-        <WorldsPage
-          isLoggedIn={true}
-          onWorldCreated={(id) => addToActiveUniverse('aura', id)}
-          onWorldDeleted={(id) => removeFromAllUniverses('aura', id)}
-        />
       ) : activePage === 'my-profile' ? (
         <MyProfilePage
           isLoggedIn={true}
