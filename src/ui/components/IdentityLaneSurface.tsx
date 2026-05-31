@@ -1,4 +1,4 @@
-import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { processCoverImage } from '../utils/coverImageUtils';
 import './IdentityLaneSurface.css';
 
@@ -83,7 +83,17 @@ export function IdentityLaneSurface({
   const [isProcessingCover, setIsProcessingCover] = useState(false);
   const [query, setQuery] = useState('');
 
-  const universeItems = universeFilter
+  // Lean-rebuild universe-pool toggle. When a universe is active and a pool
+  // filter was passed in, default to showing only items in that pool; the
+  // user can flip the toggle off to see the full library.
+  const hasUniverseFilter = Boolean(universeFilter && universeName);
+  const [restrictToUniverse, setRestrictToUniverse] = useState<boolean>(hasUniverseFilter);
+
+  useEffect(() => {
+    setRestrictToUniverse(hasUniverseFilter);
+  }, [hasUniverseFilter, universeName]);
+
+  const universeItems = (universeFilter && restrictToUniverse)
     ? items.filter(i => universeFilter.includes(i.id))
     : items;
 
@@ -206,16 +216,21 @@ export function IdentityLaneSurface({
           <div className="identity-lane-panel-header">
             <div className="identity-lane-panel-title">{config.entityLabelPlural}</div>
             <div className="identity-lane-panel-subtitle">
-              {universeFilter
-                ? `${universeItems.length} of ${items.length} — ${universeName ?? 'universe'}`
+              {hasUniverseFilter && restrictToUniverse
+                ? `${universeItems.length} of ${items.length} — ${universeName}`
                 : `${items.length} ${items.length === 1 ? config.entityLabel.toLowerCase() : config.entityLabelPlural.toLowerCase()}`}
             </div>
           </div>
 
-          {universeFilter && (
-            <div className="identity-lane-universe-banner">
-              Filtered to {universeName ?? 'active universe'}
-            </div>
+          {hasUniverseFilter && (
+            <label className="identity-lane-universe-toggle">
+              <input
+                type="checkbox"
+                checked={restrictToUniverse}
+                onChange={e => setRestrictToUniverse(e.target.checked)}
+              />
+              <span>Only show items in <strong>{universeName}</strong></span>
+            </label>
           )}
 
           {!isLoading && universeItems.length > 0 && (

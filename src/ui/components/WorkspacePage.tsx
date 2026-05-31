@@ -195,6 +195,9 @@ type WorkspacePageProps = {
   onOpenCombos?: () => void;
   canMarkCombo?: boolean;
   onMarkCombo?: () => void;
+  // Back to the universes-grid landing screen. When set, a "◄ Universes"
+  // link renders in the workspace top header.
+  onBackToLanding?: () => void;
   activeUniverseName?: string | null;
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
@@ -274,6 +277,7 @@ export function WorkspacePage({
   onOpenCombos,
   canMarkCombo,
   onMarkCombo,
+  onBackToLanding,
   activeUniverseName,
   onDeactivateUniverse,
   lockedLanes,
@@ -357,6 +361,37 @@ export function WorkspacePage({
 
   return (
     <div className="workspace-page">
+      {/* Lean-rebuild universe context bar. Persistent across the workspace
+          so the active universe is always visible, and a one-click way back
+          to the universes-grid landing screen. */}
+      {(onBackToLanding || onOpenUniverses) && (
+        <div className="ws-context-bar">
+          {onBackToLanding && (
+            <button
+              type="button"
+              className="ws-context-bar__back"
+              onClick={onBackToLanding}
+              title="Back to Universes"
+            >
+              ◄ Universes
+            </button>
+          )}
+          <button
+            type="button"
+            className={`ws-context-bar__working-in${activeUniverseName ? ' is-active' : ' is-none'}`}
+            onClick={onOpenUniverses}
+            title={activeUniverseName
+              ? `Working in ${activeUniverseName} — click to switch or edit`
+              : 'No universe active — click to pick or create one'}
+          >
+            <span className="ws-context-bar__label">Working in:</span>
+            <span className="ws-context-bar__name">
+              {activeUniverseName ? `◈ ${activeUniverseName}` : '(no universe)'}
+            </span>
+            <span className="ws-context-bar__caret">▾</span>
+          </button>
+        </div>
+      )}
       <div className="workspace-body">
 
         {/* Left column: output */}
@@ -553,16 +588,6 @@ export function WorkspacePage({
             <div className="ws-panel-header-top">
               <span className="workspace-panel-title">Identities</span>
               <div className="ws-panel-header-pickers">
-                {onOpenUniverses && (
-                  <button
-                    type="button"
-                    className={`ws-universes-btn${activeUniverseName ? ' ws-universes-btn-active' : ''}`}
-                    onClick={onOpenUniverses}
-                    title="Browse Universes"
-                  >
-                    ◈ Universes
-                  </button>
-                )}
                 {onOpenCombos && (
                   <button
                     type="button"

@@ -100,6 +100,7 @@ import {
 } from '../engine/negativeStore';
 import { WardrobeModal } from './components/WardrobeModal';
 import { WorkspacePage } from './components/WorkspacePage';
+import { WorkspaceLandingScreen } from './components/WorkspaceLandingScreen';
 import { StyleModal } from './components/StyleModal';
 import { ComboMatrixModal } from './components/ComboMatrixModal';
 import { LightingModal } from './components/LightingModal';
@@ -232,6 +233,7 @@ type BuilderSessionSnapshot = {
   envCondition: string | null;
   captureBuffer: string[];
   activeUniverseId: string | null;
+  hasEnteredWorkspace: boolean;
   pinnedItems: string[];
   targetModel: 'z-image' | 'illustrious';
 };
@@ -355,6 +357,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
         ? (parsed.captureBuffer as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
       activeUniverseId: typeof parsed.activeUniverseId === 'string' ? parsed.activeUniverseId : null,
+      hasEnteredWorkspace: typeof parsed.hasEnteredWorkspace === 'boolean' ? parsed.hasEnteredWorkspace : false,
       pinnedItems: Array.isArray(parsed.pinnedItems)
         ? (parsed.pinnedItems as unknown[]).filter((x): x is string => typeof x === 'string')
         : [],
@@ -553,6 +556,13 @@ export function App() {
   const [captureBuffer, setCaptureBuffer] = useState<string[]>(initialBuilderSession?.captureBuffer ?? []);
   const [universes, setUniverses] = useState<Universe[]>(() => listUniverses());
   const [activeUniverseId, setActiveUniverseId] = useState<string | null>(initialBuilderSession?.activeUniverseId ?? null);
+  // The lean workspace landing: when a user has never entered the workspace
+  // (first visit, no saved universe), show the Universes grid landing first.
+  // After picking a universe or hitting "Just experiment", hasEnteredWorkspace
+  // flips true and persists, so subsequent visits land directly in the workspace.
+  const [hasEnteredWorkspace, setHasEnteredWorkspace] = useState<boolean>(
+    initialBuilderSession?.hasEnteredWorkspace ?? false
+  );
   const [isUniversesOpen, setIsUniversesOpen] = useState(false);
   const [isEnvironmentLibraryOpen, setIsEnvironmentLibraryOpen] = useState(false);
   const [poolOutputOverrides, setPoolOutputOverrides] = useState<Map<string, string>>(
@@ -2183,6 +2193,24 @@ export function App() {
     setActiveUniverseId(null);
   }, []);
 
+  // --- Landing screen wiring (lean workspace rebuild) ---
+  // Three entry points out of the universe-grid landing into the workspace:
+  // pick a universe (focuses lane pools on it), just experiment (no universe),
+  // or new universe (opens the existing Universes modal to author one). All
+  // three flip hasEnteredWorkspace so the landing is skipped on next visit.
+  const handlePickUniverseFromLanding = useCallback((id: string) => {
+    setActiveUniverseId(id);
+    setHasEnteredWorkspace(true);
+  }, []);
+
+  const handleJustExperiment = useCallback(() => {
+    setHasEnteredWorkspace(true);
+  }, []);
+
+  const handleBackToLanding = useCallback(() => {
+    setHasEnteredWorkspace(false);
+  }, []);
+
   const refreshNegativePresets = useCallback(async () => {
     try {
       const next = await listNegativePresets();
@@ -3053,6 +3081,7 @@ export function App() {
         envCondition,
         captureBuffer,
         activeUniverseId,
+        hasEnteredWorkspace,
         pinnedItems: Array.from(pinnedItems),
         targetModel,
       };
@@ -3095,6 +3124,7 @@ export function App() {
     envCondition,
     captureBuffer,
     activeUniverseId,
+    hasEnteredWorkspace,
     pinnedItems,
     targetModel,
   ]);
@@ -4026,6 +4056,13 @@ export function App() {
           externalOpenSaveSignal={savePromptOpenSignal}
           defaultSaveName={captureAutoName}
         />
+      ) : !hasEnteredWorkspace ? (
+        <WorkspaceLandingScreen
+          universes={universes}
+          onPickUniverse={handlePickUniverseFromLanding}
+          onJustExperiment={handleJustExperiment}
+          onNewUniverse={() => { setIsUniversesOpen(true); }}
+        />
       ) : (
         <WorkspacePage
           activeChipTexts={activeChipTexts}
@@ -4090,6 +4127,7 @@ export function App() {
           onOpenCombos={() => setIsCombosOpen(true)}
           canMarkCombo={Boolean(activeUniverseId && activeStyleIds[0])}
           onMarkCombo={handleMarkCurrentCombo}
+          onBackToLanding={handleBackToLanding}
           activeUniverseName={activeUniverseName}
           onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}

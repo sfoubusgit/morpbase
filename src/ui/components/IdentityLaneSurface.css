@@ -104,6 +104,36 @@
   margin: 0 0 4px;
 }
 
+.identity-lane-universe-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: rgba(200, 175, 255, 0.06);
+  border: 1px solid rgba(200, 175, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 0 0 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.identity-lane-universe-toggle:hover {
+  background: rgba(200, 175, 255, 0.1);
+  border-color: rgba(200, 175, 255, 0.32);
+}
+
+.identity-lane-universe-toggle input[type="checkbox"] {
+  accent-color: #c8afff;
+  cursor: pointer;
+}
+
+.identity-lane-universe-toggle strong {
+  color: #c8afff;
+  font-weight: var(--font-weight-bold);
+}
+
 .identity-lane-search {
   width: 100%;
   box-sizing: border-box;
