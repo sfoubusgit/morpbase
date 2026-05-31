@@ -45,6 +45,7 @@ import { PublicCreatorPage } from './components/PublicCreatorPage';
 import { NotificationBell } from './components/notifications/NotificationBell';
 import { OnlinePresenceBadge } from './components/presence/OnlinePresenceBadge';
 import { DMInbox } from './components/dm/DMInbox';
+import { getUnreadDMCount, subscribeToIncomingDMs } from '../engine/dmStore';
 import { PostDetailPage } from './components/wall/PostDetailPage';
 import { IdentityDetailPage, type SharedIdentityData } from './components/community/IdentityDetailPage';
 import type { Notification } from '../types/community';
@@ -2314,10 +2315,7 @@ export function App() {
   }, []);
 
   const [dmInitialRecipient, setDmInitialRecipient] = useState<{ authUid: string; name: string } | null>(null);
-  // dmUnreadCount removed in audit Phase 2 (Messages icon hidden).
-  // To restore: re-add `const [dmUnreadCount, setDmUnreadCount] = useState(0);`
-  // here, restore the subscription useEffect below, and uncomment the
-  // Messages icon button in the nav-right block.
+  const [dmUnreadCount, setDmUnreadCount] = useState(0);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedIdentity, setSelectedIdentity] = useState<SharedIdentityData | null>(null);
 
@@ -2333,23 +2331,20 @@ export function App() {
 
   const handleStartDM = useCallback((recipientAuthUid: string, recipientName: string) => {
     setDmInitialRecipient({ authUid: recipientAuthUid, name: recipientName });
+    setDmUnreadCount(0);
     setActivePage('messages');
   }, []);
 
-  // Removed in audit Phase 2: DM unread-count subscription (icon button is
-  // hidden, so polling for unread DMs is wasted network). To restore alongside
-  // the Messages icon button, re-add the dmUnreadCount state and this effect:
-  //
-  //   useEffect(() => {
-  //     if (!authUser) { setDmUnreadCount(0); return; }
-  //     if (activePage === 'messages') { setDmUnreadCount(0); return; }
-  //     const uid = authUser.authUid;
-  //     void getUnreadDMCount(uid).then(setDmUnreadCount);
-  //     const unsubscribe = subscribeToIncomingDMs(uid, () => {
-  //       setDmUnreadCount(prev => prev + 1);
-  //     });
-  //     return unsubscribe;
-  //   }, [authUser, activePage]);
+  useEffect(() => {
+    if (!authUser) { setDmUnreadCount(0); return; }
+    if (activePage === 'messages') { setDmUnreadCount(0); return; }
+    const uid = authUser.authUid;
+    void getUnreadDMCount(uid).then(setDmUnreadCount);
+    const unsubscribe = subscribeToIncomingDMs(uid, () => {
+      setDmUnreadCount(prev => prev + 1);
+    });
+    return unsubscribe;
+  }, [authUser, activePage]);
 
   const handleNotificationNavigate = useCallback((n: Notification) => {
     const p = n.payload;
@@ -3901,13 +3896,7 @@ export function App() {
             <button type="button" className={`nav-tab${activePage === 'generator' ? ' active' : ''}`} onClick={() => setActivePage('generator')}>Workspace</button>
             <button type="button" className={`nav-tab${activePage === 'identity-systems' ? ' active' : ''}`} onClick={() => setActivePage('identity-systems')}>Lexicon</button>
             <button type="button" className={`nav-tab${activePage === 'prompts' ? ' active' : ''}`} onClick={() => setActivePage('prompts')}>Memory</button>
-            {/*
-              Hidden by audit Phase 2 (2026-05-31): Community tab. The page code
-              and routing case stay reachable for deep links / admin re-enable.
-              To restore, uncomment.
-
-              <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
-            */}
+            <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
             <button type="button" className={`nav-tab${activePage === 'my-profile' ? ' active' : ''}`} onClick={() => setActivePage('my-profile')}>Profile</button>
             {isAdmin && (
               <button type="button" className={`nav-tab${activePage === 'admin' ? ' active' : ''}`} onClick={() => setActivePage('admin')}>Admin</button>
@@ -3930,25 +3919,19 @@ export function App() {
             <>
               <OnlinePresenceBadge selfAuthUid={authUser.authUid} onViewUser={handleViewCreator} />
               <NotificationBell authUid={authUser.authUid} onNavigate={handleNotificationNavigate} />
-              {/*
-                Hidden by audit Phase 2 (2026-05-31): Messages icon button.
-                The DMInbox component + routing case stay reachable for deep
-                links / admin re-enable. To restore, uncomment.
-
-                <button
-                  type="button"
-                  className={`nav-icon-btn nav-icon-btn--badge${activePage === 'messages' ? ' active' : ''}`}
-                  title="Messages"
-                  onClick={() => { setDmUnreadCount(0); setActivePage('messages'); }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  {dmUnreadCount > 0 && (
-                    <span className="nav-icon-badge">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>
-                  )}
-                </button>
-              */}
+              <button
+                type="button"
+                className={`nav-icon-btn nav-icon-btn--badge${activePage === 'messages' ? ' active' : ''}`}
+                title="Messages"
+                onClick={() => { setDmUnreadCount(0); setActivePage('messages'); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {dmUnreadCount > 0 && (
+                  <span className="nav-icon-badge">{dmUnreadCount > 9 ? '9+' : dmUnreadCount}</span>
+                )}
+              </button>
               <button
                 type="button"
                 className="nav-user-chip"
