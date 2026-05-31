@@ -194,6 +194,8 @@ type WorkspacePageProps = {
   onOpenLaneSets?: () => void;
   onOpenUniverses?: () => void;
   onOpenCombos?: () => void;
+  canMarkCombo?: boolean;
+  onMarkCombo?: () => void;
   activeUniverseName?: string | null;
   onDeactivateUniverse?: () => void;
   lockedLanes?: Set<string>;
@@ -272,6 +274,8 @@ export function WorkspacePage({
   onOpenLaneSets,
   onOpenUniverses,
   onOpenCombos,
+  canMarkCombo,
+  onMarkCombo,
   activeUniverseName,
   onDeactivateUniverse,
   lockedLanes,
@@ -575,6 +579,21 @@ export function WorkspacePage({
                     title="Browse Combos (universe × style matrix)"
                   >
                     ▦ Combos
+                  </button>
+                )}
+                {onMarkCombo && (
+                  <button
+                    type="button"
+                    className={`ws-universes-btn ws-mark-combo-btn${canMarkCombo ? '' : ' is-disabled'}`}
+                    onClick={canMarkCombo ? onMarkCombo : undefined}
+                    disabled={!canMarkCombo}
+                    title={
+                      canMarkCombo
+                        ? 'Annotate the current Universe × Style as a Combo (status + notes).'
+                        : 'Activate a Universe and a Style first — then mark them as a Combo.'
+                    }
+                  >
+                    ★ Mark Combo
                   </button>
                 )}
               </div>

@@ -34,6 +34,18 @@ const SECTIONS: Section[] = [
         term: 'Capture',
         body: 'Saves a snapshot of the current assembled prompt into a temporary batch. Capture several variations in a session, then save the whole batch as a named set. Each capture is independent — changing lanes afterwards does not affect what you already captured.',
       },
+      {
+        term: 'Combo',
+        body: 'A single (Universe × Style) pair, treated as one validated unit. Combos let you remember what worked, what failed, and what you have not tried yet — without re-typing the underlying material. Marked from the workspace via the ★ Mark Combo button or browsed from the ▦ Combos matrix.',
+      },
+      {
+        term: 'Combo Matrix',
+        body: 'The grid view of every Universe × Style pair. Rows are universes, columns are styles. Each cell shows a status glyph: · untried, ○ sampled, ✓ won, ✗ failed. Click any cell to set a status, add a note about what happened, or activate that universe + style live in the workspace.',
+      },
+      {
+        term: 'Mark Combo',
+        body: 'A workspace toolbar action that opens the Combo Matrix pre-focused on whatever Universe + Style you currently have active. Use it after you have just confirmed a render works (or does not) — annotate in one click, no navigation required.',
+      },
     ],
   },
   {

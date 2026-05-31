@@ -17,6 +17,10 @@ type ComboMatrixModalProps = {
   styles: StyleRef[];
   notes: ComboNote[];
   isLoading?: boolean;
+  // When set, the matrix opens with this cell pre-selected so the editor
+  // is ready to annotate immediately. Useful for the workspace "Mark Combo"
+  // entry point.
+  initialSelection?: { universeId: string; styleId: string } | null;
   onUpsert: (input: ComboNoteInput) => Promise<ComboNote>;
   onDelete: (id: string) => Promise<void>;
   onActivate: (universeId: string, styleId: string) => void;
@@ -51,6 +55,7 @@ export function ComboMatrixModal({
   styles,
   notes,
   isLoading = false,
+  initialSelection = null,
   onUpsert,
   onDelete,
   onActivate,
@@ -65,14 +70,26 @@ export function ComboMatrixModal({
 
   useEffect(() => {
     if (isOpen) {
-      setSelected(null);
-      setEditStatus('sampled');
-      setEditNotes('');
       setError(null);
       setFilter('all');
       setQuery('');
+      if (initialSelection && initialSelection.universeId && initialSelection.styleId) {
+        // Pre-select the cell + load its existing note (if any) so the editor
+        // is ready for the user. Used by the workspace "★ Mark Combo" button.
+        setSelected({ universeId: initialSelection.universeId, styleId: initialSelection.styleId });
+        const existing = notes.find(
+          n => n.universeId === initialSelection.universeId && n.styleId === initialSelection.styleId
+        );
+        setEditStatus(existing?.status ?? 'sampled');
+        setEditNotes(existing?.notes ?? '');
+      } else {
+        setSelected(null);
+        setEditStatus('sampled');
+        setEditNotes('');
+      }
     }
-  }, [isOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, initialSelection]);
 
   // Index notes by (universeId, styleId) for O(1) cell lookups.
   const noteByPair = useMemo(() => {

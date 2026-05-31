@@ -516,6 +516,7 @@ export function App() {
   const [isStyleOpen, setIsStyleOpen] = useState(false);
   const [comboNotes, setComboNotes] = useState<ComboNote[]>([]);
   const [isCombosOpen, setIsCombosOpen] = useState(false);
+  const [comboInitialSelection, setComboInitialSelection] = useState<{ universeId: string; styleId: string } | null>(null);
   const [activeLightingIds, setActiveLightingIds] = useState<string[]>(initialBuilderSession?.activeLightingIds ?? []);
   const [lightingSetups, setLightingSetups] = useState<LightingSetup[]>([]);
   const [isLightingOpen, setIsLightingOpen] = useState(false);
@@ -1849,6 +1850,21 @@ export function App() {
       setActiveStyleIds(prev => prev.includes(styleId) ? prev : [...prev, styleId]);
     }
     setIsCombosOpen(false);
+  }, []);
+
+  // Open the Combo Matrix pre-selected on the (universe, style) pair currently
+  // active in the workspace. Triggered by the workspace "★ Mark Combo" button.
+  const handleMarkCurrentCombo = useCallback(() => {
+    const u = activeUniverseId;
+    const s = activeStyleIds[0];
+    if (!u || !s) return;
+    setComboInitialSelection({ universeId: u, styleId: s });
+    setIsCombosOpen(true);
+  }, [activeUniverseId, activeStyleIds]);
+
+  const handleCloseCombos = useCallback(() => {
+    setIsCombosOpen(false);
+    setComboInitialSelection(null);
   }, []);
 
   const handleCreateStylePreset = useCallback(async (input: StylePresetInput) => {
@@ -4167,6 +4183,8 @@ export function App() {
           onOpenLaneSets={() => setIsLaneSetsOpen(true)}
           onOpenUniverses={() => setIsUniversesOpen(true)}
           onOpenCombos={() => setIsCombosOpen(true)}
+          canMarkCombo={Boolean(activeUniverseId && activeStyleIds[0])}
+          onMarkCombo={handleMarkCurrentCombo}
           activeUniverseName={activeUniverseName}
           onDeactivateUniverse={handleDeactivateUniverse}
           lockedLanes={lockedLanes}
@@ -4272,10 +4290,11 @@ export function App() {
       />
       <ComboMatrixModal
         isOpen={isCombosOpen}
-        onClose={() => setIsCombosOpen(false)}
+        onClose={handleCloseCombos}
         universes={universes.map(u => ({ id: u.id, name: u.name }))}
         styles={stylePresets.map(s => ({ id: s.id, name: s.name }))}
         notes={comboNotes}
+        initialSelection={comboInitialSelection}
         onUpsert={handleUpsertComboNote}
         onDelete={handleDeleteComboNote}
         onActivate={handleActivateCombo}

@@ -1091,6 +1091,24 @@
   margin: 4px 2px;
 }
 
+/* ── Mark Combo button (workspace toolbar) ───────── */
+
+.ws-mark-combo-btn {
+  border-color: rgba(200, 175, 255, 0.45) !important;
+  color: #c8afff !important;
+}
+
+.ws-mark-combo-btn:hover:not(:disabled) {
+  background: rgba(200, 175, 255, 0.12) !important;
+  border-color: rgba(200, 175, 255, 0.7) !important;
+}
+
+.ws-mark-combo-btn.is-disabled,
+.ws-mark-combo-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ── Advanced overrides group (Lighting / Composition / Mood) ────── */
 
 .ws-advanced-group {
