@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { CharacterIdentity } from '../../types/characters';
 import { CharacterWall } from './CharacterWall';
+import { listMyGeneratedImages, type RemoteImage } from './channelImagesStore';
 
 type V3ProfileProps = {
   viewerName: string;
   viewerAvatarUrl?: string | null;
+  viewerAuthUid?: string | null;
   /** local characters == this creator's own creations */
   characters: CharacterIdentity[];
   favorites: string[];
@@ -27,6 +29,7 @@ type ProfileTab = 'created' | 'favorites' | 'generated';
 export function V3Profile({
   viewerName,
   viewerAvatarUrl,
+  viewerAuthUid,
   characters,
   favorites,
   scene,
@@ -38,6 +41,15 @@ export function V3Profile({
   onLogin,
 }: V3ProfileProps) {
   const [tab, setTab] = useState<ProfileTab>('created');
+  const [generated, setGenerated] = useState<RemoteImage[]>([]);
+
+  // Pull the real images this user has generated + saved to channels.
+  useEffect(() => {
+    if (!viewerAuthUid) { setGenerated([]); return; }
+    let live = true;
+    listMyGeneratedImages(viewerAuthUid).then(v => { if (live) setGenerated(v); }).catch(() => { /* offline */ });
+    return () => { live = false; };
+  }, [viewerAuthUid]);
 
   const created = characters; // local store = this user's own creations
   const favs = characters.filter(c => favorites.includes(c.id));
@@ -66,17 +78,29 @@ export function V3Profile({
       <div className="v3-metrics v3-prof-metrics">
         <div className="v3-metric"><div className="v">{created.length}</div><div className="k">Characters</div></div>
         <div className="v3-metric"><div className="v">{favs.length}</div><div className="k">Favorites</div></div>
-        <div className="v3-metric"><div className="v">0</div><div className="k">Generated</div></div>
+        <div className="v3-metric"><div className="v">{generated.length}</div><div className="k">Generated</div></div>
       </div>
 
       <div className="v3-tabs">
         <button type="button" className={`v3-tab2${tab === 'created' ? ' on' : ''}`} onClick={() => setTab('created')}>Created · {created.length}</button>
         <button type="button" className={`v3-tab2${tab === 'favorites' ? ' on' : ''}`} onClick={() => setTab('favorites')}>Favorites · {favs.length}</button>
-        <button type="button" className={`v3-tab2${tab === 'generated' ? ' on' : ''}`} onClick={() => setTab('generated')}>Generated</button>
+        <button type="button" className={`v3-tab2${tab === 'generated' ? ' on' : ''}`} onClick={() => setTab('generated')}>Generated{generated.length > 0 ? ` · ${generated.length}` : ''}</button>
       </div>
 
       {tab === 'generated' ? (
-        <div className="v3-empty">Your generated images will appear here once you render and save them.</div>
+        generated.length === 0 ? (
+          <div className="v3-empty">
+            {viewerAuthUid
+              ? 'Your generated images will appear here once you render and save them to a channel.'
+              : 'Log in to see the images you’ve generated.'}
+          </div>
+        ) : (
+          <div className="v3-gal">
+            {generated.map(g => (
+              <div key={g.id} className="g" style={{ backgroundImage: `url(${g.url})` }}><small>@{g.author}</small></div>
+            ))}
+          </div>
+        )
       ) : (
         <CharacterWall
           characters={tab === 'created' ? created : favs}

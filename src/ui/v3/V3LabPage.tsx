@@ -232,6 +232,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <V3Profile
             viewerName={viewer}
             viewerAvatarUrl={viewerAvatarUrl}
+            viewerAuthUid={viewerAuthUid}
             characters={characters}
             favorites={favorites}
             scene={scene}

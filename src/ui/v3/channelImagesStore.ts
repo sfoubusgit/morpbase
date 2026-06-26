@@ -28,6 +28,23 @@ export async function listGeneratedImages(subjectId: string): Promise<RemoteImag
   }));
 }
 
+/** Public — list every image a given user has generated, newest first. */
+export async function listMyGeneratedImages(authUid: string): Promise<RemoteImage[]> {
+  const { data, error } = await supabase
+    .from('v3_channel_images')
+    .select('id, author_label, url, created_at')
+    .eq('author_auth_uid', authUid)
+    .order('created_at', { ascending: false })
+    .limit(120);
+  if (error || !data) return [];
+  return data.map((r: { id: string; author_label: string | null; url: string; created_at: string }) => ({
+    id: r.id,
+    author: r.author_label || 'creator',
+    url: r.url,
+    createdAt: r.created_at,
+  }));
+}
+
 /** Authenticated — upload a generated image blob and record it on the channel. */
 export async function saveGeneratedImage(params: {
   subjectId: string;
