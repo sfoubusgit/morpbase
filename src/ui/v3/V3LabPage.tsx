@@ -7,6 +7,8 @@ import { ItemChannel } from './ItemChannel';
 import { SynthesizePanel } from './SynthesizePanel';
 import { GeneratePanel } from './GeneratePanel';
 import { V3Profile } from './V3Profile';
+import { LaneItemComposer } from './LaneItemComposer';
+import { listLaneItems, type RemoteLaneItem } from './laneItemsStore';
 import type { SynthElement } from './synthesis';
 import { SCENERY_ITEMS } from './scenery';
 import { OBJECT_ITEMS } from './objects';
@@ -74,6 +76,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [showProfile, setShowProfile] = useState(false);
   const [flow, setFlow] = useState<'synthesize' | 'generate' | null>(null);
   const [genPrompt, setGenPrompt] = useState('');
+  const [createdLaneItems, setCreatedLaneItems] = useState<RemoteLaneItem[]>([]);
+  const [composerOpen, setComposerOpen] = useState(false);
+
+  // User-created lane objects (shared via Supabase) merged into the seeded lanes.
+  useEffect(() => {
+    let live = true;
+    listLaneItems().then(items => { if (live) setCreatedLaneItems(items); }).catch(() => { /* offline → seeds only */ });
+    return () => { live = false; };
+  }, []);
 
   const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); };
   const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
@@ -95,8 +106,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         m[it.id] = { id: it.id, lane: wl.ph, kind: wl.kind, name: it.name, accent: wl.accent, tint: it.tint, image: null, phrases: it.phrases };
       }
     }
+    // User-created lane objects resolve through the same registry as seeds.
+    for (const it of createdLaneItems) {
+      const wl = WALL_LANES[it.lane];
+      if (!wl) continue;
+      m[it.id] = { id: it.id, lane: wl.ph, kind: wl.kind, name: it.name, accent: wl.accent, tint: tintIndex(it.id), image: it.coverUrl, phrases: it.phrases };
+    }
     return m;
-  }, [characters]);
+  }, [characters, createdLaneItems]);
 
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
   const removeFromScene = (id: string) => setScene(s => s.filter(x => x !== id));
@@ -129,10 +146,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const wallView = useMemo(() => {
     const wl = WALL_LANES[lane];
     if (!wl) return [];
-    return wl.items
+    const created = createdLaneItems
+      .filter(it => it.lane === lane && (!q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q)))
+      .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: tintIndex(it.id), image: it.coverUrl }));
+    const seeds = wl.items
       .filter(it => !q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q))
-      .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: it.tint }));
-  }, [lane, q]);
+      .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: it.tint, image: null as string | null }));
+    return [...created, ...seeds];
+  }, [lane, q, createdLaneItems]);
 
   // Favorites span every lane — each card carries its own accent/badge.
   const favItems = useMemo(
@@ -301,6 +322,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                 <h2>{WALL_LANES[lane].label}</h2>
                 <div className="v3-sub">{wallView.length} item{wallView.length === 1 ? '' : 's'} · {WALL_LANES[lane].sub}</div>
               </div>
+              <button
+                type="button"
+                className="v3-create-btn"
+                style={cssVar(WALL_LANES[lane].accent)}
+                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
+                title={viewerAuthUid ? `Create a new ${WALL_LANES[lane].label.toLowerCase()} object` : 'Log in to create'}
+              >
+                <span className="pl">＋</span> Create
+              </button>
             </div>
             <LaneWall
               items={wallView}
@@ -367,6 +397,18 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             Synthesize ({scene.length})
           </button>
         </div>
+      )}
+
+      {composerOpen && WALL_LANES[lane] && viewerAuthUid && (
+        <LaneItemComposer
+          lane={lane}
+          laneLabel={WALL_LANES[lane].label}
+          accent={WALL_LANES[lane].accent}
+          viewerName={viewer}
+          viewerAuthUid={viewerAuthUid}
+          onClose={() => setComposerOpen(false)}
+          onCreated={item => { setCreatedLaneItems(prev => [item, ...prev]); setComposerOpen(false); }}
+        />
       )}
     </div>
   );
