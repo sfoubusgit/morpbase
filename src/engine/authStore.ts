@@ -196,6 +196,26 @@ export const logoutUser = async (): Promise<void> => {
   if (error) throw error;
 };
 
+/**
+ * Subscribe to auth changes. Crucial for OAuth (Google): the redirect back
+ * from the provider resolves the session asynchronously, which can land just
+ * after the initial mount check — this fires SIGNED_IN once it does. Also keeps
+ * the app in sync on cross-tab logout. Returns an unsubscribe fn.
+ */
+export const onAuthChange = (
+  onSignedIn: (user: AuthUser) => void,
+  onSignedOut: () => void,
+): (() => void) => {
+  const { data } = supabase.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_IN') {
+      void getCurrentUser().then(user => { if (user) onSignedIn(user); });
+    } else if (event === 'SIGNED_OUT') {
+      onSignedOut();
+    }
+  });
+  return () => data.subscription.unsubscribe();
+};
+
 export const updateUserName = async (name: string): Promise<AuthUser> => {
   const trimmed = name.trim();
   if (!trimmed) throw new Error('Name is required.');

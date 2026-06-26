@@ -125,6 +125,7 @@ import {
   getCurrentUser,
   loginUser,
   logoutUser,
+  onAuthChange,
   registerUser,
   signInWithGoogle,
   updateUserName,
@@ -1504,20 +1505,37 @@ export function App() {
 
   useEffect(() => {
     let isMounted = true;
+    let currentUid: string | null = null;
+    const adopt = (user: Awaited<ReturnType<typeof getCurrentUser>>) => {
+      if (!isMounted) return;
+      setAuthUser(user);
+      if (user && user.authUid !== currentUid) {
+        currentUid = user.authUid;
+        void initPresence(user.authUid, user.id, user.name);
+      }
+      if (!user) currentUid = null;
+    };
+
     getCurrentUser()
       .then(user => {
-        if (!isMounted) return;
-        setAuthUser(user);
-        if (user) void initPresence(user.authUid, user.id, user.name);
+        adopt(user);
         setAuthReady(true);
       })
       .catch(() => {
-        if (!isMounted) return;
-        setAuthUser(null);
+        adopt(null);
         setAuthReady(true);
       });
+
+    // OAuth (Google) resolves the session after the redirect — this catches it,
+    // and keeps us in sync on cross-tab logout.
+    const unsubscribe = onAuthChange(
+      user => adopt(user),
+      () => { destroyPresence(); adopt(null); },
+    );
+
     return () => {
       isMounted = false;
+      unsubscribe();
     };
   }, []);
 
