@@ -490,6 +490,17 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
 .v3-fields { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
 .v3-field2 { display: inline-flex; align-items: center; gap: 8px; background: rgba(8, 9, 14, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 7px 13px; font-size: 13px; color: var(--text-secondary); }
 .v3-field2 select { background: var(--surface-1); border: 1px solid var(--border-medium); border-radius: var(--radius-xs); color: #fff; padding: 4px 8px; font: 13px var(--font-primary); cursor: pointer; }
+/* character consistency lock */
+.v3-lock { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 8px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: rgba(8, 9, 14, 0.4); }
+.v3-lock.on { border-color: var(--border-accent); background: var(--accent-primary-bg); }
+.v3-lock-toggle { flex: 1; display: flex; align-items: center; gap: 10px; background: none; border: none; cursor: pointer; font-family: inherit; text-align: left; color: var(--text-primary); padding: 2px; }
+.v3-lock-toggle .ic { font-size: 16px; line-height: 1; }
+.v3-lock-toggle .tx { display: flex; flex-direction: column; gap: 1px; }
+.v3-lock-toggle .tx b { font: var(--font-weight-semibold) 13px var(--font-primary); }
+.v3-lock-toggle .tx small { font-size: 11px; color: var(--text-tertiary); }
+.v3-lock-vary { flex: none; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); padding: 6px 12px; cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); }
+.v3-lock-vary:hover { color: #fff; border-color: var(--border-accent); }
+
 .v3-gen-go { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
 .v3-bar { flex: 1; height: 7px; border-radius: var(--radius-pill); background: rgba(8, 9, 14, 0.6); overflow: hidden; border: 1px solid var(--border-subtle); }
 .v3-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-primary), #36d3c4); transition: width 140ms linear; }

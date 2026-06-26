@@ -35,8 +35,21 @@ export const STYLE_PRESETS: StylePreset[] = [
 ];
 
 export type GenResult = { id: string; tint: number; prompt: string; styleId: string; url?: string };
-export type GenParams = { count: number; aspect: string; styleId: string };
+export type GenParams = {
+  count: number;
+  aspect: string;
+  styleId: string;
+  /** fixed seed for character consistency; random when omitted */
+  seed?: number;
+};
 export type GenProgress = { value: number; max: number };
+
+/** Deterministic seed from a stable id (e.g. a character id) — the consistency anchor. */
+export function consistencySeed(id: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) { h ^= id.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return (h >>> 0) % 1_000_000_000;
+}
 
 export interface GenerationProvider {
   generate(prompt: string, params: GenParams, onProgress?: (p: GenProgress) => void): Promise<GenResult[]>;
@@ -180,7 +193,7 @@ class ComfyGenerationProvider implements GenerationProvider {
     const style = STYLE_PRESETS.find(s => s.id === params.styleId);
     const full = style ? `${style.prefix}, ${prompt}` : prompt;
     const { w, h } = dimsFor(params.aspect);
-    const seed = Math.floor(Math.random() * 1_000_000_000_000) + 1;
+    const seed = params.seed ?? Math.floor(Math.random() * 1_000_000_000_000) + 1;
     const graph = krea2Graph(full, seed, w, h, Math.max(1, params.count));
     const clientId =
       (typeof crypto !== 'undefined' && 'randomUUID' in crypto)

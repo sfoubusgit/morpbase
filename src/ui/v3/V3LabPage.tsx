@@ -7,6 +7,7 @@ import { ItemChannel } from './ItemChannel';
 import { ItemPage, type ItemSubject } from './ItemPage';
 import { SynthesizePanel } from './SynthesizePanel';
 import { GeneratePanel } from './GeneratePanel';
+import { consistencySeed } from './generation';
 import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, type RemoteLaneItem } from './laneItemsStore';
@@ -353,6 +354,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <GeneratePanel
             prompt={genPrompt}
             channelTarget={sceneCharacter ? { id: sceneCharacter.id, name: sceneCharacter.name } : null}
+            lockName={sceneCharacter?.name ?? null}
+            lockSeed={sceneCharacter ? consistencySeed(sceneCharacter.id) : null}
             viewerName={viewer}
             viewerAuthUid={viewerAuthUid}
             onBack={() => setFlow('synthesize')}

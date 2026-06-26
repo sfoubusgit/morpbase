@@ -7,6 +7,9 @@ type GeneratePanelProps = {
   prompt: string;
   /** the character in the current scene whose channel results can be saved to */
   channelTarget?: { id: string; name: string } | null;
+  /** the locked character's name + consistency seed (keeps them consistent across renders) */
+  lockName?: string | null;
+  lockSeed?: number | null;
   viewerName?: string;
   /** auth uid — when present, saves are shared via Supabase; otherwise local-only */
   viewerAuthUid?: string | null;
@@ -17,7 +20,7 @@ type GeneratePanelProps = {
  * Step 2 of the loop — render. Style is picked here (not a lane). Calls the
  * generation provider seam; a real local KREA2/ComfyUI call swaps in behind it.
  */
-export function GeneratePanel({ prompt, channelTarget, viewerName, viewerAuthUid, onBack }: GeneratePanelProps) {
+export function GeneratePanel({ prompt, channelTarget, lockName, lockSeed, viewerName, viewerAuthUid, onBack }: GeneratePanelProps) {
   const [styleId, setStyleId] = useState('photography');
   const [count, setCount] = useState(4);
   const [aspect, setAspect] = useState('2:3');
@@ -26,6 +29,12 @@ export function GeneratePanel({ prompt, channelTarget, viewerName, viewerAuthUid
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<GenProgress | null>(null);
   const [savedIds, setSavedIds] = useState<string[]>([]);
+  // Character consistency: lock to the character's seed; "variation" nudges it
+  // to a new-but-reproducible take; unlocking renders fully random each time.
+  const canLock = typeof lockSeed === 'number';
+  const [locked, setLocked] = useState(true);
+  const [variation, setVariation] = useState(0);
+  const effectiveSeed = canLock && locked ? (lockSeed as number) + variation : undefined;
 
   const author = viewerName?.trim() || 'you';
   // Authenticated → upload to Supabase (shared, persistent). Otherwise → local only.
@@ -63,13 +72,14 @@ export function GeneratePanel({ prompt, channelTarget, viewerName, viewerAuthUid
     setError(null);
     setProgress(null);
     setSavedIds([]);
+    const genParams = { count, aspect, styleId, seed: effectiveSeed };
     try {
-      const r = await generationProvider.generate(prompt, { count, aspect, styleId }, setProgress);
+      const r = await generationProvider.generate(prompt, genParams, setProgress);
       setResults(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Generation failed.');
       // graceful fallback so the surface still demonstrates the flow
-      const fb = await stubGenerationProvider.generate(prompt, { count, aspect, styleId }, setProgress);
+      const fb = await stubGenerationProvider.generate(prompt, genParams, setProgress);
       setResults(fb);
     } finally {
       setRendering(false);
@@ -111,6 +121,21 @@ export function GeneratePanel({ prompt, channelTarget, viewerName, viewerAuthUid
                 </select>
               </label>
             </div>
+
+            {canLock && (
+              <div className={`v3-lock${locked ? ' on' : ''}`}>
+                <button type="button" className="v3-lock-toggle" onClick={() => setLocked(l => !l)} title={locked ? 'Character locked for consistency' : 'Character unlocked — renders vary'}>
+                  <span className="ic">{locked ? '🔒' : '🔓'}</span>
+                  <span className="tx">
+                    <b>{locked ? `Locked to ${lockName ?? 'character'}` : 'Consistency off'}</b>
+                    <small>{locked ? 'same character across renders' : 'each render fully random'}</small>
+                  </span>
+                </button>
+                {locked && (
+                  <button type="button" className="v3-lock-vary" onClick={() => setVariation(v => v + 1)} title="New variation of the same character">⟳ Variation</button>
+                )}
+              </div>
+            )}
             <div className="v3-gen-go">
               <button type="button" className="v3-btn primary" onClick={run} disabled={rendering}>
                 {rendering ? 'Rendering…' : 'Generate'}
