@@ -363,21 +363,35 @@
 /* ===== V3-native creator profile ===== */
 .v3-prof { max-width: 1100px; margin: 0 auto; }
 .v3-prof-cover {
-  height: 168px; border-radius: var(--radius-lg); margin-bottom: -52px; border: 1px solid var(--border-subtle);
-  background: linear-gradient(120deg, rgba(110, 86, 249, 0.45) 0%, rgba(54, 211, 196, 0.28) 52%, rgba(16, 185, 129, 0.36) 100%);
+  position: relative; height: 150px; border-radius: var(--radius-lg); border: 1px solid var(--border-subtle);
+  overflow: hidden;
+  background:
+    radial-gradient(130% 150% at 12% -10%, rgba(123, 101, 255, 0.40), transparent 58%),
+    radial-gradient(120% 150% at 92% 8%, rgba(16, 185, 129, 0.26), transparent 55%),
+    linear-gradient(180deg, rgba(123, 101, 255, 0.10), rgba(10, 11, 16, 0.55) 88%),
+    var(--surface-1);
 }
-.v3-prof-head { display: flex; align-items: flex-end; gap: 18px; padding: 0 8px; margin-bottom: 20px; }
+/* hairline sheen at the top, soft fade into the page at the bottom */
+.v3-prof-cover::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, transparent 60%, rgba(8, 9, 14, 0.35) 100%);
+}
+.v3-prof-head {
+  display: flex; align-items: flex-end; gap: 20px; padding: 0 4px; margin-top: -44px; margin-bottom: 22px;
+  position: relative; z-index: 1;
+}
 .v3-prof-av {
-  width: 96px; height: 96px; border-radius: 50%; border: 3px solid var(--surface-0); flex: none;
-  display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(60, 40, 200, 0.9)); font: var(--font-weight-extrabold) 36px var(--font-primary);
+  width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--surface-0); flex: none;
+  display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(60, 40, 200, 0.9)); font: var(--font-weight-extrabold) 38px var(--font-primary);
 }
 .v3-prof-av.img { object-fit: cover; background: none; }
-.v3-prof-id { flex: 1; padding-bottom: 6px; min-width: 0; }
+.v3-prof-id { flex: 1; padding-bottom: 4px; min-width: 0; }
 .v3-prof-id h2 { margin: 4px 0 2px; font-size: 26px; font-weight: var(--font-weight-extrabold); }
 .v3-prof-handle { color: var(--text-tertiary); font-size: 13.5px; }
-.v3-prof-actions { padding-bottom: 8px; }
-.v3-prof-metrics { max-width: 440px; margin-bottom: 18px; }
+.v3-prof-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; flex: none; }
+.v3-prof-metrics { max-width: 456px; margin-bottom: 18px; padding: 0 4px; }
 
 /* floating scene dock (replaces the right sidebar) */
 .v3-dock {

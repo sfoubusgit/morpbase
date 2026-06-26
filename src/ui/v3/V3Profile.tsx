@@ -37,7 +37,6 @@ export function V3Profile({
   onOpenChannel,
   onToggleFavorite,
   isLoggedIn = true,
-  onLogout,
   onLogin,
 }: V3ProfileProps) {
   const [tab, setTab] = useState<ProfileTab>('created');
@@ -68,10 +67,9 @@ export function V3Profile({
           <div className="v3-prof-handle">@{handle}</div>
         </div>
         <div className="v3-prof-actions">
-          <button type="button" className="v3-btn secondary">Edit profile</button>
           {isLoggedIn
-            ? <button type="button" className="v3-btn utility" onClick={onLogout}>Log out</button>
-            : <button type="button" className="v3-btn utility" onClick={onLogin}>Log in</button>}
+            ? <button type="button" className="v3-btn secondary">Edit profile</button>
+            : <button type="button" className="v3-btn primary" onClick={onLogin}>Log in</button>}
         </div>
       </div>
 
