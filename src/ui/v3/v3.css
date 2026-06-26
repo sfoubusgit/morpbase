@@ -144,12 +144,12 @@
 .v3-pill.on { background: var(--accent-primary-bg-strong); border-color: var(--border-accent); color: #fff; }
 
 /* image wall — dense thumbnail grid (fixed tile size, auto columns) */
-.v3-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.v3-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; align-items: start; }
 .v3-card {
   --c: var(--la-character);
   background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
   overflow: hidden; background-clip: padding-box; cursor: pointer; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) var(--motion-ease);
-  text-align: left; padding: 0; font-family: inherit; color: inherit; display: block; width: 100%;
+  text-align: left; padding: 0; font-family: inherit; color: inherit; display: flex; flex-direction: column; width: 100%;
   /* keep a stable GPU layer so the rounded overflow-clip survives the hover
      transform (otherwise corners snap square while lifted — a Blink/WebKit bug) */
   transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden;
@@ -164,7 +164,7 @@
   background: rgba(8, 9, 14, 0.7); border: 1px solid var(--border-medium); padding: 3px 8px; border-radius: var(--radius-pill); backdrop-filter: blur(4px);
 }
 .v3-shot {
-  aspect-ratio: 3 / 4; position: relative; background-size: cover; background-position: center;
+  width: 100%; aspect-ratio: 3 / 4; flex: none; position: relative; background-size: cover; background-position: center;
   background-color: #202027; /* neutral fallback for broken/transparent covers — never pure black */
   border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);
 }
