@@ -49,8 +49,14 @@ export function AuthModal({ isOpen, onClose, onLogin, onRegister, onGoogle, erro
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={mode === 'login' ? 'Log In' : 'Register'}>
+    <Modal isOpen={isOpen} onClose={handleClose} className="auth-shell">
       <div className="auth-modal">
+        <button type="button" className="auth-x" onClick={handleClose} aria-label="Close">✕</button>
+        <div className="auth-brand">
+          <span className="auth-wordmark"><span className="base">MORPBASE</span><span className="ai">AI</span></span>
+          <h2 className="auth-heading">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
+          <p className="auth-tagline">{mode === 'login' ? 'Log in to generate, save and share.' : 'Join the community and start creating.'}</p>
+        </div>
         {onGoogle && (
           <>
             <button type="button" className="auth-google" onClick={onGoogle}>
@@ -105,14 +111,9 @@ export function AuthModal({ isOpen, onClose, onLogin, onRegister, onGoogle, erro
             placeholder="At least 6 characters"
           />
         </label>
-        <div className="auth-actions">
-          <button type="button" className="auth-secondary" onClick={handleClose}>
-            Cancel
-          </button>
-          <button type="button" className="auth-primary" onClick={handleSubmit}>
-            {mode === 'login' ? 'Log In' : 'Create Account'}
-          </button>
-        </div>
+        <button type="button" className="auth-primary" onClick={handleSubmit}>
+          {mode === 'login' ? 'Log in' : 'Create account'}
+        </button>
         {error && <div className="auth-error">{error}</div>}
         <div className="auth-hint">
           {mode === 'login'
