@@ -252,6 +252,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             character={channelChar}
             inScene={scene.includes(channelChar.id)}
             viewerName={viewer}
+            viewerAuthUid={viewerAuthUid}
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
           />

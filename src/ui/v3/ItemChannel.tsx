@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import type { CharacterIdentity } from '../../types/characters';
 import { channelStore, type ItemChannel as ItemChannelData } from './channelStore';
 import { listGeneratedImages, type RemoteImage } from './channelImagesStore';
+import { listComments, addComment, getRatings, setRating, type RemoteComment, type RatingSummary } from './channelSocialStore';
 import { LanePlaceholder } from './LanePlaceholder';
 import { characterImage, promptElement, compact } from './media';
 
@@ -9,6 +10,7 @@ type ItemChannelProps = {
   character: CharacterIdentity;
   inScene: boolean;
   viewerName: string;
+  viewerAuthUid?: string | null;
   onBack: () => void;
   onAdd: (id: string) => void;
 };
@@ -20,35 +22,65 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, onBack, onAdd }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, onBack, onAdd }: ItemChannelProps) {
   const [data, setData] = useState<ItemChannelData>(() => channelStore.getChannel(character.id));
   const [tab, setTab] = useState<ChanTab>('gallery');
   const [draft, setDraft] = useState('');
+  const [posting, setPosting] = useState(false);
   const [remote, setRemote] = useState<RemoteImage[]>([]);
+  const [remoteComments, setRemoteComments] = useState<RemoteComment[]>([]);
+  const [ratings, setRatings] = useState<RatingSummary>({ avg: 0, count: 0, mine: null });
 
-  // Pull the real (Supabase) generated images shared to this channel.
+  // Pull the real (Supabase) social data shared to this channel.
   useEffect(() => {
     let live = true;
-    setRemote([]);
-    listGeneratedImages(character.id).then(imgs => { if (live) setRemote(imgs); }).catch(() => { /* offline */ });
+    setRemote([]); setRemoteComments([]); setRatings({ avg: 0, count: 0, mine: null });
+    listGeneratedImages(character.id).then(v => { if (live) setRemote(v); }).catch(() => { /* offline */ });
+    listComments(character.id).then(v => { if (live) setRemoteComments(v); }).catch(() => { /* offline */ });
+    getRatings(character.id, viewerAuthUid).then(v => { if (live) setRatings(v); }).catch(() => { /* offline */ });
     return () => { live = false; };
-  }, [character.id]);
+  }, [character.id, viewerAuthUid]);
 
   const img = characterImage(character);
   const heroStyle = img
     ? { backgroundImage: `url(${img})` }
     : undefined;
   const element = useMemo(() => promptElement(character), [character]);
-  const displayRating = data.myRating ?? Math.round(data.stats.rating);
 
-  const handleRate = (r: number) => setData(channelStore.rate(character.id, r));
+  // Prefer real ratings when any exist, else the seeded display.
+  const realRating = ratings.count > 0 ? ratings.avg : data.stats.rating;
+  const displayRating = ratings.mine ?? data.myRating ?? Math.round(realRating);
+  const commentCount = remoteComments.length + data.comments.length;
+
+  const handleRate = async (r: number) => {
+    setData(channelStore.rate(character.id, r)); // optimistic / offline
+    if (viewerAuthUid) {
+      try {
+        await setRating({ subjectId: character.id, authUid: viewerAuthUid, rating: r });
+        setRatings(await getRatings(character.id, viewerAuthUid));
+      } catch { /* kept local */ }
+    } else {
+      setRatings(prev => ({ ...prev, mine: r }));
+    }
+  };
   const handleFollow = () => setData(channelStore.toggleFollow(character.id));
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!draft.trim()) return;
-    setData(channelStore.addComment(character.id, viewerName, draft));
+    const body = draft.trim();
+    if (!body || posting) return;
     setDraft('');
     setTab('comments');
+    if (viewerAuthUid) {
+      setPosting(true);
+      try {
+        const c = await addComment({ subjectId: character.id, authUid: viewerAuthUid, authorLabel: viewerName, body });
+        setRemoteComments(prev => [c, ...prev]);
+      } catch {
+        setData(channelStore.addComment(character.id, viewerName, body)); // fallback local
+      } finally { setPosting(false); }
+    } else {
+      setData(channelStore.addComment(character.id, viewerName, body));
+    }
   };
 
   return (
@@ -64,8 +96,8 @@ export function ItemChannel({ character, inScene, viewerName, onBack, onAdd }: I
           <h2>{character.name}</h2>
           <div className="by">
             by <b>@{character.tags?.[0] ?? 'community'}</b> ·{' '}
-            <span className="v3-stars">{'★'.repeat(Math.round(data.stats.rating))}{'☆'.repeat(5 - Math.round(data.stats.rating))}</span>{' '}
-            {data.stats.rating.toFixed(1)}
+            <span className="v3-stars">{'★'.repeat(Math.round(realRating))}{'☆'.repeat(5 - Math.round(realRating))}</span>{' '}
+            {realRating.toFixed(1)}{ratings.count > 0 && <span className="dim"> ({ratings.count})</span>}
           </div>
 
           <div className="v3-metrics">
@@ -103,7 +135,7 @@ export function ItemChannel({ character, inScene, viewerName, onBack, onAdd }: I
 
       <div className="v3-tabs">
         <button type="button" className={`v3-tab2${tab === 'gallery' ? ' on' : ''}`} onClick={() => setTab('gallery')}>Gallery · {data.gallery.length + remote.length}</button>
-        <button type="button" className={`v3-tab2${tab === 'comments' ? ' on' : ''}`} onClick={() => setTab('comments')}>Comments · {data.comments.length}</button>
+        <button type="button" className={`v3-tab2${tab === 'comments' ? ' on' : ''}`} onClick={() => setTab('comments')}>Comments · {commentCount}</button>
         <button type="button" className={`v3-tab2${tab === 'about' ? ' on' : ''}`} onClick={() => setTab('about')}>About</button>
       </div>
 
@@ -131,10 +163,19 @@ export function ItemChannel({ character, inScene, viewerName, onBack, onAdd }: I
             <input
               value={draft}
               onChange={e => setDraft(e.target.value)}
-              placeholder={`Share how you used ${character.name}…`}
+              placeholder={viewerAuthUid ? `Share how you used ${character.name}…` : `Log in to post — or jot a local note…`}
             />
-            <button type="submit" className="v3-btn primary">Post</button>
+            <button type="submit" className="v3-btn primary" disabled={posting}>{posting ? 'Posting…' : 'Post'}</button>
           </form>
+          {remoteComments.map(c => (
+            <div key={c.id} className="v3-cmt">
+              <div className="a" />
+              <div className="b">
+                <b>@{c.author}</b> {c.body}
+                <div className="m">community</div>
+              </div>
+            </div>
+          ))}
           {data.comments.map(c => (
             <div key={c.id} className="v3-cmt">
               <div className="a" />
