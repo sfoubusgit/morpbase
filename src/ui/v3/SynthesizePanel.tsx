@@ -75,20 +75,30 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
 
         <div className="ph" style={{ marginTop: 20 }}>
           Synthesized prompt · editable
-          {source === 'ai' && <span className="v3-synth-src ai"> · composed by AI</span>}
-          {source === 'local' && <span className="v3-synth-src"> · offline composer (AI proxy not reachable)</span>}
+          {working && <span className="v3-synth-src busy"> · synthesizing<span className="v3-dots" /></span>}
+          {!working && source === 'ai' && <span className="v3-synth-src ai"> · composed by AI</span>}
+          {!working && source === 'local' && <span className="v3-synth-src"> · offline composer (AI proxy not reachable)</span>}
         </div>
-        <textarea
-          className="v3-promptbox v3-prompt-edit"
-          value={prompt}
-          onChange={e => setPrompt(e.target.value)}
-          rows={5}
-          spellCheck={false}
-        />
+        <div className={`v3-prompt-wrap${working ? ' busy' : ''}`}>
+          <textarea
+            className="v3-promptbox v3-prompt-edit"
+            value={prompt}
+            onChange={e => setPrompt(e.target.value)}
+            rows={5}
+            spellCheck={false}
+            readOnly={working}
+          />
+          {working && (
+            <div className="v3-synth-overlay">
+              <span className="v3-synth-overlay-label">Synthesizing your scene<span className="v3-dots" /></span>
+              <div className="v3-bar indet"><i /></div>
+            </div>
+          )}
+        </div>
 
         <div className="v3-flow-actions">
           <button type="button" className="v3-btn utility" onClick={() => run(method)} disabled={working}>
-            {working ? 'Composing…' : '↻ Re-synthesize'}
+            {working ? 'Synthesizing…' : '↻ Re-synthesize'}
           </button>
           <button type="button" className="v3-btn primary" onClick={() => onGenerate(prompt)} disabled={!prompt.trim()}>
             Generate image →
