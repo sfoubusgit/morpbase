@@ -378,19 +378,18 @@
   background: linear-gradient(180deg, transparent 60%, rgba(8, 9, 14, 0.35) 100%);
 }
 .v3-prof-head {
-  display: flex; align-items: flex-end; gap: 20px; padding: 0 4px; margin-top: -44px; margin-bottom: 22px;
-  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: 18px; padding: 0 4px; margin-top: 18px; margin-bottom: 22px;
 }
 .v3-prof-av {
-  width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--surface-0); flex: none;
-  display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(60, 40, 200, 0.9)); font: var(--font-weight-extrabold) 38px var(--font-primary);
+  width: 88px; height: 88px; border-radius: 50%; border: 1px solid var(--border-medium); flex: none;
+  display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 8px 22px rgba(0, 0, 0, 0.38);
+  background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(60, 40, 200, 0.9)); font: var(--font-weight-extrabold) 34px var(--font-primary);
 }
 .v3-prof-av.img { object-fit: cover; background: none; }
-.v3-prof-id { flex: 1; padding-bottom: 4px; min-width: 0; }
+.v3-prof-id { flex: 1; min-width: 0; }
 .v3-prof-id h2 { margin: 4px 0 2px; font-size: 26px; font-weight: var(--font-weight-extrabold); }
 .v3-prof-handle { color: var(--text-tertiary); font-size: 13.5px; }
-.v3-prof-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 6px; flex: none; }
+.v3-prof-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .v3-prof-metrics { max-width: 456px; margin-bottom: 18px; padding: 0 4px; }
 
 /* floating scene dock (replaces the right sidebar) */
