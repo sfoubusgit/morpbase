@@ -36,7 +36,7 @@
 }
 
 /* colorless lane placeholder (no cover image) — neutral surface + faint symbol */
-.v3-ph { position: relative; background: var(--surface-2); }
+.v3-ph { position: relative; background: linear-gradient(160deg, #26262d 0%, #1e1e24 55%, #17171c 100%); }
 .v3-ph-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: rgba(255, 255, 255, 0.14); pointer-events: none; z-index: 0; }
 .v3-ph-icon svg { width: 40%; height: 40%; max-width: 84px; max-height: 84px; }
 
