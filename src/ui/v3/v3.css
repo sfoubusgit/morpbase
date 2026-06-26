@@ -163,7 +163,11 @@
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);
   background: rgba(8, 9, 14, 0.7); border: 1px solid var(--border-medium); padding: 3px 8px; border-radius: var(--radius-pill); backdrop-filter: blur(4px);
 }
-.v3-shot { aspect-ratio: 3 / 4; position: relative; background-color: var(--surface-2); background-size: cover; background-position: center; }
+.v3-shot {
+  aspect-ratio: 3 / 4; position: relative; background-size: cover; background-position: center;
+  background-color: #202027; /* neutral fallback for broken/transparent covers — never pure black */
+  border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);
+}
 .v3-shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 42%, rgba(8, 9, 14, 0.82)); }
 .v3-badge {
   position: absolute; top: 10px; left: 10px; z-index: 2; display: inline-flex; align-items: center;
@@ -182,7 +186,7 @@
 .v3-act.add.in { background: rgba(var(--c), 0.16); box-shadow: none; }
 .v3-act.chan { background: rgba(17, 18, 24, 0.92); color: #fff; border-color: var(--border-medium); }
 .v3-act.chan:hover { border-color: rgba(var(--c), 0.5); }
-.v3-cmeta { padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.v3-cmeta { padding: 11px 13px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); }
 .v3-cmeta .nm { font: var(--font-weight-semibold) 14px var(--font-primary); }
 .v3-cmeta .st { font-size: 11.5px; color: var(--text-tertiary); margin-top: 2px; }
 .v3-cmeta .heart { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
