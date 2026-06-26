@@ -6,6 +6,7 @@ type LaneItemComposerProps = {
   lane: string;        // lane key, e.g. 'scenery'
   laneLabel: string;   // 'Scenery'
   accent: string;      // rgb-triplet var, e.g. 'var(--la-scenery)'
+  kind?: 'character' | 'object';
   viewerName: string;
   viewerAuthUid: string;
   onClose: () => void;
@@ -18,7 +19,14 @@ type LaneItemComposerProps = {
  * an optional cover, which can be uploaded or rendered on the spot with KREA2.
  * Saves to Supabase as public community content.
  */
-export function LaneItemComposer({ lane, laneLabel, accent, viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
+export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
+  const isChar = kind === 'character';
+  const singular = isChar ? 'character' : laneLabel.toLowerCase().replace(/s$/, '');
+  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
+  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : 'one per line · fed into synthesis';
+  const phrasesPlaceholder = isChar
+    ? 'tall woman with sharp features and a long black coat\nsilver undercut, calm grey eyes, a faint scar over one brow'
+    : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
   const [phrasesText, setPhrasesText] = useState('');
@@ -81,8 +89,8 @@ export function LaneItemComposer({ lane, laneLabel, accent, viewerName, viewerAu
       <div className="v3-modal" style={{ ['--c' as string]: accent }} onClick={e => e.stopPropagation()}>
         <div className="v3-modal-head">
           <div>
-            <div className="v3-eyebrow">New {laneLabel.toLowerCase()} · {laneLabel} lane</div>
-            <h2>Create a {laneLabel.toLowerCase().replace(/s$/, '')}</h2>
+            <div className="v3-eyebrow">New {singular} · {laneLabel} lane</div>
+            <h2>Create a {singular}</h2>
           </div>
           <button type="button" className="v3-modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -112,17 +120,17 @@ export function LaneItemComposer({ lane, laneLabel, accent, viewerName, viewerAu
             {/* fields */}
             <div className="v3-cmp-fields">
               <label className="v3-cmp-field">Name
-                <input value={name} onChange={e => setName(e.target.value)} placeholder={`e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`} maxLength={80} />
+                <input value={name} onChange={e => setName(e.target.value)} placeholder={namePlaceholder} maxLength={80} />
               </label>
               <label className="v3-cmp-field">Summary <span className="opt">optional</span>
                 <input value={summary} onChange={e => setSummary(e.target.value)} placeholder="One line describing it." maxLength={160} />
               </label>
-              <label className="v3-cmp-field">Phrases <span className="opt">one per line · fed into synthesis</span>
+              <label className="v3-cmp-field">Phrases <span className="opt">{phrasesHint}</span>
                 <textarea
                   value={phrasesText}
                   onChange={e => setPhrasesText(e.target.value)}
                   rows={5}
-                  placeholder={'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air'}
+                  placeholder={phrasesPlaceholder}
                 />
               </label>
               <div className="v3-legend">{phrases.length} phrase{phrases.length === 1 ? '' : 's'} · these are what the synthesizer weaves into the scene.</div>
@@ -136,7 +144,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, viewerName, viewerAu
           <span className="v3-cmp-note">Shared publicly as community content · by @{viewerName.toLowerCase().replace(/\s+/g, '')}</span>
           <div className="v3-cmp-footacts">
             <button type="button" className="v3-btn secondary" onClick={onClose} disabled={saving}>Cancel</button>
-            <button type="button" className="v3-btn primary" onClick={save} disabled={!canSave}>{saving ? 'Publishing…' : `Publish ${laneLabel.toLowerCase().replace(/s$/, '')}`}</button>
+            <button type="button" className="v3-btn primary" onClick={save} disabled={!canSave}>{saving ? 'Publishing…' : `Publish ${singular}`}</button>
           </div>
         </div>
       </div>

@@ -496,16 +496,24 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
   .v3-chero { grid-template-columns: 1fr; }
 }
 
-/* ── create button on a lane wall ── */
+/* ── create button on a lane wall — neutral pill, lane-accent glyph + hover ── */
 .v3-create-btn {
-  flex-shrink: 0; display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-family: inherit;
-  font: var(--font-weight-semibold) 13px var(--font-primary); color: #fff;
-  background: linear-gradient(135deg, rgba(var(--c), 0.95), rgba(var(--c), 0.7));
-  border: 1px solid rgba(var(--c), 0.5); border-radius: var(--radius-pill); padding: 9px 16px;
-  box-shadow: 0 4px 14px rgba(var(--c), 0.25);
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font-family: inherit;
+  font: var(--font-weight-semibold) 13px var(--font-primary); color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-medium); border-radius: var(--radius-pill);
+  padding: 7px 16px 7px 8px; transition: all var(--motion-fast) var(--motion-ease);
 }
-.v3-create-btn:hover { filter: brightness(1.08); }
-.v3-create-btn .pl { font-size: 15px; line-height: 1; margin-top: -1px; }
+.v3-create-btn:hover {
+  transform: translateY(-1px); color: #fff;
+  background: rgba(var(--c), 0.12); border-color: rgba(var(--c), 0.55);
+  box-shadow: 0 6px 18px rgba(var(--c), 0.18);
+}
+.v3-create-btn .pl {
+  display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(var(--c), 1), rgba(var(--c), 0.72)); color: #fff;
+  font-size: 14px; font-weight: var(--font-weight-bold); line-height: 1;
+  box-shadow: 0 2px 8px rgba(var(--c), 0.35);
+}
 
 /* ── modal shell (reused for the lane-item composer) ── */
 .v3-modal-backdrop {

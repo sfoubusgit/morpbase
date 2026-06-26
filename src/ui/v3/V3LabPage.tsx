@@ -90,7 +90,36 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
 
   const viewer = viewerName?.trim() || 'you';
-  const byId = (id: string) => characters.find(c => c.id === id) ?? null;
+
+  // User-created characters live in v3_lane_items under lane 'character'. Map them
+  // to the CharacterIdentity shape so the wall, channels, scene and synthesis all
+  // treat them exactly like seeded characters.
+  const toCharacter = (it: RemoteLaneItem): CharacterIdentity => ({
+    id: it.id,
+    name: it.name,
+    summary: it.summary || undefined,
+    coverImageUrl: it.coverUrl || undefined,
+    tags: [it.author],
+    identity: { visualAnchors: [], motifs: [] },
+    phraseBundle: { core: it.phrases },
+    createdAt: Date.parse(it.createdAt) || 0,
+    updatedAt: Date.parse(it.createdAt) || 0,
+  });
+  const createdChars = useMemo(
+    () => createdLaneItems.filter(it => it.lane === 'characters').map(toCharacter),
+    [createdLaneItems],
+  );
+  const allCharacters = useMemo(() => [...createdChars, ...characters], [createdChars, characters]);
+  // The current viewer's own creations (Supabase-authored + legacy local), for the profile.
+  const myCreatedCharacters = useMemo(() => {
+    const mine = createdLaneItems
+      .filter(it => it.lane === 'characters' && it.authorAuthUid && it.authorAuthUid === viewerAuthUid)
+      .map(toCharacter);
+    const localOwn = characters.filter(c => !c.id.startsWith('character_seed_'));
+    return [...mine, ...localOwn];
+  }, [createdLaneItems, viewerAuthUid, characters]);
+
+  const byId = (id: string) => allCharacters.find(c => c.id === id) ?? null;
   const channelChar = channelId ? byId(channelId) : null;
   const activeUniverse = universeById(universe);
 
@@ -98,7 +127,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   type SceneItem = { id: string; lane: string; kind: string; name: string; accent: string; tint: number; image: string | null; phrases: string[] };
   const registry = useMemo<Record<string, SceneItem>>(() => {
     const m: Record<string, SceneItem> = {};
-    for (const c of characters) {
+    for (const c of allCharacters) {
       m[c.id] = { id: c.id, lane: 'character', kind: 'character', name: c.name, accent: 'var(--la-character)', tint: tintIndex(c.id), image: characterImage(c), phrases: c.phraseBundle?.core ?? [] };
     }
     for (const wl of Object.values(WALL_LANES)) {
@@ -138,8 +167,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     universe === ALL_UNIVERSES_ID || universeOfItem(c.id) === universe;
 
   const browseChars = useMemo(
-    () => characters.filter(c => inUniverse(c) && matchesQuery(c)),
-    [characters, universe, q],
+    () => allCharacters.filter(c => inUniverse(c) && matchesQuery(c)),
+    [allCharacters, universe, q],
   );
   // Wall lanes (scenery/objects/mood/lighting/composition) share one filtered view.
   // Modifier lanes are universe-agnostic — filter by search only.
@@ -258,7 +287,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerName={viewer}
             viewerAvatarUrl={viewerAvatarUrl}
             viewerAuthUid={viewerAuthUid}
-            characters={characters}
+            createdCharacters={myCreatedCharacters}
             favItems={favItems}
             favorites={favorites}
             scene={scene}
@@ -303,6 +332,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   {browseChars.length} public character{browseChars.length === 1 ? '' : 's'} {activeUniverse ? `in ${activeUniverse.name}` : 'across every universe'} · favorite the ones you like to reuse them.
                 </div>
               </div>
+              <button
+                type="button"
+                className="v3-create-btn"
+                style={cssVar('var(--la-character)')}
+                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
+                title={viewerAuthUid ? 'Create a new character' : 'Log in to create'}
+              >
+                <span className="pl">＋</span> Create
+              </button>
             </div>
             <CharacterWall
               characters={browseChars}
@@ -399,11 +437,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {composerOpen && WALL_LANES[lane] && viewerAuthUid && (
+      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters') && (
         <LaneItemComposer
           lane={lane}
-          laneLabel={WALL_LANES[lane].label}
-          accent={WALL_LANES[lane].accent}
+          laneLabel={WALL_LANES[lane]?.label ?? 'Characters'}
+          accent={WALL_LANES[lane]?.accent ?? 'var(--la-character)'}
+          kind={lane === 'characters' ? 'character' : 'object'}
           viewerName={viewer}
           viewerAuthUid={viewerAuthUid}
           onClose={() => setComposerOpen(false)}

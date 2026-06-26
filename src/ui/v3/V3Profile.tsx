@@ -11,8 +11,8 @@ type V3ProfileProps = {
   viewerName: string;
   viewerAvatarUrl?: string | null;
   viewerAuthUid?: string | null;
-  /** all local characters (seeded public content + this user's own creations) */
-  characters: CharacterIdentity[];
+  /** this viewer's own creations (Supabase-authored + legacy local) */
+  createdCharacters: CharacterIdentity[];
   /** favorited items across every lane, ready for the generic wall */
   favItems: ProfileFavItem[];
   favorites: string[];
@@ -26,8 +26,6 @@ type V3ProfileProps = {
   onEditProfile?: () => void;
 };
 
-/** Seeded characters are public content, not a user's own creations. */
-const isUserCreated = (c: CharacterIdentity) => !c.id.startsWith('character_seed_');
 
 type ProfileTab = 'created' | 'favorites' | 'generated';
 
@@ -40,7 +38,7 @@ export function V3Profile({
   viewerName,
   viewerAvatarUrl,
   viewerAuthUid,
-  characters,
+  createdCharacters,
   favItems,
   favorites,
   scene,
@@ -62,7 +60,7 @@ export function V3Profile({
     return () => { live = false; };
   }, [viewerAuthUid]);
 
-  const created = characters.filter(isUserCreated); // exclude seeded public content
+  const created = createdCharacters;
   const handle = viewerName.toLowerCase().replace(/\s+/g, '');
 
   return (

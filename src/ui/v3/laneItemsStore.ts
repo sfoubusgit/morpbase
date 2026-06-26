@@ -17,6 +17,7 @@ export type RemoteLaneItem = {
   phrases: string[];
   coverUrl: string | null;
   author: string;
+  authorAuthUid: string | null;
   createdAt: string;
 };
 
@@ -28,8 +29,11 @@ type Row = {
   phrases: string[] | null;
   cover_url: string | null;
   author_label: string | null;
+  author_auth_uid: string | null;
   created_at: string;
 };
+
+const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, created_at';
 
 const toItem = (r: Row): RemoteLaneItem => ({
   id: r.id,
@@ -39,6 +43,7 @@ const toItem = (r: Row): RemoteLaneItem => ({
   phrases: Array.isArray(r.phrases) ? r.phrases : [],
   coverUrl: r.cover_url,
   author: r.author_label || 'creator',
+  authorAuthUid: r.author_auth_uid,
   createdAt: r.created_at,
 });
 
@@ -46,7 +51,7 @@ const toItem = (r: Row): RemoteLaneItem => ({
 export async function listLaneItems(): Promise<RemoteLaneItem[]> {
   const { data, error } = await supabase
     .from('v3_lane_items')
-    .select('id, lane, name, summary, phrases, cover_url, author_label, created_at')
+    .select(COLS)
     .order('created_at', { ascending: false })
     .limit(500);
   if (error || !data) return [];
@@ -87,7 +92,7 @@ export async function createLaneItem(params: {
       author_auth_uid: authUid,
       author_label: authorLabel,
     })
-    .select('id, lane, name, summary, phrases, cover_url, author_label, created_at')
+    .select(COLS)
     .single();
   if (error) throw new Error(error.message);
   return toItem(data as Row);
