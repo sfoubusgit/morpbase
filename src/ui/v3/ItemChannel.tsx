@@ -4,6 +4,7 @@ import { channelStore, type ItemChannel as ItemChannelData } from './channelStor
 import { listGeneratedImages, type RemoteImage } from './channelImagesStore';
 import { listComments, addComment, getRatings, setRating, type RemoteComment, type RatingSummary } from './channelSocialStore';
 import { LanePlaceholder } from './LanePlaceholder';
+import { FollowButton } from './FollowButton';
 import { characterImage, promptElement, compact } from './media';
 
 type ItemChannelProps = {
@@ -11,8 +12,11 @@ type ItemChannelProps = {
   inScene: boolean;
   viewerName: string;
   viewerAuthUid?: string | null;
+  /** the character's creator (null for seeded 'MorpBase' characters) */
+  creatorAuthUid?: string | null;
   onBack: () => void;
   onAdd: (id: string) => void;
+  onLogin?: () => void;
 };
 
 type ChanTab = 'gallery' | 'comments' | 'about';
@@ -22,7 +26,7 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, onBack, onAdd }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin }: ItemChannelProps) {
   const [data, setData] = useState<ItemChannelData>(() => channelStore.getChannel(character.id));
   const [tab, setTab] = useState<ChanTab>('gallery');
   const [draft, setDraft] = useState('');
@@ -63,7 +67,6 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, onB
       setRatings(prev => ({ ...prev, mine: r }));
     }
   };
-  const handleFollow = () => setData(channelStore.toggleFollow(character.id));
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const body = draft.trim();
@@ -103,16 +106,13 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, onB
           <div className="v3-metrics">
             <div className="v3-metric"><div className="v">{compact(data.stats.likes)}</div><div className="k">Likes</div></div>
             <div className="v3-metric"><div className="v">{compact(data.stats.scenesMade)}</div><div className="k">Scenes made</div></div>
-            <div className="v3-metric"><div className="v">{compact(data.stats.followers)}</div><div className="k">Followers</div></div>
           </div>
 
           <div className="v3-chan-actions">
             <button type="button" className="v3-btn primary" onClick={() => onAdd(character.id)} disabled={inScene}>
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
-            <button type="button" className={`v3-btn utility${data.following ? ' on' : ''}`} onClick={handleFollow}>
-              {data.following ? 'Following' : 'Follow'}
-            </button>
+            <FollowButton creatorAuthUid={creatorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
             <span className="v3-rate" title="Rate this character">
               {[1, 2, 3, 4, 5].map(n => (
                 <button

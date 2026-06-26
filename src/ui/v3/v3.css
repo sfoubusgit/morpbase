@@ -228,7 +228,9 @@
 .v3-metric { display: grid; gap: 4px; padding: 12px 14px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-hairline); }
 .v3-metric .v { font: var(--font-weight-bold) 18px var(--font-primary); }
 .v3-metric .k { font: var(--font-weight-extrabold) 11px var(--font-primary); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-tertiary); }
-.v3-chan-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+.v3-chan-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.v3-follow { display: inline-flex; align-items: center; gap: 9px; }
+.v3-follow-count { font: var(--font-weight-medium) 12.5px var(--font-primary); color: var(--text-tertiary); }
 .v3-rate { display: inline-flex; gap: 2px; align-items: center; }
 .v3-rate button { background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--text-muted); padding: 0 1px; }
 .v3-rate button.lit { color: var(--text-secondary); }

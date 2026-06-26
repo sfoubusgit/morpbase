@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { listGeneratedImages, type RemoteImage } from './channelImagesStore';
 import { listComments, addComment, getRatings, setRating, type RemoteComment, type RatingSummary } from './channelSocialStore';
 import { LanePlaceholder } from './LanePlaceholder';
+import { FollowButton } from './FollowButton';
 
 export type ItemSubject = {
   id: string;
@@ -16,6 +17,8 @@ export type ItemSubject = {
   phrases: string[];
   summary: string;
   author: string;
+  /** the creator's auth uid (null for seeded 'MorpBase' content) */
+  authorAuthUid: string | null;
 };
 
 type ItemPageProps = {
@@ -25,6 +28,7 @@ type ItemPageProps = {
   viewerAuthUid?: string | null;
   onBack: () => void;
   onAdd: (id: string) => void;
+  onLogin?: () => void;
 };
 
 type Tab = 'gallery' | 'comments' | 'about';
@@ -35,7 +39,7 @@ type Tab = 'gallery' | 'comments' | 'about';
  * clicking the item's image. Gallery, comments and ratings are real (Supabase),
  * keyed by the item id, exactly like a character's page.
  */
-export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd }: ItemPageProps) {
+export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin }: ItemPageProps) {
   const [tab, setTab] = useState<Tab>('gallery');
   const [remote, setRemote] = useState<RemoteImage[]>([]);
   const [comments, setComments] = useState<RemoteComment[]>([]);
@@ -99,6 +103,7 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
             <button type="button" className="v3-btn primary" onClick={() => onAdd(subject.id)} disabled={inScene}>
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
+            <FollowButton creatorAuthUid={subject.authorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
             <span className="v3-rate" title={`Rate this ${subject.laneLabel.toLowerCase()}`}>
               {[1, 2, 3, 4, 5].map(n => (
                 <button key={n} type="button" className={n <= displayRating ? 'lit' : ''} onClick={() => handleRate(n)} aria-label={`Rate ${n}`}>★</button>

@@ -152,17 +152,21 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     const m: Record<string, ItemSubject> = {};
     for (const wl of Object.values(WALL_LANES)) {
       for (const it of wl.items) {
-        m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: null, phrases: it.phrases, summary: it.summary, author: 'MorpBase' };
+        m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: null, phrases: it.phrases, summary: it.summary, author: 'MorpBase', authorAuthUid: null };
       }
     }
     for (const it of createdLaneItems) {
       const wl = WALL_LANES[it.lane];
       if (!wl) continue; // skip created characters (handled by ItemChannel)
-      m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author };
+      m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author, authorAuthUid: it.authorAuthUid };
     }
     return m;
   }, [createdLaneItems]);
   const openSubject = channelId && !channelChar ? laneSubjects[channelId] ?? null : null;
+  // The creator (auth uid) of the open character, for follow — null for seeds.
+  const channelCreatorUid = channelChar
+    ? createdLaneItems.find(it => it.id === channelChar.id && it.lane === 'characters')?.authorAuthUid ?? null
+    : null;
 
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
   const removeFromScene = (id: string) => setScene(s => s.filter(x => x !== id));
@@ -339,8 +343,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             inScene={scene.includes(channelChar.id)}
             viewerName={viewer}
             viewerAuthUid={viewerAuthUid}
+            creatorAuthUid={channelCreatorUid}
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
+            onLogin={onLogin}
           />
         ) : openSubject ? (
           <ItemPage
@@ -350,6 +356,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerAuthUid={viewerAuthUid}
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
+            onLogin={onLogin}
           />
         ) : lane === 'characters' ? (
           <>
