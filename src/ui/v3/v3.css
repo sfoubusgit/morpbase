@@ -150,8 +150,11 @@
   background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
   overflow: hidden; background-clip: padding-box; cursor: pointer; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) var(--motion-ease);
   text-align: left; padding: 0; font-family: inherit; color: inherit; display: block; width: 100%;
+  /* keep a stable GPU layer so the rounded overflow-clip survives the hover
+     transform (otherwise corners snap square while lifted — a Blink/WebKit bug) */
+  transform: translateZ(0); -webkit-backface-visibility: hidden; backface-visibility: hidden;
 }
-.v3-card:hover { transform: translateY(-3px); border-color: rgba(var(--c), 0.45); box-shadow: 0 0 0 1px rgba(var(--c), 0.1), 0 18px 40px rgba(0, 0, 0, 0.45); }
+.v3-card:hover { transform: translate3d(0, -3px, 0); border-color: rgba(var(--c), 0.45); box-shadow: 0 0 0 1px rgba(var(--c), 0.1), 0 18px 40px rgba(0, 0, 0, 0.45); }
 /* native sponsored card */
 .v3-ad { text-decoration: none; --c: 255, 255, 255; }
 .v3-ad:hover { border-color: var(--border-strong); }
