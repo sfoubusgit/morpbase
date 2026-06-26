@@ -17,6 +17,8 @@ const ENVIRONMENT_SEED_FLAG_KEY_V10 = 'promptgen:environments:seeded:v10';
 const ENVIRONMENT_SEED_FLAG_KEY_V11 = 'promptgen:environments:seeded:v11';
 const ENVIRONMENT_SEED_FLAG_KEY_V12 = 'promptgen:environments:seeded:v12';
 const ENVIRONMENT_SEED_FLAG_KEY_V13 = 'promptgen:environments:seeded:v13';
+const ENVIRONMENT_SEED_FLAG_KEY_V14 = 'promptgen:environments:seeded:v14';
+const ENVIRONMENT_SEED_FLAG_KEY_V15 = 'promptgen:environments:seeded:v15';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -118,6 +120,8 @@ const ENV_SEED_TS_10 = 1748649600000;
 const ENV_SEED_TS_11 = 1748736000000;
 const ENV_SEED_TS_12 = 1748822400000;
 const ENV_SEED_TS_13 = 1749600000000;
+const ENV_SEED_TS_14 = 1749859200000;
+const ENV_SEED_TS_15 = 1750204800000;
 
 const DEFAULT_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   {
@@ -2027,6 +2031,456 @@ const V13_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
   },
 ];
 
+// V14 — Orchard Reverie: an eternal-summer sacred orchard over endless golden grasslands.
+const V14_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_or_endless_grove',
+    name: 'The Endless Grove',
+    summary: 'Colossal ancient fruit trees rising from a sea of golden grass — broad boughs heavy with fruit, warm light pouring between the trunks, the orchard stretching to the horizon.',
+    phraseBundle: {
+      core: [
+        'colossal ancient fruit trees rising from an endless sea of golden grass',
+        'broad mossy boughs heavy with ripe fruit, dappled light falling between the trunks',
+        'wildflowers and tall grass swaying around the great roots',
+        'the orchard stretching unbroken to a hazy warm horizon',
+        'butterflies and drifting pollen in the warm air',
+        'idyllic, sun-drenched, endless summer',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_heart_tree',
+    name: 'The Heart Tree',
+    summary: 'The single colossal sacred tree at the orchard\'s center — impossibly old and vast, bearing every kind of fruit at once, ribbons and offerings tied to its lower boughs.',
+    phraseBundle: {
+      core: [
+        'a single colossal sacred tree at the center of the orchard, impossibly old and vast',
+        'its great canopy bearing every kind of fruit at once, blossom and ripe fruit together',
+        'ribbons, charms and small offerings tied to the lower boughs',
+        'shafts of golden light falling through the immense crown',
+        'worn roots forming a natural shrine-circle below',
+        'sacred, awe-inspiring, warm and alive',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_festival_grounds',
+    name: 'The Harvest Festival Grounds',
+    summary: 'A wide clearing set for the harvest feast — long tables under strings of paper lanterns and fruit-garlands, baskets brimming, warm evening light and drifting music.',
+    phraseBundle: {
+      core: [
+        'a wide grassy clearing set for the harvest festival',
+        'long wooden tables laden with fruit, bread and cider under the trees',
+        'strings of warm paper lanterns and fruit-garlands hung between boughs',
+        'baskets brimming with the season\'s harvest along the tables',
+        'warm golden evening light, drifting music and woodsmoke',
+        'festive, abundant, joyful',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_cider_hall',
+    name: 'The Cider Hall',
+    summary: 'A warm timber hall where the fruit is pressed — great wooden presses and oak barrels, golden cider catching the light, the air sweet with juice and woodsmoke.',
+    phraseBundle: {
+      core: [
+        'a warm timber hall lined with oak barrels and great wooden fruit-presses',
+        'golden cider running into clay jugs, catching the low light',
+        'bunches of drying herbs and fruit hung from the rafters',
+        'dust and steam in slanting warm light from high windows',
+        'the air sweet with pressed juice and woodsmoke',
+        'cosy, rustic, golden',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_bathing_springs',
+    name: 'The Warm Springs',
+    summary: 'Gentle warm pools among the reeds and fruit-laden boughs — mineral-blue water steaming softly, blossoms floating on the surface, a quiet hidden corner of the orchard.',
+    phraseBundle: {
+      core: [
+        'gentle warm spring-fed pools among tall reeds and low fruit-laden boughs',
+        'clear mineral-blue water steaming softly in the warm air',
+        'fallen blossoms and leaves floating on the still surface',
+        'smooth warm stones and soft moss around the water\'s edge',
+        'dappled light through overhanging branches heavy with fruit',
+        'serene, secluded, softly steaming',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_orchard_market',
+    name: 'The Orchard Market',
+    summary: 'A sun-dappled market of woven stalls heaped with fruit — striped awnings, baskets and crates of every colour, the bustle of the orchard\'s trade in warm morning light.',
+    phraseBundle: {
+      core: [
+        'a sun-dappled market of woven stalls heaped with fruit beneath the trees',
+        'striped linen awnings and baskets and crates of every colour',
+        'pyramids of peaches, plums, apples and grapes catching the morning light',
+        'bunting and fruit-garlands strung between the stall-posts',
+        'warm bustling morning light, dust motes in the air',
+        'lively, colourful, abundant',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_grass_sea',
+    name: 'The Grass Sea at Dusk',
+    summary: 'The endless golden grasslands between the groves at the day\'s end — long wind-combed grass turning amber and rose, a vast glowing sky, distant fruit-trees in silhouette.',
+    phraseBundle: {
+      core: [
+        'endless golden grasslands rolling between the groves at dusk',
+        'long wind-combed grass turning amber and rose in the last light',
+        'a vast glowing sky of peach, gold and soft violet',
+        'distant colossal fruit-trees standing in warm silhouette',
+        'fireflies beginning to rise from the grass',
+        'open, luminous, gently wistful',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_wardens_bower',
+    name: 'The Warden\'s Bower',
+    summary: 'A warden\'s canopy dwelling built into the boughs of a great tree — woven platforms and railings, hanging fruit and lanterns, soft cushions and a view over the grass sea.',
+    phraseBundle: {
+      core: [
+        'a cosy canopy dwelling built into the broad boughs of a great fruit-tree',
+        'woven wooden platforms, railings and a little arched doorway in the bark',
+        'hanging baskets of fruit, soft cushions and paper lanterns',
+        'gauzy curtains drifting in the breeze, a view out over the grass sea',
+        'warm afternoon light filtering through the leaves',
+        'intimate, homely, treetop-warm',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_sun_shrine',
+    name: 'The Sun Shrine',
+    summary: 'The harvest altar where the wardens keep the rite — a sun-disc of polished brass among the roots of the Heart Tree, offerings of first-fruit, warm light pooling on stone.',
+    phraseBundle: {
+      core: [
+        'a small open-air shrine among the roots of the great Heart Tree',
+        'a polished brass sun-disc mounted on weathered stone, catching the light',
+        'offerings of first-fruit, blossom and honey arranged on the altar',
+        'worn flagstones ringed with wildflowers and burning beeswax candles',
+        'a shaft of warm golden light falling directly on the sun-disc',
+        'sacred, warm, quietly ceremonial',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_preserving_cellar',
+    name: 'The Preserving Cellar',
+    summary: 'A cool stone cellar of jams, jars and honey — shelves of glowing preserves catching lamplight, the orchard\'s summer stored against the coming season.',
+    phraseBundle: {
+      core: [
+        'a cool stone cellar lined with shelves of jars, jams and golden honey',
+        'rows of glowing fruit-preserves catching the warm lamplight',
+        'braids of dried fruit and herbs hanging from low beams',
+        'clay crocks and wax-sealed pots stacked in the cool shadow',
+        'a single warm lantern, the summer stored against the coming season',
+        'cosy, amber-lit, quietly abundant',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_blossom_vale',
+    name: 'The Blossom Vale',
+    summary: 'The orchard corner where it is always spring — fruit-trees in full blossom, a drifting snow of petals, soft pink-and-white light over fresh green grass.',
+    phraseBundle: {
+      core: [
+        'a sheltered orchard vale where the trees stand in full blossom',
+        'a gentle drifting snow of pink and white petals on the breeze',
+        'soft pastel pink-and-white light over fresh bright-green grass',
+        'blossom-laden boughs arching overhead like a tunnel',
+        'a little stream winding through the petal-strewn grass',
+        'tender, fresh, dreamlike',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_granary_windmill',
+    name: 'The Granary & Windmill',
+    summary: 'The working heart of the orchard\'s edge — a golden stone granary and a slow-turning windmill among wheat and grass, warm and dusty in the afternoon sun.',
+    phraseBundle: {
+      core: [
+        'a golden stone granary and a slow-turning timber windmill at the orchard\'s edge',
+        'fields of wheat and tall grass running up to the buildings',
+        'sacks of grain and stacked crates of fruit by the open doors',
+        'warm dusty afternoon light, chaff drifting in the air',
+        'a cart half-loaded with the harvest, a winding track beyond',
+        'rustic, warm, working-pastoral',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+  {
+    id: 'environment_seed_or_last_light_hill',
+    name: 'The Last-Light Hill',
+    summary: 'The high lookout at the orchard\'s far edge — a lone fruit-tree on a grassy rise where the wardens watch the season turn, the first hint of autumn gold in the distance.',
+    phraseBundle: {
+      core: [
+        'a high grassy hill at the far edge of the orchard with a single lone fruit-tree',
+        'the whole orchard and grass sea spread out far below in golden light',
+        'the first faint hint of autumn gold creeping into the distant trees',
+        'long grass bending in the wind, a worn bench beneath the tree',
+        'a vast tender sky of late-afternoon gold and soft rose',
+        'wistful, expansive, bittersweet-beautiful',
+      ],
+    },
+    createdAt: ENV_SEED_TS_14,
+    updatedAt: ENV_SEED_TS_14,
+  },
+];
+
+// V15 — Planet Pistachio's Extraterrestrial Madness: bizarre locations across a candy-colored alien planet.
+const V15_SEED_ENVIRONMENTS: EnvironmentIdentity[] = [
+  {
+    id: 'environment_seed_pp_pistachio_sea',
+    name: 'The Pistachio Sea',
+    summary: 'A vast viscous green sea slowly rolling under a peach-and-lavender sky — pale pistachio surface bubbling thickly, hot-pink coral islets, a slow languid roll to the waves.',
+    phraseBundle: {
+      core: [
+        'a vast viscous pistachio-green sea slowly rolling under a peach-and-lavender sky',
+        'pale green surface bubbling thickly like soft custard',
+        'hot-pink coral islets and tangerine sand spits dotting the water',
+        'twin moons low on the horizon, soft warm light',
+        'a slow languid camp atmosphere, retro pulp sci-fi colour',
+        'bright candy palette, sensual and surreal',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_salt_flats',
+    name: 'The Crystal Salt Flats',
+    summary: 'An endless refractive salt desert under twin moons — every crystal catches the light in rainbow shimmer, mirage shimmers in the distance, a few glowing alien frogs hopping.',
+    phraseBundle: {
+      core: [
+        'an endless refractive salt desert under twin moons',
+        'every salt crystal catching the light in rainbow shimmer',
+        'glowing cyan-green alien frogs hopping across the flats',
+        'a heat-mirage shimmering on the horizon',
+        'pale violet-and-gold sky, vast open camp pulp scale',
+        'retro sci-fi serenity, candy palette',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_bobble_forest',
+    name: 'The Bobble-Fungus Forest',
+    summary: 'A towering forest of wobbling jelly mushrooms — translucent caps in pistachio pink and gold, glowing spores drifting, the whole forest gently wobbling on rubbery stalks.',
+    phraseBundle: {
+      core: [
+        'a towering forest of wobbling jelly mushroom-trees, rubbery stalks the size of redwoods',
+        'translucent gelatinous caps in pistachio-green hot-pink and gold',
+        'glowing cyan and pink spores drifting in the air',
+        'soft bouncy ground of fungal moss',
+        'dappled iridescent light filtering through the caps',
+        'psychedelic camp atmosphere, bright candy palette',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_honey_caves',
+    name: 'The Honey-Drip Caves',
+    summary: 'Vast cathedral caves with ceilings dripping golden honey in long slow strands, glowing honeycomb pools below, soft warm amber light.',
+    phraseBundle: {
+      core: [
+        'vast cathedral-scale alien caves with ceilings dripping golden honey in slow long strands',
+        'glowing honeycomb pools at the cave floor catching warm amber light',
+        'sticky stalactites of crystallised honey hanging like chandeliers',
+        'pistachio crystals embedded in the cave walls catching the glow',
+        'a warm sweet sticky atmosphere, retro pulp sci-fi',
+        'cosy strange and dripping',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_diner',
+    name: 'The Diner at the End of the Universe',
+    summary: 'A pink-and-pistachio neon roadside diner floating in deep space, big chrome accents, glowing PISTACHIO sign, a single asteroid parked outside as a car.',
+    phraseBundle: {
+      core: [
+        'a pink-and-pistachio neon retro diner floating in deep space on a small platform',
+        'a huge glowing neon sign reading PISTACHIO in cursive script above the roof',
+        'big chrome trim, round vinyl booths visible through the windows',
+        'a single asteroid parked outside as if it were a car',
+        'starfield and faint nebulae behind, a comet drifting past',
+        'camp 1950s diner aesthetic in deep space, glowing neon',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_asteroid_mines',
+    name: 'The Asteroid Mines',
+    summary: 'A field of slowly-drifting candy-colored asteroids with glamorous miners chipping at them — chrome scaffolding, cocktail bars in zero-g, picks ringing softly through the void.',
+    phraseBundle: {
+      core: [
+        'a field of slowly-drifting candy-coloured asteroids in low orbit',
+        'glamorous miners in gowns and helmets chipping at pistachio-veined rock with chrome picks',
+        'chrome scaffolding and small zero-gravity cocktail bars between asteroids',
+        'soft kicked-up pistachio crystal dust catching the starlight',
+        'a glittering retro sci-fi mining camp, calm and ridiculous',
+        'camp pulp glamour in deep space',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_lava_lamp_sky',
+    name: 'The Lava-Lamp Sky',
+    summary: 'A vast sunset sky that bubbles like a giant lava lamp — slow rising blobs of warm tangerine pink and gold drifting upward through deeper pistachio-violet, no horizon in sight.',
+    phraseBundle: {
+      core: [
+        'a vast sunset sky that bubbles like an enormous lava lamp',
+        'slow rising blobs of tangerine pink and gold drifting upward through deeper pistachio-violet',
+        'soft swirling currents of colour with no fixed horizon',
+        'a glowing sun-disc at the centre, a smaller distant moon',
+        'dreamy bright camp psychedelia, retro pulp sci-fi sky',
+        'endless soft chromatic motion',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_carnival',
+    name: 'The Pop-Up Carnival',
+    summary: 'A traveling alien fairground that appears overnight — striped pistachio-and-hot-pink tents, a slow ferris wheel of gold cups, ring toss with comet rings, cotton-candy clouds.',
+    phraseBundle: {
+      core: [
+        'a traveling alien fairground that appears overnight on the salt flats',
+        'striped pistachio-and-hot-pink tents and soft tangerine bunting',
+        'a slow ferris wheel made of golden teacups turning above',
+        'a ring-toss with floating comet rings, a popcorn stand selling glowing spore-puffs',
+        'pink-and-pistachio cotton candy clouds drifting between rides',
+        'joyful camp carnival in candy palette, retro pulp sci-fi',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_comet_harbor',
+    name: 'The Comet Harbor',
+    summary: 'A port where comets dock at chrome piers — long pistachio-and-cream comet vessels moored at floating walkways, harbour lanterns glowing pink, comet trails curling against the night.',
+    phraseBundle: {
+      core: [
+        'a port where small comets dock at long chrome piers floating in space',
+        'pistachio-and-cream comet-shaped vessels moored at the walkways',
+        'glowing pink harbour lanterns strung along the piers',
+        'long comet trails curling lazily against the deep starfield',
+        'figures in retro spacesuits loading and unloading freight',
+        'camp pulp sci-fi harbour aesthetic, neon-and-chrome',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_greenhouse',
+    name: 'The Sentient Greenhouse',
+    summary: 'A vast chrome-and-glass greenhouse where every plant is conscious — talking ferns, philosophical cacti, a row of philosophical pumpkins debating, gentle bright sunlight.',
+    phraseBundle: {
+      core: [
+        'a vast chrome-and-glass greenhouse with rows of conscious alien plants',
+        'talking ferns with little smiling faces, philosophical cacti with closed eyes',
+        'a row of small pumpkins quietly debating, a tomato listening intently',
+        'gentle bright pistachio-tinted sunlight pouring through the glass',
+        'soft warm cosy and slightly absurd, retro sci-fi botany',
+        'camp candy palette, sentient garden',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_palace',
+    name: 'The Royal Pistachio Palace',
+    summary: 'A camp-baroque palace in pistachio and gold — endless arches, gold-leaf curlicues, walls of pink quartz, a great throne shaped like a pistachio shell, twin pet glow-frogs.',
+    phraseBundle: {
+      core: [
+        'a camp-baroque palace interior in pistachio-green and gold',
+        'endless arches with gold-leaf curlicues, walls of polished pink quartz',
+        'a great throne shaped like an open pistachio shell on a low dais',
+        'twin pet glow-frogs perched on either side of the throne',
+        'long pink velvet drapes and a small fountain of honey at the side',
+        'extravagant retro pulp sci-fi royalty, candy palette',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_trampoline_crater',
+    name: 'The Trampoline Crater',
+    summary: 'A vast meteor crater whose floor is a perfectly soft bouncy alien membrane — locals leaping high in lo-gravity, the inner walls glittering with pistachio crystals, a small queue at the entrance.',
+    phraseBundle: {
+      core: [
+        'a vast meteor crater whose floor is a perfectly soft bouncy alien membrane',
+        'locals in retro spacesuits bouncing high in lo-gravity',
+        'the inner crater walls glittering with embedded pistachio crystals',
+        'a small queue of aliens waiting at the entrance',
+        'twin moons low above the rim, a soft pistachio glow',
+        'joyful playground camp atmosphere, retro pulp sci-fi',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+  {
+    id: 'environment_seed_pp_listening_pond',
+    name: 'The Listening Pond',
+    summary: 'A small still alien pond that hums gentle music when someone sits at its edge — pistachio-green water, lily pads with tiny speakers, a single bench, soft listening atmosphere.',
+    phraseBundle: {
+      core: [
+        'a small still pistachio-green pond in a quiet glade',
+        'large round lily pads with tiny chrome speakers embedded in their centres',
+        'a single wooden bench at the water\'s edge facing the pond',
+        'soft humming music rising visibly from the water in faint pink ripples',
+        'gentle dappled honey light through alien trees overhead',
+        'serene reflective camp atmosphere, retro sci-fi pastoral',
+      ],
+    },
+    createdAt: ENV_SEED_TS_15,
+    updatedAt: ENV_SEED_TS_15,
+  },
+];
+
 const readEnvironments = (): EnvironmentIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(ENVIRONMENT_STORE_KEY)),
@@ -2169,6 +2623,26 @@ const maybeApplyEnvSeed = (environments: EnvironmentIdentity[]): EnvironmentIden
     writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V13, true);
     const existingIds = new Set(result.map(e => e.id));
     const toAdd = V13_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V14) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V14, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V14_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
+    if (toAdd.length > 0) {
+      result = sortEnvironments([...result, ...toAdd]);
+      writeEnvironments(result);
+    }
+  }
+
+  if (readStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V15) === null) {
+    writeStorageItem(ENVIRONMENT_SEED_FLAG_KEY_V15, true);
+    const existingIds = new Set(result.map(e => e.id));
+    const toAdd = V15_SEED_ENVIRONMENTS.filter(e => !existingIds.has(e.id));
     if (toAdd.length > 0) {
       result = sortEnvironments([...result, ...toAdd]);
       writeEnvironments(result);

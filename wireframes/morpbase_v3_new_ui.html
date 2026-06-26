@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MorpBase v3 — New UI Wireframe</title>
+<style>
+  :root{
+    --bg:#0e0f13; --panel:#161821; --panel2:#1d2030; --line:#2a2e3f;
+    --ink:#e8eaf2; --mut:#8a90a6; --mut2:#5b6076;
+    --acc:#7c5cff; --acc2:#22d3ee; --warm:#ff7a59; --ok:#34d399;
+    --rad:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.45 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1280px;margin:0 auto;padding:18px}
+  /* screen tabs */
+  .screens{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+  .screens button{background:var(--panel);border:1px solid var(--line);color:var(--mut);
+    padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:600;font-size:13px}
+  .screens button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .note{color:var(--mut);font-size:12.5px;margin:10px 2px 0}
+  .kbd{color:var(--mut2);font-size:11px}
+  /* app frame */
+  .app{background:var(--panel);border:1px solid var(--line);border-radius:var(--rad);overflow:hidden}
+  .topbar{display:flex;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid var(--line);background:#12141c}
+  .logo{font-weight:800;letter-spacing:.3px}
+  .logo b{color:var(--acc)}
+  .uni{display:flex;align-items:center;gap:8px;background:var(--panel2);border:1px solid var(--line);
+    padding:6px 12px;border-radius:999px;font-size:13px}
+  .uni .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2))}
+  .search{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:999px;
+    padding:7px 14px;color:var(--mut)}
+  .me{display:flex;align-items:center;gap:8px;color:var(--mut)}
+  .avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#ff7a59,#7c5cff)}
+  /* layout */
+  .body{display:grid;grid-template-columns:190px 1fr 280px;min-height:560px}
+  .rail{border-right:1px solid var(--line);padding:14px 10px;background:#13151d}
+  .rail h6{margin:0 8px 8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
+  .lane{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--mut);cursor:pointer}
+  .lane:hover{background:var(--panel2);color:var(--ink)}
+  .lane.on{background:linear-gradient(90deg,rgba(124,92,255,.22),transparent);color:#fff;font-weight:600}
+  .lane .ic{width:18px;text-align:center}
+  .lane.del{opacity:.4;text-decoration:line-through}
+  .railsep{height:1px;background:var(--line);margin:12px 6px}
+  .main{padding:18px}
+  .mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .mhead h2{margin:0;font-size:20px}
+  .chips{display:flex;gap:8px}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 11px;color:var(--mut);font-size:12.5px;cursor:pointer}
+  .chip.on{border-color:var(--acc);color:#fff}
+  /* image grid */
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.12s}
+  .card:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .ph{aspect-ratio:3/4;position:relative;display:flex;align-items:flex-end;
+    background-size:cover;background-position:center}
+  .ph .tag{position:absolute;top:8px;left:8px;font-size:10px;color:#fff;background:rgba(0,0,0,.45);
+    padding:3px 7px;border-radius:6px;backdrop-filter:blur(2px)}
+  .ph .acts{position:absolute;inset:auto 8px 8px 8px;display:flex;gap:6px;opacity:0;transition:.12s}
+  .card:hover .acts{opacity:1}
+  .mini{flex:1;text-align:center;background:rgba(10,11,16,.78);border:1px solid var(--line);
+    border-radius:8px;padding:6px 0;font-size:12px;font-weight:600}
+  .mini.add{background:var(--acc);border-color:var(--acc);color:#fff}
+  .cap{padding:9px 10px}
+  .cap .nm{font-weight:600}
+  .cap .st{color:var(--mut);font-size:12px;margin-top:2px}
+  /* tray */
+  .tray{padding:14px;background:#13151d}
+  .tray h6{margin:0 2px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut2)}
+  .slot{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px;margin-bottom:8px}
+  .slot .sw{width:34px;height:34px;border-radius:8px;background-size:cover;background-position:center;flex:none}
+  .slot .lab{flex:1;font-size:12.5px}
+  .slot .lab small{display:block;color:var(--mut);font-size:11px}
+  .slot .x{color:var(--mut2);cursor:pointer}
+  .empty{color:var(--mut2);font-size:12.5px;border:1px dashed var(--line);border-radius:10px;padding:14px;text-align:center}
+  .synb{margin-top:10px;width:100%;background:linear-gradient(135deg,var(--acc),#5b3cff);
+    border:none;color:#fff;font-weight:700;padding:13px;border-radius:12px;cursor:pointer;font-size:14px}
+  .synb.alt{background:linear-gradient(135deg,var(--acc2),#0ea5b7);color:#04222a}
+  /* generic screen panels */
+  .pad{padding:22px}
+  .row{display:grid;gap:18px}
+  .panel{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .panel h3{margin:0 0 12px;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+  .promptbox{background:#0d0f16;border:1px solid var(--line);border-radius:10px;padding:14px;color:#cfd3e6;min-height:96px}
+  .elchips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .el{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12.5px}
+  .styles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .sty{border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer}
+  .sty.on{border-color:var(--acc2);box-shadow:0 0 0 1px var(--acc2)}
+  .sty .sb{aspect-ratio:1/1;background-size:cover;background-position:center}
+  .sty .sl{padding:6px 8px;font-size:12px;text-align:center}
+  .results{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .res{aspect-ratio:2/3;border-radius:10px;background-size:cover;background-position:center;border:1px solid var(--line)}
+  .btn{display:inline-block;background:var(--acc);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+  .btn.warm{background:var(--warm)}
+  .bar{height:8px;border-radius:99px;background:var(--panel);overflow:hidden;border:1px solid var(--line)}
+  .bar i{display:block;height:100%;width:62%;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+  .seg{display:flex;gap:6px}
+  .seg label{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);
+    padding:7px 12px;border-radius:999px;font-size:12.5px;color:var(--mut);cursor:pointer}
+  .seg input{accent-color:var(--acc)}
+  /* channel */
+  .chero{display:grid;grid-template-columns:240px 1fr;gap:20px;margin-bottom:18px}
+  .chero .big{aspect-ratio:3/4;border-radius:14px;background-size:cover;background-position:center;border:1px solid var(--line)}
+  .stars{color:#ffd166}
+  .tabs{display:flex;gap:18px;border-bottom:1px solid var(--line);margin:6px 0 16px}
+  .tabs span{padding:9px 2px;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent}
+  .tabs span.on{color:#fff;border-color:var(--acc)}
+  .gal{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+  .gal .g{aspect-ratio:1/1;border-radius:8px;background-size:cover;background-position:center;border:1px solid var(--line);position:relative}
+  .gal .g small{position:absolute;left:6px;bottom:5px;font-size:10px;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:5px}
+  .cmt{display:flex;gap:10px;margin-top:14px;align-items:flex-start}
+  .cmt .av{width:30px;height:30px;border-radius:50%;flex:none;background:linear-gradient(135deg,#22d3ee,#7c5cff)}
+  .cmt .bub{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font-size:12px;margin-top:8px}
+  .hide{display:none}
+  h2.t{font-size:18px;margin:0 0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+    <div style="font-size:18px;font-weight:800">MorpBase v3 — New UI Wireframe <span class="kbd">(mid-fidelity · click the tabs)</span></div>
+  </div>
+  <div class="note">Image-first. Lanes are visual community libraries. Community lives inside each item's <b>channel</b>. Style is chosen at <b>generate</b> time, not as a lane.</div>
+
+  <div class="screens" id="tabs">
+    <button data-s="lib" class="on">1 · Lane Library</button>
+    <button data-s="chan">2 · Item Channel</button>
+    <button data-s="syn">3 · Synthesize</button>
+    <button data-s="gen">4 · Generate</button>
+  </div>
+
+  <!-- ============ SCREEN 1: LANE LIBRARY ============ -->
+  <div class="app screen" id="lib">
+    <div class="topbar">
+      <div class="logo"><b>◆</b> MorpBase</div>
+      <div class="uni"><span class="dot"></span> Working in: <b>Neon Yokai</b> ▾</div>
+      <div class="search">🔍 Search characters, scenes, moods…</div>
+      <div class="me">◷ <span class="avatar"></span> Sina ▾</div>
+    </div>
+    <div class="body">
+      <div class="rail">
+        <h6>Lanes</h6>
+        <div class="lane on"><span class="ic">👤</span> Characters</div>
+        <div class="lane"><span class="ic">🎬</span> Scenery <small style="color:var(--ok);font-size:10px">&nbsp;NEW</small></div>
+        <div class="lane"><span class="ic">🗡</span> Objects</div>
+        <div class="lane"><span class="ic">🏙</span> Environment</div>
+        <div class="lane"><span class="ic">🎭</span> Mood</div>
+        <div class="lane"><span class="ic">💡</span> Lighting</div>
+        <div class="lane"><span class="ic">🎞</span> Composition</div>
+        <div class="lane del"><span class="ic">🎨</span> Styles</div>
+        <div class="railsep"></div>
+        <div class="lane"><span class="ic">◆</span> Universes</div>
+        <div class="lane"><span class="ic">◷</span> Memory</div>
+        <div class="lane"><span class="ic">◉</span> Profile</div>
+      </div>
+
+      <div class="main">
+        <div class="mhead">
+          <h2>Characters</h2>
+          <div class="chips">
+            <div class="chip on">Neon Yokai</div>
+            <div class="chip">All universes</div>
+            <div class="chip">Newest ▾</div>
+          </div>
+        </div>
+        <div class="grid" id="charGrid"></div>
+        <div class="legend">
+          <span><b>＋</b> add to your scene</span>
+          <span><b>↗</b> open the character's channel</span>
+          <span>every lane looks like this — a wall of images</span>
+        </div>
+      </div>
+
+      <div class="tray">
+        <h6>Your Scene</h6>
+        <div id="trayList"></div>
+        <button class="synb" onclick="go('syn')">✦ Synthesize</button>
+        <div class="note" style="text-align:center;margin-top:8px">LLM composes one coherent scene</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 2: ITEM CHANNEL ============ -->
+  <div class="app screen hide" id="chan">
+    <div class="topbar">
+      <div class="logo">← <span style="color:var(--mut)">Characters</span></div>
+      <div class="search">🔍 Search this channel…</div>
+      <div class="me"><span class="avatar"></span> Sina ▾</div>
+    </div>
+    <div class="pad">
+      <div class="chero">
+        <div class="big" style="background:linear-gradient(135deg,#7c5cff,#22d3ee)"></div>
+        <div>
+          <h2 class="t" style="font-size:24px">Soraya Vex</h2>
+          <div style="color:var(--mut);margin-bottom:14px">by @atlas · used in 380 scenes · <span class="stars">★★★★</span>☆ 4.6</div>
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <button class="btn" onclick="go('syn')">＋ Add to your scene</button>
+            <button class="btn ghost">◌ Follow</button>
+            <button class="btn ghost">★ Rate</button>
+          </div>
+          <div class="panel" style="background:var(--panel)">
+            <h3>About — prompt element</h3>
+            <div style="color:var(--mut);font-size:13px">silver-haired drifter · long charcoal coat · neon scar across cheek · calm, lethal poise · cyber-katana at hip</div>
+          </div>
+        </div>
+      </div>
+      <div class="tabs"><span class="on">Gallery</span><span>Comments</span><span>About</span></div>
+      <div style="color:var(--mut);font-size:12px;margin-bottom:10px">GALLERY — what people made with Soraya (this is where Community now lives)</div>
+      <div class="gal" id="chanGal"></div>
+      <div class="cmt"><div class="av"></div><div class="bub"><b>@mei</b> the rim lighting on this one is unreal 🔥 &nbsp; <span style="color:var(--mut)">❤ 12 · reply</span></div></div>
+      <div class="cmt"><div class="av"></div><div class="bub"><b>@kuro</b> added her to my Deep Signal world, fits perfectly &nbsp; <span style="color:var(--mut)">❤ 4 · reply</span></div></div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 3: SYNTHESIZE ============ -->
+  <div class="app screen hide" id="syn">
+    <div class="topbar">
+      <div class="logo"><b>◆</b> MorpBase</div>
+      <div class="uni"><span class="dot"></span> Neon Yokai</div>
+      <div class="search"></div>
+      <div class="me"><span class="avatar"></span> Sina ▾</div>
+    </div>
+    <div class="pad">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h2 class="t" style="font-size:22px">Synthesize scene</h2>
+        <div class="seg">
+          <label><input type="radio" name="m" checked> Faithful</label>
+          <label><input type="radio" name="m"> Cinematic</label>
+          <label><input type="radio" name="m"> Minimal</label>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Contributing elements</h3>
+        <div class="elchips">
+          <span class="el">👤 Soraya Vex</span>
+          <span class="el">🎬 Rooftop standoff</span>
+          <span class="el">🎭 Tense</span>
+          <span class="el">🗡 Katana</span>
+          <span class="el">🏙 Neon district</span>
+        </div>
+        <h3>Synthesized prompt <span style="text-transform:none;color:var(--mut2)">— editable</span></h3>
+        <div class="promptbox">Soraya Vex stands braced at the edge of a rain-slicked neon rooftop, cyber-katana drawn low, eyes locked on an unseen threat across the gap. Cold teal-and-magenta signage haze, tense stand-off framing, water beading on her charcoal coat, distant city glow below.</div>
+        <div style="display:flex;gap:10px;margin-top:14px;align-items:center">
+          <button class="btn ghost">↻ Re-synthesize</button>
+          <button class="btn alt" style="background:linear-gradient(135deg,var(--acc2),#0ea5b7);color:#04222a;border:none;border-radius:10px;padding:11px 20px;font-weight:700;cursor:pointer" onclick="go('gen')">Generate image →</button>
+          <span class="note">The LLM resolves the nouns + the Scenery verb into one sensible image.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCREEN 4: GENERATE ============ -->
+  <div class="app screen hide" id="gen">
+    <div class="topbar">
+      <div class="logo"><b>◆</b> MorpBase</div>
+      <div class="uni"><span class="dot"></span> Neon Yokai</div>
+      <div class="search"></div>
+      <div class="me"><span class="avatar"></span> Sina ▾</div>
+    </div>
+    <div class="pad">
+      <h2 class="t" style="font-size:22px;margin-bottom:16px">Generate</h2>
+      <div class="row" style="grid-template-columns:1fr 1fr">
+        <div class="panel">
+          <h3>Prompt (from synthesis)</h3>
+          <div class="promptbox" style="min-height:120px">Soraya Vex stands braced at the edge of a rain-slicked neon rooftop, cyber-katana drawn low… </div>
+          <div style="display:flex;gap:14px;align-items:center;margin:14px 0">
+            <span class="el">Aspect 2:3 ▾</span><span class="el">Count 4 ▾</span><span class="el">🎲 seed</span>
+          </div>
+          <button class="btn" onclick="render()">⚡ Generate</button>
+          <div style="margin:14px 0 6px" class="bar" id="renderBar"><i></i></div>
+          <div class="note">Free now (local KREA2 via ComfyUI) · metered later</div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:18px">
+            <h3>Style <span style="text-transform:none;color:var(--mut2)">— chosen here, not a lane</span></h3>
+            <div class="styles" id="styleGrid"></div>
+            <div class="note">add as many style presets as you want — each is just a preset/LoRA</div>
+          </div>
+          <div class="panel">
+            <h3>Results</h3>
+            <div class="results" id="resGrid"></div>
+            <div style="display:flex;gap:10px;margin-top:12px">
+              <button class="btn warm">♥ Save to channel</button>
+              <button class="btn ghost">⇪ Post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note" style="margin-top:16px">
+    Placeholder tiles = where community/generated images go. Flows wired: Library → <b>Synthesize</b> → <b>Generate</b>; any card's <b>↗</b> / "Add to scene" jumps too. This is a sketch of structure, not final visuals.
+  </div>
+</div>
+
+<script>
+  // gradient helper for placeholder "images"
+  const grads = [
+    'linear-gradient(135deg,#7c5cff,#22d3ee)','linear-gradient(135deg,#ff7a59,#7c5cff)',
+    'linear-gradient(135deg,#22d3ee,#34d399)','linear-gradient(135deg,#f472b6,#7c5cff)',
+    'linear-gradient(135deg,#fbbf24,#ff7a59)','linear-gradient(135deg,#60a5fa,#a78bfa)',
+    'linear-gradient(135deg,#34d399,#22d3ee)','linear-gradient(135deg,#f87171,#fbbf24)'
+  ];
+  const g = i => grads[i % grads.length];
+
+  const chars = [
+    ['Soraya Vex','❤ 1.2k'],['Kuro','❤ 840'],['Mei','❤ 610'],['Atlas','❤ 2.1k'],
+    ['Ren','❤ 430'],['Iyo','❤ 770'],['Dust','❤ 980'],['Nox','❤ 1.5k']
+  ];
+  const charGrid = document.getElementById('charGrid');
+  chars.forEach((c,i)=>{
+    charGrid.insertAdjacentHTML('beforeend',`
+      <div class="card" onclick="go('chan')">
+        <div class="ph" style="background:${g(i)}">
+          <span class="tag">CHARACTER</span>
+          <div class="acts">
+            <div class="mini add" onclick="event.stopPropagation();addToScene('${c[0]}',${i})">＋ Add</div>
+            <div class="mini" onclick="event.stopPropagation();go('chan')">↗ Channel</div>
+          </div>
+        </div>
+        <div class="cap"><div class="nm">${c[0]}</div><div class="st">${c[1]} · 380 scenes</div></div>
+      </div>`);
+  });
+
+  // tray
+  let tray = [['👤','Soraya Vex','Character',0],['🎬','Rooftop standoff','Scenery',2],['🎭','Tense','Mood',4]];
+  function drawTray(){
+    const el = document.getElementById('trayList');
+    if(!tray.length){el.innerHTML='<div class="empty">Pick elements from any lane.<br>They stack here.</div>';return;}
+    el.innerHTML = tray.map((t,n)=>`
+      <div class="slot">
+        <div class="sw" style="background:${g(t[3])}"></div>
+        <div class="lab">${t[0]} ${t[1]}<small>${t[2]}</small></div>
+        <div class="x" onclick="rm(${n})">✕</div>
+      </div>`).join('');
+  }
+  function addToScene(name,i){ tray.push(['👤',name,'Character',i]); drawTray(); }
+  function rm(n){ tray.splice(n,1); drawTray(); }
+  drawTray();
+
+  // channel gallery
+  const chanGal = document.getElementById('chanGal');
+  for(let i=0;i<12;i++) chanGal.insertAdjacentHTML('beforeend',
+    `<div class="g" style="background:${g(i+1)}"><small>@user${i+1}</small></div>`);
+
+  // styles
+  const styles=['Ghibli','Retro Anime','Photography','Noir','Watercolor','3D Render','Ukiyo-e','Comic'];
+  const styleGrid=document.getElementById('styleGrid');
+  styles.forEach((s,i)=>styleGrid.insertAdjacentHTML('beforeend',
+    `<div class="sty ${i===0?'on':''}" onclick="pickStyle(this)"><div class="sb" style="background:${g(i+2)}"></div><div class="sl">${s}</div></div>`));
+  function pickStyle(el){document.querySelectorAll('.sty').forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+
+  // results
+  function render(){
+    const r=document.getElementById('resGrid');r.innerHTML='';
+    for(let i=0;i<4;i++) r.insertAdjacentHTML('beforeend',`<div class="res" style="background:${g(i)}"></div>`);
+  }
+  render();
+
+  // screen switching
+  function go(s){
+    document.querySelectorAll('.screen').forEach(el=>el.classList.add('hide'));
+    document.getElementById(s).classList.remove('hide');
+    document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>go(b.dataset.s));
+</script>
+</body>
+</html>

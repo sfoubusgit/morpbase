@@ -11,6 +11,8 @@ const LIGHTING_SEED_FLAG_KEY_V7 = 'promptgen:lightings:seeded:v7';
 const LIGHTING_SEED_FLAG_KEY_V8 = 'promptgen:lightings:seeded:v8';
 const LIGHTING_SEED_FLAG_KEY_V9 = 'promptgen:lightings:seeded:v9';
 const LIGHTING_SEED_FLAG_KEY_V10 = 'promptgen:lightings:seeded:v10';
+const LIGHTING_SEED_FLAG_KEY_V11 = 'promptgen:lightings:seeded:v11';
+const LIGHTING_SEED_FLAG_KEY_V12 = 'promptgen:lightings:seeded:v12';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -100,6 +102,8 @@ const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
 const SEED_TS_10 = 1749600000000;
+const SEED_TS_11 = 1749859200000;
+const SEED_TS_12 = 1750204800000;
 
 const V5_SEED_LIGHTINGS: LightingSetup[] = [
   {
@@ -791,6 +795,170 @@ const V10_SEED_LIGHTINGS: LightingSetup[] = [
   },
 ];
 
+// V11 — Orchard Reverie: warm eternal-summer orchard light.
+const V11_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_or_golden_grass',
+    name: 'Golden Grass-Light',
+    summary: 'Warm low golden-hour sun raking across the grasslands — long honeyed light, soft glow on skin and grass, gentle lens warmth.',
+    phrases: [
+      'warm low golden-hour sun raking across endless grasslands',
+      'long honeyed light, a soft golden glow on skin and grass',
+      'gentle warm haze and faint lens flare',
+      'idyllic, warm, sun-drenched',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'lighting_or_dappled_canopy',
+    name: 'Dappled Canopy Light',
+    summary: 'Soft sunlight filtering through fruit-tree leaves — shifting dapples of light and shade, warm green-gold pools across the ground.',
+    phrases: [
+      'soft sunlight filtering down through dense fruit-tree leaves',
+      'shifting dapples of light and shade across skin and grass',
+      'warm green-gold pools of light on the ground',
+      'gentle, leafy, summer-shade',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'lighting_or_lantern_festival',
+    name: 'Lantern Festival Glow',
+    summary: 'Warm paper-lantern light in the blue dusk — pools of amber from hanging lanterns, soft warm highlights and deep soft shadow.',
+    phrases: [
+      'warm paper-lantern light scattered through a deepening blue dusk',
+      'soft pools of amber from strings of hanging lanterns',
+      'gentle warm highlights on faces, soft shadow beyond',
+      'festive, cosy, twilight-warm',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'lighting_or_dawn_mist',
+    name: 'Soft Dawn Mist',
+    summary: 'Pale rosy dawn light through low orchard mist — gentle diffuse glow, soft pastel air, dew catching the first light.',
+    phrases: [
+      'pale rosy dawn light glowing through low orchard mist',
+      'gentle diffuse glow, soft pastel pink-and-gold air',
+      'dew on grass and blossom catching the first light',
+      'tender, hazy, fresh',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'lighting_or_honey_backlight',
+    name: 'Honey Backlight',
+    summary: 'Warm sun behind the subject — a honeyed rim of light through hair and leaves, soft glowing halo of pollen and dust in the air.',
+    phrases: [
+      'warm sun directly behind the subject, a honeyed rim of light',
+      'glowing backlight through hair, leaves and translucent fruit',
+      'soft floating pollen and dust lit gold in the air',
+      'dreamy, radiant, warm-backlit',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'lighting_or_last_amber',
+    name: 'Last-Light Amber',
+    summary: 'The deep amber of the final hour — long rich shadows, a glowing rose-and-gold sky, the bittersweet warmth of day\'s end.',
+    phrases: [
+      'the deep amber glow of the final hour before sunset',
+      'long rich warm shadows stretching across the grass',
+      'a glowing rose-and-gold sky behind the trees',
+      'bittersweet, warm, gently fading',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+];
+
+// V12 — Planet Pistachio: camp pulp sci-fi candy-coloured light.
+const V12_SEED_LIGHTINGS: LightingSetup[] = [
+  {
+    id: 'lighting_pp_pistachio_noon',
+    name: 'Pistachio Noon',
+    summary: 'High bright daylight tinted pistachio-green — the whole air faintly green, soft glow on skin, candy pulp atmosphere.',
+    phrases: [
+      'high bright daylight softly tinted pistachio-green',
+      'the whole air faintly green with a soft warm glow on skin',
+      'crisp cheerful shadows, slight chromatic shift',
+      'camp pulp sci-fi noon, candy palette',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'lighting_pp_twin_moon',
+    name: 'Twin-Moon Glow',
+    summary: 'Cool dual-moon light from twin moons low on the horizon — soft mint-and-lavender double shadows, gentle silver wash, retro sci-fi night.',
+    phrases: [
+      'cool dual-moon light from twin moons low on the horizon',
+      'soft mint-and-lavender double shadows trailing every figure',
+      'gentle silver wash across the landscape',
+      'retro sci-fi night, candy palette',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'lighting_pp_comet_flare',
+    name: 'Comet Flare',
+    summary: 'A passing comet streaks across the sky throwing strong tangerine-and-pink flare light across the scene — bright rim light, long warm shadows, glamorous flash.',
+    phrases: [
+      'a passing comet streaking across the sky throwing strong tangerine-and-pink flare light',
+      'bright rim light on the figures, long warm directional shadows',
+      'a glamorous flash of colour across the scene',
+      'retro pulp sci-fi flare, candy palette',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'lighting_pp_lava_lamp_dusk',
+    name: 'Lava-Lamp Dusk',
+    summary: 'A sunset of slow rising tangerine pink and gold blobs against deeper pistachio-violet — soft chromatic glow, no hard shadows, dreamy chromatic motion.',
+    phrases: [
+      'a sunset of slow rising tangerine-pink-and-gold blobs against deeper pistachio-violet sky',
+      'soft chromatic glow on skin and surfaces, no hard shadows',
+      'dreamy slow chromatic motion in the upper sky',
+      'camp psychedelic dusk, candy palette',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'lighting_pp_spore_bioluminescence',
+    name: 'Spore Bioluminescence',
+    summary: 'Soft glow from drifting bioluminescent spores in the air — gentle pink-and-cyan particulate lighting on skin and fabric, dreamy fairy-lit atmosphere.',
+    phrases: [
+      'soft glow from drifting bioluminescent cyan-and-pink spores in the air',
+      'gentle particulate lighting catching skin and fabric in tiny points',
+      'a dreamy fairy-lit night atmosphere',
+      'retro psychedelic glow, intimate and ethereal',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'lighting_pp_neon_diner',
+    name: 'Neon Diner Pop',
+    summary: 'Bright neon-sign lighting from a roadside diner sign — saturated hot-pink and pistachio neon, sharp edges, retro pop colour, glamour-flash atmosphere.',
+    phrases: [
+      'bright neon-sign lighting from a roadside diner sign nearby',
+      'saturated hot-pink and pistachio neon with sharp colour edges',
+      'glowing chrome reflections on faces and surfaces',
+      'camp 1950s neon-pop atmosphere',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+];
+
 const writeItems = (items: LightingSetup[]) => {
   const payload: LightingStore = { version: 1, items: sortItems(items) };
   writeStorageItem(LIGHTING_STORE_KEY, payload);
@@ -884,6 +1052,26 @@ const maybeApplySeed = (items: LightingSetup[]): LightingSetup[] => {
     writeStorageItem(LIGHTING_SEED_FLAG_KEY_V10, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V10_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V11_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(LIGHTING_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(LIGHTING_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V12_SEED_LIGHTINGS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

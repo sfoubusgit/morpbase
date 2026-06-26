@@ -10,6 +10,8 @@ const WARDROBE_SEED_FLAG_KEY_V7 = 'promptgen:wardrobe:seeded:v7';
 const WARDROBE_SEED_FLAG_KEY_V8 = 'promptgen:wardrobe:seeded:v8';
 const WARDROBE_SEED_FLAG_KEY_V9 = 'promptgen:wardrobe:seeded:v9';
 const WARDROBE_SEED_FLAG_KEY_V10 = 'promptgen:wardrobe:seeded:v10';
+const WARDROBE_SEED_FLAG_KEY_V11 = 'promptgen:wardrobe:seeded:v11';
+const WARDROBE_SEED_FLAG_KEY_V12 = 'promptgen:wardrobe:seeded:v12';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -99,6 +101,8 @@ const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
 const SEED_TS_10 = 1749600000000;
+const SEED_TS_11 = 1749859200000;
+const SEED_TS_12 = 1750204800000;
 
 const DEFAULT_SEED_OUTFITS: OutfitIdentity[] = [
   {
@@ -814,6 +818,170 @@ const V10_SEED_OUTFITS: OutfitIdentity[] = [
   },
 ];
 
+// V11 — Orchard Reverie: warm pastoral warden dress.
+const V11_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_or_warden_regalia',
+    name: 'Warden Harvest Regalia',
+    summary: 'A fruit-warden\'s ceremonial dress — flowing linen robes in her fruit\'s colour, a gold harvest sash, a woven leaf-and-blossom crown, embroidered fruit motifs.',
+    phrases: [
+      'flowing linen warden robes dyed in a single fruit\'s rich colour',
+      'a gold harvest sash knotted at the waist, embroidered fruit and leaf motifs',
+      'a woven crown of leaves and blossom',
+      'soft, ceremonial, sun-warmed pastoral',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'outfit_or_linen_sundress',
+    name: 'Linen Summer Dress',
+    summary: 'A simple flowing summer dress of light linen — soft pastel tones, gentle gathered waist, bare sun-warmed shoulders, the everyday wear of the orchard.',
+    phrases: [
+      'a simple flowing summer dress of light pastel linen',
+      'a gently gathered waist and a soft long skirt',
+      'bare sun-warmed shoulders, a fruit-blossom tucked at the collar',
+      'fresh, airy, everyday-pastoral',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'outfit_or_festival_attire',
+    name: 'Festival Attire',
+    summary: 'Woven-straw and bright-ribbon festival dress — a flower crown, garland sashes, layered colourful skirts for dancing at the harvest feast.',
+    phrases: [
+      'a bright festival dress with layered colourful skirts for dancing',
+      'a woven-straw bodice and ribbon lacing, garland sashes',
+      'a full flower-and-fruit crown, ribbons trailing',
+      'festive, joyful, garland-bright',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'outfit_or_bathing_wrap',
+    name: 'Bathing Wrap',
+    summary: 'A light gauzy wrap for the warm springs — soft sheer linen draped and knotted, damp at the hem, blossoms in loose hair. Tasteful and summery.',
+    phrases: [
+      'a light gauzy linen wrap softly draped and knotted at the shoulder',
+      'soft sheer pastel fabric, damp at the hem',
+      'loose hair with a blossom or two tucked in',
+      'serene, summery, softly modest',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'outfit_or_blossom_robe',
+    name: 'Blossom Ceremonial Robe',
+    summary: 'The robe for the spring blossom-rite — pale petal-toned silk layered like falling blossom, a long blossom-crown, gauzy translucent sleeves.',
+    phrases: [
+      'a pale petal-toned silk robe layered like falling blossom',
+      'gauzy translucent sleeves and a long trailing hem',
+      'an elaborate blossom-crown and petal-strewn hair',
+      'tender, ceremonial, blossom-fresh',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'outfit_or_gardener_wrap',
+    name: 'Gardener\'s Apron-Wrap',
+    summary: 'The working dress of the orchard — a linen shift with rolled sleeves, a sturdy canvas apron of pockets, a head-kerchief, soil and juice on the hands.',
+    phrases: [
+      'a linen shift with rolled sleeves under a sturdy canvas apron of pockets',
+      'a simple head-kerchief holding back the hair',
+      'soil and fruit-juice on the hands, a pruning tool tucked in the apron',
+      'practical, warm, working-pastoral',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+];
+
+// V12 — Planet Pistachio: camp pulp 50s sci-fi dress code.
+const V12_SEED_OUTFITS: OutfitIdentity[] = [
+  {
+    id: 'outfit_pp_satin_gown',
+    name: 'Pistachio Satin Gown',
+    summary: 'A floor-length pistachio-satin evening gown with a daring slit and opera-length white gloves — glamour at any altitude.',
+    phrases: [
+      'a floor-length pistachio-green satin evening gown with a daring slit',
+      'opera-length white gloves to the elbow',
+      'pearls at the throat, a small bubble helmet hanging unhooked at the hip',
+      'glamour at any altitude, retro pulp sci-fi',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'outfit_pp_retro_flight_suit',
+    name: 'Retro Flight Suit',
+    summary: 'A sleek pistachio-and-cream retro flight suit with tangerine racing stripes — leather gloves, a long hot-pink silk scarf, dashing.',
+    phrases: [
+      'a sleek pistachio-and-cream retro flight suit with tangerine racing stripes',
+      'leather gloves and a long hot-pink silk scarf trailing',
+      'a chrome bubble helmet under one arm, sharp boots',
+      'dashing pulp pilot aesthetic',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'outfit_pp_lounge_gown',
+    name: 'Hot-Pink Beaded Lounge Gown',
+    summary: 'A backless hot-pink beaded lounge gown with a long mermaid hem — vintage chrome microphone and one white star earring, glamour-flash.',
+    phrases: [
+      'a backless hot-pink beaded lounge gown with a long mermaid hem',
+      'a single white star-shaped earring catching the spotlight',
+      'a glossy hot-pink lip and platinum waves over one shoulder',
+      'retro lounge glamour, sensual and camp',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'outfit_pp_lab_coat',
+    name: 'Botanist Lab Coat',
+    summary: 'A crisp white lab coat over a pistachio bodysuit, tangerine boots — clipboard and magnifying lens, friendly and curious.',
+    phrases: [
+      'a crisp white lab coat over a pistachio-green bodysuit',
+      'tangerine ankle boots, a clipboard in one hand',
+      'a small magnifying lens hanging from the belt',
+      'curious friendly scientist look, retro sci-fi',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'outfit_pp_wrangler',
+    name: 'Wrangler Jacket and Hat',
+    summary: 'A fringed pistachio-and-orange wrangler jacket over a cream shirt, rugged trousers, wide-brim pistachio hat with tangerine band — easygoing space-cowboy.',
+    phrases: [
+      'a fringed pistachio-and-orange wrangler jacket over a cream shirt',
+      'rugged trousers and worn brown boots',
+      'a wide-brim pistachio-green cowboy hat with a tangerine band',
+      'an easygoing space-cowboy look, camp pulp sci-fi',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'outfit_pp_carnival_jumpsuit',
+    name: 'Carnival Jumpsuit',
+    summary: 'A playful pistachio-and-hot-pink striped jumpsuit with bell-bottom flares, a soft cotton-candy boa and chunky cream platforms — built for bouncing and dancing.',
+    phrases: [
+      'a playful pistachio-and-hot-pink striped jumpsuit with bell-bottom flares',
+      'a soft cotton-candy boa draped over the shoulders',
+      'chunky cream platform boots ready to bounce',
+      'joyful camp carnival aesthetic, retro pulp colour',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+];
+
 const writeOutfits = (outfits: OutfitIdentity[]) => {
   const payload: WardrobeStore = { version: 1, outfits: sortOutfits(outfits) };
   writeStorageItem(WARDROBE_STORE_KEY, payload);
@@ -897,6 +1065,26 @@ const maybeApplySeed = (outfits: OutfitIdentity[]): OutfitIdentity[] => {
     writeStorageItem(WARDROBE_SEED_FLAG_KEY_V10, true);
     const existingIds = new Set(result.map(o => o.id));
     const toAdd = V10_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V11_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
+    if (toAdd.length > 0) {
+      result = sortOutfits([...result, ...toAdd]);
+      writeOutfits(result);
+    }
+  }
+
+  if (readStorageItem(WARDROBE_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(WARDROBE_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(o => o.id));
+    const toAdd = V12_SEED_OUTFITS.filter(o => !existingIds.has(o.id));
     if (toAdd.length > 0) {
       result = sortOutfits([...result, ...toAdd]);
       writeOutfits(result);

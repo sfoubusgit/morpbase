@@ -24,6 +24,8 @@ const SEED_FLAG_KEY_V4 = 'promptgen:objects:seeded:v4';
 const SEED_FLAG_KEY_V5 = 'promptgen:objects:seeded:v5';
 const SEED_FLAG_KEY_V6 = 'promptgen:objects:seeded:v6';
 const SEED_FLAG_KEY_V7 = 'promptgen:objects:seeded:v7';
+const SEED_FLAG_KEY_V8 = 'promptgen:objects:seeded:v8';
+const SEED_FLAG_KEY_V9 = 'promptgen:objects:seeded:v9';
 const SEED_TS = 1748304000000;
 const SEED_TS_2 = 1748476800000;
 const SEED_TS_3 = 1748563200000;
@@ -31,6 +33,8 @@ const SEED_TS_4 = 1748649600000;
 const SEED_TS_5 = 1748736000000;
 const SEED_TS_6 = 1748822400000;
 const SEED_TS_7 = 1749600000000;
+const SEED_TS_8 = 1749859200000;
+const SEED_TS_9 = 1750204800000;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -809,6 +813,170 @@ const V7_SEED_OBJECTS: ObjectIdentity[] = [
   },
 ];
 
+// V8 — Orchard Reverie: warm pastoral harvest props.
+const V8_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_or_harvest_basket',
+    name: 'Woven Harvest Basket',
+    summary: 'A wide woven willow basket heaped with mixed ripe fruit — worn smooth handles, a few leaves and blossoms tucked among the harvest.',
+    phrases: [
+      'a wide woven willow basket heaped with mixed ripe fruit',
+      'worn smooth wooden handles, a soft cloth lining',
+      'a few leaves and blossoms tucked among the harvest',
+      'rustic, abundant, warm-toned',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'object_or_warden_sickle',
+    name: 'Warden\'s Harvest Sickle',
+    summary: 'A ceremonial pruning-sickle of polished brass and warm wood — a gently curved blade etched with leaf-patterns, a ribbon knotted at the handle.',
+    phrases: [
+      'a ceremonial pruning-sickle of polished brass and warm olive wood',
+      'a gently curved blade etched with delicate leaf-patterns',
+      'a coloured ribbon knotted at the handle',
+      'graceful, sacred-rustic, golden',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'object_or_sun_medallion',
+    name: 'Sun Medallion',
+    summary: 'The focus of the harvest rite — a polished brass sun-disc on a cord, radiating engraved rays, warm and faintly glowing in the light.',
+    phrases: [
+      'a polished brass sun-disc medallion on a braided cord',
+      'engraved radiating sun-rays around a fruit-tree sigil',
+      'warm metal catching and holding the golden light',
+      'sacred, warm, talismanic',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'object_or_cider_jug',
+    name: 'Clay Cider Jug',
+    summary: 'A round earthenware jug of golden cider — a glazed amber sheen, a wooden stopper, a tin cup beside it.',
+    phrases: [
+      'a round earthenware jug of golden cider with a glazed amber sheen',
+      'a carved wooden stopper and a dented tin cup beside it',
+      'a few drops of cider beading on the cool clay',
+      'rustic, warm, homely',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'object_or_blossom_crown',
+    name: 'Blossom Crown',
+    summary: 'A woven circlet of fresh fruit-blossom and leaves — pink and white petals, fine green vine, trailing ribbons.',
+    phrases: [
+      'a woven circlet of fresh fruit-blossom and green leaves',
+      'soft pink and white petals on a fine twisted vine',
+      'a few thin ribbons trailing from the back',
+      'delicate, tender, blossom-fresh',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+  {
+    id: 'object_or_fruit_bough',
+    name: 'Fruit-Laden Bough',
+    summary: 'A heavy cut branch bowed with ripe fruit and leaves — glossy fruit clustered along the wood, a sprig of blossom at the tip.',
+    phrases: [
+      'a heavy cut branch bowed with clustered ripe fruit and leaves',
+      'glossy fruit catching the light along the wood',
+      'a sprig of late blossom at the tip',
+      'lush, abundant, sun-warmed',
+    ],
+    createdAt: SEED_TS_8,
+    updatedAt: SEED_TS_8,
+  },
+];
+
+// V9 — Planet Pistachio: camp pulp sci-fi props.
+const V9_SEED_OBJECTS: ObjectIdentity[] = [
+  {
+    id: 'object_pp_shell_crown',
+    name: 'Pistachio-Shell Crown',
+    summary: 'A tall ornate crown of pistachio-shells inlaid with gold filigree and a single pink gemstone at the front — the regalia of the Pistachio Queen.',
+    phrases: [
+      'a tall ornate crown of pistachio-shells inlaid with gold filigree',
+      'a single large pink gemstone at the front',
+      'tiny gold pistachio-leaf accents around the rim',
+      'regal camp royalty',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'object_pp_glow_frog',
+    name: 'Glow-Frog',
+    summary: 'A small alien frog with translucent cyan-green skin that pulses softly with bioluminescent light — the locals herd them across the salt flats.',
+    phrases: [
+      'a small alien frog with translucent cyan-green skin pulsing softly with bioluminescent light',
+      'big innocent black eyes, sticky webbed toes',
+      'a faint trailing glow when it hops',
+      'cute camp pulp sci-fi creature',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'object_pp_comet_board',
+    name: 'Comet Surfboard',
+    summary: 'A glowing pistachio-green surfboard with chrome trim, designed to ride the tails of passing comets — long bright comet-trail streaming behind.',
+    phrases: [
+      'a glowing pistachio-green surfboard with chrome trim and tangerine racing stripes',
+      'a long bright pink-and-gold comet-trail streaming behind it',
+      'tiny pinpoint stars catching on the deck',
+      'retro pulp sci-fi sport gear',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'object_pp_mood_cactus',
+    name: 'Mood-Cactus',
+    summary: 'A tiny succulent with a small face that changes expression based on its feeling — comes in cheerful pink, calm sage, grumpy violet.',
+    phrases: [
+      'a tiny mood-cactus the size of a teacup with a small expressive face on its body',
+      'a single small pink flower at the top',
+      'colour shifts subtly with mood — pink for cheer, sage for calm, violet for grumpy',
+      'sentient houseplant, camp alien charm',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'object_pp_pistachio_sundae',
+    name: 'Towering Pistachio Sundae',
+    summary: 'An impossibly tall pistachio-ice-cream sundae in a tall chrome glass — scoops piled four feet high, hot-pink syrup and gold sprinkles, three sparklers.',
+    phrases: [
+      'an impossibly tall pistachio-ice-cream sundae in a tall chrome dessert glass',
+      'four feet of teetering scoops with hot-pink syrup running down',
+      'gold sprinkles, a single maraschino comet on top, three sparklers',
+      'ridiculous joyous dessert, retro pulp camp',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+  {
+    id: 'object_pp_ray_gun',
+    name: 'Retro Ray Gun',
+    summary: 'A chrome ray gun with pistachio-green grip and a glowing pink crystal in the muzzle — emits a harmless little ping when fired, mostly decorative.',
+    phrases: [
+      'a chrome retro ray gun with a pistachio-green grip and brass dial',
+      'a glowing pink crystal in the muzzle',
+      'small dials and a tiny antenna on the side',
+      'mostly decorative camp pulp sci-fi sidearm',
+    ],
+    createdAt: SEED_TS_9,
+    updatedAt: SEED_TS_9,
+  },
+];
+
 const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
   let result = items;
 
@@ -876,6 +1044,26 @@ const maybeApplySeed = (items: ObjectIdentity[]): ObjectIdentity[] => {
     writeStorageItem(SEED_FLAG_KEY_V7, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V7_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V8) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V8, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V8_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(SEED_FLAG_KEY_V9) === null) {
+    writeStorageItem(SEED_FLAG_KEY_V9, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V9_SEED_OBJECTS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

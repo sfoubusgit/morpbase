@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MorpBase v3 — New UI (true to identity)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ====================================================================
+   Design tokens — copied verbatim from src/ui/styles/tokens.css
+   ==================================================================== */
+:root{
+  --surface-0:#0a0b12; --surface-1:#111217; --surface-2:#1a1a1f; --surface-3:#25252a;
+  --surface-overlay:rgba(14,15,20,.82);
+  --text-primary:#fff; --text-secondary:#b0b0c3; --text-tertiary:#9ca3af; --text-accent:#dbe2ff;
+  --text-muted:rgba(255,255,255,.3);
+  --accent:#6e56f9; --accent-hover:#7b65ff; --accent-active:#5d47e8;
+  --accent-bg:rgba(110,86,249,.12); --accent-bg-strong:rgba(110,86,249,.22);
+  --green:#10b981; --green-bg:rgba(16,185,129,.12); --green-border:rgba(16,185,129,.24);
+  --bd-hairline:rgba(255,255,255,.04); --bd-subtle:rgba(255,255,255,.07); --bd-medium:rgba(255,255,255,.12);
+  --bd-accent:rgba(110,86,249,.35); --bd-accent-strong:rgba(110,86,249,.6);
+  --error:#ff6b6b;
+  --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',Consolas,monospace;
+  --r-xs:6px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:22px; --r-pill:999px;
+  --mfast:150ms; --mnorm:250ms; --ease:cubic-bezier(.4,0,.2,1);
+  /* per-lane accents — from IdentityLaneSurface.css [data-variant] */
+  --la-character:110,86,249;  --la-scenery:255,157,110; --la-objects:168,216,255;
+  --la-environment:16,185,129; --la-mood:255,179,198;   --la-lighting:255,213,128;
+  --la-composition:158,255,216;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:var(--text-primary);font-family:var(--font);font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  background:linear-gradient(145deg,#0a0b12 0%,#1b1f2a 55%,#0a0b12 100%) fixed}
+/* dotted texture — from .app-root::before */
+body::before{content:"";position:fixed;inset:-20%;z-index:0;pointer-events:none;opacity:.6;filter:blur(.2px);
+  background-image:
+    radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px),
+    radial-gradient(rgba(110,86,249,.12) 1px,transparent 1px),
+    radial-gradient(rgba(255,255,255,.04) 2px,transparent 2px);
+  background-size:26px 26px,60px 60px,120px 120px;background-position:0 0,12px 12px,30px 30px}
+/* colour glows — from .app-root::after */
+body::after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 20% 10%,rgba(110,86,249,.15),transparent 45%),
+    radial-gradient(circle at 80% 0%,rgba(16,185,129,.12),transparent 40%),
+    radial-gradient(circle at 50% 100%,rgba(59,130,246,.10),transparent 45%)}
+.page{position:relative;z-index:1}
+
+/* mockup-only screen switcher */
+.switch{max-width:1340px;margin:0 auto;padding:16px 20px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.switch .lbl{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)}
+.switch button{background:var(--surface-2);border:1px solid var(--bd-subtle);color:var(--text-secondary);
+  padding:7px 13px;border-radius:var(--r-sm);cursor:pointer;font:600 12.5px var(--font);transition:var(--mfast) var(--ease)}
+.switch button:hover{border-color:var(--bd-medium);color:#fff}
+.switch button.on{background:var(--accent-bg-strong);border-color:var(--bd-accent-strong);color:#fff}
+
+/* ============ NAVBAR — from App.css .nav ============ */
+.app{max-width:1340px;margin:14px auto;padding:0 20px}
+.nav{display:flex;align-items:center;height:56px;padding:0 8px;margin-bottom:0;
+  background:rgba(10,10,16,.94);backdrop-filter:blur(12px);border:1px solid var(--bd-subtle);
+  border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.brand{display:inline-flex;align-items:center;gap:9px;padding:0 14px;cursor:pointer;flex-shrink:0}
+.brand svg{color:#8f82ff}
+.brand .bt{font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.brand:hover svg{color:#c4b5fd}
+.nav-center{flex:1;display:flex;justify-content:center;min-width:0}
+.tabs{display:inline-flex;align-items:center;gap:2px;padding:3px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.07);border-radius:var(--r-pill)}
+.tab{background:transparent;border:none;color:rgba(229,231,235,.65);border-radius:var(--r-pill);
+  padding:6px 16px;font:600 12px var(--font);cursor:pointer;white-space:nowrap;transition:var(--mfast) var(--ease)}
+.tab:hover{color:#fff;background:rgba(110,86,249,.16)}
+.tab.active{background:linear-gradient(135deg,rgba(110,86,249,.9),rgba(123,101,255,.9));color:#fff;
+  box-shadow:0 4px 12px rgba(110,86,249,.3)}
+.nav-right{display:flex;align-items:center;gap:6px;flex-shrink:0;padding:0 8px}
+.icbtn{width:32px;height:32px;border-radius:var(--r-md);border:1px solid transparent;background:none;
+  color:rgba(229,231,235,.55);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  position:relative;transition:var(--mfast) var(--ease)}
+.icbtn:hover{color:#fff;background:rgba(110,86,249,.18)}
+.icbtn .bdg{position:absolute;top:2px;right:2px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;
+  background:#ef4444;color:#fff;font:700 9px/14px var(--font);text-align:center}
+.divider{width:1px;height:18px;background:rgba(255,255,255,.08);margin:0 4px}
+.chip-user{display:inline-flex;align-items:center;gap:7px;padding:4px 10px 4px 4px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);border-radius:var(--r-pill);cursor:pointer}
+.chip-user:hover{background:rgba(110,86,249,.12);border-color:rgba(110,86,249,.28)}
+.uava{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,rgba(110,86,249,.85),rgba(60,40,200,.85));
+  display:flex;align-items:center;justify-content:center;font:800 11px var(--font)}
+.uname{font:600 12px var(--font);max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ctx working-in bar */
+.ctxbar{display:flex;align-items:center;gap:10px;padding:9px 18px;background:rgba(16,18,28,.6);
+  border-left:1px solid var(--bd-subtle);border-right:1px solid var(--bd-subtle);border-bottom:1px solid var(--bd-hairline);
+  font-size:12.5px;color:var(--text-tertiary)}
+.ctxbar .o{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#36d3c4,var(--accent));
+  box-shadow:0 0 10px rgba(110,86,249,.6)}
+.ctxbar b{color:#fff}
+.ctxbar .swap{margin-left:auto;font:600 11px var(--font);color:rgba(229,231,235,.5);cursor:pointer}
+.ctxbar .swap:hover{color:#fff}
+
+/* body frame */
+.frame{border:1px solid var(--bd-subtle);border-top:none;border-radius:0 0 var(--r-lg) var(--r-lg);
+  background:rgba(10,11,18,.35);overflow:hidden;min-height:560px}
+
+/* eyebrow — the signature label */
+.eyebrow{font:800 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-accent)}
+
+/* ============ shell: lane rail + main + scene tray ============ */
+.shell{display:grid;grid-template-columns:208px 1fr 300px}
+.lanerail{border-right:1px solid var(--bd-subtle);padding:16px 12px;background:rgba(8,9,14,.35)}
+.lanerail .grp{margin:4px 8px 9px;font:800 10px var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.lane{--c:255,255,255;display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:var(--r-sm);
+  color:var(--text-secondary);cursor:pointer;font-weight:500;transition:var(--mfast) var(--ease);border:1px solid transparent}
+.lane .dot{width:9px;height:9px;border-radius:50%;background:rgb(var(--c));flex:none;box-shadow:0 0 8px rgba(var(--c),.6)}
+.lane:hover{background:rgba(var(--c),.06);color:#fff;border-color:rgba(var(--c),.18)}
+.lane.on{background:rgba(var(--c),.10);color:#fff;font-weight:600;border-color:rgba(var(--c),.35);
+  box-shadow:inset 2px 0 0 rgb(var(--c)),0 0 0 1px rgba(var(--c),.06)}
+.lane .nw{margin-left:auto;font:800 8.5px var(--font);letter-spacing:.06em;color:rgb(var(--c));
+  background:rgba(var(--c),.14);border:1px solid rgba(var(--c),.3);padding:2px 6px;border-radius:var(--r-pill)}
+.lane.del{opacity:.32} .lane.del .nm{text-decoration:line-through} .lane .gone{margin-left:auto;font-size:9px;color:var(--text-muted)}
+.railsep{height:1px;background:var(--bd-subtle);margin:13px 8px}
+
+.main{padding:22px 24px;min-width:0}
+.mhead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:18px}
+.mhead h2{margin:7px 0 0;font-size:28px;font-weight:800;letter-spacing:-.01em}
+.mhead .sub{margin-top:7px;color:var(--text-secondary);font-size:14px;max-width:620px;line-height:1.65}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,.04);border:1px solid var(--bd-subtle);border-radius:var(--r-pill);
+  padding:6px 13px;color:rgba(229,231,235,.65);font:600 12px var(--font);cursor:pointer}
+.pill:hover{color:#fff;border-color:var(--bd-medium)}
+.pill.on{background:rgba(var(--c,110 86 249),.16);color:#fff}
+.pill.onAcc{background:rgba(110,86,249,.16);border-color:var(--bd-accent);color:#fff}
+
+/* ============ image-first lane cards — framed in real card idiom ============ */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.card{--c:110,86,249;background:var(--surface-overlay);border:1px solid var(--bd-subtle);border-radius:var(--r-lg);
+  overflow:hidden;cursor:pointer;transition:var(--mnorm) var(--ease)}
+.card:hover{transform:translateY(-3px);border-color:rgba(var(--c),.45);box-shadow:0 0 0 1px rgba(var(--c),.1),0 18px 40px rgba(0,0,0,.45)}
+.shot{aspect-ratio:3/4;position:relative;background-size:cover;background-position:center}
+.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 42%,rgba(8,9,14,.82))}
+.badge{position:absolute;top:10px;left:10px;z-index:2;display:inline-flex;align-items:center;padding:3px 8px;
+  border-radius:var(--r-pill);background:rgba(var(--c),.16);border:1px solid rgba(var(--c),.4);
+  color:rgb(var(--c));font:800 9px var(--font);letter-spacing:.05em;text-transform:uppercase}
+.who{position:absolute;left:11px;bottom:10px;z-index:2;display:flex;align-items:center;gap:6px;font-size:11.5px;color:#e8e9f5}
+.who .a{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#36d3c4,var(--accent))}
+.acts{position:absolute;inset:auto 10px 10px 10px;z-index:3;display:flex;gap:7px;opacity:0;transform:translateY(6px);transition:var(--mfast) var(--ease)}
+.card:hover .acts{opacity:1;transform:none} .card:hover .who{opacity:0}
+.act{flex:1;text-align:center;font:600 12px var(--font);padding:8px 0;border-radius:var(--r-sm);cursor:pointer;transition:var(--mfast)}
+.act.add{background:linear-gradient(135deg,rgba(var(--c),.96),rgba(var(--c),.8));color:#fff;border:1px solid rgba(var(--c),.6);box-shadow:0 8px 18px rgba(var(--c),.25)}
+.act.add:hover{filter:brightness(1.1)}
+.act.chan{background:rgba(17,18,24,.92);color:#fff;border:1px solid var(--bd-medium)}
+.act.chan:hover{border-color:rgba(var(--c),.5)}
+.cmeta{padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cmeta .nm{font:600 14px var(--font)} .cmeta .st{font-size:11.5px;color:var(--text-tertiary);margin-top:2px}
+.cmeta .heart{font-size:12px;color:var(--text-secondary);white-space:nowrap}
+
+/* ============ scene tray ============ */
+.tray{border-left:1px solid var(--bd-subtle);padding:18px 16px;background:rgba(8,9,14,.35);display:flex;flex-direction:column}
+.tray .eyebrow{margin-bottom:13px}
+.slot{--c:110,86,249;display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:var(--r-md);
+  background:rgba(255,255,255,.03);border:1px solid var(--bd-subtle);margin-bottom:9px;box-shadow:inset 2px 0 0 rgb(var(--c))}
+.slot .sw{width:38px;height:38px;border-radius:var(--r-xs);background-size:cover;background-position:center;flex:none;border:1px solid var(--bd-medium)}
+.slot .l{flex:1;min-width:0}.slot .l .t{font:600 13px var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot .l .k{font:800 9.5px var(--font);letter-spacing:.06em;text-transform:uppercase;color:rgb(var(--c));margin-top:2px}
+.slot .x{color:var(--text-muted);cursor:pointer;font-size:13px}.slot .x:hover{color:var(--error)}
+.traybottom{margin-top:auto;padding-top:14px}
+.traybottom .cnt{font-size:12px;color:var(--text-tertiary);margin-bottom:10px}
+.btn-syn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:1px solid var(--bd-accent-strong);
+  background:linear-gradient(135deg,rgba(110,86,249,.96),rgba(128,104,255,.96));color:#fff;font:700 15px var(--font);
+  padding:14px;border-radius:var(--r-md);cursor:pointer;box-shadow:0 10px 24px rgba(110,86,249,.22);transition:var(--mfast) var(--ease)}
+.btn-syn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(110,86,249,.3)}
+
+/* ============ buttons — 4 roles from MORPBASE_BUTTON_DESIGN_SYSTEM.md ============ */
+.btn{font:700 12.5px var(--font);border-radius:var(--r-md);padding:10px 16px;cursor:pointer;border:1px solid transparent;
+  transition:var(--mfast) var(--ease);display:inline-flex;align-items:center;gap:8px}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{border-color:var(--bd-accent-strong);background:linear-gradient(135deg,rgba(110,86,249,.96),rgba(128,104,255,.96));
+  color:#fff;box-shadow:0 10px 24px rgba(110,86,249,.18)}
+.btn.secondary{border-color:var(--bd-medium);background:rgba(17,18,24,.96);color:#d9ddea}
+.btn.secondary:hover{background:rgba(24,26,34,.98);border-color:rgba(255,255,255,.18);color:#fff}
+.btn.utility{border-color:var(--bd-medium);background:transparent;color:var(--text-secondary)}
+.btn.utility:hover{color:#fff;border-color:var(--bd-accent)}
+.btn.danger{border-color:rgba(248,113,113,.24);background:rgba(46,18,24,.72);color:#ffd0d0}
+.btn.green{border-color:var(--green-border);background:rgba(16,185,129,.16);color:#a7f3d0}
+
+/* ============ generic panels ============ */
+.pad{padding:24px}
+.panel{background:var(--surface-overlay);border:1px solid var(--bd-subtle);border-radius:var(--r-lg);padding:18px}
+.panel.live{background:linear-gradient(180deg,var(--accent-bg),transparent 70%),var(--surface-overlay);
+  border-color:var(--bd-accent);box-shadow:0 0 0 1px rgba(110,86,249,.08)}
+.panel .ph{margin:0 0 13px;font:800 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-accent)}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.metric{display:grid;gap:4px;padding:12px 14px;border-radius:var(--r-md);background:rgba(255,255,255,.03);border:1px solid var(--bd-hairline)}
+.metric .v{font:700 18px var(--font)} .metric .k{font:800 11px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--text-tertiary)}
+
+/* ============ universe home ============ */
+.uhero{display:flex;align-items:flex-end;justify-content:space-between;padding:32px 28px;border-radius:var(--r-xl);
+  margin-bottom:22px;border:1px solid var(--bd-subtle);position:relative;overflow:hidden;
+  background:linear-gradient(120deg,rgba(110,86,249,.2),rgba(16,185,129,.08)),var(--surface-overlay)}
+.uhero h2{margin:8px 0 8px;font-size:30px;font-weight:800;letter-spacing:-.02em}
+.uhero p{margin:0;max-width:540px;color:var(--text-secondary);line-height:1.6}
+.ugrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ucard{border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--bd-subtle);background:var(--surface-overlay);cursor:pointer;transition:var(--mnorm) var(--ease)}
+.ucard:hover{transform:translateY(-3px);border-color:var(--bd-accent);box-shadow:0 0 0 1px rgba(110,86,249,.1),0 18px 44px rgba(0,0,0,.5)}
+.ucard .cv{aspect-ratio:16/10;background-size:cover;position:relative}
+.ucard .cv::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,rgba(8,9,14,.9))}
+.ucard .cv .nm{position:absolute;left:15px;bottom:12px;z-index:2;font:700 18px var(--font)}
+.ucard .bd{padding:12px 15px;display:flex;align-items:center;justify-content:space-between}
+.ucard .bd .s{font-size:12px;color:var(--text-tertiary)}
+.lanedots{display:flex;gap:5px}.lanedots i{width:8px;height:8px;border-radius:50%}
+
+/* ============ channel ============ */
+.chero{display:grid;grid-template-columns:270px 1fr;gap:26px;margin-bottom:22px}
+.chero .big{aspect-ratio:3/4;border-radius:var(--r-lg);background-size:cover;border:1px solid var(--bd-subtle)}
+.chero h2{margin:6px 0 6px;font-size:30px;font-weight:800}
+.stars{color:var(--text-secondary)}
+.tabsrow{display:flex;gap:22px;border-bottom:1px solid var(--bd-subtle);margin:4px 0 18px}
+.tabsrow span{padding:11px 2px;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;font:600 13.5px var(--font)}
+.tabsrow span.on{color:#fff;border-color:var(--accent)}
+.gal{display:grid;grid-template-columns:repeat(6,1fr);gap:11px}
+.gal .g{aspect-ratio:1;border-radius:var(--r-md);background-size:cover;border:1px solid var(--bd-subtle);position:relative;cursor:pointer;transition:var(--mfast)}
+.gal .g:hover{border-color:var(--bd-accent);transform:scale(1.03)}
+.gal .g small{position:absolute;left:7px;bottom:6px;font:500 10px var(--font);background:rgba(8,9,14,.6);padding:2px 7px;border-radius:var(--r-xs)}
+.cmt{display:flex;gap:11px;margin-top:14px;align-items:flex-start}
+.cmt .a{width:32px;height:32px;border-radius:50%;flex:none;background:linear-gradient(135deg,#36d3c4,var(--accent))}
+.cmt .b{background:var(--surface-overlay);border:1px solid var(--bd-subtle);border-radius:var(--r-md);padding:11px 14px;font-size:13.5px}
+.cmt .b .m{color:var(--text-tertiary);font-size:11.5px;margin-top:5px}
+
+/* synthesize + generate */
+.segwrap{display:flex;gap:8px}
+.seg{display:flex;align-items:center;gap:8px;background:rgba(8,9,14,.6);border:1px solid var(--bd-subtle);
+  padding:9px 14px;border-radius:var(--r-md);font:500 13px var(--font);cursor:pointer;color:var(--text-secondary)}
+.seg.on{border-color:var(--bd-accent-strong);background:var(--accent-bg);color:#fff}
+.seg .d{width:9px;height:9px;border-radius:50%;border:2px solid var(--text-muted)}.seg.on .d{border-color:var(--accent);background:var(--accent)}
+.elrow{display:flex;flex-wrap:wrap;gap:9px}
+.el{--c:110,86,249;display:flex;align-items:center;gap:8px;background:rgba(var(--c),.1);border:1px solid rgba(var(--c),.3);
+  border-radius:var(--r-pill);padding:6px 13px;font-size:13px;color:#fff}
+.el::before{content:"";width:7px;height:7px;border-radius:50%;background:rgb(var(--c));box-shadow:0 0 6px rgba(var(--c),.6)}
+.promptbox{background:rgba(8,9,14,.82);border:1px solid var(--bd-medium);border-radius:var(--r-md);padding:16px 18px;
+  color:#dfe2f2;line-height:1.65;font-size:14.5px}
+.promptbox .hp{color:#c9bcff}.promptbox .hg{color:#7ee0bf}.promptbox .ho{color:#ffc4a3}
+.styles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.sty{border-radius:var(--r-md);overflow:hidden;border:1px solid var(--bd-subtle);cursor:pointer;transition:var(--mfast)}
+.sty:hover{border-color:var(--bd-accent)}
+.sty.on{border-color:var(--bd-accent-strong);box-shadow:0 0 0 1px var(--accent),0 8px 22px rgba(110,86,249,.28)}
+.sty .sc{aspect-ratio:1;background-size:cover}.sty .sl{padding:8px;font:600 12.5px var(--font);text-align:center}
+.results{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.res{aspect-ratio:2/3;border-radius:var(--r-md);background-size:cover;border:1px solid var(--bd-subtle);position:relative;overflow:hidden}
+.res .ov{position:absolute;inset:auto 0 0 0;display:flex;gap:7px;padding:9px;opacity:0;transition:var(--mfast);background:linear-gradient(transparent,rgba(8,9,14,.85))}
+.res:hover .ov{opacity:1}
+.pip{font:600 11px var(--font);padding:5px 9px;border-radius:var(--r-xs);background:rgba(17,18,24,.92);border:1px solid var(--bd-medium);cursor:pointer}
+.bar{height:7px;border-radius:var(--r-pill);background:rgba(8,9,14,.6);overflow:hidden;border:1px solid var(--bd-subtle)}
+.bar i{display:block;height:100%;width:64%;background:linear-gradient(90deg,var(--accent),#36d3c4)}
+.field{display:flex;align-items:center;gap:7px;background:rgba(8,9,14,.6);border:1px solid var(--bd-subtle);border-radius:var(--r-sm);padding:8px 13px;font-size:13px;color:var(--text-secondary)}
+.field b{color:#fff}
+.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--text-tertiary);font-size:12px;margin-top:14px}.legend b{color:var(--text-secondary)}
+.hide{display:none}
+.foot{max-width:1340px;margin:14px auto 40px;padding:0 20px;color:var(--text-tertiary);font-size:12.5px;line-height:1.65}
+.foot code{font-family:var(--mono);color:#b7a8ff;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- mockup screen switcher -->
+<div class="switch">
+  <span class="lbl">Screen</span>
+  <button data-s="home" class="on">Universe Home</button>
+  <button data-s="lib">Lane Library</button>
+  <button data-s="chan">Item Channel</button>
+  <button data-s="syn">Synthesize</button>
+  <button data-s="gen">Generate</button>
+  <button data-s="mem">Memory</button>
+</div>
+
+<!-- ================= UNIVERSE HOME ================= -->
+<div class="app screen" id="home">
+  <div class="nav">
+    <div class="brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="bt">MorpBase</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab active" onclick="go('home')">Universes</button>
+      <button class="tab" onclick="go('lib')">Library</button>
+      <button class="tab" onclick="go('mem')">Memory</button>
+      <button class="tab" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right">
+      <button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 004 0"/></svg></button>
+      <button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button>
+      <div class="divider"></div>
+      <div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div>
+    </div>
+  </div>
+  <div class="frame"><div class="pad">
+    <div class="uhero">
+      <div>
+        <div class="eyebrow">Your worlds</div>
+        <h2>Pick a universe to work in</h2>
+        <p>A universe pre-curates every lane — characters, scenery, mood, lighting — so everything you assemble stays coherent.</p>
+        <div style="display:flex;gap:10px;margin-top:18px">
+          <button class="btn primary">＋ New universe</button>
+          <button class="btn secondary">Browse community worlds</button>
+        </div>
+      </div>
+      <svg width="86" height="86" viewBox="0 0 24 24" fill="none" style="opacity:.22;color:#8f82ff"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.4" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+    </div>
+    <div class="mhead" style="margin-bottom:14px"><div><div class="eyebrow">Continue</div><h2 style="font-size:20px">Recently worked in</h2></div></div>
+    <div class="ugrid" id="ugrid"></div>
+  </div></div>
+</div>
+
+<!-- ================= LANE LIBRARY ================= -->
+<div class="app screen hide" id="lib">
+  <div class="nav">
+    <div class="brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="bt">MorpBase</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab" onclick="go('home')">Universes</button>
+      <button class="tab active" onclick="go('lib')">Library</button>
+      <button class="tab" onclick="go('mem')">Memory</button>
+      <button class="tab" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right">
+      <button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 004 0"/></svg></button><button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button>
+      <div class="divider"></div><div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div>
+    </div>
+  </div>
+  <div class="ctxbar"><span class="o"></span>Working in <b>Neon Yokai</b> · rain-soaked cyber folklore <span class="swap">⇄ Switch universe</span></div>
+  <div class="frame"><div class="shell">
+    <div class="lanerail">
+      <div class="grp">Lanes</div>
+      <div class="lane on" style="--c:var(--la-character)" onclick="setLane(this,'Characters')"><span class="dot"></span> Characters</div>
+      <div class="lane" style="--c:var(--la-scenery)" onclick="setLane(this,'Scenery')"><span class="dot"></span> <span class="nm">Scenery</span><span class="nw">New</span></div>
+      <div class="lane" style="--c:var(--la-objects)" onclick="setLane(this,'Objects')"><span class="dot"></span> Objects</div>
+      <div class="lane" style="--c:var(--la-environment)" onclick="setLane(this,'Environment')"><span class="dot"></span> Environment</div>
+      <div class="lane" style="--c:var(--la-mood)" onclick="setLane(this,'Mood')"><span class="dot"></span> Mood</div>
+      <div class="lane" style="--c:var(--la-lighting)" onclick="setLane(this,'Lighting')"><span class="dot"></span> Lighting</div>
+      <div class="lane" style="--c:var(--la-composition)" onclick="setLane(this,'Composition')"><span class="dot"></span> Composition</div>
+      <div class="lane del"><span class="dot" style="background:#777;box-shadow:none"></span> <span class="nm">Styles</span><span class="gone">→ Generate</span></div>
+      <div class="railsep"></div>
+      <div class="grp">This universe</div>
+      <div class="lane" style="--c:var(--la-character)"><span class="dot"></span> ◆ Open universe</div>
+    </div>
+
+    <div class="main">
+      <div class="mhead">
+        <div><div class="eyebrow" id="laneKick">Characters lane</div><h2 id="laneTitle">Characters</h2>
+          <div class="sub" id="laneSub">312 in Neon Yokai · curated by the community. Pick one to drop it in your scene, or open its channel.</div></div>
+        <div class="toolbar">
+          <span class="pill onAcc">This universe</span><span class="pill">All universes</span><span class="pill">Following</span><span class="pill">Newest ▾</span>
+        </div>
+      </div>
+      <div class="grid" id="charGrid"></div>
+      <div class="legend">
+        <span><b>＋ Add</b> drops it in Your Scene</span>
+        <span><b>Channel</b> opens its origin — gallery, ratings, comments</span>
+        <span>each lane carries its own accent colour</span>
+      </div>
+    </div>
+
+    <div class="tray">
+      <div class="eyebrow">Your scene</div>
+      <div id="trayList"></div>
+      <div class="traybottom">
+        <div class="cnt" id="trayCnt">5 elements · ready to compose</div>
+        <button class="btn-syn" onclick="go('syn')">✦ Synthesize</button>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= ITEM CHANNEL ================= -->
+<div class="app screen hide" id="chan">
+  <div class="nav">
+    <div class="brand" onclick="go('lib')"><span style="font-size:16px;color:var(--text-secondary)">←</span><span class="bt" style="letter-spacing:.04em">Characters</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab" onclick="go('home')">Universes</button>
+      <button class="tab" onclick="go('lib')">Library</button>
+      <button class="tab" onclick="go('mem')">Memory</button>
+      <button class="tab active" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right"><button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button><div class="divider"></div><div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div></div>
+  </div>
+  <div class="frame"><div class="pad">
+    <div class="chero">
+      <div class="big" style="background:linear-gradient(150deg,#6e56f9,#36d3c4)"></div>
+      <div>
+        <div class="eyebrow">Character · origin channel</div>
+        <h2>Soraya Vex</h2>
+        <div style="color:var(--text-secondary)">by <b style="color:#fff">@atlas</b> · <span class="stars">★★★★</span>☆ 4.6 · in <b style="color:#fff">Neon Yokai</b></div>
+        <div class="metrics" style="margin:16px 0">
+          <div class="metric"><div class="v">1,243</div><div class="k">Likes</div></div>
+          <div class="metric"><div class="v">380</div><div class="k">Scenes made</div></div>
+          <div class="metric"><div class="v">96</div><div class="k">Followers</div></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+          <button class="btn primary" onclick="go('syn')">＋ Add to your scene</button>
+          <button class="btn utility">◌ Follow</button>
+          <button class="btn utility">★ Rate</button>
+          <button class="btn utility">⇄ Add to a universe</button>
+        </div>
+        <div class="panel" style="padding:14px 16px">
+          <div class="ph" style="margin-bottom:8px">Prompt element</div>
+          <div style="color:var(--text-secondary);font-size:13.5px">silver-haired drifter · long charcoal coat · neon scar across cheek · calm lethal poise · cyber-katana at hip</div>
+        </div>
+      </div>
+    </div>
+    <div class="tabsrow"><span class="on">Gallery · 380</span><span>Comments · 142</span><span>Remixes</span><span>About</span></div>
+    <div class="eyebrow" style="margin-bottom:12px">What people made with Soraya — community lives here now</div>
+    <div class="gal" id="chanGal"></div>
+    <div style="margin-top:22px">
+      <div class="cmt"><div class="a"></div><div class="b"><b>@mei</b> the rim lighting on this one is unreal<div class="m">♥ 12 · reply · 2h</div></div></div>
+      <div class="cmt"><div class="a"></div><div class="b"><b>@kuro</b> added her to my Deep Signal world, fits perfectly<div class="m">♥ 4 · reply · 5h</div></div></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= SYNTHESIZE ================= -->
+<div class="app screen hide" id="syn">
+  <div class="nav">
+    <div class="brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="bt">MorpBase</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab" onclick="go('home')">Universes</button>
+      <button class="tab active" onclick="go('lib')">Library</button>
+      <button class="tab" onclick="go('mem')">Memory</button>
+      <button class="tab" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right"><button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button><div class="divider"></div><div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div></div>
+  </div>
+  <div class="ctxbar"><span class="o"></span>Working in <b>Neon Yokai</b><span class="swap" onclick="go('lib')">← Back to library</span></div>
+  <div class="frame"><div class="pad">
+    <div class="mhead">
+      <div><div class="eyebrow">Step 1 of 2 · compose</div><h2>Synthesize scene</h2>
+        <div class="sub">An art-director LLM resolves your elements into one coherent image prompt.</div></div>
+      <div class="segwrap">
+        <div class="seg on" onclick="pickSeg(this)"><span class="d"></span> Faithful</div>
+        <div class="seg" onclick="pickSeg(this)"><span class="d"></span> Cinematic</div>
+        <div class="seg" onclick="pickSeg(this)"><span class="d"></span> Minimal</div>
+      </div>
+    </div>
+    <div class="panel live">
+      <div class="ph">Contributing elements · 5</div>
+      <div class="elrow">
+        <span class="el" style="--c:var(--la-character)">Soraya Vex</span>
+        <span class="el" style="--c:var(--la-scenery)">Rooftop standoff</span>
+        <span class="el" style="--c:var(--la-mood)">Tense</span>
+        <span class="el" style="--c:var(--la-objects)">Cyber-katana</span>
+        <span class="el" style="--c:var(--la-environment)">Neon district</span>
+      </div>
+      <div class="ph" style="margin:20px 0 13px">Synthesized prompt · editable</div>
+      <div class="promptbox"><span class="hp">Soraya Vex</span> stands braced at the edge of a rain-slicked neon rooftop, <span class="hp">cyber-katana</span> drawn low, eyes locked on an unseen threat across the gap. <span class="ho">A tense stand-off</span> charges the air — cold teal-and-magenta signage haze, water beading on her charcoal coat, the <span class="hg">neon district</span> glowing far below.</div>
+      <div style="display:flex;gap:11px;margin-top:18px;flex-wrap:wrap">
+        <button class="btn utility">↻ Re-synthesize</button>
+        <button class="btn secondary">✎ Edit elements</button>
+        <button class="btn primary" onclick="go('gen')">Generate image →</button>
+      </div>
+      <div class="legend"><span>Nouns (character, object, environment) + the <b>Scenery verb</b> + mood → one sensible scene.</span></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= GENERATE ================= -->
+<div class="app screen hide" id="gen">
+  <div class="nav">
+    <div class="brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="bt">MorpBase</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab" onclick="go('home')">Universes</button>
+      <button class="tab active" onclick="go('lib')">Library</button>
+      <button class="tab" onclick="go('mem')">Memory</button>
+      <button class="tab" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right"><button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button><div class="divider"></div><div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div></div>
+  </div>
+  <div class="ctxbar"><span class="o"></span>Working in <b>Neon Yokai</b><span class="swap" onclick="go('syn')">← Back to synthesis</span></div>
+  <div class="frame"><div class="pad">
+    <div class="mhead"><div><div class="eyebrow">Step 2 of 2 · render</div><h2>Generate</h2>
+      <div class="sub">Local KREA2 via ComfyUI · free now, metered later.</div></div></div>
+    <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:18px">
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div class="panel">
+          <div class="ph">Prompt · from synthesis</div>
+          <div class="promptbox" style="min-height:120px">Soraya Vex stands braced at the edge of a rain-slicked neon rooftop, cyber-katana drawn low, eyes locked on an unseen threat…</div>
+          <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+            <span class="field">Aspect <b>2:3</b> ▾</span><span class="field">Count <b>4</b> ▾</span><span class="field">Seed <b>random</b></span>
+          </div>
+          <div style="display:flex;gap:11px;align-items:center;margin-top:16px">
+            <button class="btn primary" onclick="render()">Generate</button>
+            <div style="flex:1"><div class="bar"><i></i></div></div>
+          </div>
+          <div class="legend"><span>steps <b>6</b> · cfg <b>1.0</b> · <code style="font-family:var(--mono)">krea2_turbo</code> · ~3s/image on your box</span></div>
+        </div>
+        <div class="panel">
+          <div class="ph">Style · chosen at render, not a lane</div>
+          <div class="styles" id="styleGrid"></div>
+          <div class="legend"><span>each style = a preset / LoRA. add as many as you like.</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">Results</div>
+        <div class="results" id="resGrid"></div>
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn green">♥ Save to Soraya's channel</button>
+          <button class="btn secondary">◷ Save to Memory</button>
+          <button class="btn utility">⇪ Post to world</button>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ================= MEMORY ================= -->
+<div class="app screen hide" id="mem">
+  <div class="nav">
+    <div class="brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5-9 5-9-5 9-5z" fill="currentColor" opacity=".55"/><path d="M3 12l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none" opacity=".8"/><path d="M3 17l9 5 9-5" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="bt">MorpBase</span></div>
+    <div class="nav-center"><div class="tabs">
+      <button class="tab" onclick="go('home')">Universes</button>
+      <button class="tab" onclick="go('lib')">Library</button>
+      <button class="tab active" onclick="go('mem')">Memory</button>
+      <button class="tab" onclick="go('chan')">Profile</button>
+    </div></div>
+    <div class="nav-right"><button class="icbtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span class="bdg">3</span></button><div class="divider"></div><div class="chip-user"><span class="uava">S</span><span class="uname">Sina</span></div></div>
+  </div>
+  <div class="frame"><div class="pad">
+    <div class="mhead"><div><div class="eyebrow">Your archive</div><h2>Memory</h2>
+      <div class="sub">Saved scenes, prompts & generated images — reopen and reuse anytime.</div></div>
+      <div class="toolbar"><span class="pill onAcc">Scenes</span><span class="pill">Images</span><span class="pill">Prompts</span></div></div>
+    <div class="grid" id="memGrid"></div>
+  </div></div>
+</div>
+
+<div class="foot">
+  Built on MorpBase's real tokens (<code>src/ui/styles/tokens.css</code>) &amp; chrome (<code>App.css</code>): background <code>#0a0b12</code> with the dotted texture + tri-colour glow, 56px glass navbar with the centred pill tab control, <code>rgba(14,15,20,.82)</code> cards at radius <code>18px</code>, gradient-purple primary buttons, the extrabold-uppercase eyebrow, and the real <b>per-lane accent system</b> (Characters purple · Scenery coral · Objects ice-blue · Environment green · Mood pink · Lighting amber · Composition mint). Image tiles are placeholders for community + generated images.
+</div>
+</div>
+
+<script>
+  const grads=[
+    'linear-gradient(150deg,#6e56f9,#36d3c4)','linear-gradient(150deg,#ff8a65,#6e56f9)',
+    'linear-gradient(150deg,#36d3c4,#10b981)','linear-gradient(150deg,#f472b6,#6e56f9)',
+    'linear-gradient(150deg,#fbbf24,#ff8a65)','linear-gradient(150deg,#60a5fa,#6e56f9)',
+    'linear-gradient(150deg,#10b981,#36d3c4)','linear-gradient(150deg,#a78bfa,#36d3c4)',
+    'linear-gradient(150deg,#ef6f9b,#7c5cff)','linear-gradient(150deg,#5eead4,#6e56f9)'];
+  const g=i=>grads[((i%grads.length)+grads.length)%grads.length];
+  const laneColor={Characters:'var(--la-character)',Scenery:'var(--la-scenery)',Objects:'var(--la-objects)',
+    Environment:'var(--la-environment)',Mood:'var(--la-mood)',Lighting:'var(--la-lighting)',Composition:'var(--la-composition)'};
+
+  // universe home
+  const unis=[['Neon Yokai','rain-soaked cyber folklore','312 chars · 8 lanes',['#6e56f9','#ff9d6e','#a8d8ff','#10b981']],
+    ['Deep Signal','derelict deep-space salvage','188 chars · 7 lanes',['#60a5fa','#9effd8','#6e56f9','#ffd580']],
+    ['Porcelain Court','baroque courtly intrigue','241 chars · 8 lanes',['#f472b6','#fbbf24','#a78bfa','#10b981']],
+    ['Solarpunk Bloom','overgrown utopian futures','156 chars · 6 lanes',['#10b981','#a8d8ff','#fbbf24','#6e56f9']],
+    ['Dust Run','high-desert outlaw chase','203 chars · 7 lanes',['#ff8a65','#ffd580','#a8d8ff','#6e56f9']],
+    ['＋ New universe','start an empty world','build from scratch',['#555','#555','#555','#555']]];
+  const ugrid=document.getElementById('ugrid');
+  unis.forEach((u,i)=>ugrid.insertAdjacentHTML('beforeend',`
+    <div class="ucard" onclick="go('lib')">
+      <div class="cv" style="background:${i===5?'var(--surface-1)':g(i)}"><div class="nm">${u[0]}</div></div>
+      <div class="bd"><div><div style="font:600 13px var(--font)">${u[1]}</div><div class="s">${u[2]}</div></div>
+        <div class="lanedots">${u[3].map(c=>`<i style="background:${c}"></i>`).join('')}</div></div>
+    </div>`));
+
+  // lane datasets
+  const datasets={
+    Characters:[['Soraya Vex','@atlas','1.2k','380'],['Kuro','@mei','840','210'],['Mei-Lin','@ren','610','155'],
+      ['Atlas-9','@nox','2.1k','512'],['Ren','@iyo','430','98'],['Iyo','@kuro','770','187'],['Dust','@atlas','980','244'],['Nox','@soraya','1.5k','390']],
+    Scenery:[['Rooftop standoff','@atlas','1.1k','290'],['Rain duel','@mei','760','180'],['Market chase','@ren','540','120'],
+      ['Neon vows','@nox','1.4k','410'],['Alley ambush','@iyo','390','88'],['Bridge farewell','@kuro','680','160'],['Signal lost','@atlas','910','230'],['Festival night','@soraya','1.2k','300']],
+    Objects:[['Cyber-katana','@atlas','980','260'],['Drone moth','@mei','520','110'],['Paper lantern','@ren','610','140']],
+    Environment:[['Neon district','@atlas','1.3k','420'],['Flooded subway','@mei','700','170'],['Rooftop garden','@ren','560','130']],
+    Mood:[['Tense','@atlas','1.0k','350'],['Melancholy','@mei','640','150'],['Defiant','@ren','580','120']],
+    Lighting:[['Rim neon','@atlas','890','240'],['Fogged sodium','@mei','510','100'],['Moon wash','@ren','470','90']],
+    Composition:[['Low stand-off','@atlas','760','190'],['Over-shoulder','@mei','430','80'],['Wide establishing','@ren','520','110']]
+  };
+  const subFor={Characters:'312 in Neon Yokai · curated by the community. Pick one to drop it in your scene, or open its channel.',
+    Scenery:'The verb of the image — what happens. Fights, farewells, chases, festivals. Pick the moment your scene captures.',
+    Objects:'Props, weapons and artifacts that recur across your world.',
+    Environment:'Where it happens — districts, interiors, weather.',
+    Mood:'The emotional charge that colours the whole frame.',
+    Lighting:'How the scene is lit — applied as a prompt layer.',
+    Composition:'Framing and camera language for the shot.'};
+
+  function renderLane(name){
+    const data=datasets[name]||datasets.Characters;
+    const c=laneColor[name];
+    const kindLabel=name.replace(/s$/,'').toUpperCase();
+    const grid=document.getElementById('charGrid');
+    grid.innerHTML=data.map((d,i)=>`
+      <div class="card" style="--c:${c}" onclick="go('chan')">
+        <div class="shot" style="background:${g(i)}">
+          <span class="badge">${kindLabel}</span>
+          <span class="who"><span class="a"></span>${d[1]}</span>
+          <div class="acts">
+            <div class="act add" onclick="event.stopPropagation();bump()">＋ Add</div>
+            <div class="act chan" onclick="event.stopPropagation();go('chan')">Channel</div>
+          </div>
+        </div>
+        <div class="cmeta"><div><div class="nm">${d[0]}</div><div class="st">${d[3]} scenes</div></div><div class="heart">♥ ${d[2]}</div></div>
+      </div>`).join('');
+    document.getElementById('laneTitle').textContent=name;
+    document.getElementById('laneKick').textContent=name+' lane';
+    document.getElementById('laneSub').textContent=subFor[name];
+  }
+  function setLane(el,name){document.querySelectorAll('#lib .lane').forEach(x=>x.classList.remove('on'));el.classList.add('on');renderLane(name);}
+  renderLane('Characters');
+
+  // tray
+  let tray=[['Soraya Vex','Character','var(--la-character)',0],['Rooftop standoff','Scenery','var(--la-scenery)',1],
+    ['Tense','Mood','var(--la-mood)',4],['Cyber-katana','Object','var(--la-objects)',8],['Neon district','Environment','var(--la-environment)',6]];
+  function drawTray(){
+    const el=document.getElementById('trayList');
+    el.innerHTML=tray.map((t,n)=>`
+      <div class="slot" style="--c:${t[2]}">
+        <div class="sw" style="background:${g(t[3])}"></div>
+        <div class="l"><div class="t">${t[0]}</div><div class="k">${t[1]}</div></div>
+        <div class="x" onclick="rmTray(${n})">✕</div>
+      </div>`).join('');
+    document.getElementById('trayCnt').textContent=tray.length+' elements · ready to compose';
+  }
+  function bump(){tray.push(['New pick','Character','var(--la-character)',Math.floor(Math.random()*9)]);drawTray();}
+  function rmTray(n){tray.splice(n,1);drawTray();}
+  drawTray();
+
+  // channel gallery
+  const chanGal=document.getElementById('chanGal');
+  for(let i=0;i<18;i++) chanGal.insertAdjacentHTML('beforeend',`<div class="g" style="background:${g(i+2)}"><small>@user${i+1}</small></div>`);
+
+  // styles
+  const styles=['Ghibli','Retro Anime','Photography','Noir','Watercolor','3D Render','Ukiyo-e','Comic'];
+  const styleGrid=document.getElementById('styleGrid');
+  styles.forEach((s,i)=>styleGrid.insertAdjacentHTML('beforeend',
+    `<div class="sty ${i===2?'on':''}" onclick="pickStyle(this)"><div class="sc" style="background:${g(i+3)}"></div><div class="sl">${s}</div></div>`));
+  function pickStyle(el){document.querySelectorAll('.sty').forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+
+  // results
+  function render(){const r=document.getElementById('resGrid');r.innerHTML='';
+    for(let i=0;i<4;i++) r.insertAdjacentHTML('beforeend',
+      `<div class="res" style="background:${g(i)}"><div class="ov"><span class="pip">Upscale</span><span class="pip">♥ Save</span></div></div>`);}
+  render();
+
+  // memory
+  const memGrid=document.getElementById('memGrid');
+  const mem=['Rooftop standoff','Court betrayal','Salvage drift','Desert ambush','Bloom festival','Signal lost','Rain duel','Neon vows'];
+  mem.forEach((m,i)=>memGrid.insertAdjacentHTML('beforeend',`
+    <div class="card" style="--c:var(--la-character)">
+      <div class="shot" style="background:${g(i+1)}"><span class="badge">Scene</span>
+        <div class="acts"><div class="act add">↻ Reopen</div><div class="act chan">⇪ Post</div></div></div>
+      <div class="cmeta"><div><div class="nm">${m}</div><div class="st">4 images · 3d ago</div></div><div class="heart">◷</div></div>
+    </div>`));
+
+  function pickSeg(el){document.querySelectorAll('#syn .seg').forEach(x=>x.classList.remove('on'));el.classList.add('on');}
+  function go(s){
+    document.querySelectorAll('.screen').forEach(el=>el.classList.add('hide'));
+    document.getElementById(s).classList.remove('hide');
+    document.querySelectorAll('.switch button').forEach(b=>b.classList.toggle('on',b.dataset.s===s));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('.switch button').forEach(b=>b.onclick=()=>go(b.dataset.s));
+</script>
+</body>
+</html>

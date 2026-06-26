@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MORPBASEAI — wordmark</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Oxanium: a geometric, chamfered/cut-corner techno face — same family of look as the reference -->
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#6e56f9; --accent2:#8f82ff; --teal:#36d3c4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#07080c;color:#e8eaf2;
+    font-family:-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;gap:34px;padding:48px 24px 80px}
+  h1{font:700 15px/1 -apple-system,Segoe UI,sans-serif;letter-spacing:.04em;color:#8a90a6;margin:0 0 6px}
+  .sub{color:#5b6076;font-size:12.5px;text-align:center;max-width:560px;line-height:1.5}
+
+  /* the dark logo chip, like a real lockup */
+  .chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:#1a1c22;border:1px solid rgba(255,255,255,.06);
+    border-radius:10px;padding:22px 34px;box-shadow:0 18px 50px rgba(0,0,0,.5);
+  }
+  .chip.light{background:#f3f4f7;border-color:rgba(0,0,0,.06)}
+
+  /* the wordmark itself */
+  .mark{
+    font-family:'Oxanium',sans-serif;font-weight:800;
+    font-size:64px;line-height:.9;letter-spacing:.005em;text-transform:uppercase;
+    white-space:nowrap;display:inline-flex;align-items:baseline;
+  }
+  .mark .base{color:#ffffff}
+  .chip.light .mark .base{color:#11131a}
+
+  /* gradient suffix */
+  .mark .ai{
+    background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+    padding-left:.04em;
+  }
+  /* v1 — CivitAI-style teal→blue */
+  .ai.civit{background-image:linear-gradient(120deg,#3ad6cf 0%,#2ec5e6 45%,#2b9fe6 100%)}
+  /* v2 — MorpBase identity: violet → green, the app-background gradient
+     (purple #6e56f9 glow → blue → green #10b981 glow) */
+  .ai.morp{background-image:linear-gradient(120deg,#6e56f9 0%,#36d3c4 52%,#10b981 100%)}
+  /* v3 — same family, straighter violet → green */
+  .ai.duo{background-image:linear-gradient(120deg,#7b65ff 0%,#10b981 100%)}
+
+  .row{display:flex;flex-direction:column;align-items:center;gap:16px}
+  .label{font:700 11px/1 'Oxanium',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#6b7186}
+  .scale{display:flex;align-items:center;gap:26px;flex-wrap:wrap;justify-content:center}
+  .mark.sm{font-size:30px}
+  .mark.xs{font-size:18px}
+  .divider{width:min(680px,90%);height:1px;background:rgba(255,255,255,.06);margin:6px 0}
+  .note{color:#5b6076;font-size:12px;text-align:center;max-width:600px;line-height:1.6}
+  code{font-family:ui-monospace,Consolas,monospace;color:#b7a8ff;font-size:11.5px}
+</style>
+</head>
+<body>
+  <div style="text-align:center">
+    <h1>MORPBASEAI · wordmark</h1>
+    <div class="sub">Original geometric / cut-corner tech lockup (Oxanium 800) in the same visual family as the reference. Two suffix treatments below.</div>
+  </div>
+
+  <!-- VERSION 1: CivitAI-style -->
+  <div class="row">
+    <div class="label">1 · reference style — teal→blue “AI”</div>
+    <div class="chip">
+      <span class="mark"><span class="base">MORPBASE</span><span class="ai civit">AI</span></span>
+    </div>
+    <div class="scale">
+      <span class="mark sm"><span class="base">MORPBASE</span><span class="ai civit">AI</span></span>
+      <span class="mark xs"><span class="base">MORPBASE</span><span class="ai civit">AI</span></span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- VERSION 2: MorpBase identity -->
+  <div class="row">
+    <div class="label">2 · morpbase identity — violet→green “AI” (app background)</div>
+    <div class="chip">
+      <span class="mark"><span class="base">MORPBASE</span><span class="ai morp">AI</span></span>
+    </div>
+    <div class="scale">
+      <span class="mark sm"><span class="base">MORPBASE</span><span class="ai morp">AI</span></span>
+      <span class="mark xs"><span class="base">MORPBASE</span><span class="ai morp">AI</span></span>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- VERSION 3: optional duo + light bg check -->
+  <div class="row">
+    <div class="label">3 · variant — straight violet→green “AI” &amp; light-bg check</div>
+    <div class="scale">
+      <div class="chip">
+        <span class="mark sm"><span class="base">MORPBASE</span><span class="ai duo">AI</span></span>
+      </div>
+      <div class="chip light">
+        <span class="mark sm"><span class="base">MORPBASE</span><span class="ai morp">AI</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    Built with the <code>Oxanium</code> 800 typeface (chamfered, angular, futuristic — closest free match to the reference's cut-corner letterforms). The split: <code>MORPBASE</code> in solid white, <code>AI</code> in a gradient. Tell me if you want it tighter/wider, more slant, a different font, or exported as <code>SVG</code>/<code>PNG</code> assets.
+  </div>
+</body>
+</html>

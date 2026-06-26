@@ -19,6 +19,14 @@ const UNIVERSE_SEED_FLAG_KEY_V14 = 'morpbase:universes:seeded:v14';
 const UNIVERSE_SEED_FLAG_KEY_V15 = 'morpbase:universes:seeded:v15';
 const UNIVERSE_SEED_FLAG_KEY_V16 = 'morpbase:universes:seeded:v16';
 const UNIVERSE_SEED_FLAG_KEY_V17 = 'morpbase:universes:seeded:v17';
+const UNIVERSE_SEED_FLAG_KEY_V18 = 'morpbase:universes:seeded:v18';
+const UNIVERSE_SEED_FLAG_KEY_V19 = 'morpbase:universes:seeded:v19';
+const UNIVERSE_SEED_FLAG_KEY_V20 = 'morpbase:universes:seeded:v20';
+const UNIVERSE_SEED_FLAG_KEY_V21 = 'morpbase:universes:seeded:v21';
+const UNIVERSE_SEED_FLAG_KEY_V22 = 'morpbase:universes:seeded:v22';
+const UNIVERSE_SEED_FLAG_KEY_V23 = 'morpbase:universes:seeded:v23';
+const UNIVERSE_SEED_FLAG_KEY_V24 = 'morpbase:universes:seeded:v24';
+const UNIVERSE_SEED_FLAG_KEY_V25 = 'morpbase:universes:seeded:v25';
 
 const SEED_TS = 1748217600000;
 const SEED_TS_NY = 1748476800000;
@@ -36,6 +44,14 @@ const SEED_TS_V14 = 1749427200000;
 const SEED_TS_V15 = 1749513600000;
 const SEED_TS_V16 = 1749686400000;
 const SEED_TS_V17 = 1749772800000;
+const SEED_TS_V18 = 1749945600000;
+const SEED_TS_V19 = 1750032000000;
+const SEED_TS_V20 = 1750118400000;
+const SEED_TS_V21 = 1750291200000;
+const SEED_TS_V22 = 1750377600000;
+const SEED_TS_V23 = 1750464000000;
+const SEED_TS_V24 = 1750550400000;
+const SEED_TS_V25 = 1750636800000;
 
 const SEED_UNIVERSE: Universe = {
   id: 'universe_seed_alice_in_wonderland',
@@ -1053,6 +1069,360 @@ function maybeApplyUniverseSeedV17(universes: Universe[]): Universe[] {
   }
 }
 
+const SEED_UNIVERSE_ORCHARD_REVERIE: Universe = {
+  id: 'universe_seed_orchard_reverie',
+  name: 'Orchard Reverie',
+  description: 'An eternal-summer sacred orchard over endless golden grasslands. An order of fruit-bonded priestess-wardens — peach, pomegranate, cherry, plum, grape and more — tend colossal ancient fruit-trees through a perpetual harvest rite. The summer stays eternal only so long as the rite is kept, lending a quiet, precious fragility beneath the warmth. Lit always in honey-gold, peach and soft green. Glamour-pastoral, alluring but wholesome. (Style lane falls back to Style Lab — pair with any look.)',
+  pools: {
+    character: [
+      'character_seed_or_apple',
+      'character_seed_or_peach',
+      'character_seed_or_pomegranate',
+      'character_seed_or_fig',
+      'character_seed_or_citrus',
+      'character_seed_or_cherry',
+      'character_seed_or_plum',
+      'character_seed_or_grape',
+      'character_seed_or_apricot',
+      'character_seed_or_melon',
+      'character_seed_or_berry',
+      'character_seed_or_pear',
+    ],
+    environment: [
+      'environment_seed_or_endless_grove',
+      'environment_seed_or_heart_tree',
+      'environment_seed_or_festival_grounds',
+      'environment_seed_or_cider_hall',
+      'environment_seed_or_bathing_springs',
+      'environment_seed_or_orchard_market',
+      'environment_seed_or_grass_sea',
+      'environment_seed_or_wardens_bower',
+      'environment_seed_or_sun_shrine',
+      'environment_seed_or_preserving_cellar',
+      'environment_seed_or_blossom_vale',
+      'environment_seed_or_granary_windmill',
+      'environment_seed_or_last_light_hill',
+    ],
+    wardrobe: [
+      'outfit_or_warden_regalia',
+      'outfit_or_linen_sundress',
+      'outfit_or_festival_attire',
+      'outfit_or_bathing_wrap',
+      'outfit_or_blossom_robe',
+      'outfit_or_gardener_wrap',
+    ],
+    mood: [
+      'mood_or_summer_idyll',
+      'mood_or_harvest_reverence',
+      'mood_or_languid_ripeness',
+      'mood_or_festival_joy',
+      'mood_or_autumn_wistful',
+      'mood_or_blossom_tenderness',
+    ],
+    lighting: [
+      'lighting_or_golden_grass',
+      'lighting_or_dappled_canopy',
+      'lighting_or_lantern_festival',
+      'lighting_or_dawn_mist',
+      'lighting_or_honey_backlight',
+      'lighting_or_last_amber',
+    ],
+    object: [
+      'object_or_harvest_basket',
+      'object_or_warden_sickle',
+      'object_or_sun_medallion',
+      'object_or_cider_jug',
+      'object_or_blossom_crown',
+      'object_or_fruit_bough',
+    ],
+    aura: [
+      'world_seed_or_orchard_reverie',
+    ],
+  },
+  createdAt: SEED_TS_V18,
+  updatedAt: SEED_TS_V18,
+};
+
+function maybeApplyUniverseSeedV18(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V18) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V18, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_ORCHARD_REVERIE.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_ORCHARD_REVERIE];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+const SEED_UNIVERSE_EROS_ATELIER: Universe = {
+  id: 'universe_seed_eros_atelier',
+  name: 'Eros Atelier',
+  description: 'A curated library of art styles for tasteful erotic and glamour body work. Each style was chosen because the medium itself either does the covering or provides the dramatic framing for sensual subjects. Spans painting, illustration, photography, and original signature looks. Apply any style here to any character, environment or pose elsewhere in MorpBase.',
+  pools: {
+    style: [
+      'style_eros_mucha_panel',
+      'style_eros_klimt_gold',
+      'style_eros_caravaggio',
+      'style_eros_pre_raphaelite',
+      'style_eros_nagel_pop',
+      'style_eros_smoke_couture',
+      'style_eros_backlit_sheer',
+      'style_eros_charcoal_study',
+      'style_eros_pierre_gilles',
+      'style_eros_sumi_e',
+    ],
+  },
+  createdAt: SEED_TS_V19,
+  updatedAt: SEED_TS_V19,
+};
+
+function maybeApplyUniverseSeedV19(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V19) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V19, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_EROS_ATELIER.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_EROS_ATELIER];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V20 — non-destructive: merge the new 'style_lab_cinematic_stained_glass_neon'
+// style into the existing Style Lab universe pool for users who already seeded earlier.
+function maybeApplyUniverseSeedV20(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V20) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V20, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_STYLE_LAB.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    if (currentStyle.includes('style_lab_cinematic_stained_glass_neon')) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, 'style_lab_cinematic_stained_glass_neon'] },
+      updatedAt: SEED_TS_V20,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+const SEED_UNIVERSE_PLANET_PISTACHIO: Universe = {
+  id: 'universe_seed_planet_pistachio',
+  name: 'Planet Pistachio\'s Extraterrestrial Madness',
+  description: 'A pistachio-green planet at the edge of known space where the camp pulp 1950s sci-fi never ended and joyful psychedelia keeps it weird. Alien queens with shell-crowns rule from baroque palaces, glamorous miners chip at drifting asteroids in evening gowns, lounge singers serenade comets at the diner at the end of the universe, sentient pumpkins debate philosophy in chrome greenhouses. Talking plants, glow-frogs, mood-cacti, lava-lamp skies. Madness as in unhinged-joy. Palette: pistachio-green, hot pink, tangerine, lavender, gold. (Style lane falls back to Style Lab — pair with any look.)',
+  pools: {
+    character: [
+      'character_seed_pp_queen',
+      'character_seed_pp_miner',
+      'character_seed_pp_frog_wrangler',
+      'character_seed_pp_botanist',
+      'character_seed_pp_lounge_singer',
+      'character_seed_pp_robot_chef',
+      'character_seed_pp_comet_surfer',
+      'character_seed_pp_mailman',
+      'character_seed_pp_cactus_druid',
+      'character_seed_pp_spore_dancer',
+      'character_seed_pp_star_pilot',
+      'character_seed_pp_tree_mayor',
+    ],
+    environment: [
+      'environment_seed_pp_pistachio_sea',
+      'environment_seed_pp_salt_flats',
+      'environment_seed_pp_bobble_forest',
+      'environment_seed_pp_honey_caves',
+      'environment_seed_pp_diner',
+      'environment_seed_pp_asteroid_mines',
+      'environment_seed_pp_lava_lamp_sky',
+      'environment_seed_pp_carnival',
+      'environment_seed_pp_comet_harbor',
+      'environment_seed_pp_greenhouse',
+      'environment_seed_pp_palace',
+      'environment_seed_pp_trampoline_crater',
+      'environment_seed_pp_listening_pond',
+    ],
+    wardrobe: [
+      'outfit_pp_satin_gown',
+      'outfit_pp_retro_flight_suit',
+      'outfit_pp_lounge_gown',
+      'outfit_pp_lab_coat',
+      'outfit_pp_wrangler',
+      'outfit_pp_carnival_jumpsuit',
+    ],
+    mood: [
+      'mood_pp_camp_glee',
+      'mood_pp_retro_chic',
+      'mood_pp_psychedelic_calm',
+      'mood_pp_kitsch_wonder',
+      'mood_pp_ridiculous_menace',
+      'mood_pp_lo_gravity_play',
+    ],
+    lighting: [
+      'lighting_pp_pistachio_noon',
+      'lighting_pp_twin_moon',
+      'lighting_pp_comet_flare',
+      'lighting_pp_lava_lamp_dusk',
+      'lighting_pp_spore_bioluminescence',
+      'lighting_pp_neon_diner',
+    ],
+    object: [
+      'object_pp_shell_crown',
+      'object_pp_glow_frog',
+      'object_pp_comet_board',
+      'object_pp_mood_cactus',
+      'object_pp_pistachio_sundae',
+      'object_pp_ray_gun',
+    ],
+    style: [
+      'style_pp_pulp_cover',
+      'style_pp_drive_in_poster',
+      'style_pp_travel_poster',
+      'style_pp_wes_anderson',
+      'style_pp_saul_bass',
+      'style_pp_atomic_mosaic',
+      'style_pp_lava_lamp',
+      'style_pp_upa_cartoon',
+      'style_pp_riso_lounge',
+      'style_pp_sunday_comic',
+      'style_pp_stop_motion',
+    ],
+    aura: [
+      'world_seed_pp_planet_pistachio',
+    ],
+  },
+  createdAt: SEED_TS_V21,
+  updatedAt: SEED_TS_V21,
+};
+
+function maybeApplyUniverseSeedV21(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V21) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V21, 'true');
+    if (universes.some(u => u.id === SEED_UNIVERSE_PLANET_PISTACHIO.id)) return universes;
+    const next = [...universes, SEED_UNIVERSE_PLANET_PISTACHIO];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V25 — non-destructive: merge the new Burton Ink Sketchbook style into
+// the existing Style Lab universe pool for already-seeded users.
+function maybeApplyUniverseSeedV25(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V25) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V25, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_STYLE_LAB.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    if (currentStyle.includes('style_lab_burton_ink_sketchbook')) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, 'style_lab_burton_ink_sketchbook'] },
+      updatedAt: SEED_TS_V25,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V24 — non-destructive: merge the new Burton Stop-Motion Diorama style into
+// the existing Style Lab universe pool for already-seeded users.
+function maybeApplyUniverseSeedV24(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V24) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V24, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_STYLE_LAB.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    if (currentStyle.includes('style_lab_burton_stop_motion')) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, 'style_lab_burton_stop_motion'] },
+      updatedAt: SEED_TS_V24,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V23 — non-destructive: merge the new Stop-Motion Diorama style into
+// the existing Planet Pistachio universe style pool for already-seeded users.
+function maybeApplyUniverseSeedV23(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V23) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V23, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_PLANET_PISTACHIO.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    if (currentStyle.includes('style_pp_stop_motion')) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, 'style_pp_stop_motion'] },
+      updatedAt: SEED_TS_V23,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
+// V22 — non-destructive: merge the 10 new Planet Pistachio native styles into
+// the existing Planet Pistachio universe style pool for users who already seeded V21.
+function maybeApplyUniverseSeedV22(universes: Universe[]): Universe[] {
+  try {
+    if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V22) !== null) return universes;
+    localStorage.setItem(UNIVERSE_SEED_FLAG_KEY_V22, 'true');
+    const idx = universes.findIndex(u => u.id === SEED_UNIVERSE_PLANET_PISTACHIO.id);
+    if (idx === -1) return universes;
+    const existing = universes[idx];
+    const currentStyle = existing.pools.style ?? [];
+    const additions = [
+      'style_pp_pulp_cover',
+      'style_pp_drive_in_poster',
+      'style_pp_travel_poster',
+      'style_pp_wes_anderson',
+      'style_pp_saul_bass',
+      'style_pp_atomic_mosaic',
+      'style_pp_lava_lamp',
+      'style_pp_upa_cartoon',
+      'style_pp_riso_lounge',
+      'style_pp_sunday_comic',
+    ].filter(id => !currentStyle.includes(id));
+    if (additions.length === 0) return universes;
+    const merged: Universe = {
+      ...existing,
+      pools: { ...existing.pools, style: [...currentStyle, ...additions] },
+      updatedAt: SEED_TS_V22,
+    };
+    const next = [...universes.slice(0, idx), merged, ...universes.slice(idx + 1)];
+    localStorage.setItem(KEY, JSON.stringify(next));
+    return next;
+  } catch {
+    return universes;
+  }
+}
+
 function maybeApplyUniverseSeedV2(universes: Universe[]): Universe[] {
   try {
     if (localStorage.getItem(UNIVERSE_SEED_FLAG_KEY_V2) !== null) return universes;
@@ -1096,7 +1466,7 @@ function load(): Universe[] {
   try {
     const raw = localStorage.getItem(KEY);
     const universes = raw ? (JSON.parse(raw) as Universe[]) : [];
-    return maybeApplyUniverseSeedV17(maybeApplyUniverseSeedV16(maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))))))))))));
+    return maybeApplyUniverseSeedV25(maybeApplyUniverseSeedV24(maybeApplyUniverseSeedV23(maybeApplyUniverseSeedV22(maybeApplyUniverseSeedV21(maybeApplyUniverseSeedV20(maybeApplyUniverseSeedV19(maybeApplyUniverseSeedV18(maybeApplyUniverseSeedV17(maybeApplyUniverseSeedV16(maybeApplyUniverseSeedV15(maybeApplyUniverseSeedV14(maybeApplyUniverseSeedV13(maybeApplyUniverseSeedV12(maybeApplyUniverseSeedV11(maybeApplyUniverseSeedV10(maybeApplyUniverseSeedV9(maybeApplyUniverseSeedV8(maybeApplyUniverseSeedV7(maybeApplyUniverseSeedV6(maybeApplyUniverseSeedV5(maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed(universes))))))))))))))))))))))));
   } catch {
     return maybeApplyUniverseSeedV4(maybeApplyUniverseSeedV3(maybeApplyUniverseSeed([])));
   }

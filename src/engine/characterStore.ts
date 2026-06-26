@@ -27,6 +27,8 @@ const CHARACTER_SEED_FLAG_KEY_V14 = 'promptgen:characters:seeded:v14';
 const CHARACTER_SEED_FLAG_KEY_V15 = 'promptgen:characters:seeded:v15';
 const CHARACTER_SEED_FLAG_KEY_V16 = 'promptgen:characters:seeded:v16';
 const CHARACTER_SEED_FLAG_KEY_V17 = 'promptgen:characters:seeded:v17';
+const CHARACTER_SEED_FLAG_KEY_V18 = 'promptgen:characters:seeded:v18';
+const CHARACTER_SEED_FLAG_KEY_V19 = 'promptgen:characters:seeded:v19';
 const CHARACTER_AVATAR_MAX_BYTES = 60 * 1024;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -296,6 +298,8 @@ const SEED_TS_14 = 1748649600000;
 const SEED_TS_15 = 1748736000000;
 const SEED_TS_16 = 1748822400000;
 const SEED_TS_17 = 1749600000000;
+const SEED_TS_18 = 1749859200000;
+const SEED_TS_19 = 1750204800000;
 
 const DEFAULT_SEED_CHARACTERS: CharacterIdentity[] = [
   {
@@ -3448,6 +3452,806 @@ const V17_SEED_CHARACTERS: CharacterIdentity[] = [
   },
 ];
 
+// V18 — Orchard Reverie: an eternal-summer sacred orchard of fruit-bonded priestess-wardens.
+const V18_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_or_apple',
+    name: 'The Orchard Keeper',
+    summary: 'Eldest of the wardens, bonded to the first apple tree — steady, rooted, the mother of the orchard who holds the harvest rite together. Red-and-green robes, a crown of apple-leaves, warm tired eyes.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'orchard keeper',
+      presentation: 'clothed',
+      ageImpression: 'serene mature woman',
+      personalityTone: 'steady, warm, quietly authoritative',
+      visualAnchors: [
+        { id: 'anchor_orap_1', label: 'Face', kind: 'face', text: 'a warm sun-freckled face, soft laugh-lines, calm hazel eyes, golden-hour skin' },
+        { id: 'anchor_orap_2', label: 'Hair', kind: 'hair', text: 'long chestnut hair loosely braided with apple-leaves and a single red blossom' },
+        { id: 'anchor_orap_3', label: 'Crown', kind: 'accessory', text: 'a woven crown of apple-leaves and tiny green apples' },
+        { id: 'anchor_orap_4', label: 'Robes', kind: 'clothing', text: 'flowing red-and-green linen warden robes with a gold harvest sash, sleeves rolled' },
+        { id: 'anchor_orap_5', label: 'Detail', kind: 'other', text: 'a ripe red apple cradled in one hand, faint golden orchard light around her' },
+      ],
+      motifs: [
+        { id: 'motif_orap_1', label: 'Mother of the Orchard', text: 'apple-leaf crown, gold sash, the eldest who keeps the rite' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, mature woman',
+        'a warm sun-freckled face, soft laugh-lines, calm hazel eyes, golden-hour skin',
+        'long chestnut hair braided with apple-leaves, a woven crown of leaves and tiny green apples',
+        'flowing red-and-green linen warden robes with a gold harvest sash',
+        'cradling a ripe red apple in a sunlit orchard of colossal fruit trees',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_peach',
+    name: 'The Peach Warden',
+    summary: 'The welcoming warden bonded to the peach groves — soft, generous, sun-warmed. Blush-and-cream silks, a coral blossom in her hair, an easy inviting smile.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'peach warden',
+      presentation: 'clothed',
+      ageImpression: 'warm young woman',
+      personalityTone: 'soft, generous, welcoming',
+      visualAnchors: [
+        { id: 'anchor_orpe_1', label: 'Face', kind: 'face', text: 'a soft round face with peach-blush cheeks, warm brown eyes, a gentle inviting smile' },
+        { id: 'anchor_orpe_2', label: 'Hair', kind: 'hair', text: 'warm honey-brown waves loosely up, a coral peach-blossom tucked behind one ear' },
+        { id: 'anchor_orpe_3', label: 'Outfit', kind: 'clothing', text: 'a flowing blush-and-cream linen dress with a peach-coloured sash, soft and summery' },
+        { id: 'anchor_orpe_4', label: 'Skin', kind: 'other', text: 'warm sun-kissed skin with a soft peachy glow' },
+        { id: 'anchor_orpe_5', label: 'Prop', kind: 'accessory', text: 'a woven basket of ripe peaches resting on her hip' },
+      ],
+      motifs: [
+        { id: 'motif_orpe_1', label: 'The Warm Welcome', text: 'peach blossom, blush silks, a basket always offered' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a soft round face, peach-blush cheeks, warm brown eyes, gentle inviting smile',
+        'warm honey-brown waves loosely up, a coral peach-blossom behind one ear',
+        'a flowing blush-and-cream linen dress with a peach sash, soft and summery',
+        'holding a woven basket of ripe peaches in a sunlit peach grove',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_pomegranate',
+    name: 'The Pomegranate Warden',
+    summary: 'The deep and knowing warden bonded to the pomegranate — regal, mysterious, keeper of the orchard\'s older secrets. Garnet-and-crimson robes, ruby seeds at her throat.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'pomegranate warden',
+      presentation: 'clothed',
+      ageImpression: 'striking young woman',
+      personalityTone: 'regal, knowing, faintly mysterious',
+      visualAnchors: [
+        { id: 'anchor_orpo_1', label: 'Face', kind: 'face', text: 'a striking face with deep-set dark eyes, full lips stained pomegranate-red, a knowing look' },
+        { id: 'anchor_orpo_2', label: 'Hair', kind: 'hair', text: 'long black hair with a crimson sheen, threaded with tiny garnet beads' },
+        { id: 'anchor_orpo_3', label: 'Robes', kind: 'clothing', text: 'rich garnet-and-crimson robes with gold embroidery, a deep draped neckline' },
+        { id: 'anchor_orpo_4', label: 'Jewellery', kind: 'accessory', text: 'a necklace of ruby-red pomegranate-seed beads at the throat' },
+        { id: 'anchor_orpo_5', label: 'Prop', kind: 'other', text: 'a split pomegranate held open in one hand, jewel-red seeds glistening' },
+      ],
+      motifs: [
+        { id: 'motif_orpo_1', label: 'Keeper of Secrets', text: 'garnet beads, crimson robes, the split fruit and its hidden seeds' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a striking face, deep-set dark eyes, full pomegranate-stained lips, a knowing look',
+        'long black hair with a crimson sheen, threaded with garnet beads',
+        'rich garnet-and-crimson robes with gold embroidery, a necklace of ruby seed-beads',
+        'holding a split pomegranate with glistening jewel-red seeds, deep golden orchard light',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_fig',
+    name: 'The Fig Warden',
+    summary: 'The languid warden bonded to the old fig trees — ripe, unhurried, indulgent. Deep purple-and-honey wraps, fig-leaf motifs, heavy-lidded contentment.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'fig warden',
+      presentation: 'clothed',
+      ageImpression: 'languid young woman',
+      personalityTone: 'languid, ripe, indulgent',
+      visualAnchors: [
+        { id: 'anchor_orfi_1', label: 'Face', kind: 'face', text: 'a soft heavy-lidded face, warm olive skin, a slow contented half-smile' },
+        { id: 'anchor_orfi_2', label: 'Hair', kind: 'hair', text: 'dark loose curls falling over the shoulders, a fig-leaf tucked at the temple' },
+        { id: 'anchor_orfi_3', label: 'Outfit', kind: 'clothing', text: 'a deep purple-and-honey draped wrap dress with fig-leaf embroidery' },
+        { id: 'anchor_orfi_4', label: 'Detail', kind: 'other', text: 'a ripe split fig in hand showing soft pink-honey flesh' },
+        { id: 'anchor_orfi_5', label: 'Setting', kind: 'other', text: 'reclining among the broad leaves of a gnarled old fig tree' },
+      ],
+      motifs: [
+        { id: 'motif_orfi_1', label: 'Ripe and Unhurried', text: 'fig leaves, honey-purple wraps, the slow heat of late summer' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a soft heavy-lidded face, warm olive skin, slow contented half-smile',
+        'dark loose curls over the shoulders, a fig-leaf at the temple',
+        'a deep purple-and-honey draped wrap dress with fig-leaf embroidery',
+        'holding a ripe split fig with soft pink-honey flesh, among the leaves of a gnarled fig tree',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_citrus',
+    name: 'The Citrus Warden',
+    summary: 'The bright lively warden bonded to the citrus grove — sharp, sunny, quick to laugh. Zest-yellow and orange linens, citrus-blossom in her hair.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'citrus warden',
+      presentation: 'clothed',
+      ageImpression: 'lively young woman',
+      personalityTone: 'bright, sharp, quick to laugh',
+      visualAnchors: [
+        { id: 'anchor_orci_1', label: 'Face', kind: 'face', text: 'a bright open face, sun-gold skin, lively green eyes, a wide ready grin' },
+        { id: 'anchor_orci_2', label: 'Hair', kind: 'hair', text: 'short sun-bleached blonde hair with white citrus-blossom tucked in' },
+        { id: 'anchor_orci_3', label: 'Outfit', kind: 'clothing', text: 'a crisp zest-yellow and orange linen dress with rolled sleeves, fresh and summery' },
+        { id: 'anchor_orci_4', label: 'Prop', kind: 'accessory', text: 'a wide shallow basket of lemons and oranges on one arm' },
+        { id: 'anchor_orci_5', label: 'Detail', kind: 'other', text: 'bright noon light, citrus leaves glossy behind her' },
+      ],
+      motifs: [
+        { id: 'motif_orci_1', label: 'Sharp and Sunny', text: 'citrus blossom, zest-yellow linen, the bright snap of noon' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a bright open face, sun-gold skin, lively green eyes, a wide ready grin',
+        'short sun-bleached blonde hair with white citrus-blossom tucked in',
+        'a crisp zest-yellow and orange linen dress with rolled sleeves',
+        'carrying a basket of lemons and oranges in a bright citrus grove',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_cherry',
+    name: 'The Cherry Warden',
+    summary: 'The playful youngest-feeling warden bonded to the cherry trees — mischievous, flirty, light on her feet. Bright red-and-pink summer dress, cherry-pair earrings.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'cherry warden',
+      presentation: 'clothed',
+      ageImpression: 'playful young woman',
+      personalityTone: 'mischievous, flirty, light',
+      visualAnchors: [
+        { id: 'anchor_orch_1', label: 'Face', kind: 'face', text: 'a bright cheeky face, fair skin, sparkling dark eyes, a teasing grin' },
+        { id: 'anchor_orch_2', label: 'Hair', kind: 'hair', text: 'dark hair in two loose low buns, a cherry-blossom sprig tucked in' },
+        { id: 'anchor_orch_3', label: 'Outfit', kind: 'clothing', text: 'a flirty red-and-pink summer dress with a short flared skirt and a cherry-print sash' },
+        { id: 'anchor_orch_4', label: 'Detail', kind: 'accessory', text: 'a pair of glossy cherries hooked over one ear like an earring' },
+        { id: 'anchor_orch_5', label: 'Prop', kind: 'other', text: 'a handful of bright red cherries, blossom petals drifting' },
+      ],
+      motifs: [
+        { id: 'motif_orch_1', label: 'Light and Teasing', text: 'cherry earrings, red-pink skirts, drifting blossom' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a bright cheeky face, fair skin, sparkling dark eyes, a teasing grin',
+        'dark hair in two loose low buns, a cherry-blossom sprig tucked in',
+        'a flirty red-and-pink summer dress with a short flared skirt and cherry-print sash',
+        'a pair of glossy cherries hooked over one ear, blossom petals drifting in a cherry orchard',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_plum',
+    name: 'The Plum Warden',
+    summary: 'The cool elegant warden bonded to the plum trees — composed, refined, a creature of twilight. Deep indigo-and-dusk silks, a single plum-blossom at her collar.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'plum warden',
+      presentation: 'clothed',
+      ageImpression: 'composed young woman',
+      personalityTone: 'cool, refined, twilight-calm',
+      visualAnchors: [
+        { id: 'anchor_orpl_1', label: 'Face', kind: 'face', text: 'a composed elegant face, cool fair skin, calm violet-grey eyes, a faint serene smile' },
+        { id: 'anchor_orpl_2', label: 'Hair', kind: 'hair', text: 'sleek dark-violet hair in a low elegant twist' },
+        { id: 'anchor_orpl_3', label: 'Outfit', kind: 'clothing', text: 'deep indigo-and-dusk silk robes with a fine plum-blossom embroidered collar' },
+        { id: 'anchor_orpl_4', label: 'Detail', kind: 'other', text: 'a single ripe plum with a soft dusty bloom held in elegant fingers' },
+        { id: 'anchor_orpl_5', label: 'Setting', kind: 'other', text: 'standing in a plum orchard at dusk, deep blue-violet evening light' },
+      ],
+      motifs: [
+        { id: 'motif_orpl_1', label: 'Creature of Twilight', text: 'plum-blossom collar, indigo silks, the calm of dusk' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a composed elegant face, cool fair skin, calm violet-grey eyes, faint serene smile',
+        'sleek dark-violet hair in a low elegant twist',
+        'deep indigo-and-dusk silk robes with a plum-blossom embroidered collar',
+        'holding a ripe plum with a soft dusty bloom, in a plum orchard at dusk',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_grape',
+    name: 'The Grape Warden',
+    summary: 'The festive abundant warden bonded to the vine terraces — joyful, celebratory, the spirit of the harvest feast. Violet-and-gold draped vintner\'s dress, a vine-leaf wreath.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'grape warden',
+      presentation: 'clothed',
+      ageImpression: 'joyful young woman',
+      personalityTone: 'festive, abundant, celebratory',
+      visualAnchors: [
+        { id: 'anchor_orgr_1', label: 'Face', kind: 'face', text: 'a flushed joyful face, warm skin, laughing dark eyes, cheeks pink with mirth' },
+        { id: 'anchor_orgr_2', label: 'Hair', kind: 'hair', text: 'tumbling auburn curls under a wreath of grape-vine leaves and tiny purple grapes' },
+        { id: 'anchor_orgr_3', label: 'Outfit', kind: 'clothing', text: 'a violet-and-gold draped vintner dress, one shoulder bare, a wine-purple sash' },
+        { id: 'anchor_orgr_4', label: 'Prop', kind: 'accessory', text: 'a heavy bunch of dark grapes held aloft, juice-stained fingers' },
+        { id: 'anchor_orgr_5', label: 'Detail', kind: 'other', text: 'warm festival light, vine terraces heavy with fruit behind' },
+      ],
+      motifs: [
+        { id: 'motif_orgr_1', label: 'Spirit of the Feast', text: 'vine wreath, violet-gold drapes, grapes held high' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a flushed joyful face, warm skin, laughing dark eyes',
+        'tumbling auburn curls under a wreath of grape-vine leaves and tiny purple grapes',
+        'a violet-and-gold draped vintner dress, one shoulder bare, a wine-purple sash',
+        'holding a heavy bunch of dark grapes aloft on a sunlit vine terrace',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_apricot',
+    name: 'The Apricot Warden',
+    summary: 'The gentle demure warden bonded to the apricot trees — tender, shy, a creature of soft dawn. Pale orange-and-gold morning dress, apricot-blossom in loose hair.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'apricot warden',
+      presentation: 'clothed',
+      ageImpression: 'gentle young woman',
+      personalityTone: 'tender, demure, dawn-soft',
+      visualAnchors: [
+        { id: 'anchor_orac_1', label: 'Face', kind: 'face', text: 'a soft gentle face, warm apricot-gold skin, shy amber eyes, a small tender smile' },
+        { id: 'anchor_orac_2', label: 'Hair', kind: 'hair', text: 'soft strawberry-gold hair loose and slightly tousled, apricot-blossom tucked in' },
+        { id: 'anchor_orac_3', label: 'Outfit', kind: 'clothing', text: 'a pale apricot-orange and gold morning dress, soft gauzy sleeves' },
+        { id: 'anchor_orac_4', label: 'Prop', kind: 'other', text: 'cupping a single velvety apricot in both hands' },
+        { id: 'anchor_orac_5', label: 'Setting', kind: 'other', text: 'soft rosy dawn light, apricot trees in gentle blossom' },
+      ],
+      motifs: [
+        { id: 'motif_orac_1', label: 'Soft Dawn', text: 'apricot blossom, gold-orange gauze, the tender first light' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a soft gentle face, warm apricot-gold skin, shy amber eyes, a small tender smile',
+        'soft strawberry-gold hair loose and tousled, apricot-blossom tucked in',
+        'a pale apricot-orange and gold morning dress with soft gauzy sleeves',
+        'cupping a single velvety apricot in both hands, soft rosy dawn light in the orchard',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_melon',
+    name: 'The Melon Warden',
+    summary: 'The cool refreshing warden bonded to the melon patches — serene, breezy, the relief of shade on a hot day. Pale green-and-pink summer wrap, melon-vine motifs.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'melon warden',
+      presentation: 'clothed',
+      ageImpression: 'serene young woman',
+      personalityTone: 'serene, breezy, refreshing',
+      visualAnchors: [
+        { id: 'anchor_orme_1', label: 'Face', kind: 'face', text: 'a calm fresh face, dewy fair skin, cool sea-green eyes, a relaxed easy look' },
+        { id: 'anchor_orme_2', label: 'Hair', kind: 'hair', text: 'pale mint-green tinted hair in a loose low ponytail, a few stray strands' },
+        { id: 'anchor_orme_3', label: 'Outfit', kind: 'clothing', text: 'a breezy pale-green and watermelon-pink summer wrap dress, light and cool' },
+        { id: 'anchor_orme_4', label: 'Prop', kind: 'other', text: 'a wedge of bright watermelon or a pale honeydew half in hand' },
+        { id: 'anchor_orme_5', label: 'Setting', kind: 'other', text: 'dappled shade of broad melon-vine leaves, cool and green' },
+      ],
+      motifs: [
+        { id: 'motif_orme_1', label: 'Cool Shade', text: 'melon vines, green-pink wraps, the breeze of a hot afternoon' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a calm fresh face, dewy fair skin, cool sea-green eyes, relaxed easy look',
+        'pale mint-green tinted hair in a loose low ponytail',
+        'a breezy pale-green and watermelon-pink summer wrap dress, light and cool',
+        'holding a wedge of bright watermelon in the dappled shade of melon vines',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_berry',
+    name: 'The Berry Warden',
+    summary: 'The wild forager warden bonded to the bramble-hedges — free-spirited, untamed, always wandering the orchard\'s edges. Magenta-and-bramble-blue patched dress, berry-stained fingers.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'berry warden',
+      presentation: 'clothed',
+      ageImpression: 'free-spirited young woman',
+      personalityTone: 'wild, free, untamed',
+      visualAnchors: [
+        { id: 'anchor_orbe_1', label: 'Face', kind: 'face', text: 'a lively wind-flushed face, freckled tan skin, bright eyes, berry-stained lips and a grin' },
+        { id: 'anchor_orbe_2', label: 'Hair', kind: 'hair', text: 'wild dark hair full of small leaves and a few tangled bramble-flowers' },
+        { id: 'anchor_orbe_3', label: 'Outfit', kind: 'clothing', text: 'a patched magenta-and-bramble-blue forager dress, sleeves pushed up, a satchel of berries' },
+        { id: 'anchor_orbe_4', label: 'Detail', kind: 'other', text: 'berry-stained fingers, scratches from the brambles, a fistful of dark berries' },
+        { id: 'anchor_orbe_5', label: 'Setting', kind: 'other', text: 'tangled bramble-hedges heavy with blackberries and raspberries at the orchard edge' },
+      ],
+      motifs: [
+        { id: 'motif_orbe_1', label: 'The Wandering Edge', text: 'bramble-flowers in the hair, berry-stained hands, the wild hedgerows' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a lively wind-flushed face, freckled tan skin, bright eyes, berry-stained lips and a grin',
+        'wild dark hair full of small leaves and tangled bramble-flowers',
+        'a patched magenta-and-bramble-blue forager dress, sleeves pushed up',
+        'a fistful of dark berries and berry-stained fingers among bramble-hedges',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+  {
+    id: 'character_seed_or_pear',
+    name: 'The Pear Warden',
+    summary: 'The poised classic warden bonded to the pear trees — graceful, quiet, timeless. Pale green-and-cream gown, a pear-blossom circlet, a still and gentle bearing.',
+    tags: ['solo', 'orchard reverie', 'fruit warden'],
+    identity: {
+      archetype: 'pear warden',
+      presentation: 'clothed',
+      ageImpression: 'graceful young woman',
+      personalityTone: 'poised, classic, gentle',
+      visualAnchors: [
+        { id: 'anchor_orpr_1', label: 'Face', kind: 'face', text: 'a serene oval face, soft fair skin, calm grey-green eyes, a gentle composed expression' },
+        { id: 'anchor_orpr_2', label: 'Hair', kind: 'hair', text: 'smooth ash-blonde hair half-up under a delicate pear-blossom circlet' },
+        { id: 'anchor_orpr_3', label: 'Outfit', kind: 'clothing', text: 'a graceful pale-green and cream gown with a long soft skirt, classic and timeless' },
+        { id: 'anchor_orpr_4', label: 'Prop', kind: 'other', text: 'a single ripe golden-green pear held lightly in one hand' },
+        { id: 'anchor_orpr_5', label: 'Setting', kind: 'other', text: 'standing beneath a tall pear tree in soft late-afternoon gold' },
+      ],
+      motifs: [
+        { id: 'motif_orpr_1', label: 'Timeless Grace', text: 'pear-blossom circlet, green-cream gown, a still gentle poise' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a serene oval face, soft fair skin, calm grey-green eyes, gentle composed expression',
+        'smooth ash-blonde hair half-up under a delicate pear-blossom circlet',
+        'a graceful pale-green and cream gown with a long soft skirt',
+        'holding a ripe golden-green pear beneath a tall pear tree in late-afternoon gold',
+      ],
+    },
+    createdAt: SEED_TS_18,
+    updatedAt: SEED_TS_18,
+  },
+];
+
+// V19 — Planet Pistachio's Extraterrestrial Madness: camp pulp 50s sci-fi meets joyful psychedelia on a pistachio-green planet at the edge of known space.
+const V19_SEED_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_seed_pp_queen',
+    name: 'The Pistachio Queen',
+    summary: 'The regal alien sovereign of Planet Pistachio — pistachio-green skin, a tall crown of pistachio-shells and gold, a beaded cape, languid imperious bearing. The whole planet bows or pretends to.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'alien queen',
+      presentation: 'clothed',
+      ageImpression: 'ageless regal',
+      personalityTone: 'languid, imperious, faintly bored',
+      visualAnchors: [
+        { id: 'anchor_ppq_1', label: 'Skin', kind: 'face', text: 'smooth pistachio-green skin, long elegant alien features, half-lidded gold eyes, long fluttering lashes' },
+        { id: 'anchor_ppq_2', label: 'Crown', kind: 'accessory', text: 'a tall ornate crown of pistachio-shells inlaid with gold and a single pink gemstone' },
+        { id: 'anchor_ppq_3', label: 'Cape', kind: 'clothing', text: 'a long beaded cape of pistachio-green silk and hot-pink feathers' },
+        { id: 'anchor_ppq_4', label: 'Hair', kind: 'hair', text: 'high lavender-and-mint hair swept up with golden pins' },
+        { id: 'anchor_ppq_5', label: 'Detail', kind: 'other', text: 'a single tiny mood-cactus on her shoulder as a brooch' },
+      ],
+      motifs: [
+        { id: 'motif_ppq_1', label: 'Ruler of Nothing in Particular', text: 'pistachio crown, beaded cape, the languid sovereign of a candy planet' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, alien queen',
+        'smooth pistachio-green skin, long elegant alien features, half-lidded gold eyes',
+        'a tall ornate crown of pistachio-shells inlaid with gold and a pink gemstone',
+        'a long beaded cape of pistachio-green silk and hot-pink feathers',
+        'high lavender-and-mint hair swept up, a tiny mood-cactus brooch on her shoulder',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_miner',
+    name: 'The Asteroid Miner',
+    summary: 'A human colonist who strip-mines drifting asteroids in evening wear. Long pistachio-satin gown, sturdy pickaxe, pearls and helmet, perfectly poised over a rock.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'asteroid miner',
+      presentation: 'clothed',
+      ageImpression: 'glamorous adult',
+      personalityTone: 'glamorously practical, deadpan',
+      visualAnchors: [
+        { id: 'anchor_ppam_1', label: 'Face', kind: 'face', text: 'a polished face with sharp red lipstick and immaculate winged eyeliner, calm composed expression' },
+        { id: 'anchor_ppam_2', label: 'Outfit', kind: 'clothing', text: 'a long floor-length pistachio-satin evening gown with a daring slit, opera-length white gloves' },
+        { id: 'anchor_ppam_3', label: 'Hair', kind: 'hair', text: 'platinum hair set in a perfect retro updo' },
+        { id: 'anchor_ppam_4', label: 'Tool', kind: 'accessory', text: 'a heavy chrome pickaxe slung over one shoulder' },
+        { id: 'anchor_ppam_5', label: 'Helmet', kind: 'accessory', text: 'a small bubble helmet hanging unhooked at the hip, pearls at the throat' },
+      ],
+      motifs: [
+        { id: 'motif_ppam_1', label: 'Glamour at the Coal-Face', text: 'satin gown, chrome pickaxe, the high-fashion of strip-mining' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo',
+        'a polished face with sharp red lipstick and winged eyeliner, composed expression',
+        'a long pistachio-satin evening gown with a slit, opera-length white gloves',
+        'platinum hair in a perfect retro updo, a small bubble helmet at the hip',
+        'a heavy chrome pickaxe slung over one shoulder, standing on a drifting asteroid',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_frog_wrangler',
+    name: 'The Glow-Frog Wrangler',
+    summary: 'A space-cowboy who herds glowing alien frogs across the salt flats. Pistachio-and-orange wrangler outfit, lasso, herd of softly-pulsing frogs trailing behind.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'space cowboy',
+      presentation: 'clothed',
+      ageImpression: 'weathered adult',
+      personalityTone: 'easygoing, drawling, kindly',
+      visualAnchors: [
+        { id: 'anchor_ppgf_1', label: 'Face', kind: 'face', text: 'a sun-tanned face with kind crinkled eyes and a half-grin, dust freckles' },
+        { id: 'anchor_ppgf_2', label: 'Hat', kind: 'accessory', text: 'a wide-brim pistachio-green cowboy hat with a tangerine band' },
+        { id: 'anchor_ppgf_3', label: 'Outfit', kind: 'clothing', text: 'a fringed pistachio-and-orange wrangler jacket over a cream shirt, rugged trousers' },
+        { id: 'anchor_ppgf_4', label: 'Tool', kind: 'accessory', text: 'a coiled silver lasso in one hand' },
+        { id: 'anchor_ppgf_5', label: 'Detail', kind: 'other', text: 'a few softly-glowing cyan-green frogs hopping near the boots' },
+      ],
+      motifs: [
+        { id: 'motif_ppgf_1', label: 'Frog Trails at Dusk', text: 'pistachio hat, glowing alien frogs, the long drawl of the open salt flats' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, space cowboy',
+        'a sun-tanned face with kind crinkled eyes and a half-grin',
+        'a wide-brim pistachio-green cowboy hat with a tangerine band',
+        'a fringed pistachio-and-orange wrangler jacket over a cream shirt',
+        'a coiled silver lasso in hand, a few glowing cyan-green frogs hopping nearby',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_botanist',
+    name: 'The Honey-Antenna Botanist',
+    summary: 'A scholar of the planet\'s talking plants. Slender alien with twin golden honey-tipped antennae, a lab coat over a pistachio bodysuit, a clipboard and a friendly cactus on her shoulder.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'alien botanist',
+      presentation: 'clothed',
+      ageImpression: 'thoughtful young adult',
+      personalityTone: 'curious, precise, gentle',
+      visualAnchors: [
+        { id: 'anchor_ppbo_1', label: 'Face', kind: 'face', text: 'pale mint-green skin, large amber eyes, a soft thoughtful expression' },
+        { id: 'anchor_ppbo_2', label: 'Antennae', kind: 'accessory', text: 'twin slender antennae rising from her hair, each tipped with a glowing drop of honey-gold' },
+        { id: 'anchor_ppbo_3', label: 'Outfit', kind: 'clothing', text: 'a crisp white lab coat over a pistachio bodysuit, tangerine boots' },
+        { id: 'anchor_ppbo_4', label: 'Tool', kind: 'accessory', text: 'a clipboard in one hand, a small magnifying lens at her belt' },
+        { id: 'anchor_ppbo_5', label: 'Detail', kind: 'other', text: 'a tiny smiling mood-cactus perched on her shoulder' },
+      ],
+      motifs: [
+        { id: 'motif_ppbo_1', label: 'Friendly Field Notes', text: 'honey antennae, lab coat, the cactus that wants to be friends' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, alien botanist',
+        'pale mint-green skin, large amber eyes, soft thoughtful expression',
+        'twin slender antennae tipped with glowing honey-gold drops',
+        'a crisp white lab coat over a pistachio bodysuit, tangerine boots',
+        'a clipboard in one hand, a tiny smiling mood-cactus on her shoulder',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_lounge_singer',
+    name: 'The Comet Lounge Singer',
+    summary: 'A chanteuse who sings to passing comets from the Diner at the End of the Universe. Lavender alien skin, a hot-pink beaded gown, vintage chrome microphone, a single white star earring.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'lounge singer',
+      presentation: 'clothed',
+      ageImpression: 'glamorous adult',
+      personalityTone: 'wistful, husky, glamorous',
+      visualAnchors: [
+        { id: 'anchor_ppls_1', label: 'Face', kind: 'face', text: 'pale lavender alien skin, half-closed silver eyes, glossy hot-pink lips' },
+        { id: 'anchor_ppls_2', label: 'Hair', kind: 'hair', text: 'long platinum waves swept dramatically over one shoulder' },
+        { id: 'anchor_ppls_3', label: 'Gown', kind: 'clothing', text: 'a backless hot-pink beaded gown with a long mermaid hem' },
+        { id: 'anchor_ppls_4', label: 'Mic', kind: 'accessory', text: 'a vintage chrome microphone held in one hand' },
+        { id: 'anchor_ppls_5', label: 'Detail', kind: 'other', text: 'a single white star-shaped earring catching the spotlight' },
+      ],
+      motifs: [
+        { id: 'motif_ppls_1', label: 'A Song for Every Comet', text: 'hot-pink beads, vintage microphone, lavender skin under the spotlight' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, lounge singer',
+        'pale lavender alien skin, half-closed silver eyes, glossy hot-pink lips',
+        'long platinum waves swept over one shoulder',
+        'a backless hot-pink beaded gown with a long mermaid hem',
+        'holding a vintage chrome microphone, a white star earring catching the spotlight',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_robot_chef',
+    name: 'The Outdated Robot Chef',
+    summary: 'A creaking retro-future robot who serves impossibly tall pistachio sundaes at the diner. Chrome torso, tiny chef hat, dented apron, expressive eye-screen showing a smiley face.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'retro robot chef',
+      presentation: 'other',
+      ageImpression: 'antique appliance',
+      personalityTone: 'cheerful, dutiful, slightly broken',
+      visualAnchors: [
+        { id: 'anchor_pprc_1', label: 'Body', kind: 'silhouette', text: 'a stout chrome retro-future robot body with riveted plates, slightly dented' },
+        { id: 'anchor_pprc_2', label: 'Face', kind: 'face', text: 'a round CRT eye-screen on the face showing a glowing smiley face in cyan pixels' },
+        { id: 'anchor_pprc_3', label: 'Hat', kind: 'accessory', text: 'a tiny white chef hat balanced on top of the head' },
+        { id: 'anchor_pprc_4', label: 'Apron', kind: 'clothing', text: 'a stained pistachio-green apron with a hot-pink trim' },
+        { id: 'anchor_pprc_5', label: 'Prop', kind: 'accessory', text: 'an impossibly tall pistachio-ice-cream sundae held in three chrome arms' },
+      ],
+      motifs: [
+        { id: 'motif_pprc_1', label: 'Sundae of Towering Ambition', text: 'CRT smiley, tiny chef hat, the unsteady pistachio sundae' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'solo, retro-future chrome robot, robot chef',
+        'a stout dented chrome retro robot body with riveted plates',
+        'a round CRT eye-screen showing a glowing cyan smiley face',
+        'a tiny white chef hat and a stained pistachio-green apron with hot-pink trim',
+        'holding an impossibly tall pistachio sundae in three chrome arms',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_comet_surfer',
+    name: 'The Comet Surfer',
+    summary: 'A daredevil teen who rides comets on a glowing surfboard. Pistachio wetsuit, tangerine hair, goggles, easy grin, the comet trail streaming behind her.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'comet surfer',
+      presentation: 'clothed',
+      ageImpression: 'reckless teen',
+      personalityTone: 'reckless, sunny, fearless',
+      visualAnchors: [
+        { id: 'anchor_ppcs_1', label: 'Face', kind: 'face', text: 'a sun-flushed face with bright cyan eyes and a wide easy grin' },
+        { id: 'anchor_ppcs_2', label: 'Hair', kind: 'hair', text: 'short tangerine hair whipping in cosmic wind' },
+        { id: 'anchor_ppcs_3', label: 'Outfit', kind: 'clothing', text: 'a sleek pistachio-and-tangerine wetsuit with chrome trim' },
+        { id: 'anchor_ppcs_4', label: 'Goggles', kind: 'accessory', text: 'large chrome goggles pushed up on the forehead' },
+        { id: 'anchor_ppcs_5', label: 'Board', kind: 'accessory', text: 'a glowing pistachio-green surfboard under her feet, a long comet-tail trailing behind' },
+      ],
+      motifs: [
+        { id: 'motif_ppcs_1', label: 'Riding the Tail', text: 'pistachio board, tangerine hair, the long bright comet-trail' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1girl, solo, comet surfer, teen',
+        'a sun-flushed face, bright cyan eyes, wide easy grin',
+        'short tangerine hair whipping in cosmic wind',
+        'a sleek pistachio-and-tangerine wetsuit with chrome trim, goggles on the forehead',
+        'a glowing pistachio surfboard under her feet, a long comet-tail trailing behind',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_mailman',
+    name: 'The Three-Eyed Mailman',
+    summary: 'A weary alien postal worker delivering mail across the planet. Three tired eyes, a worn pistachio-and-grey uniform, a heavy sack of letters, a small jetpack.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'alien postman',
+      presentation: 'clothed',
+      ageImpression: 'tired adult',
+      personalityTone: 'weary, dutiful, deadpan',
+      visualAnchors: [
+        { id: 'anchor_ppma_1', label: 'Face', kind: 'face', text: 'a tired pale-green alien face with three slightly droopy yellow eyes and a small mustache' },
+        { id: 'anchor_ppma_2', label: 'Uniform', kind: 'clothing', text: 'a worn pistachio-green and grey postal uniform with brass buttons' },
+        { id: 'anchor_ppma_3', label: 'Hat', kind: 'accessory', text: 'a small pistachio-green pillbox postal cap' },
+        { id: 'anchor_ppma_4', label: 'Sack', kind: 'accessory', text: 'a bulging canvas sack of letters slung over the shoulder' },
+        { id: 'anchor_ppma_5', label: 'Tech', kind: 'accessory', text: 'a small dented chrome jetpack on the back trailing a thin puff of smoke' },
+      ],
+      motifs: [
+        { id: 'motif_ppma_1', label: 'Mail Across the Cosmos', text: 'three tired eyes, worn pistachio uniform, the long route' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, alien postman, three eyes',
+        'a tired pale-green alien face with three droopy yellow eyes and a small mustache',
+        'a worn pistachio-green and grey postal uniform with brass buttons',
+        'a small pistachio pillbox postal cap, a bulging sack of letters over the shoulder',
+        'a small chrome jetpack on the back trailing a thin puff of smoke',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_cactus_druid',
+    name: 'The Mood-Cactus Druid',
+    summary: 'A serene alien druid who grows emotional cacti. Robe of green succulents, lavender skin, gentle expression, a row of tiny cacti with different feelings on his shoulders.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'cactus druid',
+      presentation: 'clothed',
+      ageImpression: 'gentle elder',
+      personalityTone: 'serene, gentle, patient',
+      visualAnchors: [
+        { id: 'anchor_ppcd_1', label: 'Face', kind: 'face', text: 'pale lavender skin, kind closed-half eyes, a soft serene smile, a small succulent in his beard' },
+        { id: 'anchor_ppcd_2', label: 'Robe', kind: 'clothing', text: 'a flowing pistachio-and-sage robe stitched with small living succulents' },
+        { id: 'anchor_ppcd_3', label: 'Cacti', kind: 'accessory', text: 'a row of tiny mood-cacti with different little faces perched along his shoulders' },
+        { id: 'anchor_ppcd_4', label: 'Staff', kind: 'accessory', text: 'a tall gnarled cactus-wood staff topped with a single pink cactus-flower' },
+        { id: 'anchor_ppcd_5', label: 'Detail', kind: 'other', text: 'a soft golden-honey halo behind his head' },
+      ],
+      motifs: [
+        { id: 'motif_ppcd_1', label: 'Garden of Small Feelings', text: 'mood-cacti, succulent robe, the gentle druid of the green' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1man, solo, alien druid, elder',
+        'pale lavender skin, kind half-closed eyes, soft serene smile, a small succulent in his beard',
+        'a flowing pistachio-and-sage robe stitched with small living succulents',
+        'a row of tiny mood-cacti with little faces along his shoulders',
+        'a tall gnarled cactus-wood staff topped with a pink cactus-flower, a honey halo behind him',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_spore_dancer',
+    name: 'The Spore Dancer',
+    summary: 'A graceful performer who dances in clouds of softly-glowing spores. Iridescent dance leotard, long ribbons, drifting bioluminescent spores around her like floating snow.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'spore dancer',
+      presentation: 'clothed',
+      ageImpression: 'lithe young adult',
+      personalityTone: 'graceful, dreamy, weightless',
+      visualAnchors: [
+        { id: 'anchor_ppsd_1', label: 'Face', kind: 'face', text: 'pale mint-green skin with a soft bioluminescent glow on the cheeks, dreamy lavender eyes' },
+        { id: 'anchor_ppsd_2', label: 'Hair', kind: 'hair', text: 'long mint-green hair flowing in mid-motion' },
+        { id: 'anchor_ppsd_3', label: 'Outfit', kind: 'clothing', text: 'an iridescent pistachio-and-pink dance leotard with long flowing ribbons at the wrists' },
+        { id: 'anchor_ppsd_4', label: 'Pose', kind: 'other', text: 'caught mid-dance with one leg lifted, both arms drifting upward' },
+        { id: 'anchor_ppsd_5', label: 'Spores', kind: 'other', text: 'a cloud of softly-glowing cyan and pink spores drifting in the air around her like floating snow' },
+      ],
+      motifs: [
+        { id: 'motif_ppsd_1', label: 'Dance of the Drifting Light', text: 'iridescent leotard, long ribbons, glowing spores drifting' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1woman, solo, dancer',
+        'pale mint-green skin with a soft bioluminescent glow, dreamy lavender eyes',
+        'long mint-green hair flowing in motion',
+        'an iridescent pistachio-and-pink dance leotard with long flowing ribbons at the wrists',
+        'caught mid-dance, glowing cyan and pink spores drifting around her like floating snow',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_star_pilot',
+    name: 'The Star Pilot',
+    summary: 'An ace flier of the local skies. Retro-future flight suit in pistachio-and-cream, a chrome bubble helmet held under one arm, a confident grin, scarf trailing.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'space pilot',
+      presentation: 'clothed',
+      ageImpression: 'dashing adult',
+      personalityTone: 'confident, breezy, dashing',
+      visualAnchors: [
+        { id: 'anchor_ppsp_1', label: 'Face', kind: 'face', text: 'a confident grinning face with a small scar over one brow, warm tan skin' },
+        { id: 'anchor_ppsp_2', label: 'Hair', kind: 'hair', text: 'short dark hair swept back, slightly wind-tousled' },
+        { id: 'anchor_ppsp_3', label: 'Suit', kind: 'clothing', text: 'a sleek pistachio-and-cream retro flight suit with tangerine racing stripes' },
+        { id: 'anchor_ppsp_4', label: 'Helmet', kind: 'accessory', text: 'a chrome bubble helmet held under one arm' },
+        { id: 'anchor_ppsp_5', label: 'Scarf', kind: 'accessory', text: 'a long hot-pink silk scarf trailing behind, leather gloves' },
+      ],
+      motifs: [
+        { id: 'motif_ppsp_1', label: 'Ace of the Pistachio Skies', text: 'chrome helmet, retro flight suit, the trailing pink scarf' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        '1person, solo, space pilot',
+        'a confident grinning face with a small scar over one brow, warm tan skin',
+        'short dark hair swept back, slightly wind-tousled',
+        'a sleek pistachio-and-cream retro flight suit with tangerine stripes, leather gloves',
+        'a chrome bubble helmet under one arm, a long hot-pink silk scarf trailing behind',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+  {
+    id: 'character_seed_pp_tree_mayor',
+    name: 'The Sentient Plant Mayor',
+    summary: 'A talking pistachio-tree being who runs city hall. A walking small tree with a wise expressive face in the bark, branches in a tiny mayoral sash, leaves rustling thoughtfully.',
+    tags: ['solo', 'planet pistachio', 'camp sci-fi'],
+    identity: {
+      archetype: 'sentient plant',
+      presentation: 'other',
+      ageImpression: 'ancient',
+      personalityTone: 'civic, patient, slightly bureaucratic',
+      visualAnchors: [
+        { id: 'anchor_pptm_1', label: 'Body', kind: 'silhouette', text: 'a walking small pistachio-tree being on rooted feet, a knotty bark-body the size of a person' },
+        { id: 'anchor_pptm_2', label: 'Face', kind: 'face', text: 'an expressive wise face carved into the bark with kind glowing amber eyes and a small wooden mouth' },
+        { id: 'anchor_pptm_3', label: 'Leaves', kind: 'hair', text: 'a canopy of soft pistachio leaves rustling above, with small green pistachios hanging here and there' },
+        { id: 'anchor_pptm_4', label: 'Sash', kind: 'clothing', text: 'a small mayoral sash of gold across the bark with a tiny medallion' },
+        { id: 'anchor_pptm_5', label: 'Detail', kind: 'other', text: 'a tiny rolled scroll tucked into a knot, a small pair of spectacles on the bark' },
+      ],
+      motifs: [
+        { id: 'motif_pptm_1', label: 'Bark of the Civic', text: 'pistachio canopy, gold sash, the kindly civic plant' },
+      ],
+    },
+    phraseBundle: {
+      core: [
+        'solo, sentient plant, walking small tree',
+        'a knotty pistachio-tree being on rooted feet, the size of a person',
+        'an expressive wise face carved into the bark with kind glowing amber eyes',
+        'a canopy of soft pistachio leaves rustling above with small hanging pistachios',
+        'a small gold mayoral sash across the bark, a tiny rolled scroll tucked into a knot',
+      ],
+    },
+    createdAt: SEED_TS_19,
+    updatedAt: SEED_TS_19,
+  },
+];
+
 const readCharacters = (): CharacterIdentity[] => {
   const candidates = [
     parseJson(readStorageItem(CHARACTER_STORE_KEY)),
@@ -3639,6 +4443,26 @@ const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] =>
     }
   }
 
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V18) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V18, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V18_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
+  if (readStorageItem(CHARACTER_SEED_FLAG_KEY_V19) === null) {
+    writeStorageItem(CHARACTER_SEED_FLAG_KEY_V19, true);
+    const existingIds = new Set(result.map(c => c.id));
+    const toAdd = V19_SEED_CHARACTERS.filter(c => !existingIds.has(c.id));
+    if (toAdd.length > 0) {
+      result = sortCharacters([...result, ...toAdd]);
+      writeCharacters(result);
+    }
+  }
+
   return result;
 };
 
@@ -3687,8 +4511,31 @@ const ensureEntryIds = (input: CharacterIdentityInput): CharacterIdentityInput =
   },
 });
 
+/**
+ * Seed characters that ship with a pre-generated KREA2 (rtx-refined) cover image,
+ * served from public/char-covers/<id>.jpg. Applied on read so covers appear even
+ * for characters already persisted in localStorage without one.
+ */
+const SEEDED_COVER_IDS = new Set<string>([
+  'character_seed_ny_konbini_yurei',
+  'character_seed_ny_subway_kitsune',
+  'character_seed_ny_neon_oni',
+  'character_seed_ny_kasa_obake',
+  'character_seed_ny_rokurokubi',
+  'character_seed_ny_tengu_courier',
+  'character_seed_ny_nekomata_barista',
+  'character_seed_ny_yuki_onna',
+  'character_seed_ny_jorogumo',
+  'character_seed_ny_bakeneko_idol',
+]);
+
 export async function listCharacters(): Promise<CharacterIdentity[]> {
-  return readCharacters();
+  const base = import.meta.env.BASE_URL || '/';
+  return readCharacters().map(c =>
+    !c.coverImageUrl && SEEDED_COVER_IDS.has(c.id)
+      ? { ...c, coverImageUrl: `${base}char-covers/${c.id}.jpg` }
+      : c,
+  );
 }
 
 export async function createCharacter(input: CharacterIdentityInput): Promise<CharacterIdentity> {

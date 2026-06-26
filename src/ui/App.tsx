@@ -57,6 +57,7 @@ import {
   listCharacters,
   updateCharacter,
 } from '../engine/characterStore';
+import { V3LabPage } from './v3/V3LabPage';
 import {
   createEnvironment,
   deleteEnvironment as deleteStoredEnvironment,
@@ -369,7 +370,7 @@ function loadBuilderSessionSnapshot(): BuilderSessionSnapshot | null {
   }
 }
 
-type PageId = 'generator' | 'identity-systems' | 'prompts' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'identity-detail' | 'admin';
+type PageId = 'generator' | 'identity-systems' | 'prompts' | 'community' | 'messages' | 'my-profile' | 'creator-profile' | 'post-detail' | 'identity-detail' | 'admin' | 'v3-lab';
 
 const PAGE_TO_PARAM: Record<PageId, string> = {
   'generator': '',
@@ -382,6 +383,7 @@ const PAGE_TO_PARAM: Record<PageId, string> = {
   'post-detail': '',
   'identity-detail': '',
   'admin': 'admin',
+  'v3-lab': 'v3-lab',
 };
 
 const PARAM_TO_PAGE: Record<string, PageId> = Object.fromEntries(
@@ -441,16 +443,8 @@ export function App() {
   const CUSTOM_PROMPT_FRAGMENTS_STORAGE_KEY = 'morpbase:custom_global_phrases';
   const initialBuilderSession = loadBuilderSessionSnapshot();
 
-  const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
-    try {
-      if (parseCreatorHash()) {
-        return true;
-      }
-      return window.localStorage.getItem('morpbase:seen_landing') === '1';
-    } catch {
-      return false;
-    }
-  });
+  // First-open landing page removed — visitors go straight into the workspace.
+  const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(true);
   const [activePage, setActivePage] = useState<PageId>(() => {
     try {
       if (parseCreatorHash()) return 'creator-profile';
@@ -465,9 +459,10 @@ export function App() {
       if (saved === 'my-profile') return 'my-profile';
       if (saved === 'creator-profile') return 'creator-profile';
       if (saved === 'admin') return 'admin';
-      return 'generator';
+      if (saved === 'v3-lab') return 'v3-lab';
+      return 'v3-lab';
     } catch {
-      return 'generator';
+      return 'v3-lab';
     }
   });
   // UI State: Selections
@@ -3871,6 +3866,7 @@ export function App() {
         <LandingPage manualUrl={manualUrl} onEnter={handleEnterApp} />
       ) : (
       <>
+      {activePage !== 'v3-lab' && (
       <nav className="nav" aria-label="Main navigation">
 
         {/* Brand */}
@@ -3893,10 +3889,7 @@ export function App() {
         {/* Center navigation */}
         <div className="nav-center">
           <div className="nav-tabs">
-            <button type="button" className={`nav-tab${activePage === 'generator' ? ' active' : ''}`} onClick={() => setActivePage('generator')}>Workspace</button>
-            <button type="button" className={`nav-tab${activePage === 'identity-systems' ? ' active' : ''}`} onClick={() => setActivePage('identity-systems')}>Lexicon</button>
-            <button type="button" className={`nav-tab${activePage === 'prompts' ? ' active' : ''}`} onClick={() => setActivePage('prompts')}>Memory</button>
-            <button type="button" className={`nav-tab${activePage === 'community' ? ' active' : ''}`} onClick={() => setActivePage('community')}>Community</button>
+            <button type="button" className={`nav-tab${activePage === 'v3-lab' ? ' active' : ''}`} onClick={() => setActivePage('v3-lab')}>Workspace</button>
             <button type="button" className={`nav-tab${activePage === 'my-profile' ? ' active' : ''}`} onClick={() => setActivePage('my-profile')}>Profile</button>
             {isAdmin && (
               <button type="button" className={`nav-tab${activePage === 'admin' ? ' active' : ''}`} onClick={() => setActivePage('admin')}>Admin</button>
@@ -3955,7 +3948,15 @@ export function App() {
         </div>
 
       </nav>
-      {activePage === 'admin' ? (
+      )}
+      {activePage === 'v3-lab' ? (
+        <V3LabPage
+          characters={characters}
+          viewerName={authUser?.name ?? null}
+          viewerAvatarUrl={authUser?.avatarUrl ?? null}
+          viewerAuthUid={authUser?.authUid ?? null}
+        />
+      ) : activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />
       ) : activePage === 'identity-systems' ? (
         <LexiconPage />

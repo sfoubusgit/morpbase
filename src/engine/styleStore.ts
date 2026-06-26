@@ -20,6 +20,12 @@ const STYLE_SEED_FLAG_KEY_V16 = 'promptgen:styles:seeded:v16';
 const STYLE_SEED_FLAG_KEY_V17 = 'promptgen:styles:seeded:v17';
 const STYLE_SEED_FLAG_KEY_V18 = 'promptgen:styles:seeded:v18';
 const STYLE_SEED_FLAG_KEY_V19 = 'promptgen:styles:seeded:v19';
+const STYLE_SEED_FLAG_KEY_V20 = 'promptgen:styles:seeded:v20';
+const STYLE_SEED_FLAG_KEY_V21 = 'promptgen:styles:seeded:v21';
+const STYLE_SEED_FLAG_KEY_V22 = 'promptgen:styles:seeded:v22';
+const STYLE_SEED_FLAG_KEY_V23 = 'promptgen:styles:seeded:v23';
+const STYLE_SEED_FLAG_KEY_V24 = 'promptgen:styles:seeded:v24';
+const STYLE_SEED_FLAG_KEY_V25 = 'promptgen:styles:seeded:v25';
 // One-time fix-up: rename the mislabeled "Charcoal Dark Classic Anime" (which
 // actually renders as a clean vintage anime cel) to "Vintage Anime Cel" for
 // users who already seeded it. Id kept stable; only display name + phrases change.
@@ -122,6 +128,12 @@ const SEED_TS_16 = 1749340800000;
 const SEED_TS_17 = 1749427200000;
 const SEED_TS_18 = 1749600000000;
 const SEED_TS_19 = 1749686400000;
+const SEED_TS_20 = 1750032000000;
+const SEED_TS_21 = 1750118400000;
+const SEED_TS_22 = 1750377600000;
+const SEED_TS_23 = 1750464000000;
+const SEED_TS_24 = 1750550400000;
+const SEED_TS_25 = 1750636800000;
 
 const DEFAULT_SEED_STYLES: StylePreset[] = [
   {
@@ -1363,6 +1375,381 @@ const V19_SEED_STYLES: StylePreset[] = [
   },
 ];
 
+// V20 — Eros Atelier: curated art styles for tasteful erotic body work.
+// Each style was chosen because the medium itself either does the covering
+// or provides the dramatic framing for sensual subjects.
+const V20_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_eros_mucha_panel',
+    name: 'Mucha Boudoir Panel',
+    summary: 'An Art Nouveau decorative panel in the manner of Alphonse Mucha — a single elegant sensual figure with a halo disk, sinuous organic linework, flat decorative colour with gold accents, ornate floral border.',
+    phrases: [
+      'an Art Nouveau decorative panel in the manner of Alphonse Mucha',
+      'a single elegant sensual figure with a circular halo disk behind the head',
+      'sinuous flowing organic linework, soft hair in curling waves',
+      'an ornate floral border framing the panel',
+      'flat decorative colour with burnished gold accents, soft pastel palette',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_klimt_gold',
+    name: 'Klimt Gold Tapestry',
+    summary: 'Gustav Klimt-style ornate gold-leaf tapestry — figure embedded in a dense geometric gilt pattern, the pattern doing the covering, jewel-tone accents, the unmistakable Vienna Secession aesthetic.',
+    phrases: [
+      'in the style of Gustav Klimt, ornate gold-leaf tapestry composition',
+      'a figure embedded within and partly covered by a dense geometric gilt pattern',
+      'burnished gold-leaf background with intricate spirals squares and eyes',
+      'jewel-tone accents of crimson emerald and sapphire breaking through the gold',
+      'flat decorative surface, Vienna Secession aesthetic, sensual and ornate',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_caravaggio',
+    name: 'Caravaggio Chiaroscuro',
+    summary: 'Baroque Caravaggio chiaroscuro — a single hard light source from one direction, deep velvety shadow swallowing the rest, dramatic painterly modeling of skin, theatrical body composition.',
+    phrases: [
+      'Baroque chiaroscuro in the style of Caravaggio',
+      'a single hard light source from one direction modelling the figure',
+      'deep velvety shadow swallowing most of the scene',
+      'dramatic painterly oil-on-canvas modelling of skin and fabric',
+      'theatrical baroque body composition, intense and intimate',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_pre_raphaelite',
+    name: 'Pre-Raphaelite Painterly',
+    summary: 'Pre-Raphaelite oil painting in the style of Waterhouse and Rossetti — dreamy lush color, rich painterly skin, symbolic flowers and fabrics, classical sensual subject in nature or interior.',
+    phrases: [
+      'a Pre-Raphaelite oil painting in the style of Waterhouse and Rossetti',
+      'dreamy lush colour with rich painterly modelling of skin',
+      'soft glazed oil-on-canvas finish, fine brushwork on hair and fabric',
+      'symbolic flowers ivy or jewelled fabrics in the composition',
+      'classical sensual subject, romantic atmosphere, painted glamour',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_nagel_pop',
+    name: 'Patrick Nagel Pop',
+    summary: 'In the style of Patrick Nagel — 80s flat-color geometric pop pin-up, pure-black hair, milk-white skin, a single red lip, flat saturated color blocks, bold simplification, Duran Duran Rio cover aesthetic.',
+    phrases: [
+      'in the style of Patrick Nagel, 80s flat-colour geometric pop pin-up',
+      'a figure with pure-black hair and milk-white skin, a single red lip',
+      'flat saturated colour blocks with no gradients or shading',
+      'bold graphic simplification, sharp clean edges',
+      'soft peach or aqua background, Duran Duran Rio cover aesthetic',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_smoke_couture',
+    name: 'Smoke Couture',
+    summary: 'The body wrapped in dense pigmented smoke shaped into an impossible flowing gown — smoke trailing in long sculpted ribbons, bare shoulders and limbs softly visible at the edges, hyper-real material physics on a dark background.',
+    phrases: [
+      'the body wrapped in dense pigmented smoke shaped into an impossible flowing gown',
+      'smoke trailing from the figure in long sculpted ribbons',
+      'bare shoulders and limbs softly visible at the edges of the smoke',
+      'hyper-real smoke material physics, soft rim light',
+      'deep dark background, dreamlike photoreal boudoir glamour',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_backlit_sheer',
+    name: 'Backlit Sheer Silhouette',
+    summary: 'The figure in pure silhouette behind a translucent backlit fabric — strong warm rim light from behind, body suggested through the gauze, intimate photoreal boudoir glamour, only soft contours visible.',
+    phrases: [
+      'the figure in pure silhouette behind a translucent backlit fabric',
+      'strong warm rim light coming through the gauze from behind',
+      'body suggested through the fabric, only soft contours visible',
+      'dust drifting in the warm beam, fabric softly billowing',
+      'deep dark foreground, intimate photoreal boudoir glamour',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_charcoal_study',
+    name: 'Boudoir Charcoal Study',
+    summary: 'A classical academic charcoal figure drawing — pure monochrome, rich tonal range, soft blended shading, deep velvety blacks and lifted white highlights on textured paper, intimate body study.',
+    phrases: [
+      'a classical academic charcoal figure study on textured paper',
+      'pure monochrome, rich tonal range, soft blended shading',
+      'deep velvety blacks and brilliantly lifted white highlights',
+      'expressive but refined body modelling, gestural charcoal marks',
+      'intimate atelier study, sensual and dignified',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_pierre_gilles',
+    name: 'Pierre et Gilles',
+    summary: 'In the style of Pierre et Gilles — hand-painted-over-photograph, hyper-saturated colours, theatrical religious-iconography composition, kitsch elevated to high art, dreamlike tableau.',
+    phrases: [
+      'in the style of Pierre et Gilles, a hand-painted-over-photograph',
+      'hyper-saturated colours and a glossy painted finish',
+      'theatrical religious-iconography composition, a tableau pose',
+      'soft halos, painted flowers and decorative props around the figure',
+      'kitsch elevated to high art, dreamlike camp glamour',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+  {
+    id: 'style_eros_sumi_e',
+    name: 'Sumi-e Body Wash',
+    summary: 'A Japanese sumi-e brush figure painting — gestural ink wash on aged rice paper, deep negative space, monochrome with a single selective colour accent (a lip a ribbon a flower), restrained sensuality.',
+    phrases: [
+      'a Japanese sumi-e brush figure painting on aged rice paper',
+      'gestural black ink wash with expressive negative space',
+      'monochrome ink with a single selective colour accent — a lip, a ribbon or a flower',
+      'restrained elegant brushwork, calm meditative composition',
+      'traditional Japanese aesthetic, intimate and refined',
+    ],
+    createdAt: SEED_TS_20,
+    updatedAt: SEED_TS_20,
+  },
+];
+
+// V21 — Cinematic Stained-Glass Neon: dramatic depth/atmosphere variant.
+// The painterly version reads as 'looking at a stained-glass window';
+// the cinematic version reads as 'a film still of a stained-glass window
+// casting volumetric god-rays into a dim atmospheric interior'.
+const V21_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_cinematic_stained_glass_neon',
+    name: 'Cinematic Stained-Glass Neon',
+    summary: 'A cinematic film-still of a stained-glass window catching strong backlight, dramatic volumetric god-rays of colored light cutting through the panes into a dim atmospheric interior, dust and incense haze drifting in the colored beams, deep cinematic depth of field, theatrical chiaroscuro, film-grain rendering.',
+    phrases: [
+      'a cinematic film-still of a stained-glass cathedral window catching strong backlight',
+      'dramatic volumetric god-rays of colored light cutting through the leaded panes',
+      'dust motes and incense haze drifting in the colored beams, atmospheric depth',
+      'jewel-tone colour panes glowing through a dim atmospheric interior',
+      'leaded black bars dividing the panes, soft impasto on the glass',
+      'deep cinematic depth of field, theatrical chiaroscuro, film-grain rendering',
+    ],
+    createdAt: SEED_TS_21,
+    updatedAt: SEED_TS_21,
+  },
+];
+
+// V22 — Planet Pistachio native styles: camp pulp 1950s sci-fi meets joyful psychedelia.
+// Each style chosen to fit the candy palette + retro pulp + Wes-Anderson-on-a-candy-planet vibe.
+const V22_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_pp_pulp_cover',
+    name: 'Pulp Sci-Fi Cover',
+    summary: 'A 1950s painted pulp sci-fi magazine cover — high-contrast figures, lurid saturated colour, dynamic dramatic poses, a faux headline strip at the top, painted oil-on-canvas finish.',
+    phrases: [
+      'a 1950s pulp sci-fi magazine cover, painted oil-on-canvas finish',
+      'high-contrast figures with lurid saturated candy colour',
+      'dynamic dramatic action poses, motion lines',
+      'a faux headline strip at the top suggesting AMAZING STORIES typography',
+      'aged paper edges with slight yellowing, retro pulp grain',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_drive_in_poster',
+    name: 'Drive-In Movie Poster',
+    summary: 'A hand-painted lurid B-movie drive-in poster — bold dramatic figures, faux STARRING blocks suggested, painted brush highlights, hot-pink and tangerine slashes of colour, dynamic composition.',
+    phrases: [
+      'a hand-painted lurid 1950s drive-in B-movie poster',
+      'bold dramatic figures with painted brush highlights',
+      'hot-pink and tangerine slashes of colour, dynamic diagonal composition',
+      'a suggestion of STARRING typography at the bottom, painted in block letters',
+      'aged paper texture with slight wear at the edges, glamour-pulp aesthetic',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_travel_poster',
+    name: 'Atomic-Age Travel Poster',
+    summary: 'A vintage 1950s screen-print travel poster — flat blocks of pistachio teal tangerine and cream, bold simplified shapes, atomic-age confidence, faux VISIT typography at the top.',
+    phrases: [
+      'a vintage 1950s screen-print travel poster',
+      'flat blocks of pistachio teal tangerine and cream colour, no gradients',
+      'bold simplified shapes with confident atomic-age design',
+      'a faux VISIT or COME TO PLANET PISTACHIO typography block at the top',
+      'cream paper texture with slight registration shifts, mid-century graphic poster',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_wes_anderson',
+    name: 'Wes Anderson Diorama',
+    summary: 'A perfectly symmetrical pastel diorama composition — centered subject, soft pastel palette, mid-distance framing, gentle dollhouse depth, deadpan posing, slight tilt-shift miniature feel.',
+    phrases: [
+      'a perfectly symmetrical Wes-Anderson-style centered composition',
+      'soft warm pastel palette of pistachio cream peach and mint',
+      'mid-distance framing with gentle dollhouse depth',
+      'deadpan composed posing, slight tilt-shift miniature feel',
+      'flat front-on staging, twee whimsical retro atmosphere',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_saul_bass',
+    name: 'Saul Bass Cut-Out',
+    summary: 'Mid-century flat cut-paper shapes in the manner of Saul Bass — bold graphic simplification, limited 3–4 colour palette, sharp silhouettes, abstract negative space, modernist poster feel.',
+    phrases: [
+      'in the style of Saul Bass, mid-century flat cut-paper shapes',
+      'bold graphic simplification with a limited 3 to 4 colour palette',
+      'sharp clean silhouettes and abstract negative space',
+      'modernist poster feel, no gradients or shading',
+      'pistachio tangerine cream and black, slight torn-paper edges',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_atomic_mosaic',
+    name: 'Atomic-Age Mosaic',
+    summary: 'A 1950s atomic-age restaurant mosaic — tessellated coloured glass chips forming the image, pistachio teal pink cream and gold, grout lines visible, retro modernist tile aesthetic.',
+    phrases: [
+      'a 1950s atomic-age restaurant mosaic of tessellated coloured glass chips',
+      'pistachio teal hot-pink cream and gold tiles, visible black grout lines',
+      'subject formed entirely from small geometric chips of colour',
+      'retro modernist tile aesthetic, atomic-era restaurant decor',
+      'flat decorative surface, no shading',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_lava_lamp',
+    name: 'Lava-Lamp Op-Art',
+    summary: 'Psychedelic chromatic flow in the manner of 1960s lava-lamp op-art — bubbly blobs of saturated colour drifting, fluid undulating shapes, hot-pink tangerine pistachio swirls, retro hippie poster feel.',
+    phrases: [
+      'psychedelic 1960s op-art in the manner of a lava lamp',
+      'bubbly blobs of saturated hot-pink tangerine and pistachio colour drifting in fluid undulation',
+      'sinuous wavy outlines around every shape',
+      'flat slightly luminous colour fills, retro hippie poster feel',
+      'no horizon or perspective, chromatic flow',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_upa_cartoon',
+    name: 'UPA Cartoon Flat',
+    summary: 'Mid-century UPA / Hanna-Barbera limited-animation aesthetic — flat blocky figures with thin black outlines, limited pastel palette, simplified geometric backgrounds, Jetsons-era retro cartoon.',
+    phrases: [
+      'mid-century UPA and Hanna-Barbera limited-animation aesthetic',
+      'flat blocky figures with thin clean black outlines',
+      'limited pastel palette, no shading, simplified geometric backgrounds',
+      'Jetsons-era retro cartoon vibe, friendly rounded shapes',
+      'cel-painted flat surface, cheerful and clean',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_riso_lounge',
+    name: 'Riso Lounge Print',
+    summary: 'A 2-colour risograph print — hot-pink and pistachio-green ink overlay, visible halftone dot pattern, slight misregistration between layers, paper grain, retro zine print aesthetic.',
+    phrases: [
+      'a 2-colour risograph print in hot-pink and pistachio-green ink',
+      'visible halftone dot pattern across the image',
+      'slight charming misregistration between the two ink layers',
+      'cream paper grain visible underneath, retro zine print aesthetic',
+      'flat saturated overprint, slightly rough imperfect finish',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+  {
+    id: 'style_pp_sunday_comic',
+    name: 'Sunday Comic Strip',
+    summary: 'A 1950s Sunday newspaper comic strip — clean ink linework, Ben-Day dot colour fills, slight CMYK misregistration, faux speech-balloon and panel-border suggestions, vintage newsprint feel.',
+    phrases: [
+      'a 1950s Sunday newspaper comic strip aesthetic',
+      'clean confident ink linework with Ben-Day dot colour fills',
+      'slight CMYK misregistration giving a vintage newsprint feel',
+      'faux speech-balloon and thin black panel-border suggestions',
+      'limited bright pulp palette, cream newsprint paper texture',
+    ],
+    createdAt: SEED_TS_22,
+    updatedAt: SEED_TS_22,
+  },
+];
+
+// V23 — Planet Pistachio: Stop-Motion Diorama style (Rankin/Bass felt-and-fuzz holiday-special aesthetic).
+// The only 3D-tactile register in the Planet Pistachio set.
+const V23_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_pp_stop_motion',
+    name: 'Stop-Motion Diorama',
+    summary: 'A 1960s-70s Rankin/Bass-style stop-motion holiday-special scene — felt and fuzzy fabric textures, miniature handcrafted sets, soft tungsten lighting, slight shallow depth of field, tactile handmade quality with charming imperfections.',
+    phrases: [
+      'a 1960s-70s Rankin/Bass-style stop-motion holiday-special diorama scene',
+      'felt and fuzzy fabric textures on every figure, visible fibers and stitched seams',
+      'miniature handcrafted sets with painted cardboard backdrops',
+      'soft warm tungsten lighting from set lamps, slight shallow depth of field',
+      'tactile handmade quality, charming imperfections, retro animated-special feel',
+    ],
+    createdAt: SEED_TS_23,
+    updatedAt: SEED_TS_23,
+  },
+];
+
+// V24 — Burton Stop-Motion Diorama: Tim-Burton-style elongated stitched-puppet aesthetic.
+// Sister style to V23 Stop-Motion Diorama — same tactile medium, opposite emotional palette
+// (twisted melancholy vs. warm holiday-special).
+const V24_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_burton_stop_motion',
+    name: 'Burton Stop-Motion Diorama',
+    summary: 'A Tim-Burton-style stop-motion puppet diorama — elongated stitched puppets with sunken hollow eyes and oversized hands, spiral-twist hair, bone-white and ash-grey palette with sickly green cyan and rust accents, twisted spiral gothic architecture, German Expressionist hatched-line painted backdrops, whimsical melancholy mood.',
+    phrases: [
+      'a Tim-Burton-style stop-motion puppet diorama scene',
+      'elongated stitched puppets with sunken hollow eyes and oversized expressive hands',
+      'spiral-twist hair and patchwork stitched costumes with visible seams',
+      'bone-white and ash-grey palette with sickly green cyan and rust accents',
+      'twisted spiral gothic architecture and German Expressionist hatched-line painted backdrops',
+      'candle-wax dripping, ash drifting, whimsical melancholy mood, tactile handmade puppet quality',
+    ],
+    createdAt: SEED_TS_24,
+    updatedAt: SEED_TS_24,
+  },
+];
+
+// V25 — Burton Ink Sketchbook: Tim-Burton-style loose ink-and-watercolor illustration.
+// Sister style to V24 Burton Stop-Motion — same elongated melancholy figures rendered as
+// flat sketchbook drawings instead of dimensional puppets. References Burton's actual
+// drawing style (Melancholy Death of Oyster Boy / Nightmare Before Christmas concept art).
+const V25_SEED_STYLES: StylePreset[] = [
+  {
+    id: 'style_lab_burton_ink_sketchbook',
+    name: 'Burton Ink Sketchbook',
+    summary: 'A Tim-Burton-style sketchbook illustration — loose nervous black ink linework, pale watercolor washes in ash-grey muted cyan and rust, stretched spindly figures with oversized round eyes and spiral hair, cross-hatched shadows and smudges with white sketchbook paper showing through, childlike-melancholy mixed-media drawing feel.',
+    phrases: [
+      'a Tim-Burton-style sketchbook ink-and-watercolor illustration',
+      'loose nervous black ink linework with visible scratchy pen strokes',
+      'pale watercolor washes in cool ash-grey muted cyan and rust',
+      'stretched spindly figures with oversized round black eyes and spiral hair',
+      'cross-hatched shadows, ink smudges and white sketchbook paper showing through',
+      'childlike-melancholy quality, mixed-media drawing feel',
+    ],
+    createdAt: SEED_TS_25,
+    updatedAt: SEED_TS_25,
+  },
+];
+
 const writeItems = (items: StylePreset[]) => {
   const payload: StyleStore = { version: 1, items: sortItems(items) };
   writeStorageItem(STYLE_STORE_KEY, payload);
@@ -1546,6 +1933,66 @@ const maybeApplySeed = (items: StylePreset[]): StylePreset[] => {
     writeStorageItem(STYLE_SEED_FLAG_KEY_V19, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V19_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V20) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V20, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V20_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V21) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V21, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V21_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V22) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V22, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V22_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V23) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V23, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V23_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V24) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V24, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V24_SEED_STYLES.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(STYLE_SEED_FLAG_KEY_V25) === null) {
+    writeStorageItem(STYLE_SEED_FLAG_KEY_V25, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V25_SEED_STYLES.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);

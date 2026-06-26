@@ -21,6 +21,8 @@ const WORLD_SEED_FLAG_KEY_V7 = 'promptgen:worlds:seeded:v7';
 const WORLD_SEED_FLAG_KEY_V8 = 'promptgen:worlds:seeded:v8';
 const WORLD_SEED_FLAG_KEY_V9 = 'promptgen:worlds:seeded:v9';
 const WORLD_SEED_FLAG_KEY_V10 = 'promptgen:worlds:seeded:v10';
+const WORLD_SEED_FLAG_KEY_V11 = 'promptgen:worlds:seeded:v11';
+const WORLD_SEED_FLAG_KEY_V12 = 'promptgen:worlds:seeded:v12';
 
 const WORLD_SEED_TS = 1747872000000;
 const WORLD_SEED_TS_V2 = 1747094400000;
@@ -32,6 +34,8 @@ const WORLD_SEED_TS_V7 = 1748649600000;
 const WORLD_SEED_TS_V8 = 1748736000000;
 const WORLD_SEED_TS_V9 = 1748822400000;
 const WORLD_SEED_TS_V10 = 1749600000000;
+const WORLD_SEED_TS_V11 = 1749859200000;
+const WORLD_SEED_TS_V12 = 1750204800000;
 
 const SEED_WORLDS: World[] = [
   {
@@ -448,6 +452,90 @@ const SEED_WORLDS_V10: World[] = [
   },
 ];
 
+const SEED_WORLDS_V11: World[] = [
+  {
+    id: 'world_seed_or_orchard_reverie',
+    name: 'Orchard Reverie',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_or_01', text: 'an eternal-summer sacred orchard over endless golden grasslands, where the harvest never truly ends' },
+      { id: 'wp_or_02', text: 'a palette of warm honey-gold, peach, coral and soft green, lit always by a low golden-hour sun' },
+      { id: 'wp_or_03', text: 'colossal ancient fruit trees rising from a sea of long wind-combed grass, boughs heavy with ripe fruit' },
+      { id: 'wp_or_04', text: 'an order of fruit-bonded priestess-wardens, each woman bonded to a single fruit and coloured to its hue' },
+      { id: 'wp_or_05', text: 'the great Heart Tree at the orchard\'s center, impossibly old, bearing every fruit and blossom at once' },
+      { id: 'wp_or_06', text: 'a harvest rite kept by the wardens — the summer stays eternal only so long as the rite is kept' },
+      { id: 'wp_or_07', text: 'a quiet precious fragility beneath the warmth, a sense that autumn waits patiently at the edges' },
+      { id: 'wp_or_08', text: 'the warden bonded to the apple, eldest and steady, crowned in apple-leaves, mother of the orchard' },
+      { id: 'wp_or_09', text: 'the peach warden in blush-and-cream silks, soft and welcoming, a basket of peaches always offered' },
+      { id: 'wp_or_10', text: 'the pomegranate warden in garnet robes, regal and knowing, a split fruit of jewel-red seeds in hand' },
+      { id: 'wp_or_11', text: 'the cherry warden in flirty red-and-pink, cherries hooked over one ear, blossom drifting around her' },
+      { id: 'wp_or_12', text: 'the grape warden crowned in vine-leaves, flushed and joyful, the laughing spirit of the harvest feast' },
+      { id: 'wp_or_13', text: 'a harvest festival in a grassy clearing, long tables under strings of paper lanterns and fruit-garlands' },
+      { id: 'wp_or_14', text: 'a warm cider hall of oak barrels and wooden presses, golden cider running into clay jugs' },
+      { id: 'wp_or_15', text: 'warm spring-fed bathing pools among the reeds, steaming softly, blossoms floating on the still water' },
+      { id: 'wp_or_16', text: 'a sun-dappled orchard market of woven stalls heaped with peaches, plums, apples and grapes' },
+      { id: 'wp_or_17', text: 'the grass sea at dusk, long grass turning amber and rose, fireflies rising under a vast glowing sky' },
+      { id: 'wp_or_18', text: 'a warden\'s canopy bower built into the boughs, woven platforms, hanging fruit and drifting curtains' },
+      { id: 'wp_or_19', text: 'the sun shrine among the Heart Tree roots, a brass sun-disc and offerings of first-fruit and honey' },
+      { id: 'wp_or_20', text: 'a cool preserving cellar of glowing jams and jars, the summer stored against the coming season' },
+      { id: 'wp_or_21', text: 'a blossom vale where it is always spring, a drifting snow of pink and white petals over fresh grass' },
+      { id: 'wp_or_22', text: 'a golden granary and slow-turning windmill among the wheat at the orchard\'s working edge' },
+      { id: 'wp_or_23', text: 'the last-light hill where a lone tree stands and a warden watches the first faint gold of autumn' },
+      { id: 'wp_or_24', text: 'warm low golden light raking across the grass, honeyed rim-light through hair, leaves and fruit' },
+      { id: 'wp_or_25', text: 'wildflowers, drifting pollen and butterflies in the warm still air between the great trunks' },
+      { id: 'wp_or_26', text: 'woven leaf-and-blossom crowns, gold harvest sashes, flowing linen robes dyed in each fruit\'s colour' },
+      { id: 'wp_or_27', text: 'the smell the image implies — ripe fruit, warm grass, beeswax, pressed cider, blossom and sun-baked earth' },
+      { id: 'wp_or_28', text: 'the everyday wear of the orchard — light linen sundresses, gardener\'s aprons, bare sun-warmed shoulders' },
+      { id: 'wp_or_29', text: 'a tone tasteful and warm — glamour-pastoral, alluring but wholesome, summery and golden' },
+      { id: 'wp_or_30', text: 'the whole world an endless golden afternoon, sacred and abundant and quietly, preciously fragile' },
+    ],
+    createdAt: WORLD_SEED_TS_V11,
+    updatedAt: WORLD_SEED_TS_V11,
+  },
+];
+
+const SEED_WORLDS_V12: World[] = [
+  {
+    id: 'world_seed_pp_planet_pistachio',
+    name: 'Planet Pistachio',
+    coverImageUrl: null,
+    phrases: [
+      { id: 'wp_pp_01', text: 'a pistachio-green planet at the edge of known space where the camp pulp 1950s sci-fi never ended and joyful psychedelia keeps it weird' },
+      { id: 'wp_pp_02', text: 'a palette of pistachio-green hot pink tangerine lavender and gold dominating every surface' },
+      { id: 'wp_pp_03', text: 'a vast viscous green sea bubbling thickly under a peach-and-lavender sky, twin moons low on the horizon' },
+      { id: 'wp_pp_04', text: 'a regal alien queen with pistachio-green skin a tall pistachio-shell crown and a beaded cape, languidly imperious' },
+      { id: 'wp_pp_05', text: 'glamorous human colonists strip-mining drifting asteroids in floor-length pistachio-satin gowns and opera gloves' },
+      { id: 'wp_pp_06', text: 'a space-cowboy in a pistachio-and-orange wrangler jacket herding glowing cyan-green alien frogs across the salt flats' },
+      { id: 'wp_pp_07', text: 'a slender alien botanist with twin honey-tipped antennae and a tiny mood-cactus on her shoulder' },
+      { id: 'wp_pp_08', text: 'a lavender-skinned lounge singer in a hot-pink beaded gown serenading passing comets from the diner at the end of the universe' },
+      { id: 'wp_pp_09', text: 'a dented chrome retro robot chef with a CRT smiley face serving impossibly tall pistachio sundaes' },
+      { id: 'wp_pp_10', text: 'a daredevil teen on a glowing pistachio surfboard riding the tail of a passing comet' },
+      { id: 'wp_pp_11', text: 'a weary three-eyed mailman in a worn pistachio uniform with a dented chrome jetpack delivering letters across the planet' },
+      { id: 'wp_pp_12', text: 'a serene cactus druid in a robe stitched with living succulents, mood-cacti perched along his shoulders' },
+      { id: 'wp_pp_13', text: 'a spore dancer caught mid-leap in an iridescent leotard with drifting cyan-and-pink bioluminescent spores around her' },
+      { id: 'wp_pp_14', text: 'an ace star pilot in a pistachio retro flight suit with a chrome bubble helmet and a trailing hot-pink silk scarf' },
+      { id: 'wp_pp_15', text: 'a walking pistachio-tree mayor with a wise carved bark-face and a gold sash, the civic plant of the realm' },
+      { id: 'wp_pp_16', text: 'a vast endless refractive salt-crystal desert glittering rainbow under twin moons' },
+      { id: 'wp_pp_17', text: 'a towering forest of wobbling translucent jelly mushrooms in pistachio pink and gold with glowing spores drifting' },
+      { id: 'wp_pp_18', text: 'vast cathedral caves with ceilings dripping golden honey in long slow strands into glowing honeycomb pools' },
+      { id: 'wp_pp_19', text: 'a pink-and-pistachio neon retro diner floating in deep space with a huge cursive PISTACHIO sign and an asteroid parked outside' },
+      { id: 'wp_pp_20', text: 'a sunset sky that bubbles like an enormous lava lamp, slow rising blobs of tangerine pink and gold against deeper pistachio-violet' },
+      { id: 'wp_pp_21', text: 'a traveling alien pop-up carnival in pistachio-and-hot-pink stripes with a slow ferris wheel of golden teacups' },
+      { id: 'wp_pp_22', text: 'a comet harbour with long pistachio-and-cream vessels moored at chrome piers strung with pink lanterns' },
+      { id: 'wp_pp_23', text: 'a vast chrome-and-glass sentient greenhouse where conscious plants debate philosophy under bright pistachio sun' },
+      { id: 'wp_pp_24', text: 'a camp-baroque royal palace in pistachio and gold with a throne shaped like an open pistachio shell' },
+      { id: 'wp_pp_25', text: 'a vast meteor crater whose bouncy alien-membrane floor hosts lo-gravity leaping locals in retro spacesuits' },
+      { id: 'wp_pp_26', text: 'a still listening pond whose lily pads hum gentle music in faint pink ripples when you sit by it' },
+      { id: 'wp_pp_27', text: 'an impossibly tall pistachio sundae in a chrome glass with hot-pink syrup gold sprinkles and sparklers' },
+      { id: 'wp_pp_28', text: 'a chrome retro ray gun with a pistachio-green grip and a glowing pink crystal in the muzzle, mostly decorative' },
+      { id: 'wp_pp_29', text: 'the smell the image implies — toasted pistachio, hot sugar, ozone, cotton candy, warm rubber, the faint tang of comet trail' },
+      { id: 'wp_pp_30', text: 'the whole planet ridiculous and beautiful and unironically itself, a candy world that has stopped pretending' },
+    ],
+    createdAt: WORLD_SEED_TS_V12,
+    updatedAt: WORLD_SEED_TS_V12,
+  },
+];
+
 const createId = () => `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 function maybeApplySeed(worlds: World[]): World[] {
@@ -547,6 +635,26 @@ function maybeApplySeed(worlds: World[]): World[] {
     localStorage.setItem(WORLD_SEED_FLAG_KEY_V10, 'true');
     const existingIds = new Set(current.map(w => w.id));
     const toAdd = SEED_WORLDS_V10.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V11) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V11, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V11.filter(w => !existingIds.has(w.id));
+    if (toAdd.length > 0) {
+      current = [...current, ...toAdd];
+      save(current);
+    }
+  }
+
+  if (localStorage.getItem(WORLD_SEED_FLAG_KEY_V12) === null) {
+    localStorage.setItem(WORLD_SEED_FLAG_KEY_V12, 'true');
+    const existingIds = new Set(current.map(w => w.id));
+    const toAdd = SEED_WORLDS_V12.filter(w => !existingIds.has(w.id));
     if (toAdd.length > 0) {
       current = [...current, ...toAdd];
       save(current);

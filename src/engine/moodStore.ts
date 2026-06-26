@@ -11,6 +11,8 @@ const MOOD_SEED_FLAG_KEY_V7 = 'promptgen:moods:seeded:v7';
 const MOOD_SEED_FLAG_KEY_V8 = 'promptgen:moods:seeded:v8';
 const MOOD_SEED_FLAG_KEY_V9 = 'promptgen:moods:seeded:v9';
 const MOOD_SEED_FLAG_KEY_V10 = 'promptgen:moods:seeded:v10';
+const MOOD_SEED_FLAG_KEY_V11 = 'promptgen:moods:seeded:v11';
+const MOOD_SEED_FLAG_KEY_V12 = 'promptgen:moods:seeded:v12';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -100,6 +102,8 @@ const SEED_TS_7 = 1748649600000;
 const SEED_TS_8 = 1748736000000;
 const SEED_TS_9 = 1748822400000;
 const SEED_TS_10 = 1749600000000;
+const SEED_TS_11 = 1749859200000;
+const SEED_TS_12 = 1750204800000;
 
 const V5_SEED_MOODS: MoodPreset[] = [
   {
@@ -830,6 +834,170 @@ const V10_SEED_MOODS: MoodPreset[] = [
   },
 ];
 
+// V11 — Orchard Reverie: warm pastoral emotional registers.
+const V11_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_or_summer_idyll',
+    name: 'Summer Idyll',
+    summary: 'The deep contentment of an endless warm afternoon — unhurried, peaceful, the simple joy of abundance and sun.',
+    phrases: [
+      'the deep contentment of an endless warm afternoon',
+      'unhurried and peaceful, the simple joy of sun and abundance',
+      'soft easy smiles, a slow gentle pace',
+      'idyllic, warm, blissful',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'mood_or_harvest_reverence',
+    name: 'Harvest Reverence',
+    summary: 'The quiet gratitude of the sacred harvest — gentle ceremony, hands in the earth and fruit, devotion without solemnity.',
+    phrases: [
+      'the quiet gratitude of the sacred harvest rite',
+      'gentle ceremony, hands among earth, blossom and fruit',
+      'warm devotion without solemnity, eyes soft and thankful',
+      'sacred, tender, grateful',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'mood_or_languid_ripeness',
+    name: 'Languid Ripeness',
+    summary: 'The heavy warm laziness of peak summer — sun-drowsy, sensual, the slow indulgence of ripe fruit and shade.',
+    phrases: [
+      'the heavy warm laziness of peak summer heat',
+      'sun-drowsy and unhurried, a slow indulgent ease',
+      'heavy-lidded contentment in the dappled shade',
+      'languid, warm, ripe',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'mood_or_festival_joy',
+    name: 'Festival Joy',
+    summary: 'The bright shared delight of the harvest feast — laughter and music, garlands and lantern-light, open celebration.',
+    phrases: [
+      'the bright shared delight of the harvest feast',
+      'laughter, music and dancing under lantern-light',
+      'open warm celebration, flushed happy faces',
+      'festive, joyful, alive',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'mood_or_autumn_wistful',
+    name: 'Autumn Wistfulness',
+    summary: 'The gentle ache beneath the endless summer — a quiet awareness that the light is precious and the season could turn.',
+    phrases: [
+      'a gentle wistful ache beneath the endless summer',
+      'a quiet awareness that the warm light is precious and fragile',
+      'a soft faraway gaze toward the turning of the season',
+      'bittersweet, tender, fleeting',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+  {
+    id: 'mood_or_blossom_tenderness',
+    name: 'Blossom Tenderness',
+    summary: 'The fresh soft hope of blossom-time — gentle, shy, the delicate new warmth of spring within the orchard.',
+    phrases: [
+      'the fresh soft hope of blossom-time in the orchard',
+      'gentle and shy, a delicate new warmth',
+      'soft tender expressions amid drifting petals',
+      'tender, fresh, hopeful',
+    ],
+    createdAt: SEED_TS_11,
+    updatedAt: SEED_TS_11,
+  },
+];
+
+// V12 — Planet Pistachio: camp pulp sci-fi emotional registers.
+const V12_SEED_MOODS: MoodPreset[] = [
+  {
+    id: 'mood_pp_camp_glee',
+    name: 'Camp Glee',
+    summary: 'The bright giddy joy of a planet that takes nothing seriously — unhurried delight, ridiculous wonder, a grin at the absurd.',
+    phrases: [
+      'the bright giddy joy of a planet that takes nothing seriously',
+      'unhurried delight, ridiculous wonder, a grin at the absurd',
+      'open warm camp atmosphere, retro pulp sci-fi',
+      'cheerful, ridiculous, joyful',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'mood_pp_retro_chic',
+    name: 'Retro Chic',
+    summary: 'The languid composed glamour of a 1950s lounge transposed into deep space — chrome and cocktails, a wry smirk, posed dignity.',
+    phrases: [
+      'the languid composed glamour of a 1950s lounge transposed into deep space',
+      'chrome and cocktails, a wry smirk and posed dignity',
+      'effortless cool, soft smouldering glamour',
+      'retro chic camp sci-fi',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'mood_pp_psychedelic_calm',
+    name: 'Psychedelic Calm',
+    summary: 'A serene drifting calm in a candy-coloured world — eyes half-closed, slow dreamy motion, gentle wonder at the impossible.',
+    phrases: [
+      'a serene drifting calm in a candy-coloured world',
+      'eyes half-closed, slow dreamy motion',
+      'gentle wonder at the impossible without surprise',
+      'meditative, soft, psychedelic',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'mood_pp_kitsch_wonder',
+    name: 'Kitsch Wonder',
+    summary: 'Open-mouthed delight at the silly grandeur of the planet — a wide-eyed grin at a giant sundae, the unironic love of the ridiculous.',
+    phrases: [
+      'open-mouthed delight at the silly grandeur of the planet',
+      'wide-eyed grins at impossible objects, hands raised in joy',
+      'an unironic love of the ridiculous',
+      'cheerful, awed, kitsch-warm',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'mood_pp_ridiculous_menace',
+    name: 'Ridiculous Menace',
+    summary: 'The mildly threatening pose of a queen or a sentient pumpkin who is in fact harmless — eyebrow raised, head tilted, faintly imperious.',
+    phrases: [
+      'the mildly threatening pose of a queen or a sentient pumpkin who is in fact harmless',
+      'eyebrow raised, head tilted, faintly imperious',
+      'a wry camp dignity, a smile that is half-smirk',
+      'camp pulp villainy, harmless menace',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+  {
+    id: 'mood_pp_lo_gravity_play',
+    name: 'Lo-Gravity Playfulness',
+    summary: 'The bouncing weightless joy of moving in low gravity — caught mid-leap, hair lifted, grin frozen in the air.',
+    phrases: [
+      'the bouncing weightless joy of moving in low gravity',
+      'caught mid-leap with hair lifted and limbs drifting',
+      'a frozen grin and easy posture in the air',
+      'playful, weightless, exuberant',
+    ],
+    createdAt: SEED_TS_12,
+    updatedAt: SEED_TS_12,
+  },
+];
+
 const writeItems = (items: MoodPreset[]) => {
   const payload: MoodStore = { version: 1, items: sortItems(items) };
   writeStorageItem(MOOD_STORE_KEY, payload);
@@ -923,6 +1091,26 @@ const maybeApplySeed = (items: MoodPreset[]): MoodPreset[] => {
     writeStorageItem(MOOD_SEED_FLAG_KEY_V10, true);
     const existingIds = new Set(result.map(i => i.id));
     const toAdd = V10_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V11) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V11, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V11_SEED_MOODS.filter(i => !existingIds.has(i.id));
+    if (toAdd.length > 0) {
+      result = sortItems([...result, ...toAdd]);
+      writeItems(result);
+    }
+  }
+
+  if (readStorageItem(MOOD_SEED_FLAG_KEY_V12) === null) {
+    writeStorageItem(MOOD_SEED_FLAG_KEY_V12, true);
+    const existingIds = new Set(result.map(i => i.id));
+    const toAdd = V12_SEED_MOODS.filter(i => !existingIds.has(i.id));
     if (toAdd.length > 0) {
       result = sortItems([...result, ...toAdd]);
       writeItems(result);
