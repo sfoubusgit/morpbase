@@ -46,6 +46,7 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
   const [ratings, setRatings] = useState<RatingSummary>({ avg: 0, count: 0, mine: null });
   const [draft, setDraft] = useState('');
   const [posting, setPosting] = useState(false);
+  const [cmtError, setCmtError] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -72,11 +73,14 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
     e.preventDefault();
     const body = draft.trim();
     if (!body || posting || !viewerAuthUid) return;
-    setDraft(''); setPosting(true);
+    setPosting(true); setCmtError(null);
     try {
       const c = await addComment({ subjectId: subject.id, authUid: viewerAuthUid, authorLabel: viewerName, body });
       setComments(prev => [c, ...prev]);
-    } catch { /* offline */ } finally { setPosting(false); }
+      setDraft('');
+    } catch (err) {
+      setCmtError(err instanceof Error ? err.message : 'Could not post comment.');
+    } finally { setPosting(false); }
   };
 
   const heroStyle = subject.image ? { backgroundImage: `url(${subject.image})` } : undefined;
@@ -150,6 +154,7 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
             />
             <button type="submit" className="v3-btn primary" disabled={posting || !viewerAuthUid}>{posting ? 'Posting…' : 'Post'}</button>
           </form>
+          {cmtError && <div className="v3-cmp-error" style={{ marginTop: 0, marginBottom: 14 }}>{cmtError}</div>}
           {comments.length === 0
             ? <div className="v3-empty">No comments yet. Be the first.</div>
             : comments.map(c => (

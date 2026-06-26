@@ -220,8 +220,8 @@
 .v3-chan-back:hover { color: #fff; }
 .v3-chero { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 26px; margin-bottom: 22px; }
 .v3-chero .big { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); background-size: cover; background-position: center; border: 1px solid var(--border-subtle); }
-.v3-chero h2 { margin: 6px 0 6px; font-size: 30px; font-weight: var(--font-weight-extrabold); }
-.v3-chero .by { color: var(--text-secondary); }
+.v3-chero h2 { margin: 8px 0 6px; font-size: 30px; font-weight: var(--font-weight-extrabold); }
+.v3-chero .by { color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
 .v3-chero .by b { color: #fff; }
 .v3-stars { color: var(--text-secondary); letter-spacing: 1px; }
 .v3-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0; }
@@ -497,6 +497,14 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
   .v3-search2 { order: 3; flex-basis: 100%; }
   .v3-chero { grid-template-columns: 1fr; }
 }
+
+/* ── boot screen — held until auth resolves, to avoid a logged-out flash ── */
+.v3-boot { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--surface-0); }
+.v3-boot-mark {
+  font: var(--font-weight-extrabold) 14px var(--font-primary); letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--text-tertiary); animation: v3boot 1.1s var(--motion-ease) infinite;
+}
+@keyframes v3boot { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.8; } }
 
 /* ── create button on a lane wall — neutral pill, lane-accent glyph + hover ── */
 .v3-create-btn {

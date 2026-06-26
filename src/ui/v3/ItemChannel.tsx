@@ -31,6 +31,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
   const [tab, setTab] = useState<ChanTab>('gallery');
   const [draft, setDraft] = useState('');
   const [posting, setPosting] = useState(false);
+  const [cmtError, setCmtError] = useState<string | null>(null);
   const [remote, setRemote] = useState<RemoteImage[]>([]);
   const [remoteComments, setRemoteComments] = useState<RemoteComment[]>([]);
   const [ratings, setRatings] = useState<RatingSummary>({ avg: 0, count: 0, mine: null });
@@ -71,18 +72,19 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
     e.preventDefault();
     const body = draft.trim();
     if (!body || posting) return;
-    setDraft('');
     setTab('comments');
     if (viewerAuthUid) {
-      setPosting(true);
+      setPosting(true); setCmtError(null);
       try {
         const c = await addComment({ subjectId: character.id, authUid: viewerAuthUid, authorLabel: viewerName, body });
         setRemoteComments(prev => [c, ...prev]);
-      } catch {
-        setData(channelStore.addComment(character.id, viewerName, body)); // fallback local
+        setDraft('');
+      } catch (err) {
+        setCmtError(err instanceof Error ? err.message : 'Could not post comment.');
       } finally { setPosting(false); }
     } else {
       setData(channelStore.addComment(character.id, viewerName, body));
+      setDraft('');
     }
   };
 
@@ -167,6 +169,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
             />
             <button type="submit" className="v3-btn primary" disabled={posting}>{posting ? 'Posting…' : 'Post'}</button>
           </form>
+          {cmtError && <div className="v3-cmp-error" style={{ marginTop: 0, marginBottom: 14 }}>{cmtError}</div>}
           {remoteComments.map(c => (
             <div key={c.id} className="v3-cmt">
               <div className="a" />

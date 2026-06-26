@@ -3997,15 +3997,19 @@ export function App() {
       </nav>
       )}
       {activePage === 'v3-lab' ? (
-        <V3LabPage
-          characters={characters}
-          viewerName={authUser?.name ?? null}
-          viewerAvatarUrl={authUser?.avatarUrl ?? null}
-          viewerAuthUid={authUser?.authUid ?? null}
-          onLogout={handleLogout}
-          onLogin={handleOpenAuth}
-          onEditProfile={handleOpenAccount}
-        />
+        authReady ? (
+          <V3LabPage
+            characters={characters}
+            viewerName={authUser?.name ?? null}
+            viewerAvatarUrl={authUser?.avatarUrl ?? null}
+            viewerAuthUid={authUser?.authUid ?? null}
+            onLogout={handleLogout}
+            onLogin={handleOpenAuth}
+            onEditProfile={handleOpenAccount}
+          />
+        ) : (
+          <div className="v3-boot" aria-busy="true"><span className="v3-boot-mark">MORPBASE</span></div>
+        )
       ) : activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />
       ) : activePage === 'identity-systems' ? (
