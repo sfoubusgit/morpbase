@@ -16,8 +16,10 @@ export type SynthElement = {
   phrases: string[];
 };
 
+export type SynthResult = { text: string; source: 'ai' | 'local' };
+
 export interface SynthesisProvider {
-  synthesize(elements: SynthElement[], method: SynthMethod): Promise<string>;
+  synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult>;
 }
 
 const byKind = (els: SynthElement[], kind: string) => els.filter(e => e.kind === kind);
@@ -38,6 +40,13 @@ function uniquePhrases(els: SynthElement[]): string[] {
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+// Light per-call variation so Re-synthesize visibly changes even offline.
+function shuffle<T>(arr: T[]): T[] {
+  const x = arr.slice();
+  for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; }
+  return x;
+}
+
 function compose(elements: SynthElement[], method: SynthMethod): string {
   const chars = byKind(elements, 'character');
   const scenery = byKind(elements, 'scenery');
@@ -49,7 +58,7 @@ function compose(elements: SynthElement[], method: SynthMethod): string {
   const composition = byKind(elements, 'composition');
 
   const subject = chars.length ? joinNames(chars) : 'the scene';
-  const charDetails = uniquePhrases(chars);
+  const charDetails = shuffle(uniquePhrases(chars));
   const sceneryText = uniquePhrases(scenery).join(', ') || joinNames(scenery);
   const envText = uniquePhrases(environment).join(', ') || joinNames(environment);
   const moodText = uniquePhrases(mood).join(', ') || joinNames(mood);
@@ -92,14 +101,18 @@ function compose(elements: SynthElement[], method: SynthMethod): string {
 
 /** Local heuristic — also the graceful fallback when the LLM is unreachable. */
 class LocalSynthesisProvider implements SynthesisProvider {
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<string> {
-    return compose(elements, method);
+  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
+    return { text: compose(elements, method), source: 'local' };
   }
 }
 
-// ── Real art-director LLM (Claude Sonnet 4.6 via the OpenRouter /llm proxy) ──
-const LLM_ENDPOINT = '/llm/chat/completions';
-const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'anthropic/claude-sonnet-4-6';
+// ── Real art-director LLM (free model, OpenRouter) ──
+// Endpoint: dev uses the Vite /llm proxy; production sets VITE_LLM_URL to a
+// hosted proxy (Cloudflare Worker in workers/llm-proxy.js) that injects the key
+// server-side, so it works from any origin without shipping the key. Model is a
+// completely free OpenRouter model; the worker also force-overrides to free.
+const LLM_ENDPOINT = (import.meta.env.VITE_LLM_URL as string | undefined) || '/llm/chat/completions';
+const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'openai/gpt-oss-20b:free';
 
 const SYSTEM_PROMPT =
   'You are an expert art director composing prompts for an image generator. ' +
@@ -121,7 +134,7 @@ function buildUserMessage(elements: SynthElement[], method: SynthMethod): string
 }
 
 class LlmSynthesisProvider implements SynthesisProvider {
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<string> {
+  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
     const res = await fetch(LLM_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -138,7 +151,7 @@ class LlmSynthesisProvider implements SynthesisProvider {
     const j = await res.json();
     const text = (j?.choices?.[0]?.message?.content ?? '').trim();
     if (!text) throw new Error('LLM returned no content');
-    return text.replace(/^["']+|["']+$/g, '');
+    return { text: text.replace(/^["']+|["']+$/g, ''), source: 'ai' };
   }
 }
 
@@ -146,7 +159,7 @@ class LlmSynthesisProvider implements SynthesisProvider {
 class SmartSynthesisProvider implements SynthesisProvider {
   private llm = new LlmSynthesisProvider();
   private local = new LocalSynthesisProvider();
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<string> {
+  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
     try {
       return await this.llm.synthesize(elements, method);
     } catch {

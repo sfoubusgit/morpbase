@@ -32,11 +32,13 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
   const [method, setMethod] = useState<SynthMethod>('faithful');
   const [prompt, setPrompt] = useState('');
   const [working, setWorking] = useState(false);
+  const [source, setSource] = useState<'ai' | 'local' | null>(null);
 
   const run = async (m: SynthMethod) => {
     setWorking(true);
-    const out = await synthesisProvider.synthesize(elements, m);
-    setPrompt(out);
+    const res = await synthesisProvider.synthesize(elements, m);
+    setPrompt(res.text);
+    setSource(res.source);
     setWorking(false);
   };
 
@@ -71,7 +73,11 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
           ))}
         </div>
 
-        <div className="ph" style={{ marginTop: 20 }}>Synthesized prompt · editable</div>
+        <div className="ph" style={{ marginTop: 20 }}>
+          Synthesized prompt · editable
+          {source === 'ai' && <span className="v3-synth-src ai"> · composed by AI</span>}
+          {source === 'local' && <span className="v3-synth-src"> · offline composer (AI proxy not reachable)</span>}
+        </div>
         <textarea
           className="v3-promptbox v3-prompt-edit"
           value={prompt}
