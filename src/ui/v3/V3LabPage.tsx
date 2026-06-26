@@ -11,6 +11,7 @@ import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, type RemoteLaneItem } from './laneItemsStore';
 import { listAds, type AdItem } from './adsStore';
+import { ratingForText, ratingVisible } from './contentRating';
 import type { SynthElement } from './synthesis';
 import { SCENERY_ITEMS } from './scenery';
 import { OBJECT_ITEMS } from './objects';
@@ -116,19 +117,27 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     createdAt: Date.parse(it.createdAt) || 0,
     updatedAt: Date.parse(it.createdAt) || 0,
   });
+  // SFW gate — NSFW content (detected from its own text) is hidden from every
+  // public surface until the future age-gated red section opens the gate.
+  const charText = (c: CharacterIdentity) =>
+    `${c.name} ${c.summary ?? ''} ${(c.phraseBundle?.core ?? []).join(' ')} ${(c.identity?.visualAnchors ?? []).map(a => a.text).join(' ')}`;
+  const itemText = (it: RemoteLaneItem) => `${it.name} ${it.summary} ${it.phrases.join(' ')}`;
+  const visibleCharacters = useMemo(() => characters.filter(c => ratingVisible(ratingForText(charText(c)))), [characters]);
+  const visibleCreatedItems = useMemo(() => createdLaneItems.filter(it => ratingVisible(ratingForText(itemText(it)))), [createdLaneItems]);
+
   const createdChars = useMemo(
-    () => createdLaneItems.filter(it => it.lane === 'characters').map(toCharacter),
-    [createdLaneItems],
+    () => visibleCreatedItems.filter(it => it.lane === 'characters').map(toCharacter),
+    [visibleCreatedItems],
   );
-  const allCharacters = useMemo(() => [...createdChars, ...characters], [createdChars, characters]);
+  const allCharacters = useMemo(() => [...createdChars, ...visibleCharacters], [createdChars, visibleCharacters]);
   // The current viewer's own creations (Supabase-authored + legacy local), for the profile.
   const myCreatedCharacters = useMemo(() => {
-    const mine = createdLaneItems
+    const mine = visibleCreatedItems
       .filter(it => it.lane === 'characters' && it.authorAuthUid && it.authorAuthUid === viewerAuthUid)
       .map(toCharacter);
-    const localOwn = characters.filter(c => !c.id.startsWith('character_seed_'));
+    const localOwn = visibleCharacters.filter(c => !c.id.startsWith('character_seed_'));
     return [...mine, ...localOwn];
-  }, [createdLaneItems, viewerAuthUid, characters]);
+  }, [visibleCreatedItems, viewerAuthUid, visibleCharacters]);
 
   const byId = (id: string) => allCharacters.find(c => c.id === id) ?? null;
   const channelChar = channelId ? byId(channelId) : null;
@@ -147,13 +156,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       }
     }
     // User-created lane objects resolve through the same registry as seeds.
-    for (const it of createdLaneItems) {
+    for (const it of visibleCreatedItems) {
       const wl = WALL_LANES[it.lane];
       if (!wl) continue;
       m[it.id] = { id: it.id, lane: wl.ph, kind: wl.kind, name: it.name, accent: wl.accent, tint: tintIndex(it.id), image: it.coverUrl, phrases: it.phrases };
     }
     return m;
-  }, [characters, createdLaneItems]);
+  }, [allCharacters, visibleCreatedItems]);
 
   // Every non-character lane item resolves to a page subject (seeds + created).
   const laneSubjects = useMemo<Record<string, ItemSubject>>(() => {
@@ -163,13 +172,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: null, phrases: it.phrases, summary: it.summary, author: 'MorpBase', authorAuthUid: null };
       }
     }
-    for (const it of createdLaneItems) {
+    for (const it of visibleCreatedItems) {
       const wl = WALL_LANES[it.lane];
       if (!wl) continue; // skip created characters (handled by ItemChannel)
       m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author, authorAuthUid: it.authorAuthUid };
     }
     return m;
-  }, [createdLaneItems]);
+  }, [visibleCreatedItems]);
   const openSubject = channelId && !channelChar ? laneSubjects[channelId] ?? null : null;
   // The creator (auth uid) of the open character, for follow — null for seeds.
   const channelCreatorUid = channelChar
@@ -207,14 +216,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const wallView = useMemo(() => {
     const wl = WALL_LANES[lane];
     if (!wl) return [];
-    const created = createdLaneItems
+    const created = visibleCreatedItems
       .filter(it => it.lane === lane && (!q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q)))
       .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: tintIndex(it.id), image: it.coverUrl }));
     const seeds = wl.items
       .filter(it => !q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q))
       .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: it.tint, image: null as string | null }));
     return [...created, ...seeds];
-  }, [lane, q, createdLaneItems]);
+  }, [lane, q, visibleCreatedItems]);
 
   // Favorites span every lane — each card carries its own accent/badge.
   const favItems = useMemo(
