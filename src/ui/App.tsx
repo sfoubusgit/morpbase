@@ -3955,6 +3955,8 @@ export function App() {
           viewerName={authUser?.name ?? null}
           viewerAvatarUrl={authUser?.avatarUrl ?? null}
           viewerAuthUid={authUser?.authUid ?? null}
+          onLogout={handleLogout}
+          onLogin={handleOpenAuth}
         />
       ) : activePage === 'admin' ? (
         <AdminPage userName={authUser?.name ?? null} />

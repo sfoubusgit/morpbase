@@ -12,6 +12,9 @@ type V3ProfileProps = {
   onAdd: (id: string) => void;
   onOpenChannel: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  isLoggedIn?: boolean;
+  onLogout?: () => void;
+  onLogin?: () => void;
 };
 
 type ProfileTab = 'created' | 'favorites' | 'generated';
@@ -30,6 +33,9 @@ export function V3Profile({
   onAdd,
   onOpenChannel,
   onToggleFavorite,
+  isLoggedIn = true,
+  onLogout,
+  onLogin,
 }: V3ProfileProps) {
   const [tab, setTab] = useState<ProfileTab>('created');
 
@@ -51,6 +57,9 @@ export function V3Profile({
         </div>
         <div className="v3-prof-actions">
           <button type="button" className="v3-btn secondary">Edit profile</button>
+          {isLoggedIn
+            ? <button type="button" className="v3-btn utility" onClick={onLogout}>Log out</button>
+            : <button type="button" className="v3-btn utility" onClick={onLogin}>Log in</button>}
         </div>
       </div>
 
