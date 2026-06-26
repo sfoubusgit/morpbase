@@ -117,6 +117,7 @@ export function V3Profile({
           selectedIds={scene}
           favorites={favorites}
           onAdd={onAdd}
+          onOpen={onOpenChannel}
           onToggleFavorite={onToggleFavorite}
           emptyHint="No favorites yet. Tap the ☆ on any thumbnail to save it here."
         />

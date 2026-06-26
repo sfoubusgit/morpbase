@@ -92,7 +92,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, onB
           {!img && <LanePlaceholder lane="character" />}
         </div>
         <div>
-          <div className="v3-eyebrow">Character · origin channel</div>
+          <div className="v3-eyebrow">Character</div>
           <h2>{character.name}</h2>
           <div className="by">
             by <b>@{character.tags?.[0] ?? 'community'}</b> ·{' '}

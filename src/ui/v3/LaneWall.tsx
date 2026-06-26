@@ -23,8 +23,8 @@ type LaneWallProps = {
   favorites: string[];
   onAdd: (id: string) => void;
   onToggleFavorite: (id: string) => void;
-  /** optional — lanes without channels (e.g. Scenery) omit it; the card then adds on click */
-  onOpenChannel?: (id: string) => void;
+  /** open the item's page (clicking the image). Falls back to add-to-scene if absent. */
+  onOpen?: (id: string) => void;
   emptyHint?: string;
 };
 
@@ -42,7 +42,7 @@ export function LaneWall({
   favorites,
   onAdd,
   onToggleFavorite,
-  onOpenChannel,
+  onOpen,
   emptyHint,
 }: LaneWallProps) {
   if (items.length === 0) {
@@ -59,7 +59,7 @@ export function LaneWall({
         const acc = item.accent ?? accent;
         const bdg = item.badge ?? badge;
         const ln = item.lane ?? lane;
-        const primary = () => (onOpenChannel ? onOpenChannel(item.id) : onAdd(item.id));
+        const primary = () => (onOpen ? onOpen(item.id) : onAdd(item.id));
         return (
           <button
             key={item.id}
@@ -85,14 +85,6 @@ export function LaneWall({
                   tabIndex={-1}
                   onClick={(e) => { e.stopPropagation(); onAdd(item.id); }}
                 >{inScene ? 'In scene' : '＋ Add'}</span>
-                {onOpenChannel && (
-                  <span
-                    className="v3-act chan"
-                    role="button"
-                    tabIndex={-1}
-                    onClick={(e) => { e.stopPropagation(); onOpenChannel(item.id); }}
-                  >Channel</span>
-                )}
               </div>
             </div>
             <div className="v3-cmeta">

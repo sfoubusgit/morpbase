@@ -4,6 +4,7 @@ import { CharacterWall } from './CharacterWall';
 import { LaneWall } from './LaneWall';
 import { LanePlaceholder } from './LanePlaceholder';
 import { ItemChannel } from './ItemChannel';
+import { ItemPage, type ItemSubject } from './ItemPage';
 import { SynthesizePanel } from './SynthesizePanel';
 import { GeneratePanel } from './GeneratePanel';
 import { V3Profile } from './V3Profile';
@@ -88,6 +89,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); };
   const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
+  // Open an item's page (clicking its image), from anywhere — exits profile/flow.
+  const openItem = (id: string) => { setShowProfile(false); setFlow(null); setChannelId(id); };
 
   const viewer = viewerName?.trim() || 'you';
 
@@ -143,6 +146,23 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     }
     return m;
   }, [characters, createdLaneItems]);
+
+  // Every non-character lane item resolves to a page subject (seeds + created).
+  const laneSubjects = useMemo<Record<string, ItemSubject>>(() => {
+    const m: Record<string, ItemSubject> = {};
+    for (const wl of Object.values(WALL_LANES)) {
+      for (const it of wl.items) {
+        m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: null, phrases: it.phrases, summary: it.summary, author: 'MorpBase' };
+      }
+    }
+    for (const it of createdLaneItems) {
+      const wl = WALL_LANES[it.lane];
+      if (!wl) continue; // skip created characters (handled by ItemChannel)
+      m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author };
+    }
+    return m;
+  }, [createdLaneItems]);
+  const openSubject = channelId && !channelChar ? laneSubjects[channelId] ?? null : null;
 
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
   const removeFromScene = (id: string) => setScene(s => s.filter(x => x !== id));
@@ -292,7 +312,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             favorites={favorites}
             scene={scene}
             onAdd={addToScene}
-            onOpenChannel={setChannelId}
+            onOpenChannel={openItem}
             onToggleFavorite={toggleFavorite}
             isLoggedIn={Boolean(viewerAuthUid)}
             onLogout={onLogout}
@@ -317,6 +337,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <ItemChannel
             character={channelChar}
             inScene={scene.includes(channelChar.id)}
+            viewerName={viewer}
+            viewerAuthUid={viewerAuthUid}
+            onBack={() => setChannelId(null)}
+            onAdd={addToScene}
+          />
+        ) : openSubject ? (
+          <ItemPage
+            subject={openSubject}
+            inScene={scene.includes(openSubject.id)}
             viewerName={viewer}
             viewerAuthUid={viewerAuthUid}
             onBack={() => setChannelId(null)}
@@ -347,7 +376,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               selectedIds={scene}
               favorites={favorites}
               onAdd={addToScene}
-              onOpenChannel={setChannelId}
+              onOpenChannel={openItem}
               onToggleFavorite={toggleFavorite}
               emptyHint={q ? 'No characters match your search.' : 'No characters in this universe yet.'}
             />
@@ -378,6 +407,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               selectedIds={scene}
               favorites={favorites}
               onAdd={addToScene}
+              onOpen={openItem}
               onToggleFavorite={toggleFavorite}
               emptyHint={q ? `No ${WALL_LANES[lane].label.toLowerCase()} matches your search.` : `No ${WALL_LANES[lane].label.toLowerCase()} yet.`}
             />
@@ -399,6 +429,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               selectedIds={scene}
               favorites={favorites}
               onAdd={addToScene}
+              onOpen={openItem}
               onToggleFavorite={toggleFavorite}
               emptyHint="No favorites yet. Tap the ☆ on any thumbnail to save it here."
             />

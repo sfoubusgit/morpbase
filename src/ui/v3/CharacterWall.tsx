@@ -71,14 +71,6 @@ export function CharacterWall({
                 >
                   {inScene ? 'In scene' : '＋ Add'}
                 </span>
-                <span
-                  className="v3-act chan"
-                  role="button"
-                  tabIndex={-1}
-                  onClick={(e) => { e.stopPropagation(); onOpenChannel(c.id); }}
-                >
-                  Channel
-                </span>
               </div>
             </div>
             <div className="v3-cmeta">
