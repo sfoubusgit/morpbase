@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CharacterIdentity } from '../../types/characters';
 import { CharacterWall } from './CharacterWall';
 import { LaneWall } from './LaneWall';
@@ -99,7 +99,16 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
   const removeFromScene = (id: string) => setScene(s => s.filter(x => x !== id));
-  const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id));
+  const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
+
+  // On login, merge the user's remote favorites into the local set so they
+  // follow the user across devices.
+  useEffect(() => {
+    if (!viewerAuthUid) return;
+    let live = true;
+    favoritesStore.sync(viewerAuthUid).then(ids => { if (live) setFavorites(ids); }).catch(() => { /* offline */ });
+    return () => { live = false; };
+  }, [viewerAuthUid]);
 
   const q = query.trim().toLowerCase();
   const matchesQuery = (c: CharacterIdentity) =>
