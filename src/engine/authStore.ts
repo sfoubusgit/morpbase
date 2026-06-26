@@ -23,34 +23,28 @@ const toAuthUser = (profile: ProfileRow, authUid: string, avatarUrl: string | nu
   avatarUrl,
 });
 
+// Best-effort: a public profile is secondary to auth. We only insert columns
+// guaranteed by the base schema (migration 0003) so schema drift in optional
+// flag columns can't block sign-in, and any failure here is swallowed rather
+// than nulling out the whole session.
 const ensurePublicProfile = async (profile: ProfileRow): Promise<void> => {
-  const { data, error } = await supabase
-    .from('public_profiles')
-    .select('id')
-    .eq('user_id', profile.id)
-    .maybeSingle();
+  try {
+    const { data, error } = await supabase
+      .from('public_profiles')
+      .select('id')
+      .eq('user_id', profile.id)
+      .maybeSingle();
 
-  if (error) {
-    throw error;
-  }
+    if (error || data) return;
 
-  if (data) {
-    return;
-  }
-
-  const { error: insertError } = await supabase
-    .from('public_profiles')
-    .insert({
-      user_id: profile.id,
-      display_name: profile.display_name,
-      show_public_prompts: false,
-      show_public_pools: false,
-      discoverable_in_search: true,
-      show_links_publicly: true,
-    });
-
-  if (insertError) {
-    throw insertError;
+    await supabase
+      .from('public_profiles')
+      .insert({
+        user_id: profile.id,
+        display_name: profile.display_name,
+      });
+  } catch {
+    /* non-fatal — login proceeds on the users row alone */
   }
 };
 
@@ -135,7 +129,10 @@ export const getCurrentUser = async (): Promise<AuthUser | null> => {
     if (sessionError) throw sessionError;
     if (!sessionData.session?.user) return null;
     return await ensureProfile();
-  } catch {
+  } catch (err) {
+    // Session exists but provisioning failed — surface it; this is the usual
+    // cause of "logged in to Supabase but the app shows logged out".
+    console.error('[auth] getCurrentUser failed:', err);
     return null;
   }
 };
