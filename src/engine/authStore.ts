@@ -92,6 +92,12 @@ const ensureProfile = async (): Promise<AuthUser> => {
     throw selectError;
   }
 
+  // OAuth providers (e.g. Google) hand us a profile picture in user_metadata.
+  const oauthAvatar =
+    (typeof user.user_metadata?.avatar_url === 'string' && user.user_metadata.avatar_url) ||
+    (typeof user.user_metadata?.picture === 'string' && user.user_metadata.picture) ||
+    null;
+
   if (existing) {
     await ensurePublicProfile(existing as ProfileRow);
     const { data: pub } = await supabase
@@ -99,7 +105,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
       .select('avatar_url')
       .eq('user_id', (existing as ProfileRow).id)
       .maybeSingle();
-    const avatarUrl = (pub as { avatar_url: string | null } | null)?.avatar_url ?? null;
+    const avatarUrl = (pub as { avatar_url: string | null } | null)?.avatar_url ?? oauthAvatar;
     return toAuthUser(existing as ProfileRow, user.id, avatarUrl);
   }
 
@@ -120,7 +126,7 @@ const ensureProfile = async (): Promise<AuthUser> => {
 
   if (insertError) throw insertError;
   await ensurePublicProfile(inserted as ProfileRow);
-  return toAuthUser(inserted as ProfileRow, user.id);
+  return toAuthUser(inserted as ProfileRow, user.id, oauthAvatar);
 };
 
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
@@ -168,6 +174,21 @@ export const loginUser = async (email: string, password: string): Promise<AuthUs
   });
   if (error) throw error;
   return ensureProfile();
+};
+
+/**
+ * Start the Google OAuth flow. This triggers a full-page redirect to Google
+ * and back to the app; on return, supabase-js detects the session from the URL
+ * and the app's mount effect (getCurrentUser) provisions the profile. The
+ * promise typically does not resolve in-page — the browser navigates away.
+ */
+export const signInWithGoogle = async (): Promise<void> => {
+  const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}`;
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo },
+  });
+  if (error) throw error;
 };
 
 export const logoutUser = async (): Promise<void> => {

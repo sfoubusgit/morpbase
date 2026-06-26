@@ -126,6 +126,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  signInWithGoogle,
   updateUserName,
 } from '../engine/authStore';
 import { isCurrentUserAdmin } from '../engine/adminStore';
@@ -1545,6 +1546,15 @@ export function App() {
     } catch (err: any) {
       setAuthError(err?.message ?? 'Registration failed.');
       return false;
+    }
+  };
+
+  const handleGoogle = async () => {
+    try {
+      setAuthError(null);
+      await signInWithGoogle(); // full-page redirect to Google; returns to the app
+    } catch (err: any) {
+      setAuthError(err?.message ?? 'Google sign-in failed.');
     }
   };
 
@@ -4341,6 +4351,7 @@ export function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onLogin={handleLogin}
         onRegister={handleRegister}
+        onGoogle={handleGoogle}
         error={authError}
       />
       {authUser && (
