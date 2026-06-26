@@ -10,6 +10,7 @@ import { GeneratePanel } from './GeneratePanel';
 import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, type RemoteLaneItem } from './laneItemsStore';
+import { listAds, type AdItem } from './adsStore';
 import type { SynthElement } from './synthesis';
 import { SCENERY_ITEMS } from './scenery';
 import { OBJECT_ITEMS } from './objects';
@@ -79,6 +80,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [genPrompt, setGenPrompt] = useState('');
   const [createdLaneItems, setCreatedLaneItems] = useState<RemoteLaneItem[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [ads, setAds] = useState<AdItem[]>([]);
+
+  useEffect(() => {
+    let live = true;
+    listAds().then(a => { if (live) setAds(a); }).catch(() => { /* no ads */ });
+    return () => { live = false; };
+  }, []);
 
   // User-created lane objects (shared via Supabase) merged into the seeded lanes.
   useEffect(() => {
@@ -266,15 +274,18 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search characters, scenes, creators…" />
         </div>
 
-        <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); }} title="Your profile">
-          {viewerAvatarUrl
-            ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
-            : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
-          <span className="nm">{viewer}</span>
-        </button>
-        {viewerAuthUid
-          ? <button type="button" className="v3-authbtn" onClick={onLogout} title="Log out">Log out</button>
-          : <button type="button" className="v3-authbtn primary" onClick={onLogin} title="Log in">Log in</button>}
+        <div className="v3-userbar">
+          <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); }} title="Your profile">
+            {viewerAvatarUrl
+              ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
+              : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
+            <span className="nm">{viewer}</span>
+          </button>
+          <span className="v3-userbar-sep" aria-hidden="true" />
+          {viewerAuthUid
+            ? <button type="button" className="v3-userbar-link" onClick={onLogout}>Log out</button>
+            : <button type="button" className="v3-userbar-link" onClick={onLogin}>Log in</button>}
+        </div>
       </header>
 
       {/* ── lanes = the main nav (no sidebar) ── */}
@@ -416,6 +427,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               onAdd={addToScene}
               onOpen={openItem}
               onToggleFavorite={toggleFavorite}
+              ads={ads}
+              adEvery={10}
               emptyHint={q ? `No ${WALL_LANES[lane].label.toLowerCase()} matches your search.` : `No ${WALL_LANES[lane].label.toLowerCase()} yet.`}
             />
           </>

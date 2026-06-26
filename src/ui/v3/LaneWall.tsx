@@ -1,4 +1,6 @@
 import { LanePlaceholder } from './LanePlaceholder';
+import { AdCard } from './AdCard';
+import type { AdItem } from './adsStore';
 
 type LaneWallItem = {
   id: string;
@@ -25,6 +27,10 @@ type LaneWallProps = {
   onToggleFavorite: (id: string) => void;
   /** open the item's page (clicking the image). Falls back to add-to-scene if absent. */
   onOpen?: (id: string) => void;
+  /** native sponsored cards interleaved into the grid */
+  ads?: AdItem[];
+  /** insert one ad after every N items (default 12) */
+  adEvery?: number;
   emptyHint?: string;
 };
 
@@ -43,15 +49,30 @@ export function LaneWall({
   onAdd,
   onToggleFavorite,
   onOpen,
+  ads,
+  adEvery = 12,
   emptyHint,
 }: LaneWallProps) {
   if (items.length === 0) {
     return <div className="v3-empty">{emptyHint ?? 'Nothing here yet.'}</div>;
   }
 
+  // Build the render order, dropping a sponsored card after every `adEvery` items.
+  const slots: Array<{ ad: AdItem; key: string } | { item: LaneWallItem }> = [];
+  let adIdx = 0;
+  items.forEach((item, i) => {
+    slots.push({ item });
+    if (ads && ads.length > 0 && (i + 1) % adEvery === 0) {
+      slots.push({ ad: ads[adIdx % ads.length], key: `ad-${i}` });
+      adIdx++;
+    }
+  });
+
   return (
     <div className="v3-grid">
-      {items.map(item => {
+      {slots.map(slot => {
+        if ('ad' in slot) return <AdCard key={slot.key} ad={slot.ad} />;
+        const item = slot.item;
         const img = item.image || null;
         const inScene = selectedIds.includes(item.id);
         const fav = favorites.includes(item.id);

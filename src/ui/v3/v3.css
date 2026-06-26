@@ -147,11 +147,19 @@
 .v3-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
 .v3-card {
   --c: var(--la-character);
-  background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: 22px;
   overflow: hidden; cursor: pointer; transition: transform var(--motion-normal) var(--motion-ease), border-color var(--motion-normal) var(--motion-ease), box-shadow var(--motion-normal) var(--motion-ease);
   text-align: left; padding: 0; font-family: inherit; color: inherit; display: block; width: 100%;
 }
 .v3-card:hover { transform: translateY(-3px); border-color: rgba(var(--c), 0.45); box-shadow: 0 0 0 1px rgba(var(--c), 0.1), 0 18px 40px rgba(0, 0, 0, 0.45); }
+/* native sponsored card */
+.v3-ad { text-decoration: none; --c: 255, 255, 255; }
+.v3-ad:hover { border-color: var(--border-strong); }
+.v3-ad-tag {
+  position: absolute; top: 9px; left: 9px; z-index: 2; font: var(--font-weight-bold) 9.5px var(--font-primary);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary);
+  background: rgba(8, 9, 14, 0.7); border: 1px solid var(--border-medium); padding: 3px 8px; border-radius: var(--radius-pill); backdrop-filter: blur(4px);
+}
 .v3-shot { aspect-ratio: 3 / 4; position: relative; background-size: cover; background-position: center; }
 .v3-shot::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 42%, rgba(8, 9, 14, 0.82)); }
 .v3-badge {
@@ -311,12 +319,26 @@
 .v3-search2 input { flex: 1; background: none; border: none; outline: none; color: var(--text-primary); font: 13.5px var(--font-primary); min-width: 0; }
 .v3-search2 input::placeholder { color: var(--text-tertiary); }
 
-/* profile chip */
-.v3-userchip {
-  display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px 4px 4px; background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-strong); border-radius: var(--radius-pill); cursor: pointer; flex-shrink: 0; font-family: inherit;
+/* user bar — name + a thin divider + a plain log-out link (one quiet unit) */
+.v3-userbar {
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-medium); border-radius: var(--radius-pill);
+  padding: 3px; overflow: hidden;
 }
-.v3-userchip:hover { background: var(--accent-primary-bg); border-color: var(--border-accent); }
+.v3-userbar-sep { width: 1px; align-self: stretch; margin: 5px 2px; background: var(--border-strong); }
+.v3-userbar-link {
+  background: none; border: none; cursor: pointer; font: var(--font-weight-semibold) 12.5px var(--font-primary);
+  color: var(--text-tertiary); padding: 6px 13px; border-radius: var(--radius-pill); font-family: inherit;
+}
+.v3-userbar-link:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+
+/* profile chip — now a plain, borderless element inside the user bar */
+.v3-userchip {
+  display: inline-flex; align-items: center; gap: 8px; padding: 4px 10px 4px 4px; background: none;
+  border: none; border-radius: var(--radius-pill); cursor: pointer; flex-shrink: 0; font-family: inherit;
+}
+.v3-userchip:hover { background: rgba(255, 255, 255, 0.06); }
+.v3-userchip.active { background: var(--accent-primary-bg-strong); }
 .v3-userchip .av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(110, 86, 249, 0.85), rgba(60, 40, 200, 0.85)); font: var(--font-weight-extrabold) 11px var(--font-primary); color: #fff; flex: none; }
 .v3-userchip .av.img { object-fit: cover; background: none; }
 .v3-userchip .nm { font: var(--font-weight-semibold) 12.5px var(--font-primary); color: var(--text-primary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
