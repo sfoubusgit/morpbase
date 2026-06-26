@@ -1,6 +1,8 @@
 import type { CharacterIdentity } from '../../types/characters';
 import { channelStore } from './channelStore';
 import { LanePlaceholder } from './LanePlaceholder';
+import { AdCard } from './AdCard';
+import type { AdItem } from './adsStore';
 import { characterImage, compact } from './media';
 
 type CharacterWallProps = {
@@ -10,6 +12,8 @@ type CharacterWallProps = {
   onAdd: (id: string) => void;
   onOpenChannel: (id: string) => void;
   onToggleFavorite: (id: string) => void;
+  ads?: AdItem[];
+  adEvery?: number;
   emptyHint?: string;
 };
 
@@ -25,6 +29,8 @@ export function CharacterWall({
   onAdd,
   onOpenChannel,
   onToggleFavorite,
+  ads,
+  adEvery = 12,
   emptyHint,
 }: CharacterWallProps) {
   if (characters.length === 0) {
@@ -35,9 +41,21 @@ export function CharacterWall({
     );
   }
 
+  const slots: Array<{ ad: AdItem; key: string } | { c: CharacterIdentity }> = [];
+  let adIdx = 0;
+  characters.forEach((c, i) => {
+    slots.push({ c });
+    if (ads && ads.length > 0 && (i + 1) % adEvery === 0) {
+      slots.push({ ad: ads[adIdx % ads.length], key: `ad-${i}` });
+      adIdx++;
+    }
+  });
+
   return (
     <div className="v3-grid">
-      {characters.map(c => {
+      {slots.map(slot => {
+        if ('ad' in slot) return <AdCard key={slot.key} ad={slot.ad} />;
+        const c = slot.c;
         const img = characterImage(c);
         const stats = channelStore.getChannel(c.id).stats;
         const inScene = selectedIds.includes(c.id);

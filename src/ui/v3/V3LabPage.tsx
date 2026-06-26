@@ -396,6 +396,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               onAdd={addToScene}
               onOpenChannel={openItem}
               onToggleFavorite={toggleFavorite}
+              ads={ads}
+              adEvery={10}
               emptyHint={q ? 'No characters match your search.' : 'No characters in this universe yet.'}
             />
           </>
@@ -451,6 +453,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               onAdd={addToScene}
               onOpen={openItem}
               onToggleFavorite={toggleFavorite}
+              ads={ads}
+              adEvery={10}
               emptyHint="No favorites yet. Tap the ☆ on any thumbnail to save it here."
             />
           </>
