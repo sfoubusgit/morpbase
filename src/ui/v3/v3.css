@@ -312,7 +312,7 @@
 /* global search */
 .v3-search2 {
   flex: 1; display: flex; align-items: center; gap: 9px; background: var(--surface-1);
-  border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 9px 14px; color: var(--text-tertiary); min-width: 0;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 9px 16px; color: var(--text-tertiary); min-width: 0;
 }
 .v3-search2:focus-within { border-color: var(--border-accent); }
 .v3-search2 svg { flex: none; }
