@@ -1516,13 +1516,27 @@ export function App() {
       if (!user) currentUid = null;
     };
 
+    // After an OAuth redirect the URL carries ?code= / #access_token; once the
+    // session is resolved, strip them so refreshes and routing stay clean.
+    const cleanOAuthParams = () => {
+      const search = new URLSearchParams(window.location.search);
+      const hadParams = search.has('code') || search.has('error') || search.has('state');
+      const hadHash = window.location.hash.includes('access_token');
+      if (!hadParams && !hadHash) return;
+      ['code', 'error', 'error_description', 'state', 'provider_token'].forEach(k => search.delete(k));
+      const qs = search.toString();
+      window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`);
+    };
+
     getCurrentUser()
       .then(user => {
         adopt(user);
+        cleanOAuthParams();
         setAuthReady(true);
       })
       .catch(() => {
         adopt(null);
+        cleanOAuthParams();
         setAuthReady(true);
       });
 
@@ -3718,6 +3732,11 @@ export function App() {
       // ignore
     }
     if (activePage === 'creator-profile') return; // hash system handles this
+    // Don't clobber an in-flight OAuth return: Supabase needs the ?code= /
+    // #access_token params in the URL to exchange the session. The auth effect
+    // cleans them up once the session is established.
+    const search = new URLSearchParams(window.location.search);
+    if (search.has('code') || search.has('error') || window.location.hash.includes('access_token')) return;
     const param = PAGE_TO_PARAM[activePage];
     const next = param ? `?page=${param}` : window.location.pathname;
     const current = window.location.search || window.location.pathname;

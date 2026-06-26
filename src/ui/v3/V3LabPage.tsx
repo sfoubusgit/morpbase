@@ -197,6 +197,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
           <span className="nm">{viewer}</span>
         </button>
+        {viewerAuthUid
+          ? <button type="button" className="v3-authbtn" onClick={onLogout} title="Log out">Log out</button>
+          : <button type="button" className="v3-authbtn primary" onClick={onLogin} title="Log in">Log in</button>}
       </header>
 
       {/* ── lanes = the main nav (no sidebar) ── */}
