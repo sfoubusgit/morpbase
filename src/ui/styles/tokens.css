@@ -104,12 +104,12 @@
   --section-gap: 24px;
   --card-padding: 18px;
 
-  /* ── Border Radius ── */
-  --radius-xs: 6px;    /* tiny badges, small controls */
-  --radius-sm: 10px;   /* inputs, small buttons */
-  --radius-md: 14px;   /* standard cards */
-  --radius-lg: 18px;   /* section cards, large panels */
-  --radius-xl: 22px;   /* page heroes, large modals */
+  /* ── Border Radius ── (nudged up a touch for a softer, rounder feel) */
+  --radius-xs: 8px;    /* tiny badges, small controls */
+  --radius-sm: 12px;   /* inputs, small buttons */
+  --radius-md: 17px;   /* standard cards */
+  --radius-lg: 22px;   /* section cards, large panels */
+  --radius-xl: 26px;   /* page heroes, large modals */
   --radius-pill: 999px;/* pills and chips */
   /* Legacy aliases used by existing code */
   --radius-sm-legacy: 8px;
