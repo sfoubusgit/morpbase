@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
 import type { CharacterIdentity } from '../../types/characters';
 import { CharacterWall } from './CharacterWall';
+import { LaneWall } from './LaneWall';
 import { listMyGeneratedImages, type RemoteImage } from './channelImagesStore';
+
+/** Favorites span every lane, so the profile renders them with the generic wall. */
+export type ProfileFavItem = { id: string; name: string; tint: number; image?: string | null; accent?: string; badge?: string; lane?: string };
 
 type V3ProfileProps = {
   viewerName: string;
   viewerAvatarUrl?: string | null;
   viewerAuthUid?: string | null;
-  /** local characters == this creator's own creations */
+  /** all local characters (seeded public content + this user's own creations) */
   characters: CharacterIdentity[];
+  /** favorited items across every lane, ready for the generic wall */
+  favItems: ProfileFavItem[];
   favorites: string[];
   scene: string[];
   onAdd: (id: string) => void;
@@ -17,7 +23,11 @@ type V3ProfileProps = {
   isLoggedIn?: boolean;
   onLogout?: () => void;
   onLogin?: () => void;
+  onEditProfile?: () => void;
 };
+
+/** Seeded characters are public content, not a user's own creations. */
+const isUserCreated = (c: CharacterIdentity) => !c.id.startsWith('character_seed_');
 
 type ProfileTab = 'created' | 'favorites' | 'generated';
 
@@ -31,6 +41,7 @@ export function V3Profile({
   viewerAvatarUrl,
   viewerAuthUid,
   characters,
+  favItems,
   favorites,
   scene,
   onAdd,
@@ -38,6 +49,7 @@ export function V3Profile({
   onToggleFavorite,
   isLoggedIn = true,
   onLogin,
+  onEditProfile,
 }: V3ProfileProps) {
   const [tab, setTab] = useState<ProfileTab>('created');
   const [generated, setGenerated] = useState<RemoteImage[]>([]);
@@ -50,8 +62,7 @@ export function V3Profile({
     return () => { live = false; };
   }, [viewerAuthUid]);
 
-  const created = characters; // local store = this user's own creations
-  const favs = characters.filter(c => favorites.includes(c.id));
+  const created = characters.filter(isUserCreated); // exclude seeded public content
   const handle = viewerName.toLowerCase().replace(/\s+/g, '');
 
   return (
@@ -68,20 +79,20 @@ export function V3Profile({
         </div>
         <div className="v3-prof-actions">
           {isLoggedIn
-            ? <button type="button" className="v3-btn secondary">Edit profile</button>
+            ? <button type="button" className="v3-btn secondary" onClick={onEditProfile}>Edit profile</button>
             : <button type="button" className="v3-btn primary" onClick={onLogin}>Log in</button>}
         </div>
       </div>
 
       <div className="v3-metrics v3-prof-metrics">
         <div className="v3-metric"><div className="v">{created.length}</div><div className="k">Characters</div></div>
-        <div className="v3-metric"><div className="v">{favs.length}</div><div className="k">Favorites</div></div>
+        <div className="v3-metric"><div className="v">{favItems.length}</div><div className="k">Favorites</div></div>
         <div className="v3-metric"><div className="v">{generated.length}</div><div className="k">Generated</div></div>
       </div>
 
       <div className="v3-tabs">
         <button type="button" className={`v3-tab2${tab === 'created' ? ' on' : ''}`} onClick={() => setTab('created')}>Created · {created.length}</button>
-        <button type="button" className={`v3-tab2${tab === 'favorites' ? ' on' : ''}`} onClick={() => setTab('favorites')}>Favorites · {favs.length}</button>
+        <button type="button" className={`v3-tab2${tab === 'favorites' ? ' on' : ''}`} onClick={() => setTab('favorites')}>Favorites · {favItems.length}</button>
         <button type="button" className={`v3-tab2${tab === 'generated' ? ' on' : ''}`} onClick={() => setTab('generated')}>Generated{generated.length > 0 ? ` · ${generated.length}` : ''}</button>
       </div>
 
@@ -99,17 +110,27 @@ export function V3Profile({
             ))}
           </div>
         )
+      ) : tab === 'favorites' ? (
+        <LaneWall
+          items={favItems}
+          accent="var(--la-character)"
+          badge="Item"
+          lane="character"
+          selectedIds={scene}
+          favorites={favorites}
+          onAdd={onAdd}
+          onToggleFavorite={onToggleFavorite}
+          emptyHint="No favorites yet. Tap the ☆ on any thumbnail to save it here."
+        />
       ) : (
         <CharacterWall
-          characters={tab === 'created' ? created : favs}
+          characters={created}
           selectedIds={scene}
           favorites={favorites}
           onAdd={onAdd}
           onOpenChannel={onOpenChannel}
           onToggleFavorite={onToggleFavorite}
-          emptyHint={tab === 'created'
-            ? 'You haven’t created any characters yet.'
-            : 'No favorites yet. Tap the ☆ on any thumbnail to save it here.'}
+          emptyHint="You haven’t created any characters yet."
         />
       )}
     </div>

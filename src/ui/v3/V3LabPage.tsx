@@ -26,6 +26,7 @@ type V3LabPageProps = {
   viewerAuthUid?: string | null;
   onLogout?: () => void;
   onLogin?: () => void;
+  onEditProfile?: () => void;
 };
 
 type LaneDef = { key: string; label: string; accent: string; status: 'live' | 'soon'; isNew?: boolean };
@@ -62,7 +63,7 @@ const WALL_LANES: Record<string, WallLaneCfg> = {
  * public thumbnail wall, and a floating scene dock. Community lives inside each
  * item's Channel. Characters is the live lane; the rest are scaffolded.
  */
-export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthUid, onLogout, onLogin }: V3LabPageProps) {
+export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthUid, onLogout, onLogin, onEditProfile }: V3LabPageProps) {
   const [universe, setUniverse] = useState<string>(ALL_UNIVERSES_ID);
   const [uniOpen, setUniOpen] = useState(false);
   const [lane, setLane] = useState<string>('characters');
@@ -237,6 +238,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerAvatarUrl={viewerAvatarUrl}
             viewerAuthUid={viewerAuthUid}
             characters={characters}
+            favItems={favItems}
             favorites={favorites}
             scene={scene}
             onAdd={addToScene}
@@ -245,6 +247,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             isLoggedIn={Boolean(viewerAuthUid)}
             onLogout={onLogout}
             onLogin={onLogin}
+            onEditProfile={onEditProfile}
           />
         ) : flow === 'synthesize' ? (
           <SynthesizePanel
