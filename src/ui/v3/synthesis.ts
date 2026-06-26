@@ -115,12 +115,18 @@ const LLM_ENDPOINT = (import.meta.env.VITE_LLM_URL as string | undefined) || '/l
 const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'openai/gpt-oss-20b:free';
 
 const SYSTEM_PROMPT =
-  'You are an expert art director composing prompts for an image generator. ' +
-  'Given a set of scene elements (characters, scenery/action, environment, mood, objects, lighting), ' +
-  'write ONE coherent visual prompt that places the characters into the scene, respecting the mood and the action. ' +
-  'Be vivid and concrete, 1–3 sentences, present tense, describing only what is seen. ' +
+  'You are an expert art director. Weave the given scene elements (characters, ' +
+  'scenery/action, environment, mood, objects, lighting) into ONE coherent moment — ' +
+  'a tiny vivid scene with a clear sense of what is happening — written as a single ' +
+  'image-generation prompt. Place the characters into the action and setting, and carry ' +
+  'the mood through it. 1–3 sentences, present tense, concrete, describing only what is seen. ' +
   'Do not specify art medium or style — that is chosen separately. ' +
   'Output ONLY the prompt text: no preamble, labels, options, or quotes.';
+
+/** Tidy an LLM prompt: drop wrapping quotes, normalise odd hyphens/whitespace. */
+function cleanPrompt(s: string): string {
+  return s.replace(/[‐-―]/g, '-').replace(/^["'\s]+|["'\s]+$/g, '').replace(/\s+/g, ' ').trim();
+}
 
 function methodGuidance(method: SynthMethod): string {
   if (method === 'cinematic') return 'Take cinematic license — dramatic framing, depth, and tension.';
@@ -151,19 +157,53 @@ class LlmSynthesisProvider implements SynthesisProvider {
     const j = await res.json();
     const text = (j?.choices?.[0]?.message?.content ?? '').trim();
     if (!text) throw new Error('LLM returned no content');
-    return { text: text.replace(/^["']+|["']+$/g, ''), source: 'ai' };
+    return { text: cleanPrompt(text), source: 'ai' };
   }
 }
 
-/** Tries the real LLM, falls back to the local heuristic on any failure. */
+// Keyless, CORS-open, free, callable directly from the browser — so real AI
+// synthesis works from any origin with no proxy/key/infra. Primary provider.
+const POLLINATIONS_URL = 'https://text.pollinations.ai/openai';
+
+class PollinationsSynthesisProvider implements SynthesisProvider {
+  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
+    const res = await fetch(POLLINATIONS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'openai',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: buildUserMessage(elements, method) },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`pollinations ${res.status}`);
+    const j = await res.json();
+    const raw = (j?.choices?.[0]?.message?.content ?? '').trim();
+    if (!raw) throw new Error('pollinations returned no content');
+    return { text: cleanPrompt(raw), source: 'ai' };
+  }
+}
+
+/**
+ * Real AI first (keyless Pollinations → optional OpenRouter proxy), then the
+ * local heuristic. Pollinations needs no key/proxy, so coherent synthesis works
+ * everywhere out of the box; the heuristic is only a last-resort fallback.
+ */
 class SmartSynthesisProvider implements SynthesisProvider {
-  private llm = new LlmSynthesisProvider();
+  private pollinations = new PollinationsSynthesisProvider();
+  private openrouter = new LlmSynthesisProvider();
   private local = new LocalSynthesisProvider();
   async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
     try {
-      return await this.llm.synthesize(elements, method);
+      return await this.pollinations.synthesize(elements, method);
     } catch {
-      return this.local.synthesize(elements, method);
+      try {
+        return await this.openrouter.synthesize(elements, method);
+      } catch {
+        return this.local.synthesize(elements, method);
+      }
     }
   }
 }
