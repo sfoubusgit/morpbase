@@ -66,13 +66,15 @@ export function GeneratePanel({ prompt, channelTarget, lockName, lockSeed, viewe
 
   const pct = progress && progress.max > 0 ? Math.round((progress.value / progress.max) * 100) : null;
 
-  const run = async () => {
+  const run = async (seedOverride?: number) => {
+    if (rendering) return;
     setRendering(true);
     setResults([]);
     setError(null);
     setProgress(null);
     setSavedIds([]);
-    const genParams = { count, aspect, styleId, seed: effectiveSeed };
+    const seed = seedOverride ?? effectiveSeed;
+    const genParams = { count, aspect, styleId, seed };
     try {
       const r = await generationProvider.generate(prompt, genParams, setProgress);
       setResults(r);
@@ -132,12 +134,18 @@ export function GeneratePanel({ prompt, channelTarget, lockName, lockSeed, viewe
                   </span>
                 </button>
                 {locked && (
-                  <button type="button" className="v3-lock-vary" onClick={() => setVariation(v => v + 1)} title="New variation of the same character">⟳ Variation</button>
+                  <button
+                    type="button"
+                    className="v3-lock-vary"
+                    disabled={rendering}
+                    onClick={() => { const next = variation + 1; setVariation(next); void run((lockSeed as number) + next); }}
+                    title="Render a new variation of the same character"
+                  >⟳ Variation</button>
                 )}
               </div>
             )}
             <div className="v3-gen-go">
-              <button type="button" className="v3-btn primary" onClick={run} disabled={rendering}>
+              <button type="button" className="v3-btn primary" onClick={() => run()} disabled={rendering}>
                 {rendering ? 'Rendering…' : 'Generate'}
               </button>
               {rendering && (
