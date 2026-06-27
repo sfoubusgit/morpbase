@@ -18,6 +18,7 @@ export type RemoteLaneItem = {
   coverUrl: string | null;
   author: string;
   authorAuthUid: string | null;
+  world: string;
   createdAt: string;
 };
 
@@ -30,10 +31,11 @@ type Row = {
   cover_url: string | null;
   author_label: string | null;
   author_auth_uid: string | null;
+  world: string | null;
   created_at: string;
 };
 
-const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, created_at';
+const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, world, created_at';
 
 const toItem = (r: Row): RemoteLaneItem => ({
   id: r.id,
@@ -44,6 +46,7 @@ const toItem = (r: Row): RemoteLaneItem => ({
   coverUrl: r.cover_url,
   author: r.author_label || 'creator',
   authorAuthUid: r.author_auth_uid,
+  world: (r.world || '').trim(),
   createdAt: r.created_at,
 });
 
@@ -66,9 +69,10 @@ export async function createLaneItem(params: {
   name: string;
   summary: string;
   phrases: string[];
+  world?: string;
   coverBlob?: Blob | null;
 }): Promise<RemoteLaneItem> {
-  const { lane, authUid, authorLabel, name, summary, phrases, coverBlob } = params;
+  const { lane, authUid, authorLabel, name, summary, phrases, world, coverBlob } = params;
 
   let coverUrl: string | null = null;
   let storagePath: string | null = null;
@@ -91,6 +95,7 @@ export async function createLaneItem(params: {
       storage_path: storagePath,
       author_auth_uid: authUid,
       author_label: authorLabel,
+      world: (world || '').trim() || null,
     })
     .select(COLS)
     .single();

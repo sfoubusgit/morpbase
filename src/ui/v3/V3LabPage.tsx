@@ -21,7 +21,9 @@ import { LIGHTING_ITEMS } from './lighting';
 import { COMPOSITION_ITEMS } from './composition';
 import { ENVIRONMENT_ITEMS } from './environment';
 import { favoritesStore } from './favoritesStore';
-import { UNIVERSES, ALL_UNIVERSES_ID, universeById, universeOfItem } from './universes';
+/** Worlds are emergent: each created item carries an optional world label, and
+ *  the workspace groups/filters by it. 'all' = the global pool (no filter). */
+const ALL_WORLDS = 'all';
 import { characterImage, tintIndex } from './media';
 import './v3.css';
 
@@ -70,7 +72,7 @@ const WALL_LANES: Record<string, WallLaneCfg> = {
  * item's Channel. Characters is the live lane; the rest are scaffolded.
  */
 export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthUid, onLogout, onLogin, onEditProfile }: V3LabPageProps) {
-  const [universe, setUniverse] = useState<string>(ALL_UNIVERSES_ID);
+  const [world, setWorld] = useState<string>(ALL_WORLDS);
   const [uniOpen, setUniOpen] = useState(false);
   const [lane, setLane] = useState<string>('characters');
   const [query, setQuery] = useState('');
@@ -149,7 +151,16 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   const byId = (id: string) => allCharacters.find(c => c.id === id) ?? null;
   const channelChar = channelId ? byId(channelId) : null;
-  const activeUniverse = universeById(universe);
+  // Worlds are derived from the labels users put on their created items.
+  const worlds = useMemo(
+    () => Array.from(new Set(visibleCreatedItems.map(it => it.world).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [visibleCreatedItems],
+  );
+  const worldOf = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const it of visibleCreatedItems) if (it.world) m[it.id] = it.world;
+    return m;
+  }, [visibleCreatedItems]);
 
   // Unified resolver so the scene (tray, synthesis) can hold items from any lane.
   type SceneItem = { id: string; lane: string; kind: string; name: string; accent: string; tint: number; image: string | null; phrases: string[] };
@@ -212,26 +223,25 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     c.name.toLowerCase().includes(q) ||
     (c.summary?.toLowerCase().includes(q) ?? false) ||
     (c.tags?.some(t => t.toLowerCase().includes(q)) ?? false);
-  const inUniverse = (c: CharacterIdentity) =>
-    universe === ALL_UNIVERSES_ID || universeOfItem(c.id) === universe;
+  const inWorld = (id: string) => world === ALL_WORLDS || worldOf[id] === world;
 
   const browseChars = useMemo(
-    () => allCharacters.filter(c => inUniverse(c) && matchesQuery(c)),
-    [allCharacters, universe, q],
+    () => allCharacters.filter(c => inWorld(c.id) && matchesQuery(c)),
+    [allCharacters, world, worldOf, q],
   );
-  // Wall lanes (scenery/objects/mood/lighting/composition) share one filtered view.
-  // Modifier lanes are universe-agnostic — filter by search only.
+  // Wall lanes share one filtered view, scoped to the selected world (if any).
   const wallView = useMemo(() => {
     const wl = WALL_LANES[lane];
     if (!wl) return [];
     const created = visibleCreatedItems
-      .filter(it => it.lane === lane && (!q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q)))
+      .filter(it => it.lane === lane && inWorld(it.id) && (!q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q)))
       .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: tintIndex(it.id), image: it.coverUrl }));
-    const seeds = wl.items
+    // Seeds belong to no world, so they only show in the global ("All worlds") view.
+    const seeds = world !== ALL_WORLDS ? [] : wl.items
       .filter(it => !q || it.name.toLowerCase().includes(q) || it.summary.toLowerCase().includes(q))
       .map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: it.tint, image: null as string | null }));
     return [...created, ...seeds];
-  }, [lane, q, visibleCreatedItems]);
+  }, [lane, q, visibleCreatedItems, world, worldOf]);
 
   // Favorites span every lane — each card carries its own accent/badge.
   const favItems = useMemo(
@@ -259,27 +269,27 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <span className="v3-wordmark"><span className="base">MORPBASE</span><span className="ai">AI</span></span>
         </button>
 
-        {UNIVERSES.length > 0 && (
+        {worlds.length > 0 && (
         <div className="v3-uni" onClick={e => e.stopPropagation()}>
           <button type="button" className="v3-unibtn" onClick={() => setUniOpen(o => !o)}>
-            <span className={`v3-uni-dot${activeUniverse ? '' : ' all'}`} style={activeUniverse ? { background: `rgb(${activeUniverse.accent})` } : undefined} />
-            <span className="lbl">Universe</span>
-            <b>{activeUniverse ? activeUniverse.name : 'All universes'}</b>
+            <span className={`v3-uni-dot${world === ALL_WORLDS ? ' all' : ''}`} />
+            <span className="lbl">World</span>
+            <b>{world === ALL_WORLDS ? 'All worlds' : world}</b>
             <span className="caret">▾</span>
           </button>
           {uniOpen && (
             <div className="v3-unipop">
-              <button type="button" className={`v3-uni-opt${universe === ALL_UNIVERSES_ID ? ' on' : ''}`} onClick={() => { setUniverse(ALL_UNIVERSES_ID); setUniOpen(false); setChannelId(null); }}>
+              <button type="button" className={`v3-uni-opt${world === ALL_WORLDS ? ' on' : ''}`} onClick={() => { setWorld(ALL_WORLDS); setUniOpen(false); setChannelId(null); }}>
                 <span className="v3-uni-dot all" />
-                <span className="txt"><span className="n">All universes</span><span className="b">browse the global public pool</span></span>
+                <span className="txt"><span className="n">All worlds</span><span className="b">browse everything</span></span>
               </button>
-              {UNIVERSES.map(u => (
-                <button type="button" key={u.id} className={`v3-uni-opt${universe === u.id ? ' on' : ''}`} onClick={() => { setUniverse(u.id); setUniOpen(false); setChannelId(null); }}>
-                  <span className="v3-uni-dot" style={{ background: `rgb(${u.accent})` }} />
-                  <span className="txt"><span className="n">{u.name}</span><span className="b">{u.blurb}</span></span>
+              {worlds.map(w => (
+                <button type="button" key={w} className={`v3-uni-opt${world === w ? ' on' : ''}`} onClick={() => { setWorld(w); setUniOpen(false); setChannelId(null); }}>
+                  <span className="v3-uni-dot" />
+                  <span className="txt"><span className="n">{w}</span></span>
                 </button>
               ))}
-              <div className="v3-unipop-foot">A universe sits one level above every lane — it curates all lanes into one coherent world.</div>
+              <div className="v3-unipop-foot">A world groups related characters and lane objects. Set one when you create an item.</div>
             </div>
           )}
         </div>
@@ -396,10 +406,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <>
             <div className="v3-head">
               <div>
-                <div className="v3-eyebrow">{activeUniverse ? activeUniverse.name : 'All universes'} · Characters</div>
+                <div className="v3-eyebrow">{world === ALL_WORLDS ? 'All worlds' : world} · Characters</div>
                 <h2>Characters</h2>
                 <div className="v3-sub">
-                  {browseChars.length} public character{browseChars.length === 1 ? '' : 's'} {activeUniverse ? `in ${activeUniverse.name}` : 'across every universe'} · favorite the ones you like to reuse them.
+                  {browseChars.length} character{browseChars.length === 1 ? '' : 's'} {world === ALL_WORLDS ? 'across every world' : `in ${world}`} · favorite the ones you like to reuse them.
                 </div>
               </div>
               <button
@@ -421,7 +431,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               onToggleFavorite={toggleFavorite}
               ads={ads}
               adEvery={10}
-              emptyHint={q ? 'No characters match your search.' : 'No characters in this universe yet.'}
+              emptyHint={q ? 'No characters match your search.' : (world === ALL_WORLDS ? 'No characters yet.' : `No characters in ${world} yet.`)}
             />
           </>
         ) : WALL_LANES[lane] ? (
@@ -521,6 +531,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           laneLabel={WALL_LANES[lane]?.label ?? 'Characters'}
           accent={WALL_LANES[lane]?.accent ?? 'var(--la-character)'}
           kind={lane === 'characters' ? 'character' : 'object'}
+          worlds={worlds}
           viewerName={viewer}
           viewerAuthUid={viewerAuthUid}
           onClose={() => setComposerOpen(false)}

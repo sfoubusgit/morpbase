@@ -7,6 +7,8 @@ type LaneItemComposerProps = {
   laneLabel: string;   // 'Scenery'
   accent: string;      // rgb-triplet var, e.g. 'var(--la-scenery)'
   kind?: 'character' | 'object';
+  /** existing world names, for the autocomplete on the World field */
+  worlds?: string[];
   viewerName: string;
   viewerAuthUid: string;
   onClose: () => void;
@@ -19,7 +21,7 @@ type LaneItemComposerProps = {
  * an optional cover, which can be uploaded or rendered on the spot with KREA2.
  * Saves to Supabase as public community content.
  */
-export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
+export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', worlds = [], viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
   const isChar = kind === 'character';
   const singular = isChar ? 'character' : laneLabel.toLowerCase().replace(/s$/, '');
   const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
@@ -29,6 +31,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', vie
     : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
+  const [world, setWorld] = useState('');
   const [phrasesText, setPhrasesText] = useState('');
   const [coverBlob, setCoverBlob] = useState<Blob | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -75,7 +78,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', vie
     try {
       const item = await createLaneItem({
         lane, authUid: viewerAuthUid, authorLabel: viewerName,
-        name: name.trim(), summary: summary.trim(), phrases, coverBlob,
+        name: name.trim(), summary: summary.trim(), phrases, world: world.trim(), coverBlob,
       });
       onCreated(item);
     } catch (e) {
@@ -126,6 +129,10 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', vie
               </label>
               <label className="v3-cmp-field">Summary <span className="opt">optional</span>
                 <input value={summary} onChange={e => setSummary(e.target.value)} placeholder="One line describing it." maxLength={160} />
+              </label>
+              <label className="v3-cmp-field">World <span className="opt">optional · groups your related items</span>
+                <input value={world} onChange={e => setWorld(e.target.value)} placeholder="e.g. Neon District — type a new one or pick an existing" list="v3-world-list" maxLength={60} />
+                <datalist id="v3-world-list">{worlds.map(w => <option key={w} value={w} />)}</datalist>
               </label>
               <label className="v3-cmp-field">Phrases <span className="opt">{phrasesHint}</span>
                 <textarea
