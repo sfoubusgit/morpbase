@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { synthesisProvider, type SynthElement, type SynthMethod } from './synthesis';
+import { GENERATION_LIVE } from './generation';
 
 type SynthesizePanelProps = {
   elements: SynthElement[];
@@ -100,11 +101,21 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
           <button type="button" className="v3-btn utility" onClick={() => run(method)} disabled={working}>
             {working ? 'Synthesizing…' : '↻ Re-synthesize'}
           </button>
-          <button type="button" className="v3-btn primary" onClick={() => onGenerate(prompt)} disabled={!prompt.trim()}>
-            Generate image →
-          </button>
+          {GENERATION_LIVE ? (
+            <button type="button" className="v3-btn primary" onClick={() => onGenerate(prompt)} disabled={!prompt.trim()}>
+              Generate image →
+            </button>
+          ) : (
+            <button type="button" className="v3-btn primary" disabled title="Cloud rendering is coming soon">
+              🔒 Image generation — coming soon
+            </button>
+          )}
         </div>
-        <div className="v3-legend">Nouns (character, object, environment) + the scenery verb + mood → one sensible scene.</div>
+        <div className="v3-legend">
+          {GENERATION_LIVE
+            ? 'Nouns (character, object, environment) + the scenery verb + mood → one sensible scene.'
+            : 'Your scene is composed into a render-ready prompt. One-click image generation goes live soon.'}
+        </div>
       </div>
     </div>
   );

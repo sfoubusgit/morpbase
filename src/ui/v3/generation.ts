@@ -55,6 +55,14 @@ export interface GenerationProvider {
   generate(prompt: string, params: GenParams, onProgress?: (p: GenProgress) => void): Promise<GenResult[]>;
 }
 
+/**
+ * Is live image generation available? KREA2 only runs against the local ComfyUI
+ * proxy (dev), and cloud generation isn't wired yet — so on the deployed site we
+ * show "coming soon" instead of a broken Generate. Flip to `true` (or gate on a
+ * cloud flag) once the serverless endpoint is live.
+ */
+export const GENERATION_LIVE = import.meta.env.DEV;
+
 /** ComfyUI base; the Vite dev proxy maps /comfy → http://127.0.0.1:8188 */
 const COMFY = (import.meta.env.VITE_COMFY_URL as string | undefined) || '/comfy';
 
