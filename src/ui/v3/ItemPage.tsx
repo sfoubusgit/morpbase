@@ -29,6 +29,8 @@ type ItemPageProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** delete this item — only offered to its author */
+  onDelete?: (id: string) => void;
 };
 
 type Tab = 'gallery' | 'comments' | 'about';
@@ -39,7 +41,11 @@ type Tab = 'gallery' | 'comments' | 'about';
  * clicking the item's image. Gallery, comments and ratings are real (Supabase),
  * keyed by the item id, exactly like a character's page.
  */
-export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin }: ItemPageProps) {
+export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onDelete }: ItemPageProps) {
+  const isMine = Boolean(viewerAuthUid && subject.authorAuthUid && subject.authorAuthUid === viewerAuthUid);
+  const confirmDelete = () => {
+    if (onDelete && window.confirm(`Delete "${subject.name}"? This can't be undone.`)) onDelete(subject.id);
+  };
   const [tab, setTab] = useState<Tab>('gallery');
   const [remote, setRemote] = useState<RemoteImage[]>([]);
   const [comments, setComments] = useState<RemoteComment[]>([]);
@@ -108,6 +114,9 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
             <FollowButton creatorAuthUid={subject.authorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
+            {isMine && onDelete && (
+              <button type="button" className="v3-btn danger" onClick={confirmDelete}>Delete</button>
+            )}
             <span className="v3-rate" title={`Rate this ${subject.laneLabel.toLowerCase()}`}>
               {[1, 2, 3, 4, 5].map(n => (
                 <button key={n} type="button" className={n <= displayRating ? 'lit' : ''} onClick={() => handleRate(n)} aria-label={`Rate ${n}`}>★</button>

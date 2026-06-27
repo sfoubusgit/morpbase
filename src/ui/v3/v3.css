@@ -227,6 +227,8 @@
 .v3-btn.secondary:hover { background: rgba(24, 26, 34, 0.98); border-color: rgba(255, 255, 255, 0.18); color: #fff; }
 .v3-btn.green { border-color: var(--green-border); background: var(--green-bg); color: #a7f3d0; }
 .v3-btn.green:hover { background: rgba(16, 185, 129, 0.2); }
+.v3-btn.danger { border-color: rgba(248, 113, 113, 0.35); background: rgba(248, 113, 113, 0.10); color: #fca5a5; }
+.v3-btn.danger:hover { background: rgba(248, 113, 113, 0.2); border-color: rgba(248, 113, 113, 0.6); color: #fff; }
 .v3-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
 /* channel page */

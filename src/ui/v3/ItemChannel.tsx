@@ -17,6 +17,8 @@ type ItemChannelProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** delete this character — only offered to its author */
+  onDelete?: (id: string) => void;
 };
 
 type ChanTab = 'gallery' | 'comments' | 'about';
@@ -26,7 +28,11 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onDelete }: ItemChannelProps) {
+  const isMine = Boolean(viewerAuthUid && creatorAuthUid && creatorAuthUid === viewerAuthUid);
+  const confirmDelete = () => {
+    if (onDelete && window.confirm(`Delete "${character.name}"? This can't be undone.`)) onDelete(character.id);
+  };
   const [data, setData] = useState<ItemChannelData>(() => channelStore.getChannel(character.id));
   const [tab, setTab] = useState<ChanTab>('gallery');
   const [draft, setDraft] = useState('');
@@ -115,6 +121,9 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
             <FollowButton creatorAuthUid={creatorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
+            {isMine && onDelete && (
+              <button type="button" className="v3-btn danger" onClick={confirmDelete}>Delete</button>
+            )}
             <span className="v3-rate" title="Rate this character">
               {[1, 2, 3, 4, 5].map(n => (
                 <button

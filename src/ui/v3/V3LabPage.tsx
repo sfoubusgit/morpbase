@@ -10,7 +10,7 @@ import { GeneratePanel } from './GeneratePanel';
 import { consistencySeed } from './generation';
 import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
-import { listLaneItems, type RemoteLaneItem } from './laneItemsStore';
+import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
 import type { SynthElement } from './synthesis';
@@ -101,6 +101,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
   // Open an item's page (clicking its image), from anywhere — exits profile/flow.
   const openItem = (id: string) => { setShowProfile(false); setFlow(null); setChannelId(id); };
+  // Delete a user-created item (RLS enforces author-only); drop it locally + go back.
+  const deleteCreatedItem = async (id: string) => {
+    setCreatedLaneItems(prev => prev.filter(it => it.id !== id)); // optimistic
+    setChannelId(null);
+    setScene(s => s.filter(x => x !== id));
+    try { await deleteLaneItem(id); } catch { /* RLS/offline — already removed from view */ }
+  };
 
   const viewer = viewerName?.trim() || 'you';
 
@@ -370,6 +377,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onDelete={deleteCreatedItem}
           />
         ) : openSubject ? (
           <ItemPage
@@ -380,6 +388,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onDelete={deleteCreatedItem}
           />
         ) : lane === 'characters' ? (
           <>

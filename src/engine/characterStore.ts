@@ -4291,6 +4291,14 @@ const writeCharacters = (characters: CharacterIdentity[]) => {
 };
 
 const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] => {
+  // Clean slate (2026-06-27): seeding is disabled. We no longer add any seed
+  // characters, and we prune any previously-seeded ones from storage so the app
+  // starts empty for everyone. The seed arrays above are now inert/dead code.
+  const cleaned = characters.filter(c => !c.id.startsWith('character_seed_'));
+  if (cleaned.length !== characters.length) writeCharacters(cleaned);
+  return cleaned;
+
+  // --- legacy seeding (disabled) ---
   let result = characters;
 
   if (readStorageItem(CHARACTER_SEED_FLAG_KEY) === null) {
