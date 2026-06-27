@@ -259,6 +259,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <span className="v3-wordmark"><span className="base">MORPBASE</span><span className="ai">AI</span></span>
         </button>
 
+        {UNIVERSES.length > 0 && (
         <div className="v3-uni" onClick={e => e.stopPropagation()}>
           <button type="button" className="v3-unibtn" onClick={() => setUniOpen(o => !o)}>
             <span className={`v3-uni-dot${activeUniverse ? '' : ' all'}`} style={activeUniverse ? { background: `rgb(${activeUniverse.accent})` } : undefined} />
@@ -282,6 +283,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             </div>
           )}
         </div>
+        )}
 
         <div className="v3-search2">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">

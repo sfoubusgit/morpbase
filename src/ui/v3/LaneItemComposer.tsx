@@ -1,5 +1,5 @@
 import { useRef, useState, type ChangeEvent } from 'react';
-import { generationProvider, type GenProgress } from './generation';
+import { generationProvider, GENERATION_LIVE, type GenProgress } from './generation';
 import { createLaneItem, type RemoteLaneItem } from './laneItemsStore';
 
 type LaneItemComposerProps = {
@@ -110,7 +110,9 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', vie
               </div>
               <div className="v3-cmp-coveracts">
                 <button type="button" className="v3-btn utility" onClick={() => fileRef.current?.click()} disabled={rendering || saving}>Upload</button>
-                <button type="button" className="v3-btn utility" onClick={generateCover} disabled={rendering || saving}>{rendering ? 'Rendering…' : 'Generate'}</button>
+                {GENERATION_LIVE && (
+                  <button type="button" className="v3-btn utility" onClick={generateCover} disabled={rendering || saving}>{rendering ? 'Rendering…' : 'Generate'}</button>
+                )}
                 {coverUrl && <button type="button" className="v3-btn ghost" onClick={() => { setCoverBlob(null); setCoverUrl(null); }} disabled={rendering || saving}>Clear</button>}
               </div>
               <input ref={fileRef} type="file" accept="image/*" hidden onChange={onPickFile} />
