@@ -223,6 +223,8 @@
 .v3-btn.utility { border-color: var(--border-medium); background: transparent; color: var(--text-secondary); }
 .v3-btn.utility:hover { color: #fff; border-color: var(--border-accent); }
 .v3-btn.utility.on { color: #fff; border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
+.v3-btn.utility.ok { color: var(--success-base); border-color: var(--success-base); }
+.v3-btn.utility.ok:hover { color: var(--success-base); border-color: var(--success-base); }
 .v3-btn.secondary { border-color: var(--border-medium); background: rgba(17, 18, 24, 0.96); color: #d9ddea; }
 .v3-btn.secondary:hover { background: rgba(24, 26, 34, 0.98); border-color: rgba(255, 255, 255, 0.18); color: #fff; }
 .v3-btn.green { border-color: var(--green-border); background: var(--green-bg); color: #a7f3d0; }

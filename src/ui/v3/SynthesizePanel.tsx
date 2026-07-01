@@ -36,6 +36,24 @@ export function SynthesizePanel({ elements, relations = [], onBack, onGenerate }
   const [prompt, setPrompt] = useState('');
   const [working, setWorking] = useState(false);
   const [source, setSource] = useState<'ai' | 'local' | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const copyPrompt = async () => {
+    const text = prompt.trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // clipboard blocked (insecure context / permissions) — fall back to a hidden textarea
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch { /* give up silently */ }
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
 
   const relKey = relations.map(r => `${r.from}|${r.verb}|${r.to}`).join(',');
 
@@ -108,6 +126,9 @@ export function SynthesizePanel({ elements, relations = [], onBack, onGenerate }
         <div className="v3-flow-actions">
           <button type="button" className="v3-btn utility" onClick={() => run(method)} disabled={working}>
             {working ? 'Synthesizing…' : '↻ Re-synthesize'}
+          </button>
+          <button type="button" className={`v3-btn utility${copied ? ' ok' : ''}`} onClick={copyPrompt} disabled={working || !prompt.trim()}>
+            {copied ? '✓ Copied' : '⧉ Copy prompt'}
           </button>
           {GENERATION_LIVE ? (
             <button type="button" className="v3-btn primary" onClick={() => onGenerate(prompt)} disabled={!prompt.trim()}>
