@@ -13,7 +13,9 @@ import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
-import type { SynthElement } from './synthesis';
+import type { SynthElement, SynthRelation } from './synthesis';
+import { INTERACTIONS } from './interactions';
+import { ActionEmblem } from './ActionEmblem';
 import { SCENERY_ITEMS } from './scenery';
 import { OBJECT_ITEMS } from './objects';
 import { MOOD_ITEMS } from './mood';
@@ -205,7 +207,16 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     : null;
 
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
-  const removeFromScene = (id: string) => setScene(s => s.filter(x => x !== id));
+  const removeFromScene = (id: string) => {
+    setScene(s => s.filter(x => x !== id));
+    // drop any interaction that referenced the removed element
+    setInteractions(list => list.filter(x => x.from !== id && x.to !== id));
+  };
+
+  // Interactions authored in the main scene flow: directed action between two
+  // scene characters (from → to), shown as image cards, fed to synthesis.
+  const [interactions, setInteractions] = useState<{ from: string; verbId: string; to: string }[]>([]);
+  const [actionPicker, setActionPicker] = useState(false);
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -260,6 +271,30 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   // first character in the scene — the channel that Generate results save to
   const sceneCharacter = scene.map(id => registry[id]).find(s => s?.lane === 'character') ?? null;
+
+  // characters in the scene (ordered) — the endpoints an interaction can link
+  const sceneCharItems = scene.map(id => registry[id]).filter((s): s is SceneItem => !!s && s.lane === 'character');
+  // interactions → the directed relations synthesis understands (resolve names)
+  const sceneRelations: SynthRelation[] = interactions
+    .map(x => {
+      const from = registry[x.from]?.name;
+      const to = registry[x.to]?.name;
+      const rel = INTERACTIONS.find(i => i.id === x.verbId)?.rel;
+      return from && to && rel ? { from, verb: rel, to } : null;
+    })
+    .filter((r): r is SynthRelation => !!r);
+  // add an interaction between the first two scene characters (v0 binding)
+  const addInteraction = (verbId: string) => {
+    if (sceneCharItems.length < 2) return;
+    const from = sceneCharItems[0].id;
+    const to = sceneCharItems[1].id;
+    setInteractions(list =>
+      list.some(x => x.from === from && x.to === to && x.verbId === verbId)
+        ? list
+        : [...list, { from, verbId, to }]);
+    setActionPicker(false);
+  };
+  const removeInteraction = (i: number) => setInteractions(list => list.filter((_, idx) => idx !== i));
 
   return (
     <div className="v3" onClick={() => uniOpen && setUniOpen(false)}>
@@ -366,6 +401,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         ) : flow === 'synthesize' ? (
           <SynthesizePanel
             elements={sceneElements}
+            relations={sceneRelations}
             onBack={() => setFlow(null)}
             onGenerate={(p) => { setGenPrompt(p); setFlow('generate'); }}
           />
@@ -502,7 +538,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
       {scene.length > 0 && !channelChar && !showProfile && !flow && (
-        <div className="v3-dock">
+        <div className="v3-dock" onClick={e => e.stopPropagation()}>
           <span className="v3-eyebrow dock-lbl">Your scene</span>
           <div className="v3-dock-items">
             {scene.map(id => {
@@ -519,6 +555,41 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               );
             })}
           </div>
+
+          {/* interactions — a visual sentence: character · action image · character */}
+          {sceneCharItems.length >= 2 && (
+            <div className="v3-dock-actions">
+              {interactions.map((x, i) => {
+                const from = registry[x.from]; const to = registry[x.to];
+                if (!from || !to) return null;
+                return (
+                  <span key={i} className="v3-sentence" title={`${from.name} · ${to.name}`}>
+                    <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
+                    <span className="v3-actemb"><ActionEmblem id={x.verbId} /></span>
+                    <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
+                    <button type="button" className="x" onClick={() => removeInteraction(i)} aria-label="Remove">✕</button>
+                  </span>
+                );
+              })}
+              <div className="v3-actpick-wrap">
+                <button type="button" className="v3-actadd" onClick={() => setActionPicker(o => !o)} title="Add an interaction">＋ action</button>
+                {actionPicker && (
+                  <div className="v3-actpick">
+                    <div className="v3-actpick-hd">{sceneCharItems[0].name} → {sceneCharItems[1].name}</div>
+                    <div className="v3-actpick-grid">
+                      {INTERACTIONS.map(a => (
+                        <button type="button" key={a.id} className="v3-actcard" onClick={() => addInteraction(a.id)} title={a.label}>
+                          <span className="em"><ActionEmblem id={a.id} /></span>
+                          <span className="lb">{a.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <button type="button" className="v3-syn" onClick={() => setFlow('synthesize')}>
             Synthesize ({scene.length})
           </button>
