@@ -11,6 +11,7 @@ import { consistencySeed } from './generation';
 import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
+import { DEV_LANE_ITEMS } from './laneItemSeed';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
 import type { SynthElement, SynthRelation } from './synthesis';
@@ -96,9 +97,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   }, []);
 
   // User-created lane objects (shared via Supabase) merged into the seeded lanes.
+  // In dev we prepend read-only test fixtures (2 per lane) so every lane has
+  // content to work with; prod stays a clean slate.
   useEffect(() => {
     let live = true;
-    listLaneItems().then(items => { if (live) setCreatedLaneItems(items); }).catch(() => { /* offline → seeds only */ });
+    const seed = import.meta.env.DEV ? DEV_LANE_ITEMS : [];
+    listLaneItems()
+      .then(items => { if (live) setCreatedLaneItems([...seed, ...items]); })
+      .catch(() => { if (live) setCreatedLaneItems(seed); });
     return () => { live = false; };
   }, []);
 
