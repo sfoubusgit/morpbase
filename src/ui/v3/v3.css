@@ -467,7 +467,7 @@
 .v3-actadd { background: rgba(255, 255, 255, 0.05); border: 1px dashed var(--border-medium); border-radius: var(--radius-pill); padding: 6px 12px; cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); white-space: nowrap; }
 .v3-actadd:hover { color: #fff; border-color: var(--border-accent); }
 /* guided link builder popover */
-.v3-linkbar { position: absolute; bottom: calc(100% + 12px); left: 0; min-width: 260px; max-width: 344px; z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
+.v3-linkbar { position: absolute; bottom: calc(100% + 12px); right: 0; width: max-content; min-width: 260px; max-width: 344px; z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
 .v3-linkbar-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .v3-linkstep { display: inline-flex; align-items: center; gap: 8px; font: var(--font-weight-medium) 12px var(--font-primary); color: var(--text-secondary); }
 .v3-linkstep b { flex: none; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--accent-primary); color: #fff; font-size: 11px; font-weight: var(--font-weight-bold); }
