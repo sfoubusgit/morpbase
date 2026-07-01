@@ -4290,13 +4290,66 @@ const writeCharacters = (characters: CharacterIdentity[]) => {
   writeStorageItem(CHARACTER_STORE_BACKUP_KEY, payload);
 };
 
+// Two SFW test characters, seeded ONCE in local dev only (never on the deployed
+// site), so the interaction feature can be tried on the otherwise-clean slate.
+const TEST_CHARS_FLAG = 'promptgen:test_chars:v1';
+const TEST_CHARACTERS: CharacterIdentity[] = [
+  {
+    id: 'character_test_ana',
+    name: 'Ana Vale',
+    summary: 'A calm, sharp-eyed investigator in a long charcoal coat.',
+    tags: ['you'],
+    identity: {
+      archetype: 'investigator', presentation: 'clothed', ageImpression: 'adult',
+      visualAnchors: [
+        { id: 'a1', label: 'Hair', kind: 'hair', text: 'short silver-grey hair swept back' },
+        { id: 'a2', label: 'Face', kind: 'face', text: 'calm grey eyes, a thin scar over one brow' },
+        { id: 'a3', label: 'Clothing', kind: 'clothing', text: 'a long charcoal wool coat over a dark shirt' },
+      ],
+      motifs: [],
+    },
+    phraseBundle: { core: [
+      'a tall composed woman in a long charcoal coat',
+      'short silver-grey hair swept back, calm grey eyes',
+      'a thin pale scar over one brow',
+    ] },
+    createdAt: 0, updatedAt: 0,
+  },
+  {
+    id: 'character_test_bo',
+    name: 'Bo Reyes',
+    summary: 'A warm, broad-shouldered mechanic with an easy grin.',
+    tags: ['you'],
+    identity: {
+      archetype: 'mechanic', presentation: 'clothed', ageImpression: 'adult',
+      visualAnchors: [
+        { id: 'b1', label: 'Build', kind: 'silhouette', text: 'stocky, broad-shouldered build' },
+        { id: 'b2', label: 'Face', kind: 'face', text: 'warm brown skin, shaved head, short black beard, an easy grin' },
+        { id: 'b3', label: 'Clothing', kind: 'clothing', text: 'a weathered brown leather jacket over a grey tee' },
+      ],
+      motifs: [],
+    },
+    phraseBundle: { core: [
+      'a broad-shouldered man with warm brown skin',
+      'a shaved head and short black beard, an easy grin',
+      'a weathered brown leather jacket over a grey tee',
+    ] },
+    createdAt: 0, updatedAt: 0,
+  },
+];
+
 const maybeApplySeed = (characters: CharacterIdentity[]): CharacterIdentity[] => {
-  // Clean slate (2026-06-27): seeding is disabled. We no longer add any seed
-  // characters, and we prune any previously-seeded ones from storage so the app
-  // starts empty for everyone. The seed arrays above are now inert/dead code.
-  const cleaned = characters.filter(c => !c.id.startsWith('character_seed_'));
-  if (cleaned.length !== characters.length) writeCharacters(cleaned);
-  return cleaned;
+  // Clean slate: legacy seeding disabled; prune any previously-seeded character_seed_*.
+  let out = characters.filter(c => !c.id.startsWith('character_seed_'));
+  // Local-dev only: seed the two test characters once so interactions are testable.
+  if (import.meta.env.DEV && readStorageItem(TEST_CHARS_FLAG) === null) {
+    writeStorageItem(TEST_CHARS_FLAG, true);
+    const existing = new Set(out.map(c => c.id));
+    const toAdd = TEST_CHARACTERS.filter(c => !existing.has(c.id));
+    if (toAdd.length > 0) out = sortCharacters([...out, ...toAdd]);
+  }
+  if (out.length !== characters.length) writeCharacters(out);
+  return out;
 
   // --- legacy seeding (disabled) ---
   let result = characters;
