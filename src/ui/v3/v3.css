@@ -463,6 +463,20 @@
 .v3-actcard .em svg { width: 26px; height: 26px; }
 .v3-actcard .lb { font: var(--font-weight-medium) 10.5px var(--font-primary); color: var(--text-secondary); }
 
+/* actions lane — browse wall */
+.v3-actwall { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.v3-actwall-card { position: relative; display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); }
+.v3-actwall-card:hover { border-color: var(--border-accent); }
+.v3-actwall-card .art { width: 46px; height: 46px; flex: none; display: flex; align-items: center; justify-content: center; color: #fff; background: rgba(255, 255, 255, 0.05); border-radius: var(--radius-sm); overflow: hidden; }
+.v3-actwall-card .art svg { width: 30px; height: 30px; }
+.v3-actwall-card .meta { min-width: 0; }
+.v3-actwall-card .meta .nm { font: var(--font-weight-semibold) 13px var(--font-primary); color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v3-actwall-card .meta .rel { font: var(--font-weight-regular) 11px var(--font-primary); color: var(--text-tertiary); margin-top: 2px; }
+.v3-actwall-card .meta .rel b { color: var(--text-secondary); font-weight: var(--font-weight-semibold); }
+.v3-actwall-card .del { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; display: none; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6); border: none; border-radius: 50%; color: rgba(255, 255, 255, 0.8); cursor: pointer; font-size: 11px; }
+.v3-actwall-card:hover .del { display: flex; }
+.v3-actwall-card .del:hover { color: #fff; background: rgba(220, 60, 60, 0.85); }
+
 /* ===== Synthesize / Generate flow ===== */
 .v3-flow { max-width: 1100px; margin: 0 auto; }
 .v3-flow-back { background: none; border: none; color: var(--text-secondary); cursor: pointer; font: var(--font-weight-semibold) 13px var(--font-primary); padding: 0 0 16px; }

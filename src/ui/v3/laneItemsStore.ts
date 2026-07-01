@@ -19,6 +19,8 @@ export type RemoteLaneItem = {
   author: string;
   authorAuthUid: string | null;
   world: string;
+  /** for actions only — the relation phrase, e.g. "is dancing with" */
+  relation: string;
   createdAt: string;
 };
 
@@ -32,10 +34,11 @@ type Row = {
   author_label: string | null;
   author_auth_uid: string | null;
   world: string | null;
+  relation: string | null;
   created_at: string;
 };
 
-const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, world, created_at';
+const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, world, relation, created_at';
 
 const toItem = (r: Row): RemoteLaneItem => ({
   id: r.id,
@@ -47,6 +50,7 @@ const toItem = (r: Row): RemoteLaneItem => ({
   author: r.author_label || 'creator',
   authorAuthUid: r.author_auth_uid,
   world: (r.world || '').trim(),
+  relation: (r.relation || '').trim(),
   createdAt: r.created_at,
 });
 
@@ -70,9 +74,10 @@ export async function createLaneItem(params: {
   summary: string;
   phrases: string[];
   world?: string;
+  relation?: string;
   coverBlob?: Blob | null;
 }): Promise<RemoteLaneItem> {
-  const { lane, authUid, authorLabel, name, summary, phrases, world, coverBlob } = params;
+  const { lane, authUid, authorLabel, name, summary, phrases, world, relation, coverBlob } = params;
 
   let coverUrl: string | null = null;
   let storagePath: string | null = null;
@@ -96,6 +101,7 @@ export async function createLaneItem(params: {
       author_auth_uid: authUid,
       author_label: authorLabel,
       world: (world || '').trim() || null,
+      relation: (relation || '').trim() || null,
     })
     .select(COLS)
     .single();

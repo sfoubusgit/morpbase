@@ -43,7 +43,8 @@ type LaneDef = { key: string; label: string; accent: string; status: 'live' | 's
 
 const LANES: LaneDef[] = [
   { key: 'characters', label: 'Characters', accent: 'var(--la-character)', status: 'live' },
-  { key: 'scenery', label: 'Scenery', accent: 'var(--la-scenery)', status: 'live', isNew: true },
+  { key: 'actions', label: 'Actions', accent: 'var(--la-mood)', status: 'live', isNew: true },
+  { key: 'scenery', label: 'Scenery', accent: 'var(--la-scenery)', status: 'live' },
   { key: 'objects', label: 'Objects', accent: 'var(--la-objects)', status: 'live' },
   { key: 'environment', label: 'Environment', accent: 'var(--la-environment)', status: 'live' },
   { key: 'mood', label: 'Mood', accent: 'var(--la-mood)', status: 'live' },
@@ -214,8 +215,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   };
 
   // Interactions authored in the main scene flow: directed action between two
-  // scene characters (from → to), shown as image cards, fed to synthesis.
-  const [interactions, setInteractions] = useState<{ from: string; verbId: string; to: string }[]>([]);
+  // scene characters (from → to). verb = relation phrase; emblem (seeded) or
+  // cover (user-created action) is how it's shown.
+  const [interactions, setInteractions] = useState<{ from: string; to: string; verb: string; emblem?: string; cover?: string | null }[]>([]);
   const [actionPicker, setActionPicker] = useState(false);
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
@@ -279,19 +281,26 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     .map(x => {
       const from = registry[x.from]?.name;
       const to = registry[x.to]?.name;
-      const rel = INTERACTIONS.find(i => i.id === x.verbId)?.rel;
-      return from && to && rel ? { from, verb: rel, to } : null;
+      return from && to && x.verb ? { from, verb: x.verb, to } : null;
     })
     .filter((r): r is SynthRelation => !!r);
+  // Actions available to pick: seeded emblems + user-created action cards.
+  type PickAction = { key: string; label: string; verb: string; emblem?: string; cover?: string | null };
+  const pickActions: PickAction[] = [
+    ...INTERACTIONS.map(i => ({ key: i.id, label: i.label, verb: i.rel, emblem: i.id })),
+    ...visibleCreatedItems
+      .filter(it => it.lane === 'actions' && it.relation)
+      .map(it => ({ key: it.id, label: it.name, verb: it.relation, cover: it.coverUrl })),
+  ];
   // add an interaction between the first two scene characters (v0 binding)
-  const addInteraction = (verbId: string) => {
+  const addInteraction = (a: PickAction) => {
     if (sceneCharItems.length < 2) return;
     const from = sceneCharItems[0].id;
     const to = sceneCharItems[1].id;
     setInteractions(list =>
-      list.some(x => x.from === from && x.to === to && x.verbId === verbId)
+      list.some(x => x.from === from && x.to === to && x.verb === a.verb)
         ? list
-        : [...list, { from, verbId, to }]);
+        : [...list, { from, to, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
     setActionPicker(false);
   };
   const removeInteraction = (i: number) => setInteractions(list => list.filter((_, idx) => idx !== i));
@@ -503,6 +512,46 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               emptyHint={q ? `No ${WALL_LANES[lane].label.toLowerCase()} matches your search.` : `No ${WALL_LANES[lane].label.toLowerCase()} yet.`}
             />
           </>
+        ) : lane === 'actions' ? (
+          <>
+            <div className="v3-head">
+              <div>
+                <div className="v3-eyebrow">Actions lane</div>
+                <h2>Actions</h2>
+                <div className="v3-sub">
+                  {pickActions.length} action{pickActions.length === 1 ? '' : 's'} · interactions you can place between two characters in a scene.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="v3-create-btn"
+                style={cssVar('var(--la-mood)')}
+                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
+                title={viewerAuthUid ? 'Create a new action' : 'Log in to create'}
+              >
+                <span className="pl">＋</span> Create
+              </button>
+            </div>
+            <div className="v3-actwall">
+              {pickActions.map(a => {
+                const mine = createdLaneItems.find(it => it.id === a.key && it.lane === 'actions' && it.authorAuthUid && it.authorAuthUid === viewerAuthUid);
+                return (
+                  <div key={a.key} className="v3-actwall-card">
+                    <span className="art" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
+                      {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
+                    </span>
+                    <div className="meta">
+                      <div className="nm">{a.label}</div>
+                      <div className="rel">A <b>{a.verb}</b> B</div>
+                    </div>
+                    {mine && (
+                      <button type="button" className="del" onClick={() => deleteCreatedItem(a.key)} title="Delete this action" aria-label="Delete">✕</button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         ) : lane === 'favorites' ? (
           <>
             <div className="v3-head">
@@ -565,7 +614,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                 return (
                   <span key={i} className="v3-sentence" title={`${from.name} · ${to.name}`}>
                     <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
-                    <span className="v3-actemb"><ActionEmblem id={x.verbId} /></span>
+                    <span className="v3-actemb" style={x.cover ? { backgroundImage: `url(${x.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
+                      {!x.cover && <ActionEmblem id={x.emblem ?? ''} />}
+                    </span>
                     <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
                     <button type="button" className="x" onClick={() => removeInteraction(i)} aria-label="Remove">✕</button>
                   </span>
@@ -577,9 +628,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   <div className="v3-actpick">
                     <div className="v3-actpick-hd">{sceneCharItems[0].name} → {sceneCharItems[1].name}</div>
                     <div className="v3-actpick-grid">
-                      {INTERACTIONS.map(a => (
-                        <button type="button" key={a.id} className="v3-actcard" onClick={() => addInteraction(a.id)} title={a.label}>
-                          <span className="em"><ActionEmblem id={a.id} /></span>
+                      {pickActions.map(a => (
+                        <button type="button" key={a.key} className="v3-actcard" onClick={() => addInteraction(a)} title={a.label}>
+                          <span className="em" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
+                            {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
+                          </span>
                           <span className="lb">{a.label}</span>
                         </button>
                       ))}
@@ -596,12 +649,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters') && (
+      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters' || lane === 'actions') && (
         <LaneItemComposer
           lane={lane}
-          laneLabel={WALL_LANES[lane]?.label ?? 'Characters'}
-          accent={WALL_LANES[lane]?.accent ?? 'var(--la-character)'}
-          kind={lane === 'characters' ? 'character' : 'object'}
+          laneLabel={WALL_LANES[lane]?.label ?? (lane === 'actions' ? 'Actions' : 'Characters')}
+          accent={WALL_LANES[lane]?.accent ?? (lane === 'actions' ? 'var(--la-mood)' : 'var(--la-character)')}
+          kind={lane === 'characters' ? 'character' : lane === 'actions' ? 'action' : 'object'}
           worlds={worlds}
           viewerName={viewer}
           viewerAuthUid={viewerAuthUid}

@@ -6,7 +6,7 @@ type LaneItemComposerProps = {
   lane: string;        // lane key, e.g. 'scenery'
   laneLabel: string;   // 'Scenery'
   accent: string;      // rgb-triplet var, e.g. 'var(--la-scenery)'
-  kind?: 'character' | 'object';
+  kind?: 'character' | 'object' | 'action';
   /** existing world names, for the autocomplete on the World field */
   worlds?: string[];
   viewerName: string;
@@ -23,15 +23,19 @@ type LaneItemComposerProps = {
  */
 export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', worlds = [], viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
   const isChar = kind === 'character';
-  const singular = isChar ? 'character' : laneLabel.toLowerCase().replace(/s$/, '');
-  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
-  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : 'one per line · fed into synthesis';
+  const isAction = kind === 'action';
+  const singular = isChar ? 'character' : isAction ? 'action' : laneLabel.toLowerCase().replace(/s$/, '');
+  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : isAction ? 'e.g. Dancing' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
+  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : isAction ? 'optional · how the interaction looks' : 'one per line · fed into synthesis';
   const phrasesPlaceholder = isChar
     ? 'tall woman with sharp features and a long black coat\nsilver undercut, calm grey eyes, a faint scar over one brow'
-    : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
+    : isAction
+      ? 'mid-turn, hands clasped, a blur of motion\nleaning close, caught in the moment'
+      : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
   const [name, setName] = useState('');
   const [summary, setSummary] = useState('');
   const [world, setWorld] = useState('');
+  const [relation, setRelation] = useState('');
   const [phrasesText, setPhrasesText] = useState('');
   const [coverBlob, setCoverBlob] = useState<Blob | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -42,7 +46,8 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const fileRef = useRef<HTMLInputElement>(null);
 
   const phrases = phrasesText.split('\n').map(p => p.trim()).filter(Boolean);
-  const canSave = name.trim().length > 0 && phrases.length > 0 && !saving;
+  // Actions require a relation phrase (phrases optional); everything else requires phrases.
+  const canSave = name.trim().length > 0 && (isAction ? relation.trim().length > 0 : phrases.length > 0) && !saving;
   const pct = progress && progress.max > 0 ? Math.round((progress.value / progress.max) * 100) : null;
 
   const setCover = (blob: Blob) => {
@@ -78,7 +83,8 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
     try {
       const item = await createLaneItem({
         lane, authUid: viewerAuthUid, authorLabel: viewerName,
-        name: name.trim(), summary: summary.trim(), phrases, world: world.trim(), coverBlob,
+        name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
+        relation: isAction ? relation.trim() : undefined, coverBlob,
       });
       onCreated(item);
     } catch (e) {
@@ -130,6 +136,11 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
               <label className="v3-cmp-field">Summary <span className="opt">optional</span>
                 <input value={summary} onChange={e => setSummary(e.target.value)} placeholder="One line describing it." maxLength={160} />
               </label>
+              {isAction && (
+                <label className="v3-cmp-field">Relation <span className="opt">reads as: A <b>___</b> B</span>
+                  <input value={relation} onChange={e => setRelation(e.target.value)} placeholder="e.g. is dancing with" maxLength={40} />
+                </label>
+              )}
               <label className="v3-cmp-field">World <span className="opt">optional · groups your related items</span>
                 <input value={world} onChange={e => setWorld(e.target.value)} placeholder="e.g. Neon District — type a new one or pick an existing" list="v3-world-list" maxLength={60} />
                 <datalist id="v3-world-list">{worlds.map(w => <option key={w} value={w} />)}</datalist>
