@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { synthesisProvider, type SynthElement, type SynthMethod } from './synthesis';
+import { useEffect, useMemo, useState } from 'react';
+import { synthesisProvider, type SynthElement, type SynthMethod, type SynthRelation } from './synthesis';
 import { GENERATION_LIVE } from './generation';
+import { INTERACTIONS } from './interactions';
 
 type SynthesizePanelProps = {
   elements: SynthElement[];
@@ -34,16 +35,36 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
   const [prompt, setPrompt] = useState('');
   const [working, setWorking] = useState(false);
   const [source, setSource] = useState<'ai' | 'local' | null>(null);
+  const [relations, setRelations] = useState<SynthRelation[]>([]);
+
+  // Character names in the scene — the endpoints an interaction can connect.
+  const charNames = useMemo(() => elements.filter(e => e.kind === 'character').map(e => e.name), [elements]);
+  // Add-row state for building a new interaction.
+  const [newVerb, setNewVerb] = useState(INTERACTIONS[0].id);
+  const [newFrom, setNewFrom] = useState('');
+  const [newTo, setNewTo] = useState('');
+
+  const relKey = relations.map(r => `${r.from}|${r.verb}|${r.to}`).join(',');
 
   const run = async (m: SynthMethod) => {
     setWorking(true);
-    const res = await synthesisProvider.synthesize(elements, m);
+    const res = await synthesisProvider.synthesize(elements, m, relations);
     setPrompt(res.text);
     setSource(res.source);
     setWorking(false);
   };
 
-  useEffect(() => { void run(method); /* re-run on method or scene change */ }, [method, elements.length]);
+  useEffect(() => { void run(method); /* re-run on method, scene, or interaction change */ }, [method, elements.length, relKey]);
+
+  const addRelation = () => {
+    const from = newFrom || charNames[0];
+    const to = newTo || charNames.find(n => n !== from) || '';
+    if (!from || !to || from === to) return;
+    const rel = INTERACTIONS.find(i => i.id === newVerb)?.rel ?? 'is with';
+    setRelations(rs => [...rs, { from, verb: rel, to }]);
+    setNewFrom(''); setNewTo('');
+  };
+  const removeRelation = (i: number) => setRelations(rs => rs.filter((_, idx) => idx !== i));
 
   return (
     <div className="v3-flow">
@@ -73,6 +94,34 @@ export function SynthesizePanel({ elements, onBack, onGenerate }: SynthesizePane
             </span>
           ))}
         </div>
+
+        {charNames.length >= 2 && (
+          <div className="v3-interact">
+            <div className="ph" style={{ marginTop: 18 }}>Interactions <span className="v3-int-hint">how the characters relate — the focus of the scene</span></div>
+            {relations.length > 0 && (
+              <div className="v3-int-chips">
+                {relations.map((r, i) => (
+                  <span key={i} className="v3-int-chip">
+                    {r.from} <b>{r.verb}</b> {r.to}
+                    <button type="button" className="x" onClick={() => removeRelation(i)} aria-label="Remove">✕</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="v3-int-add">
+              <select value={newFrom || charNames[0]} onChange={e => setNewFrom(e.target.value)}>
+                {charNames.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <select value={newVerb} onChange={e => setNewVerb(e.target.value)}>
+                {INTERACTIONS.map(i => <option key={i.id} value={i.id}>{i.label}</option>)}
+              </select>
+              <select value={newTo || (charNames.find(n => n !== (newFrom || charNames[0])) ?? '')} onChange={e => setNewTo(e.target.value)}>
+                {charNames.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+              <button type="button" className="v3-btn utility" onClick={addRelation}>＋ Link</button>
+            </div>
+          </div>
+        )}
 
         <div className="ph" style={{ marginTop: 20 }}>
           Synthesized prompt · editable

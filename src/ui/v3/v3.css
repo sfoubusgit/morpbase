@@ -503,6 +503,17 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
 .v3-lock-vary { flex: none; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); padding: 6px 12px; cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); }
 .v3-lock-vary:hover { color: #fff; border-color: var(--border-accent); }
 
+/* interactions (character ↔ character actions) */
+.v3-int-hint { font: var(--font-weight-medium) 11px var(--font-primary); color: var(--text-muted); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+.v3-int-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+.v3-int-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); padding: 5px 6px 5px 12px; font: var(--font-weight-medium) 12.5px var(--font-primary); color: var(--text-secondary); }
+.v3-int-chip b { color: #fff; font-weight: var(--font-weight-semibold); }
+.v3-int-chip .x { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 11px; padding: 2px 4px; border-radius: 50%; }
+.v3-int-chip .x:hover { color: var(--error-base); }
+.v3-int-add { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.v3-int-add select { background: rgba(8, 9, 14, 0.6); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); color: #fff; padding: 7px 10px; font: var(--font-weight-medium) 12.5px var(--font-primary); cursor: pointer; }
+.v3-int-add .v3-btn { padding: 7px 14px; font-size: 12.5px; }
+
 .v3-gen-go { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
 .v3-bar { flex: 1; height: 7px; border-radius: var(--radius-pill); background: rgba(8, 9, 14, 0.6); overflow: hidden; border: 1px solid var(--border-subtle); }
 .v3-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent-primary), #36d3c4); transition: width 140ms linear; }

@@ -18,9 +18,15 @@ export type SynthElement = {
 
 export type SynthResult = { text: string; source: 'ai' | 'local' };
 
+/** A directed interaction between two characters, e.g. { from:'Ana', verb:'is kissing', to:'Bo' }. */
+export type SynthRelation = { from: string; verb: string; to: string };
+
 export interface SynthesisProvider {
-  synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult>;
+  synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult>;
 }
+
+const relationText = (relations?: SynthRelation[]): string =>
+  (relations ?? []).map(r => `${r.from} ${r.verb} ${r.to}`).join('; ');
 
 const byKind = (els: SynthElement[], kind: string) => els.filter(e => e.kind === kind);
 
@@ -47,7 +53,9 @@ function shuffle<T>(arr: T[]): T[] {
   return x;
 }
 
-function compose(elements: SynthElement[], method: SynthMethod): string {
+function compose(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): string {
+  const relText = relationText(relations);
+  const lead = relText ? cap(relText) + '. ' : '';
   const chars = byKind(elements, 'character');
   const scenery = byKind(elements, 'scenery');
   const environment = byKind(elements, 'environment');
@@ -71,7 +79,7 @@ function compose(elements: SynthElement[], method: SynthMethod): string {
     if (sceneryText) bits.push(sceneryText);
     if (lightText) bits.push(lightText);
     if (compText) bits.push(compText);
-    return cap(bits.filter(Boolean).join(', ') + '.');
+    return lead + cap(bits.filter(Boolean).join(', ') + '.');
   }
 
   if (method === 'cinematic') {
@@ -84,7 +92,7 @@ function compose(elements: SynthElement[], method: SynthMethod): string {
     if (lightText) s += `. ${cap(lightText)}`;
     if (compText) s += `, ${compText}`;
     s += '. Dramatic depth, a held breath of tension.';
-    return cap(s);
+    return lead + cap(s);
   }
 
   // faithful
@@ -96,13 +104,13 @@ function compose(elements: SynthElement[], method: SynthMethod): string {
   if (moodText) s += `, ${moodText} mood`;
   if (lightText) s += `, ${lightText}`;
   if (compText) s += `, ${compText}`;
-  return cap(s.endsWith('.') ? s : s + '.');
+  return lead + cap(s.endsWith('.') ? s : s + '.');
 }
 
 /** Local heuristic — also the graceful fallback when the LLM is unreachable. */
 class LocalSynthesisProvider implements SynthesisProvider {
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
-    return { text: compose(elements, method), source: 'local' };
+  async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
+    return { text: compose(elements, method, relations), source: 'local' };
   }
 }
 
@@ -119,7 +127,9 @@ const SYSTEM_PROMPT =
   'scenery/action, environment, mood, objects, lighting) into ONE coherent moment — ' +
   'a tiny vivid scene with a clear sense of what is happening — written as a single ' +
   'image-generation prompt. Place the characters into the action and setting, and carry ' +
-  'the mood through it. 1–3 sentences, present tense, concrete, describing only what is seen. ' +
+  'the mood through it. If Interactions between characters are given (e.g. "A is kissing B"), ' +
+  'make that interaction the FOCUS of the moment and stage the characters accordingly. ' +
+  '1–3 sentences, present tense, concrete, describing only what is seen. ' +
   'Do not specify art medium or style — that is chosen separately. ' +
   'Output ONLY the prompt text: no preamble, labels, options, or quotes.';
 
@@ -134,13 +144,15 @@ function methodGuidance(method: SynthMethod): string {
   return "Preserve every element's described details faithfully.";
 }
 
-function buildUserMessage(elements: SynthElement[], method: SynthMethod): string {
+function buildUserMessage(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): string {
   const lines = elements.map(e => `- ${cap(e.kind)}: ${e.name}${e.phrases.length ? ` — ${e.phrases.join('; ')}` : ''}`);
-  return `Method: ${methodGuidance(method)}\n\nElements:\n${lines.join('\n')}\n\nCompose the single image prompt now.`;
+  const rels = (relations ?? []).map(r => `- ${r.from} ${r.verb} ${r.to}`);
+  const relBlock = rels.length ? `\n\nInteractions (make these the focus):\n${rels.join('\n')}` : '';
+  return `Method: ${methodGuidance(method)}\n\nElements:\n${lines.join('\n')}${relBlock}\n\nCompose the single image prompt now.`;
 }
 
 class LlmSynthesisProvider implements SynthesisProvider {
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
+  async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
     const res = await fetch(LLM_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -149,7 +161,7 @@ class LlmSynthesisProvider implements SynthesisProvider {
         max_tokens: 400,
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserMessage(elements, method) },
+          { role: 'user', content: buildUserMessage(elements, method, relations) },
         ],
       }),
     });
@@ -166,7 +178,7 @@ class LlmSynthesisProvider implements SynthesisProvider {
 const POLLINATIONS_URL = 'https://text.pollinations.ai/openai';
 
 class PollinationsSynthesisProvider implements SynthesisProvider {
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
+  async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
     const res = await fetch(POLLINATIONS_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -174,7 +186,7 @@ class PollinationsSynthesisProvider implements SynthesisProvider {
         model: 'openai',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: buildUserMessage(elements, method) },
+          { role: 'user', content: buildUserMessage(elements, method, relations) },
         ],
       }),
     });
@@ -195,14 +207,14 @@ class SmartSynthesisProvider implements SynthesisProvider {
   private pollinations = new PollinationsSynthesisProvider();
   private openrouter = new LlmSynthesisProvider();
   private local = new LocalSynthesisProvider();
-  async synthesize(elements: SynthElement[], method: SynthMethod): Promise<SynthResult> {
+  async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
     try {
-      return await this.pollinations.synthesize(elements, method);
+      return await this.pollinations.synthesize(elements, method, relations);
     } catch {
       try {
-        return await this.openrouter.synthesize(elements, method);
+        return await this.openrouter.synthesize(elements, method, relations);
       } catch {
-        return this.local.synthesize(elements, method);
+        return this.local.synthesize(elements, method, relations);
       }
     }
   }
