@@ -218,7 +218,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // scene characters (from → to). verb = relation phrase; emblem (seeded) or
   // cover (user-created action) is how it's shown.
   const [interactions, setInteractions] = useState<{ from: string; to: string; verb: string; emblem?: string; cover?: string | null }[]>([]);
-  const [actionPicker, setActionPicker] = useState(false);
+  // Tap-to-link builder: null = idle; otherwise a partial link being assembled.
+  // Phase is derived — no `from` → pick who; `from` but no `action` → pick action;
+  // both set → pick whom. Guides the user through an explicit A → action → B link.
+  const [linkStep, setLinkStep] = useState<null | { from?: string; action?: PickAction }>(null);
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -292,16 +295,26 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       .filter(it => it.lane === 'actions' && it.relation)
       .map(it => ({ key: it.id, label: it.name, verb: it.relation, cover: it.coverUrl })),
   ];
-  // add an interaction between the first two scene characters (v0 binding)
-  const addInteraction = (a: PickAction) => {
-    if (sceneCharItems.length < 2) return;
-    const from = sceneCharItems[0].id;
-    const to = sceneCharItems[1].id;
-    setInteractions(list =>
-      list.some(x => x.from === from && x.to === to && x.verb === a.verb)
-        ? list
-        : [...list, { from, to, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
-    setActionPicker(false);
+  // Tap-to-link builder. The user taps a character (from), picks an action, then
+  // taps a second character (to) — an explicit A → action → B link.
+  const startLink = () => setLinkStep({});
+  const cancelLink = () => setLinkStep(null);
+  const pickLinkAction = (a: PickAction) => setLinkStep(s => (s ? { ...s, action: a } : s));
+  // Tapping a character chip while linking: sets `from`, or completes the link as `to`.
+  const tapCharForLink = (id: string) => {
+    setLinkStep(s => {
+      if (!s) return s;
+      if (!s.from) return { from: id };            // step 1 → picked who
+      if (s.from && s.action && id !== s.from) {   // step 3 → picked whom → commit
+        const a = s.action;
+        setInteractions(list =>
+          list.some(x => x.from === s.from && x.to === id && x.verb === a.verb)
+            ? list
+            : [...list, { from: s.from!, to: id, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
+        return null;
+      }
+      return s;
+    });
   };
   const removeInteraction = (i: number) => setInteractions(list => list.filter((_, idx) => idx !== i));
 
@@ -593,43 +606,81 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             {scene.map(id => {
               const item = registry[id];
               if (!item) return null;
+              const isChar = item.lane === 'character';
+              // Which character chips are tappable right now depends on the link phase.
+              const pickFrom = !!linkStep && !linkStep.from && isChar;
+              const pickTo = !!linkStep && !!linkStep.from && !!linkStep.action && isChar && id !== linkStep.from;
+              const linkable = pickFrom || pickTo;
+              const isFrom = linkStep?.from === id;
+              const dim = !!linkStep && !linkable && !isFrom;
               return (
-                <span key={id} className="v3-dock-chip" style={cssVar(item.accent)}>
+                <span
+                  key={id}
+                  className={`v3-dock-chip${linkable ? ' linkable' : ''}${isFrom ? ' isfrom' : ''}${dim ? ' dim' : ''}`}
+                  style={cssVar(item.accent)}
+                  onClick={linkable ? () => tapCharForLink(id) : undefined}
+                  role={linkable ? 'button' : undefined}
+                  title={pickFrom ? `Link from ${item.name}` : pickTo ? `Link to ${item.name}` : undefined}
+                >
                   <span className={`sw${item.image ? '' : ' v3-ph'}`} style={item.image ? { backgroundImage: `url(${item.image})` } : undefined}>
                     {!item.image && <LanePlaceholder lane={item.lane} />}
                   </span>
                   <span className="t">{item.name}</span>
-                  <button type="button" className="x" onClick={() => removeFromScene(id)} aria-label="Remove">✕</button>
+                  {!linkStep && <button type="button" className="x" onClick={() => removeFromScene(id)} aria-label="Remove">✕</button>}
                 </span>
               );
             })}
           </div>
 
-          {/* interactions — a visual sentence: character · action image · character */}
+          {/* interactions — explicit A → action → B links, built by tapping */}
           {sceneCharItems.length >= 2 && (
             <div className="v3-dock-actions">
               {interactions.map((x, i) => {
                 const from = registry[x.from]; const to = registry[x.to];
                 if (!from || !to) return null;
                 return (
-                  <span key={i} className="v3-sentence" title={`${from.name} · ${to.name}`}>
-                    <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
-                    <span className="v3-actemb" style={x.cover ? { backgroundImage: `url(${x.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
-                      {!x.cover && <ActionEmblem id={x.emblem ?? ''} />}
+                  <span key={i} className="v3-sentence" title={`${from.name} ${x.verb} ${to.name}`}>
+                    <span className="ep">
+                      <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
+                      <span className="nm">{from.name}</span>
                     </span>
-                    <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
+                    <span className="v3-link">
+                      <span className="v3-actemb" style={x.cover ? { backgroundImage: `url(${x.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
+                        {!x.cover && <ActionEmblem id={x.emblem ?? ''} />}
+                      </span>
+                      <span className="vb">{x.verb}</span>
+                    </span>
+                    <span className="ep">
+                      <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
+                      <span className="nm">{to.name}</span>
+                    </span>
                     <button type="button" className="x" onClick={() => removeInteraction(i)} aria-label="Remove">✕</button>
                   </span>
                 );
               })}
-              <div className="v3-actpick-wrap">
-                <button type="button" className="v3-actadd" onClick={() => setActionPicker(o => !o)} title="Add an interaction">＋ action</button>
-                {actionPicker && (
-                  <div className="v3-actpick">
-                    <div className="v3-actpick-hd">{sceneCharItems[0].name} → {sceneCharItems[1].name}</div>
+
+              {/* guided link builder */}
+              {!linkStep ? (
+                <button type="button" className="v3-actadd" onClick={startLink} title="Connect two characters">＋ connect characters</button>
+              ) : (
+                <div className="v3-linkbar">
+                  <div className="v3-linkbar-hd">
+                    <span className="v3-linkstep">
+                      {!linkStep.from ? (
+                        <><b>1</b> Tap the first character above</>
+                      ) : !linkStep.action ? (
+                        <><b>2</b> Pick an action for <em>{registry[linkStep.from]?.name}</em></>
+                      ) : (
+                        <><b>3</b> Tap who <em>{registry[linkStep.from]?.name} {linkStep.action.verb}</em></>
+                      )}
+                    </span>
+                    <button type="button" className="v3-linkcancel" onClick={cancelLink}>Cancel</button>
+                  </div>
+                  {/* action picker appears once the first character is chosen */}
+                  {linkStep.from && !linkStep.action && (
                     <div className="v3-actpick-grid">
                       {pickActions.map(a => (
-                        <button type="button" key={a.key} className="v3-actcard" onClick={() => addInteraction(a)} title={a.label}>
+                        <button type="button" key={a.key} className="v3-actcard" onClick={() => pickLinkAction(a)} title={a.label}>
                           <span className="em" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
                             {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
                           </span>
@@ -637,9 +688,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                         </button>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
