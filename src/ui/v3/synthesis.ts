@@ -119,8 +119,13 @@ class LocalSynthesisProvider implements SynthesisProvider {
 // hosted proxy (Cloudflare Worker in workers/llm-proxy.js) that injects the key
 // server-side, so it works from any origin without shipping the key. Model is a
 // completely free OpenRouter model; the worker also force-overrides to free.
-const LLM_ENDPOINT = (import.meta.env.VITE_LLM_URL as string | undefined) || '/llm/chat/completions';
-const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'openai/gpt-oss-20b:free';
+// Dev: the Vite /llm proxy injects the key. Prod: a Vercel serverless function
+// at /api/llm injects the key (set OPENROUTER_KEY in Vercel). Key never ships.
+const LLM_ENDPOINT =
+  (import.meta.env.VITE_LLM_URL as string | undefined) ||
+  (import.meta.env.DEV ? '/llm/chat/completions' : '/api/llm');
+// High-quality paid model — best for coherent, vivid art-director synthesis.
+const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'anthropic/claude-opus-4.8';
 
 const SYSTEM_PROMPT =
   'You are an expert art director. Weave the given scene elements (characters, ' +
@@ -199,20 +204,21 @@ class PollinationsSynthesisProvider implements SynthesisProvider {
 }
 
 /**
- * Real AI first (keyless Pollinations → optional OpenRouter proxy), then the
- * local heuristic. Pollinations needs no key/proxy, so coherent synthesis works
- * everywhere out of the box; the heuristic is only a last-resort fallback.
+ * Best model first: the paid OpenRouter model (Claude Opus 4.8) via a
+ * key-injecting proxy — dev uses the Vite /llm proxy, prod a Vercel /api/llm
+ * function. If that's unreachable (e.g. no key set), fall back to the keyless
+ * Pollinations model, then the local heuristic. The key never reaches the browser.
  */
 class SmartSynthesisProvider implements SynthesisProvider {
-  private pollinations = new PollinationsSynthesisProvider();
   private openrouter = new LlmSynthesisProvider();
+  private pollinations = new PollinationsSynthesisProvider();
   private local = new LocalSynthesisProvider();
   async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
     try {
-      return await this.pollinations.synthesize(elements, method, relations);
+      return await this.openrouter.synthesize(elements, method, relations);
     } catch {
       try {
-        return await this.openrouter.synthesize(elements, method, relations);
+        return await this.pollinations.synthesize(elements, method, relations);
       } catch {
         return this.local.synthesize(elements, method, relations);
       }
