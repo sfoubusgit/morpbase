@@ -124,8 +124,10 @@ class LocalSynthesisProvider implements SynthesisProvider {
 const LLM_ENDPOINT =
   (import.meta.env.VITE_LLM_URL as string | undefined) ||
   (import.meta.env.DEV ? '/llm/chat/completions' : '/api/llm');
-// High-quality paid model — best for coherent, vivid art-director synthesis.
-const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'anthropic/claude-opus-4.8';
+// Art-director model — Sonnet 4.6 gives near-Opus prose quality for this bounded
+// synthesis task at ~40% lower cost. Override via VITE_SYNTH_MODEL (e.g. bump to
+// anthropic/claude-opus-4.8 for max quality, or drop to claude-haiku-4.5 to cut cost).
+const LLM_MODEL = (import.meta.env.VITE_SYNTH_MODEL as string | undefined) || 'anthropic/claude-sonnet-4.6';
 
 const SYSTEM_PROMPT =
   'You are an expert art director. Weave the given scene elements (characters, ' +
@@ -204,7 +206,7 @@ class PollinationsSynthesisProvider implements SynthesisProvider {
 }
 
 /**
- * Best model first: the paid OpenRouter model (Claude Opus 4.8) via a
+ * Best model first: the paid OpenRouter model (Claude Sonnet 4.6) via a
  * key-injecting proxy — dev uses the Vite /llm proxy, prod a Vercel /api/llm
  * function. If that's unreachable (e.g. no key set), fall back to the keyless
  * Pollinations model, then the local heuristic. The key never reaches the browser.
