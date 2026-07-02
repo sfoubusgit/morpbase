@@ -253,6 +253,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // Phase is derived — no `from` → pick who; `from` but no `action` → pick action;
   // both set → pick whom. Guides the user through an explicit A → action → B link.
   const [linkStep, setLinkStep] = useState<null | { from?: string; action?: PickAction }>(null);
+  const [sceneMenu, setSceneMenu] = useState(false); // scene switcher dropdown
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -356,17 +357,24 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     for (const s of scenes) { const m = /^Scene (\d+)$/.exec(s.name); if (m) max = Math.max(max, Number(m[1])); }
     return `Scene ${max + 1}`;
   };
-  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); };
+  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); setSceneMenu(false); };
+  const sceneIndex = scenes.findIndex(s => s.id === active.id);
+  // Cycle to the previous/next scene (wraps around); no-op with a single scene.
+  const stepScene = (dir: 1 | -1) => {
+    if (scenes.length < 2) return;
+    const n = (sceneIndex + dir + scenes.length) % scenes.length;
+    switchScene(scenes[n].id);
+  };
   const newScene = () => {
     const s = scenesStore.make(nextSceneName());
     setScenes(list => [...list, s]);
-    setActiveId(s.id); setLinkStep(null);
+    setActiveId(s.id); setLinkStep(null); setSceneMenu(false);
   };
   const duplicateScene = (id: string) => {
     const src = scenes.find(s => s.id === id); if (!src) return;
     const copy = scenesStore.duplicate(src, `${src.name} copy`);
     setScenes(list => { const i = list.findIndex(s => s.id === id); const next = [...list]; next.splice(i + 1, 0, copy); return next; });
-    setActiveId(copy.id); setLinkStep(null);
+    setActiveId(copy.id); setLinkStep(null); setSceneMenu(false);
   };
   const deleteScene = (id: string) => {
     const idx = scenes.findIndex(s => s.id === id);
@@ -378,7 +386,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   };
 
   return (
-    <div className="v3" onClick={() => uniOpen && setUniOpen(false)}>
+    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) setSceneMenu(false); }}>
       {/* ── top bar: brand · universe (above lanes) · global search · profile ── */}
       <header className="v3-topbar">
         <button type="button" className="v3-brand" onClick={goWorkspace} title="Workspace">
@@ -660,29 +668,40 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
       {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && (
         <div className="v3-dock" onClick={e => e.stopPropagation()}>
-          {/* scene tabs — swap between independent arrangements, duplicate to vary */}
-          <div className="v3-scene-tabs">
-            {scenes.map(s => (
-              <button
-                type="button"
-                key={s.id}
-                className={`v3-scene-tab${s.id === active.id ? ' on' : ''}`}
-                onClick={() => switchScene(s.id)}
-                title={s.name}
-              >
-                <span className="nm">{s.name}</span>
-                <span className="ct">{s.items.length}</span>
-                <span className="dup" role="button" aria-label="Duplicate scene" title="Duplicate scene" onClick={e => { e.stopPropagation(); duplicateScene(s.id); }}>⧉</span>
-                {scenes.length > 1 && (
-                  <span className="cl" role="button" aria-label="Close scene" title="Close scene" onClick={e => { e.stopPropagation(); deleteScene(s.id); }}>✕</span>
-                )}
-              </button>
-            ))}
-            <button type="button" className="v3-scene-new" onClick={newScene} title="New empty scene">＋</button>
-          </div>
-
           <div className="v3-dock-main">
-          <span className="v3-eyebrow dock-lbl">Your scene</span>
+          {/* scene switcher — step through scenes, or open the dropdown for direct access */}
+          <div className="v3-scene-nav">
+            <div className="v3-scene-step">
+              <button type="button" aria-label="Previous scene" title="Previous scene" onClick={() => stepScene(-1)} disabled={scenes.length < 2}>▲</button>
+              <button type="button" aria-label="Next scene" title="Next scene" onClick={() => stepScene(1)} disabled={scenes.length < 2}>▼</button>
+            </div>
+            <button type="button" className={`v3-scene-current${sceneMenu ? ' open' : ''}`} onClick={() => setSceneMenu(o => !o)} title="Switch scene">
+              <span className="nm">{active.name}</span>
+              <span className="ct">{active.items.length}</span>
+              <span className="caret">▾</span>
+            </button>
+            <button type="button" className="v3-scene-act" onClick={() => duplicateScene(active.id)} aria-label="Duplicate this scene" title="Duplicate this scene">⧉</button>
+            <button type="button" className="v3-scene-act" onClick={newScene} aria-label="New empty scene" title="New empty scene">＋</button>
+
+            {sceneMenu && (
+              <div className="v3-scene-menu">
+                <div className="v3-scene-menu-hd">Scenes · {scenes.length}</div>
+                <div className="v3-scene-menu-list">
+                  {scenes.map(s => (
+                    <div key={s.id} className={`v3-scene-row${s.id === active.id ? ' on' : ''}`} onClick={() => switchScene(s.id)}>
+                      <span className="nm">{s.name}</span>
+                      <span className="ct">{s.items.length}</span>
+                      <span className="dup" role="button" aria-label="Duplicate" title="Duplicate" onClick={e => { e.stopPropagation(); duplicateScene(s.id); }}>⧉</span>
+                      {scenes.length > 1 && (
+                        <span className="cl" role="button" aria-label="Close" title="Close" onClick={e => { e.stopPropagation(); deleteScene(s.id); }}>✕</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="v3-scene-menu-new" onClick={newScene}>＋ New scene</button>
+              </div>
+            )}
+          </div>
           <div className="v3-dock-items">
             {scene.length === 0 && <span className="v3-dock-empty">Empty scene — add objects from any lane, or ⧉ duplicate another.</span>}
             {scene.map(id => {
