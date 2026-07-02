@@ -69,6 +69,14 @@ const WALL_LANES: Record<string, WallLaneCfg> = {
   environment: { label: 'Environment', accent: 'var(--la-environment)', badge: 'Environment', kind: 'environment', ph: 'environment', sub: 'where it happens — the setting of the image.', items: ENVIRONMENT_ITEMS },
 };
 
+// Lane metadata keyed by the registry lane (`ph`) value, for the variation engine.
+const LANE_META_BY_PH: Record<string, { label: string; accent: string }> = {
+  character: { label: 'Characters', accent: 'var(--la-character)' },
+};
+for (const wl of Object.values(WALL_LANES)) LANE_META_BY_PH[wl.ph] = { label: wl.label, accent: wl.accent };
+// Canonical order lanes appear in the "Vary" picker.
+const VARY_LANE_ORDER = ['character', 'scenery', 'object', 'environment', 'mood', 'lighting', 'composition'];
+
 /**
  * v3 workspace — the new main surface. Owns its full chrome (so the legacy app
  * nav is hidden here): a global search bar on top, the UNIVERSE context above
@@ -219,6 +227,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     return m;
   }, [allCharacters, visibleCreatedItems]);
 
+  // Selectable objects grouped by lane — the pool the variation engine fans across.
+  const laneObjects = useMemo(() => {
+    const m: Record<string, SceneItem[]> = {};
+    for (const it of Object.values(registry)) (m[it.lane] ||= []).push(it);
+    for (const k of Object.keys(m)) m[k].sort((a, b) => a.name.localeCompare(b.name));
+    return m;
+  }, [registry]);
+  const varyLanes = useMemo(() => VARY_LANE_ORDER.filter(l => laneObjects[l]?.length), [laneObjects]);
+
   // Every non-character lane item resolves to a page subject (seeds + created).
   const laneSubjects = useMemo<Record<string, ItemSubject>>(() => {
     const m: Record<string, ItemSubject> = {};
@@ -256,6 +273,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [sceneMenu, setSceneMenu] = useState(false); // scene switcher dropdown
   const [renamingId, setRenamingId] = useState<string | null>(null); // scene being renamed
   const [renameText, setRenameText] = useState('');
+  // Variation engine: fan the current scene across one lane's objects.
+  const [varyOpen, setVaryOpen] = useState(false);
+  const [varyLane, setVaryLane] = useState<string | null>(null);
+  const [varyPick, setVaryPick] = useState<string[]>([]); // selected object ids to fan across
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -394,8 +415,37 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     setLinkStep(null);
   };
 
+  // ── variation engine: fan the current scene across one lane's objects ──
+  const gid = () => `axis_${Math.random().toString(36).slice(2, 10)}`;
+  const openVary = () => {
+    setSceneMenu(false); setRenamingId(null);
+    // Default to a lane the scene already has (most likely target); else the first available.
+    const present = VARY_LANE_ORDER.find(l => active.items.some(id => registry[id]?.lane === l) && laneObjects[l]?.length);
+    setVaryLane(present ?? varyLanes[0] ?? null);
+    setVaryPick([]); setVaryOpen(true);
+  };
+  const closeVary = () => { setVaryOpen(false); setVaryPick([]); };
+  const pickVaryLane = (lane: string) => { setVaryLane(lane); setVaryPick([]); };
+  const toggleVaryPick = (id: string) => setVaryPick(list => (list.includes(id) ? list.filter(x => x !== id) : [...list, id]));
+  const createVariants = () => {
+    if (!varyLane || varyPick.length === 0) return;
+    const base = active;
+    const groupId = gid();
+    const kept = base.items.filter(id => registry[id]?.lane !== varyLane); // drop existing items of the varied lane
+    const built = varyPick.map(objId => {
+      const items = [...kept, objId];
+      const alive = new Set(items);
+      const interactions = base.interactions.filter(r => alive.has(r.from) && alive.has(r.to));
+      const s = scenesStore.make(`${base.name} · ${registry[objId]?.name ?? 'variant'}`, items, interactions);
+      return { ...s, parentId: base.id, axisGroupId: groupId };
+    });
+    setScenes(list => { const i = list.findIndex(x => x.id === base.id); const next = [...list]; next.splice(i + 1, 0, ...built); return next; });
+    setActiveId(built[0].id);
+    setVaryOpen(false); setVaryPick([]); setLinkStep(null);
+  };
+
   return (
-    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); }}>
+    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); if (varyOpen) closeVary(); }}>
       {/* ── top bar: brand · universe (above lanes) · global search · profile ── */}
       <header className="v3-topbar">
         <button type="button" className="v3-brand" onClick={goWorkspace} title="Workspace">
@@ -684,13 +734,57 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               <button type="button" aria-label="Previous scene" title="Previous scene" onClick={() => stepScene(-1)} disabled={scenes.length < 2}>▲</button>
               <button type="button" aria-label="Next scene" title="Next scene" onClick={() => stepScene(1)} disabled={scenes.length < 2}>▼</button>
             </div>
-            <button type="button" className={`v3-scene-current${sceneMenu ? ' open' : ''}`} onClick={() => { setSceneMenu(o => !o); setRenamingId(null); }} title="Switch scene">
+            <button type="button" className={`v3-scene-current${sceneMenu ? ' open' : ''}`} onClick={() => { setSceneMenu(o => !o); setRenamingId(null); setVaryOpen(false); }} title="Switch scene">
               <span className="nm">{active.name}</span>
               <span className="ct">{active.items.length}</span>
               <span className="caret">▾</span>
             </button>
             <button type="button" className="v3-scene-act" onClick={() => duplicateScene(active.id)} aria-label="Duplicate this scene" title="Duplicate this scene">⧉</button>
             <button type="button" className="v3-scene-act" onClick={newScene} aria-label="New empty scene" title="New empty scene">＋</button>
+            {scene.length > 0 && varyLanes.length > 0 && (
+              <button type="button" className={`v3-scene-act vary${varyOpen ? ' open' : ''}`} onClick={() => (varyOpen ? closeVary() : openVary())} aria-label="Vary this scene" title="Vary this scene across a lane">⋔</button>
+            )}
+
+            {varyOpen && varyLane && (
+              <div className="v3-vary-menu">
+                <div className="v3-vary-hd">
+                  <span>Vary <b>{active.name}</b> across a lane</span>
+                  <button type="button" className="v3-vary-x" onClick={closeVary} aria-label="Close">✕</button>
+                </div>
+                {/* pick which lane to fan across */}
+                <div className="v3-vary-lanes">
+                  {varyLanes.map(l => (
+                    <button
+                      type="button"
+                      key={l}
+                      className={`v3-vary-lane${varyLane === l ? ' on' : ''}`}
+                      style={cssVar(LANE_META_BY_PH[l]?.accent ?? 'var(--la-character)')}
+                      onClick={() => pickVaryLane(l)}
+                    >
+                      {LANE_META_BY_PH[l]?.label ?? l}
+                    </button>
+                  ))}
+                </div>
+                {/* pick which objects become the variants */}
+                <div className="v3-vary-objs">
+                  {(laneObjects[varyLane] ?? []).map(o => {
+                    const picked = varyPick.includes(o.id);
+                    const inBase = scene.includes(o.id);
+                    return (
+                      <button type="button" key={o.id} className={`v3-vary-obj${picked ? ' on' : ''}`} onClick={() => toggleVaryPick(o.id)}>
+                        <span className="tick">{picked ? '✓' : ''}</span>
+                        <span className="nm">{o.name}</span>
+                        {inBase && <span className="cur">current</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+                <button type="button" className="v3-vary-go" onClick={createVariants} disabled={varyPick.length === 0}>
+                  Create {varyPick.length || ''} variant{varyPick.length === 1 ? '' : 's'}
+                </button>
+                <div className="v3-vary-note">Keeps everything else fixed · each pick becomes its own scene.</div>
+              </div>
+            )}
 
             {sceneMenu && (
               <div className="v3-scene-menu">
