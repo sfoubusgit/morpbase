@@ -12,6 +12,7 @@ import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
+import { scenesStore, type Scene, type SceneInteraction } from './scenesStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
 import type { SynthElement, SynthRelation } from './synthesis';
@@ -80,8 +81,26 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [uniOpen, setUniOpen] = useState(false);
   const [lane, setLane] = useState<string>('characters');
   const [query, setQuery] = useState('');
-  const [scene, setScene] = useState<string[]>([]);
   const [channelId, setChannelId] = useState<string | null>(null);
+
+  // ── Scenes: independent arrangements you swap between (v0: tabs + duplicate) ──
+  // A scene holds references (item ids) + interactions, never content — so
+  // duplicating is cheap and editing a library object propagates everywhere. The
+  // ACTIVE scene projects onto `scene`/`interactions`, so the rest of the page
+  // (dock, synthesis) is unchanged. Full schema/rationale in scenesStore.
+  const boot = useMemo(() => scenesStore.load(), []);
+  const [scenes, setScenes] = useState<Scene[]>(boot.scenes);
+  const [activeId, setActiveId] = useState<string>(boot.activeId);
+  const active = scenes.find(s => s.id === activeId) ?? scenes[0];
+  const scene = active.items;
+  const interactions = active.interactions;
+  const updateActive = (fn: (s: Scene) => Scene) =>
+    setScenes(list => list.map(s => (s.id === active.id ? { ...fn(s), updatedAt: new Date().toISOString() } : s)));
+  const setScene = (upd: string[] | ((prev: string[]) => string[])) =>
+    updateActive(s => ({ ...s, items: typeof upd === 'function' ? upd(s.items) : upd }));
+  const setInteractions = (upd: SceneInteraction[] | ((prev: SceneInteraction[]) => SceneInteraction[])) =>
+    updateActive(s => ({ ...s, interactions: typeof upd === 'function' ? upd(s.interactions) : upd }));
+
   const [favorites, setFavorites] = useState<string[]>(() => favoritesStore.list());
   const [showProfile, setShowProfile] = useState(false);
   const [flow, setFlow] = useState<'synthesize' | 'generate' | null>(null);
@@ -108,6 +127,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     return () => { live = false; };
   }, []);
 
+  // Persist scenes locally so they survive a refresh (debounced in the store).
+  useEffect(() => { scenesStore.save(scenes, activeId); }, [scenes, activeId]);
+
   const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); };
   const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
   // Open an item's page (clicking its image), from anywhere — exits profile/flow.
@@ -116,7 +138,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const deleteCreatedItem = async (id: string) => {
     setCreatedLaneItems(prev => prev.filter(it => it.id !== id)); // optimistic
     setChannelId(null);
-    setScene(s => s.filter(x => x !== id));
+    // prune the deleted library item (and any interaction using it) from every scene
+    setScenes(list => list.map(s => ({
+      ...s,
+      items: s.items.filter(x => x !== id),
+      interactions: s.interactions.filter(r => r.from !== id && r.to !== id),
+    })));
     try { await deleteLaneItem(id); } catch { /* RLS/offline — already removed from view */ }
   };
 
@@ -220,10 +247,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     setInteractions(list => list.filter(x => x.from !== id && x.to !== id));
   };
 
-  // Interactions authored in the main scene flow: directed action between two
-  // scene characters (from → to). verb = relation phrase; emblem (seeded) or
-  // cover (user-created action) is how it's shown.
-  const [interactions, setInteractions] = useState<{ from: string; to: string; verb: string; emblem?: string; cover?: string | null }[]>([]);
+  // `interactions` (directed A→action→B links) lives on the ACTIVE scene — see
+  // the scenes block above for the derived `interactions` + `setInteractions`.
   // Tap-to-link builder: null = idle; otherwise a partial link being assembled.
   // Phase is derived — no `from` → pick who; `from` but no `action` → pick action;
   // both set → pick whom. Guides the user through an explicit A → action → B link.
@@ -323,6 +348,34 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     });
   };
   const removeInteraction = (i: number) => setInteractions(list => list.filter((_, idx) => idx !== i));
+
+  // ── scene operations (swap / new / duplicate / close) ──
+  // Auto-name off the highest existing "Scene N" so numbers don't collide after deletes.
+  const nextSceneName = () => {
+    let max = 0;
+    for (const s of scenes) { const m = /^Scene (\d+)$/.exec(s.name); if (m) max = Math.max(max, Number(m[1])); }
+    return `Scene ${max + 1}`;
+  };
+  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); };
+  const newScene = () => {
+    const s = scenesStore.make(nextSceneName());
+    setScenes(list => [...list, s]);
+    setActiveId(s.id); setLinkStep(null);
+  };
+  const duplicateScene = (id: string) => {
+    const src = scenes.find(s => s.id === id); if (!src) return;
+    const copy = scenesStore.duplicate(src, `${src.name} copy`);
+    setScenes(list => { const i = list.findIndex(s => s.id === id); const next = [...list]; next.splice(i + 1, 0, copy); return next; });
+    setActiveId(copy.id); setLinkStep(null);
+  };
+  const deleteScene = (id: string) => {
+    const idx = scenes.findIndex(s => s.id === id);
+    const filtered = scenes.filter(s => s.id !== id);
+    const next = filtered.length ? filtered : [scenesStore.make('Scene 1')]; // always keep ≥1
+    setScenes(next);
+    if (id === activeId) setActiveId(next[Math.min(idx, next.length - 1)].id);
+    setLinkStep(null);
+  };
 
   return (
     <div className="v3" onClick={() => uniOpen && setUniOpen(false)}>
@@ -605,10 +658,33 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       </main>
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
-      {scene.length > 0 && !channelChar && !showProfile && !flow && (
+      {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && (
         <div className="v3-dock" onClick={e => e.stopPropagation()}>
+          {/* scene tabs — swap between independent arrangements, duplicate to vary */}
+          <div className="v3-scene-tabs">
+            {scenes.map(s => (
+              <button
+                type="button"
+                key={s.id}
+                className={`v3-scene-tab${s.id === active.id ? ' on' : ''}`}
+                onClick={() => switchScene(s.id)}
+                title={s.name}
+              >
+                <span className="nm">{s.name}</span>
+                <span className="ct">{s.items.length}</span>
+                <span className="dup" role="button" aria-label="Duplicate scene" title="Duplicate scene" onClick={e => { e.stopPropagation(); duplicateScene(s.id); }}>⧉</span>
+                {scenes.length > 1 && (
+                  <span className="cl" role="button" aria-label="Close scene" title="Close scene" onClick={e => { e.stopPropagation(); deleteScene(s.id); }}>✕</span>
+                )}
+              </button>
+            ))}
+            <button type="button" className="v3-scene-new" onClick={newScene} title="New empty scene">＋</button>
+          </div>
+
+          <div className="v3-dock-main">
           <span className="v3-eyebrow dock-lbl">Your scene</span>
           <div className="v3-dock-items">
+            {scene.length === 0 && <span className="v3-dock-empty">Empty scene — add objects from any lane, or ⧉ duplicate another.</span>}
             {scene.map(id => {
               const item = registry[id];
               if (!item) return null;
@@ -700,9 +776,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             </div>
           )}
 
-          <button type="button" className="v3-syn" onClick={() => setFlow('synthesize')}>
-            Synthesize ({scene.length})
-          </button>
+          {scene.length > 0 && (
+            <button type="button" className="v3-syn" onClick={() => setFlow('synthesize')}>
+              Synthesize ({scene.length})
+            </button>
+          )}
+          </div>
         </div>
       )}
 
