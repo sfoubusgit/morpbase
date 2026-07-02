@@ -254,6 +254,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // both set → pick whom. Guides the user through an explicit A → action → B link.
   const [linkStep, setLinkStep] = useState<null | { from?: string; action?: PickAction }>(null);
   const [sceneMenu, setSceneMenu] = useState(false); // scene switcher dropdown
+  const [renamingId, setRenamingId] = useState<string | null>(null); // scene being renamed
+  const [renameText, setRenameText] = useState('');
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -357,7 +359,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     for (const s of scenes) { const m = /^Scene (\d+)$/.exec(s.name); if (m) max = Math.max(max, Number(m[1])); }
     return `Scene ${max + 1}`;
   };
-  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); setSceneMenu(false); };
+  const closeSceneMenu = () => { setSceneMenu(false); setRenamingId(null); };
+  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); closeSceneMenu(); };
+  const renameScene = (id: string, name: string) => {
+    const n = name.trim();
+    setScenes(list => list.map(s => (s.id === id ? { ...s, name: n || s.name, updatedAt: new Date().toISOString() } : s)));
+  };
+  const startRename = (id: string, current: string) => { setRenamingId(id); setRenameText(current); };
+  const commitRename = () => { if (renamingId) renameScene(renamingId, renameText); setRenamingId(null); };
   const sceneIndex = scenes.findIndex(s => s.id === active.id);
   // Cycle to the previous/next scene (wraps around); no-op with a single scene.
   const stepScene = (dir: 1 | -1) => {
@@ -368,13 +377,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const newScene = () => {
     const s = scenesStore.make(nextSceneName());
     setScenes(list => [...list, s]);
-    setActiveId(s.id); setLinkStep(null); setSceneMenu(false);
+    setActiveId(s.id); setLinkStep(null); closeSceneMenu();
   };
   const duplicateScene = (id: string) => {
     const src = scenes.find(s => s.id === id); if (!src) return;
     const copy = scenesStore.duplicate(src, `${src.name} copy`);
     setScenes(list => { const i = list.findIndex(s => s.id === id); const next = [...list]; next.splice(i + 1, 0, copy); return next; });
-    setActiveId(copy.id); setLinkStep(null); setSceneMenu(false);
+    setActiveId(copy.id); setLinkStep(null); closeSceneMenu();
   };
   const deleteScene = (id: string) => {
     const idx = scenes.findIndex(s => s.id === id);
@@ -386,7 +395,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   };
 
   return (
-    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) setSceneMenu(false); }}>
+    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); }}>
       {/* ── top bar: brand · universe (above lanes) · global search · profile ── */}
       <header className="v3-topbar">
         <button type="button" className="v3-brand" onClick={goWorkspace} title="Workspace">
@@ -675,7 +684,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               <button type="button" aria-label="Previous scene" title="Previous scene" onClick={() => stepScene(-1)} disabled={scenes.length < 2}>▲</button>
               <button type="button" aria-label="Next scene" title="Next scene" onClick={() => stepScene(1)} disabled={scenes.length < 2}>▼</button>
             </div>
-            <button type="button" className={`v3-scene-current${sceneMenu ? ' open' : ''}`} onClick={() => setSceneMenu(o => !o)} title="Switch scene">
+            <button type="button" className={`v3-scene-current${sceneMenu ? ' open' : ''}`} onClick={() => { setSceneMenu(o => !o); setRenamingId(null); }} title="Switch scene">
               <span className="nm">{active.name}</span>
               <span className="ct">{active.items.length}</span>
               <span className="caret">▾</span>
@@ -688,12 +697,32 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                 <div className="v3-scene-menu-hd">Scenes · {scenes.length}</div>
                 <div className="v3-scene-menu-list">
                   {scenes.map(s => (
-                    <div key={s.id} className={`v3-scene-row${s.id === active.id ? ' on' : ''}`} onClick={() => switchScene(s.id)}>
-                      <span className="nm">{s.name}</span>
-                      <span className="ct">{s.items.length}</span>
-                      <span className="dup" role="button" aria-label="Duplicate" title="Duplicate" onClick={e => { e.stopPropagation(); duplicateScene(s.id); }}>⧉</span>
-                      {scenes.length > 1 && (
-                        <span className="cl" role="button" aria-label="Close" title="Close" onClick={e => { e.stopPropagation(); deleteScene(s.id); }}>✕</span>
+                    <div
+                      key={s.id}
+                      className={`v3-scene-row${s.id === active.id ? ' on' : ''}${renamingId === s.id ? ' editing' : ''}`}
+                      onClick={() => { if (renamingId !== s.id) switchScene(s.id); }}
+                    >
+                      {renamingId === s.id ? (
+                        <input
+                          className="v3-scene-rename"
+                          autoFocus
+                          value={renameText}
+                          maxLength={40}
+                          onClick={e => e.stopPropagation()}
+                          onChange={e => setRenameText(e.target.value)}
+                          onBlur={commitRename}
+                          onKeyDown={e => { if (e.key === 'Enter') commitRename(); else if (e.key === 'Escape') setRenamingId(null); }}
+                        />
+                      ) : (
+                        <>
+                          <span className="nm" onDoubleClick={e => { e.stopPropagation(); startRename(s.id, s.name); }}>{s.name}</span>
+                          <span className="ct">{s.items.length}</span>
+                          <span className="edit" role="button" aria-label="Rename" title="Rename" onClick={e => { e.stopPropagation(); startRename(s.id, s.name); }}>✎</span>
+                          <span className="dup" role="button" aria-label="Duplicate" title="Duplicate" onClick={e => { e.stopPropagation(); duplicateScene(s.id); }}>⧉</span>
+                          {scenes.length > 1 && (
+                            <span className="cl" role="button" aria-label="Close" title="Close" onClick={e => { e.stopPropagation(); deleteScene(s.id); }}>✕</span>
+                          )}
+                        </>
                       )}
                     </div>
                   ))}

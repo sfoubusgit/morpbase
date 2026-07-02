@@ -462,10 +462,11 @@
 .v3-scene-row.on { background: var(--accent-primary-bg); color: #fff; }
 .v3-scene-row .nm { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .v3-scene-row .ct { flex: none; min-width: 16px; height: 16px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.08); color: var(--text-tertiary); font-size: 10px; font-weight: var(--font-weight-bold); }
-.v3-scene-row .dup, .v3-scene-row .cl { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 16px; color: var(--text-muted); font-size: 11px; opacity: 0; }
-.v3-scene-row:hover .dup, .v3-scene-row:hover .cl { opacity: 1; }
-.v3-scene-row .dup:hover { color: #fff; }
+.v3-scene-row .edit, .v3-scene-row .dup, .v3-scene-row .cl { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 16px; color: var(--text-muted); font-size: 11px; opacity: 0; }
+.v3-scene-row:hover .edit, .v3-scene-row:hover .dup, .v3-scene-row:hover .cl { opacity: 1; }
+.v3-scene-row .edit:hover, .v3-scene-row .dup:hover { color: #fff; }
 .v3-scene-row .cl:hover { color: var(--error-base); }
+.v3-scene-rename { flex: 1; min-width: 0; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-accent-strong); border-radius: var(--radius-sm); padding: 4px 7px; color: #fff; font: var(--font-weight-medium) 12.5px var(--font-primary); outline: none; }
 .v3-scene-menu-new { width: 100%; margin-top: 6px; padding: 8px; background: rgba(255, 255, 255, 0.03); border: 1px dashed var(--border-medium); border-radius: var(--radius-sm); color: var(--text-secondary); cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); }
 .v3-scene-menu-new:hover { color: #fff; border-color: var(--border-accent); }
 .v3-dock-items { display: flex; align-items: center; gap: 8px; flex: 1; overflow-x: auto; scrollbar-width: none; }
