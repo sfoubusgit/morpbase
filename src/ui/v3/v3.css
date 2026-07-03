@@ -257,8 +257,9 @@
 .v3-panel { background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 16px 18px; }
 .v3-panel .ph { margin: 0 0 8px; font: var(--font-weight-extrabold) 11px var(--font-primary); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-accent); }
 .v3-panel .body { color: var(--text-secondary); font-size: 13.5px; line-height: var(--line-height-normal); }
-.v3-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border-subtle); margin: 6px 0 18px; }
-.v3-tab2 { padding: 11px 2px; color: var(--text-tertiary); cursor: pointer; border-bottom: 2px solid transparent; font: var(--font-weight-semibold) 13.5px var(--font-primary); background: none; border-left: none; border-right: none; border-top: none; }
+.v3-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border-subtle); margin: 6px 0 18px; overflow-x: auto; scrollbar-width: none; }
+.v3-tabs::-webkit-scrollbar { display: none; }
+.v3-tab2 { flex: none; white-space: nowrap; padding: 11px 2px; color: var(--text-tertiary); cursor: pointer; border-bottom: 2px solid transparent; font: var(--font-weight-semibold) 13.5px var(--font-primary); background: none; border-left: none; border-right: none; border-top: none; }
 .v3-tab2.on { color: #fff; border-bottom-color: var(--accent-primary); }
 .v3-gal { display: grid; grid-template-columns: repeat(6, 1fr); gap: 11px; }
 .v3-gal .g { aspect-ratio: 1; border-radius: var(--radius-md); background-size: cover; border: 1px solid var(--border-subtle); position: relative; cursor: pointer; transition: all var(--motion-fast); }

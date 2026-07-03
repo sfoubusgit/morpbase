@@ -193,6 +193,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     const localOwn = visibleCharacters.filter(c => !c.id.startsWith('character_seed_'));
     return [...mine, ...localOwn];
   }, [visibleCreatedItems, viewerAuthUid, visibleCharacters]);
+  // The viewer's own created lane objects (non-character lanes) — for the typed profile tabs.
+  const myCreatedItems = useMemo(
+    () => visibleCreatedItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters'),
+    [visibleCreatedItems, viewerAuthUid],
+  );
 
   const byId = (id: string) => allCharacters.find(c => c.id === id) ?? null;
   const channelChar = channelId ? byId(channelId) : null;
@@ -572,6 +577,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerAvatarUrl={viewerAvatarUrl}
             viewerAuthUid={viewerAuthUid}
             createdCharacters={myCreatedCharacters}
+            createdItems={myCreatedItems}
             favItems={favItems}
             favorites={favorites}
             scene={scene}
