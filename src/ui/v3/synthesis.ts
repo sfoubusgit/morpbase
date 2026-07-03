@@ -18,15 +18,20 @@ export type SynthElement = {
 
 export type SynthResult = { text: string; source: 'ai' | 'local' };
 
-/** A directed interaction between two characters, e.g. { from:'Ana', verb:'is kissing', to:'Bo' }. */
-export type SynthRelation = { from: string; verb: string; to: string };
+/**
+ * A character action fed to synthesis. Pair actions carry a target
+ * ({ from:'Ana', verb:'is kissing', to:'Bo' } → "Ana is kissing Bo"); solo
+ * actions omit `to` ({ from:'Ana', verb:'is kneeling' } → "Ana is kneeling").
+ */
+export type SynthRelation = { from: string; verb: string; to?: string };
 
 export interface SynthesisProvider {
   synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult>;
 }
 
+const relText1 = (r: SynthRelation): string => (r.to ? `${r.from} ${r.verb} ${r.to}` : `${r.from} ${r.verb}`);
 const relationText = (relations?: SynthRelation[]): string =>
-  (relations ?? []).map(r => `${r.from} ${r.verb} ${r.to}`).join('; ');
+  (relations ?? []).map(relText1).join('; ');
 
 const byKind = (els: SynthElement[], kind: string) => els.filter(e => e.kind === kind);
 
@@ -107,6 +112,14 @@ function compose(elements: SynthElement[], method: SynthMethod, relations?: Synt
   return lead + cap(s.endsWith('.') ? s : s + '.');
 }
 
+/**
+ * Instant, LLM-free prompt straight from the local heuristic — for a "quick
+ * prompt" the user can grab without waiting on an AI synthesis round-trip.
+ */
+export function quickPrompt(elements: SynthElement[], method: SynthMethod = 'faithful', relations?: SynthRelation[]): string {
+  return compose(elements, method, relations);
+}
+
 /** Local heuristic — also the graceful fallback when the LLM is unreachable. */
 class LocalSynthesisProvider implements SynthesisProvider {
   async synthesize(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): Promise<SynthResult> {
@@ -134,8 +147,9 @@ const SYSTEM_PROMPT =
   'scenery/action, environment, mood, objects, lighting) into ONE coherent moment — ' +
   'a tiny vivid scene with a clear sense of what is happening — written as a single ' +
   'image-generation prompt. Place the characters into the action and setting, and carry ' +
-  'the mood through it. If Interactions between characters are given (e.g. "A is kissing B"), ' +
-  'make that interaction the FOCUS of the moment and stage the characters accordingly. ' +
+  'the mood through it. If Actions are given — whether solo (e.g. "A is kneeling") or ' +
+  'between characters (e.g. "A is kissing B") — make them the FOCUS of the moment and ' +
+  'stage the characters accordingly. ' +
   '1–3 sentences, present tense, concrete, describing only what is seen. ' +
   'Do not specify art medium or style — that is chosen separately. ' +
   'Output ONLY the prompt text: no preamble, labels, options, or quotes.';
@@ -153,8 +167,8 @@ function methodGuidance(method: SynthMethod): string {
 
 function buildUserMessage(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): string {
   const lines = elements.map(e => `- ${cap(e.kind)}: ${e.name}${e.phrases.length ? ` — ${e.phrases.join('; ')}` : ''}`);
-  const rels = (relations ?? []).map(r => `- ${r.from} ${r.verb} ${r.to}`);
-  const relBlock = rels.length ? `\n\nInteractions (make these the focus):\n${rels.join('\n')}` : '';
+  const rels = (relations ?? []).map(r => `- ${relText1(r)}`);
+  const relBlock = rels.length ? `\n\nActions (make these the focus):\n${rels.join('\n')}` : '';
   return `Method: ${methodGuidance(method)}\n\nElements:\n${lines.join('\n')}${relBlock}\n\nCompose the single image prompt now.`;
 }
 

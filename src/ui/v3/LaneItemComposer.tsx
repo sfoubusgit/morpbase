@@ -36,6 +36,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const [summary, setSummary] = useState('');
   const [world, setWorld] = useState('');
   const [relation, setRelation] = useState('');
+  const [solo, setSolo] = useState(false); // action arity: solo (one char) vs pair (two)
   const [phrasesText, setPhrasesText] = useState('');
   const [coverBlob, setCoverBlob] = useState<Blob | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
@@ -84,7 +85,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
       const item = await createLaneItem({
         lane, authUid: viewerAuthUid, authorLabel: viewerName,
         name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
-        relation: isAction ? relation.trim() : undefined, coverBlob,
+        relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined, coverBlob,
       });
       onCreated(item);
     } catch (e) {
@@ -137,8 +138,16 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
                 <input value={summary} onChange={e => setSummary(e.target.value)} placeholder="One line describing it." maxLength={160} />
               </label>
               {isAction && (
-                <label className="v3-cmp-field">Relation <span className="opt">reads as: A <b>___</b> B</span>
-                  <input value={relation} onChange={e => setRelation(e.target.value)} placeholder="e.g. is dancing with" maxLength={40} />
+                <div className="v3-cmp-field">Applies to
+                  <div className="v3-cmp-arity">
+                    <button type="button" className={`v3-cmp-aritybtn${solo ? ' on' : ''}`} onClick={() => setSolo(true)}>One character <span>solo</span></button>
+                    <button type="button" className={`v3-cmp-aritybtn${!solo ? ' on' : ''}`} onClick={() => setSolo(false)}>Two characters <span>interaction</span></button>
+                  </div>
+                </div>
+              )}
+              {isAction && (
+                <label className="v3-cmp-field">{solo ? 'Verb' : 'Relation'} <span className="opt">reads as: A <b>___</b>{solo ? '' : ' B'}</span>
+                  <input value={relation} onChange={e => setRelation(e.target.value)} placeholder={solo ? 'e.g. is kneeling' : 'e.g. is dancing with'} maxLength={40} />
                 </label>
               )}
               <label className="v3-cmp-field">World <span className="opt">optional · groups your related items</span>

@@ -19,8 +19,10 @@ export type RemoteLaneItem = {
   author: string;
   authorAuthUid: string | null;
   world: string;
-  /** for actions only — the relation phrase, e.g. "is dancing with" */
+  /** for actions only — the relation phrase, e.g. "is dancing with" / "is kneeling" */
   relation: string;
+  /** for actions only — true = solo (one character), false = pair (two) */
+  solo: boolean;
   createdAt: string;
 };
 
@@ -35,10 +37,13 @@ type Row = {
   author_auth_uid: string | null;
   world: string | null;
   relation: string | null;
+  solo: boolean | null;
   created_at: string;
 };
 
-const COLS = 'id, lane, name, summary, phrases, cover_url, author_label, author_auth_uid, world, relation, created_at';
+// Select every column so a not-yet-migrated column (e.g. world/relation/solo on
+// an out-of-date DB) can't break reads — toItem defaults anything missing.
+const COLS = '*';
 
 const toItem = (r: Row): RemoteLaneItem => ({
   id: r.id,
@@ -51,6 +56,7 @@ const toItem = (r: Row): RemoteLaneItem => ({
   authorAuthUid: r.author_auth_uid,
   world: (r.world || '').trim(),
   relation: (r.relation || '').trim(),
+  solo: !!r.solo,
   createdAt: r.created_at,
 });
 
@@ -75,9 +81,10 @@ export async function createLaneItem(params: {
   phrases: string[];
   world?: string;
   relation?: string;
+  solo?: boolean;
   coverBlob?: Blob | null;
 }): Promise<RemoteLaneItem> {
-  const { lane, authUid, authorLabel, name, summary, phrases, world, relation, coverBlob } = params;
+  const { lane, authUid, authorLabel, name, summary, phrases, world, relation, solo, coverBlob } = params;
 
   let coverUrl: string | null = null;
   let storagePath: string | null = null;
@@ -102,6 +109,7 @@ export async function createLaneItem(params: {
       author_label: authorLabel,
       world: (world || '').trim() || null,
       relation: (relation || '').trim() || null,
+      solo: !!solo,
     })
     .select(COLS)
     .single();

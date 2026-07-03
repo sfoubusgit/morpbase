@@ -21,6 +21,7 @@ const mk = (
   summary: string,
   phrases: string[],
   relation = '',
+  solo = false,
 ): RemoteLaneItem => ({
   id: `seed_test_${lane}_${n}`,
   lane,
@@ -32,6 +33,7 @@ const mk = (
   authorAuthUid: null,
   world: '',
   relation,
+  solo,
   createdAt: T,
 });
 
@@ -94,11 +96,17 @@ export const DEV_LANE_ITEMS: RemoteLaneItem[] = [
     'foreground shoulder soft, the subject sharp beyond',
   ]),
 
-  // ── actions ──
+  // ── actions ── (pair + solo)
   mk('actions', 1, 'Dancing', 'Two figures caught mid-turn in a close dance.', [
     'mid-turn, hands clasped, a blur of motion',
   ], 'is dancing with'),
   mk('actions', 2, 'Arguing', 'A heated exchange, leaning in, tension crackling.', [
     'leaning in, jaws set, a heated exchange',
   ], 'is arguing with'),
+  mk('actions', 3, 'Holding something', 'A single figure cradling an unseen object.', [
+    'both hands cupped, holding something close',
+  ], 'is holding something', true),
+  mk('actions', 4, 'Gazing up', 'A lone figure looking to the sky.', [
+    'chin lifted, eyes toward the sky',
+  ], 'gazes upward', true),
 ];

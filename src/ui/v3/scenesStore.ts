@@ -15,11 +15,14 @@
  */
 import type { SynthMethod } from './synthesis';
 
-/** A directed A → action → B link between two items in the scene. */
+/**
+ * A character action in the scene. Pair actions link two items (from → to);
+ * solo actions omit `to` (one subject, no target — "{from} kneels").
+ */
 export type SceneInteraction = {
-  from: string;            // item id, present in items[]
-  to: string;              // item id, present in items[]
-  verb: string;            // relation phrase, e.g. "is chasing"
+  from: string;            // subject item id, present in items[]
+  to?: string;             // target item id (pair only); absent for solo
+  verb: string;            // relation phrase, e.g. "is chasing" / "is kneeling"
   emblem?: string;         // seeded action id (monochrome emblem)
   cover?: string | null;   // user-created action cover (render cache)
   actionId?: string;       // ref to the action lane item, so edits propagate
@@ -105,7 +108,7 @@ function migrate(payload: unknown): Scene[] {
       id: s.id as string,
       items: (s.items as unknown[]).filter((x): x is string => typeof x === 'string'),
       interactions: Array.isArray(s.interactions)
-        ? (s.interactions as SceneInteraction[]).filter(r => r && r.from && r.to && r.verb)
+        ? (s.interactions as SceneInteraction[]).filter(r => r && r.from && r.verb) // solo has no `to`
         : [],
       name: typeof s.name === 'string' ? s.name : 'Scene',
       createdAt: typeof s.createdAt === 'string' ? s.createdAt : nowISO(),

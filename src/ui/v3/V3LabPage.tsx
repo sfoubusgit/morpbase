@@ -15,6 +15,7 @@ import { DEV_LANE_ITEMS } from './laneItemSeed';
 import { scenesStore, type Scene, type SceneInteraction } from './scenesStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
+import { quickPrompt } from './synthesis';
 import type { SynthElement, SynthRelation } from './synthesis';
 import { INTERACTIONS } from './interactions';
 import { ActionEmblem } from './ActionEmblem';
@@ -277,6 +278,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [varyOpen, setVaryOpen] = useState(false);
   const [varyLane, setVaryLane] = useState<string | null>(null);
   const [varyPick, setVaryPick] = useState<string[]>([]); // selected object ids to fan across
+  // Quick prompt: instant local-heuristic prompt, no AI round-trip.
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [quickCopied, setQuickCopied] = useState(false);
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
 
   // On login, merge the user's remote favorites into the local set so they
@@ -334,33 +338,50 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   // characters in the scene (ordered) — the endpoints an interaction can link
   const sceneCharItems = scene.map(id => registry[id]).filter((s): s is SceneItem => !!s && s.lane === 'character');
-  // interactions → the directed relations synthesis understands (resolve names)
+  // actions → the relations synthesis understands (resolve names). Solo actions
+  // have no `to`; pair actions carry the target's name.
   const sceneRelations: SynthRelation[] = interactions
     .map(x => {
       const from = registry[x.from]?.name;
+      if (!from || !x.verb) return null;
+      if (!x.to) return { from, verb: x.verb };            // solo
       const to = registry[x.to]?.name;
-      return from && to && x.verb ? { from, verb: x.verb, to } : null;
+      return to ? { from, verb: x.verb, to } : null;       // pair
     })
     .filter((r): r is SynthRelation => !!r);
   // Actions available to pick: seeded emblems + user-created action cards.
-  type PickAction = { key: string; label: string; verb: string; emblem?: string; cover?: string | null };
+  type PickAction = { key: string; label: string; verb: string; solo?: boolean; emblem?: string; cover?: string | null };
   const pickActions: PickAction[] = [
-    ...INTERACTIONS.map(i => ({ key: i.id, label: i.label, verb: i.rel, emblem: i.id })),
+    ...INTERACTIONS.map(i => ({ key: i.id, label: i.label, verb: i.rel, solo: i.solo, emblem: i.id })),
     ...visibleCreatedItems
       .filter(it => it.lane === 'actions' && it.relation)
-      .map(it => ({ key: it.id, label: it.name, verb: it.relation, cover: it.coverUrl })),
+      .map(it => ({ key: it.id, label: it.name, verb: it.relation, solo: it.solo, cover: it.coverUrl })),
   ];
-  // Tap-to-link builder. The user taps a character (from), picks an action, then
-  // taps a second character (to) — an explicit A → action → B link.
+  // Action builder. Tap a character (subject), pick an action; a SOLO action
+  // commits right there, a PAIR action then asks you to tap a second character.
   const startLink = () => setLinkStep({});
   const cancelLink = () => setLinkStep(null);
-  const pickLinkAction = (a: PickAction) => setLinkStep(s => (s ? { ...s, action: a } : s));
-  // Tapping a character chip while linking: sets `from`, or completes the link as `to`.
+  const pickLinkAction = (a: PickAction) => {
+    setLinkStep(s => {
+      if (!s || !s.from) return s;
+      if (a.solo) {
+        // solo → commit immediately, no target
+        const from = s.from;
+        setInteractions(list =>
+          list.some(x => x.from === from && !x.to && x.verb === a.verb)
+            ? list
+            : [...list, { from, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
+        return null;
+      }
+      return { ...s, action: a };
+    });
+  };
+  // Tapping a character chip while building: sets `from`, or completes a pair as `to`.
   const tapCharForLink = (id: string) => {
     setLinkStep(s => {
       if (!s) return s;
-      if (!s.from) return { from: id };            // step 1 → picked who
-      if (s.from && s.action && id !== s.from) {   // step 3 → picked whom → commit
+      if (!s.from) return { from: id };            // step 1 → picked subject
+      if (s.from && s.action && id !== s.from) {   // step 3 (pair) → picked target → commit
         const a = s.action;
         setInteractions(list =>
           list.some(x => x.from === s.from && x.to === id && x.verb === a.verb)
@@ -444,8 +465,24 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     setVaryOpen(false); setVaryPick([]); setLinkStep(null);
   };
 
+  // ── quick prompt: instant local-heuristic prompt (no AI) ──
+  const copyQuick = async () => {
+    const text = quickPrompt(sceneElements, 'faithful', sceneRelations).trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch { /* ignore */ }
+      document.body.removeChild(ta);
+    }
+    setQuickCopied(true); window.setTimeout(() => setQuickCopied(false), 1600);
+  };
+
   return (
-    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); if (varyOpen) closeVary(); }}>
+    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); if (varyOpen) closeVary(); if (quickOpen) setQuickOpen(false); }}>
       {/* ── top bar: brand · universe (above lanes) · global search · profile ── */}
       <header className="v3-topbar">
         <button type="button" className="v3-brand" onClick={goWorkspace} title="Workspace">
@@ -681,7 +718,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                     </span>
                     <div className="meta">
                       <div className="nm">{a.label}</div>
-                      <div className="rel">A <b>{a.verb}</b> B</div>
+                      <div className="rel">A <b>{a.verb}</b>{a.solo ? '' : ' B'}</div>
                     </div>
                     {mine && (
                       <button type="button" className="del" onClick={() => deleteCreatedItem(a.key)} title="Delete this action" aria-label="Delete">✕</button>
@@ -856,14 +893,16 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             })}
           </div>
 
-          {/* interactions — explicit A → action → B links, built by tapping */}
-          {sceneCharItems.length >= 2 && (
+          {/* actions — what each character is doing (solo or between two), built by tapping */}
+          {sceneCharItems.length >= 1 && (
             <div className="v3-dock-actions">
               {interactions.map((x, i) => {
-                const from = registry[x.from]; const to = registry[x.to];
-                if (!from || !to) return null;
+                const from = registry[x.from];
+                if (!from) return null;
+                const to = x.to ? registry[x.to] : null;
+                if (x.to && !to) return null; // dangling pair target
                 return (
-                  <span key={i} className="v3-sentence" title={`${from.name} ${x.verb} ${to.name}`}>
+                  <span key={i} className={`v3-sentence${to ? '' : ' solo'}`} title={`${from.name} ${x.verb}${to ? ` ${to.name}` : ''}`}>
                     <span className="ep">
                       <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
                       <span className="nm">{from.name}</span>
@@ -874,24 +913,26 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                       </span>
                       <span className="vb">{x.verb}</span>
                     </span>
-                    <span className="ep">
-                      <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
-                      <span className="nm">{to.name}</span>
-                    </span>
+                    {to && (
+                      <span className="ep">
+                        <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
+                        <span className="nm">{to.name}</span>
+                      </span>
+                    )}
                     <button type="button" className="x" onClick={() => removeInteraction(i)} aria-label="Remove">✕</button>
                   </span>
                 );
               })}
 
-              {/* guided link builder */}
+              {/* guided action builder */}
               {!linkStep ? (
-                <button type="button" className="v3-actadd" onClick={startLink} title="Connect two characters">＋ connect characters</button>
+                <button type="button" className="v3-actadd" onClick={startLink} title="Add an action to a character">＋ action</button>
               ) : (
                 <div className="v3-linkbar">
                   <div className="v3-linkbar-hd">
                     <span className="v3-linkstep">
                       {!linkStep.from ? (
-                        <><b>1</b> Tap the first character above</>
+                        <><b>1</b> Tap a character above</>
                       ) : !linkStep.action ? (
                         <><b>2</b> Pick an action for <em>{registry[linkStep.from]?.name}</em></>
                       ) : (
@@ -900,11 +941,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                     </span>
                     <button type="button" className="v3-linkcancel" onClick={cancelLink}>Cancel</button>
                   </div>
-                  {/* action picker appears once the first character is chosen */}
+                  {/* action picker — pair actions only when a second character exists */}
                   {linkStep.from && !linkStep.action && (
                     <div className="v3-actpick-grid">
-                      {pickActions.map(a => (
-                        <button type="button" key={a.key} className="v3-actcard" onClick={() => pickLinkAction(a)} title={a.label}>
+                      {pickActions.filter(a => a.solo || sceneCharItems.length >= 2).map(a => (
+                        <button type="button" key={a.key} className={`v3-actcard${a.solo ? ' solo' : ''}`} onClick={() => pickLinkAction(a)} title={a.solo ? `${a.label} (solo)` : a.label}>
                           <span className="em" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
                             {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
                           </span>
@@ -918,6 +959,24 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             </div>
           )}
 
+          {scene.length > 0 && (
+            <div className="v3-quick-wrap">
+              <button type="button" className={`v3-quick-btn${quickOpen ? ' on' : ''}`} onClick={() => setQuickOpen(o => !o)} title="Instant prompt — no AI">⚡ Quick</button>
+              {quickOpen && (
+                <div className="v3-quick-pop">
+                  <div className="v3-quick-hd">
+                    <span>Quick prompt <em>instant · no AI</em></span>
+                    <button type="button" className="v3-quick-x" onClick={() => setQuickOpen(false)} aria-label="Close">✕</button>
+                  </div>
+                  <textarea className="v3-quick-text" readOnly rows={4} value={quickPrompt(sceneElements, 'faithful', sceneRelations)} onFocus={e => e.currentTarget.select()} />
+                  <div className="v3-quick-acts">
+                    <button type="button" className={`v3-btn utility${quickCopied ? ' ok' : ''}`} onClick={copyQuick}>{quickCopied ? '✓ Copied' : '⧉ Copy'}</button>
+                    <button type="button" className="v3-btn secondary" onClick={() => { setQuickOpen(false); setFlow('synthesize'); }}>Synthesize instead →</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           {scene.length > 0 && (
             <button type="button" className="v3-syn" onClick={() => setFlow('synthesize')}>
               Synthesize ({scene.length})
