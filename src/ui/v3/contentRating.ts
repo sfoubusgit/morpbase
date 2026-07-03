@@ -15,8 +15,11 @@ export type ContentRating = 'sfw' | 'nsfw';
 /** The gate. Flipped on (per-session, post-verification) only inside the red section. */
 export const SHOW_NSFW = false;
 
-// Conservative explicit-content detector over an item's own descriptive text.
-const NSFW_TERMS = /\b(nude|nudity|naked|topless|bottomless|breasts?|areolas?|nipples?|cleavage|genital\w*|vulva|vagina|penis|erect\w*|cum|cumshot|sex|sexual|intercourse|orgasm|masturbat\w*|fellatio|blowjob|hentai|pornographic|porn|explicit|nsfw|lewd)\b/i;
+// Explicit-content detector over an item's own descriptive text. Deliberately
+// scoped to genuinely explicit terms — common fashion/anatomy words that merely
+// *describe* a clothed character (cleavage, breasts, a "cutout") are SFW and must
+// NOT be flagged, or ordinary character art gets wrongly hidden.
+const NSFW_TERMS = /\b(nude|nudity|naked|topless|bottomless|areolas?|nipples?|genital\w*|vulva|vagina|penis|cum|cumshot|sex|sexual|intercourse|orgasm|masturbat\w*|fellatio|cunnilingus|blowjob|hentai|pornographic|porn|nsfw|lewd|erotic|erotica)\b/i;
 
 export function ratingForText(text: string): ContentRating {
   return NSFW_TERMS.test(text) ? 'nsfw' : 'sfw';

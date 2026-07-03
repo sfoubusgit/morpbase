@@ -304,12 +304,6 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     () => allCharacters.filter(c => inWorld(c.id) && matchesQuery(c)),
     [allCharacters, world, worldOf, q],
   );
-  // TEMP diagnostic — pinpoint where a created character is dropped.
-  useEffect(() => {
-    console.info('[chars] world=%o q=%o | createdLaneItems=%d createdChars=%d allCharacters=%d browseChars=%d',
-      world, q, createdLaneItems.length, createdChars.length, allCharacters.length, browseChars.length);
-    console.info('[chars] createdChars:', createdChars.map(c => c.name), '| browseChars:', browseChars.map(c => c.name));
-  }, [world, q, createdLaneItems, createdChars, allCharacters, browseChars]);
   // Wall lanes share one filtered view, scoped to the selected world (if any).
   const wallView = useMemo(() => {
     const wl = WALL_LANES[lane];
