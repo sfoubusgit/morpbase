@@ -25,5 +25,11 @@ export function ratingForText(text: string): ContentRating {
   return NSFW_TERMS.test(text) ? 'nsfw' : 'sfw';
 }
 
+/** The first explicit term found — so we can tell a creator WHY it's flagged. */
+export function nsfwMatch(text: string): string | null {
+  const m = text.match(NSFW_TERMS);
+  return m ? m[0] : null;
+}
+
 /** Visible under the current gate? (SFW always; NSFW only when the gate is open.) */
 export const ratingVisible = (rating: ContentRating): boolean => SHOW_NSFW || rating === 'sfw';

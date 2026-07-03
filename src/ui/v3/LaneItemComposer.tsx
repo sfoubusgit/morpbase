@@ -1,6 +1,8 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { generationProvider, GENERATION_LIVE, type GenProgress } from './generation';
 import { createLaneItem, type RemoteLaneItem } from './laneItemsStore';
+import { nsfwMatch } from './contentRating';
+import { ContentRatingBadge } from './ContentRatingBadge';
 
 type LaneItemComposerProps = {
   lane: string;        // lane key, e.g. 'scenery'
@@ -47,6 +49,9 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const fileRef = useRef<HTMLInputElement>(null);
 
   const phrases = phrasesText.split('\n').map(p => p.trim()).filter(Boolean);
+  // Live SFW rating of the draft — so the creator sees, before publishing, whether
+  // it'll be visible on public lanes (and exactly which word flags it if not).
+  const flaggedTerm = nsfwMatch(`${name} ${summary} ${relation} ${phrasesText}`);
   const pct = progress && progress.max > 0 ? Math.round((progress.value / progress.max) * 100) : null;
 
   const setCover = (blob: Blob) => {
@@ -109,7 +114,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
         <div className="v3-modal-head">
           <div>
             <div className="v3-eyebrow">New {singular} · {laneLabel} lane</div>
-            <h2>Create a {singular}</h2>
+            <h2>Create a {singular} <ContentRatingBadge rating={flaggedTerm ? 'nsfw' : 'sfw'} /></h2>
           </div>
           <button type="button" className="v3-modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -175,6 +180,11 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
             </div>
           </div>
 
+          {flaggedTerm && (
+            <div className="v3-cmp-warn">
+              <b>Marked 18+</b> — matched the word “{flaggedTerm}”. It’ll still save, but stays hidden from public lanes (including your own view) until the age-gated section opens. Reword it to publish publicly now.
+            </div>
+          )}
           {error && <div className="v3-cmp-error">{error}</div>}
         </div>
 
