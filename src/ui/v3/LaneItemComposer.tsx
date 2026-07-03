@@ -95,8 +95,10 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   };
 
   return (
-    <div className="v3-modal-backdrop" onClick={onClose}>
-      <div className="v3-modal" style={{ ['--c' as string]: accent }} onClick={e => e.stopPropagation()}>
+    // Backdrop clicks do NOT close the composer — a stray click shouldn't wipe an
+    // in-progress draft. Only the ✕ and Cancel close it.
+    <div className="v3-modal-backdrop">
+      <div className="v3-modal" style={{ ['--c' as string]: accent }}>
         <div className="v3-modal-head">
           <div>
             <div className="v3-eyebrow">New {singular} · {laneLabel} lane</div>
