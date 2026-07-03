@@ -67,7 +67,8 @@ export async function listLaneItems(): Promise<RemoteLaneItem[]> {
     .select(COLS)
     .order('created_at', { ascending: false })
     .limit(500);
-  if (error || !data) return [];
+  if (error) { console.error('[listLaneItems] read failed —', error.message); return []; }
+  if (!data) return [];
   return (data as Row[]).map(toItem);
 }
 
@@ -124,10 +125,13 @@ export async function createLaneItem(params: {
   let { data, error } = await insert(fullRow);
   if (error && isMissingColumn(error.message)) {
     // DB is behind on migrations — persist the object with the columns that exist.
-    console.warn('v3_lane_items: optional columns missing, saving base fields only —', error.message);
+    console.warn('[createLaneItem] optional columns missing, saving base fields only —', error.message);
     ({ data, error } = await insert(baseRow));
   }
-  if (error) throw new Error(error.message);
+  if (error) {
+    console.error('[createLaneItem] insert failed for lane', lane, '—', error.message);
+    throw new Error(error.message);
+  }
   return toItem(data as Row);
 }
 

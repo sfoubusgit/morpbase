@@ -47,8 +47,6 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const fileRef = useRef<HTMLInputElement>(null);
 
   const phrases = phrasesText.split('\n').map(p => p.trim()).filter(Boolean);
-  // Actions require a relation phrase (phrases optional); everything else requires phrases.
-  const canSave = name.trim().length > 0 && (isAction ? relation.trim().length > 0 : phrases.length > 0) && !saving;
   const pct = progress && progress.max > 0 ? Math.round((progress.value / progress.max) * 100) : null;
 
   const setCover = (blob: Blob) => {
@@ -79,7 +77,15 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   };
 
   const save = async () => {
-    if (!canSave) return;
+    if (saving) return;
+    // Validate with a clear reason instead of a silently-disabled button.
+    if (!name.trim()) { setError('Add a name first.'); return; }
+    if (isAction) {
+      if (!relation.trim()) { setError(solo ? 'Add the verb (e.g. “is kneeling”).' : 'Add the relation (e.g. “is chasing”).'); return; }
+    } else if (phrases.length === 0) {
+      setError(`Add at least one phrase for this ${singular} (one per line) — it’s what synthesis uses.`);
+      return;
+    }
     setSaving(true); setError(null);
     try {
       const item = await createLaneItem({
@@ -89,6 +95,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
       });
       onCreated(item);
     } catch (e) {
+      console.error('[composer] create failed —', e);
       setError(e instanceof Error ? e.message : 'Couldn’t save. Try again.');
       setSaving(false);
     }
@@ -175,7 +182,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
           <span className="v3-cmp-note">Shared publicly as community content · by @{viewerName.toLowerCase().replace(/\s+/g, '')}</span>
           <div className="v3-cmp-footacts">
             <button type="button" className="v3-btn secondary" onClick={onClose} disabled={saving}>Cancel</button>
-            <button type="button" className="v3-btn primary" onClick={save} disabled={!canSave}>{saving ? 'Publishing…' : `Publish ${singular}`}</button>
+            <button type="button" className="v3-btn primary" onClick={save} disabled={saving}>{saving ? 'Publishing…' : `Publish ${singular}`}</button>
           </div>
         </div>
       </div>
