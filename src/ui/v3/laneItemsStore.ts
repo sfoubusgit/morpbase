@@ -96,23 +96,37 @@ export async function createLaneItem(params: {
     storagePath = path;
   }
 
-  const { data, error } = await supabase
-    .from('v3_lane_items')
-    .insert({
-      lane,
-      name,
-      summary,
-      phrases,
-      cover_url: coverUrl,
-      storage_path: storagePath,
-      author_auth_uid: authUid,
-      author_label: authorLabel,
-      world: (world || '').trim() || null,
-      relation: (relation || '').trim() || null,
-      solo: !!solo,
-    })
-    .select(COLS)
-    .single();
+  // Base columns exist on every deployed DB. The optional ones (world/relation/
+  // solo) come from later migrations — if a DB hasn't run them yet, inserting
+  // them 400s with a schema-cache error and would lose the whole object. So try
+  // the full insert, and on a missing-column error retry with base columns only
+  // (a character/object needs none of the optional ones anyway).
+  const baseRow = {
+    lane,
+    name,
+    summary,
+    phrases,
+    cover_url: coverUrl,
+    storage_path: storagePath,
+    author_auth_uid: authUid,
+    author_label: authorLabel,
+  };
+  const fullRow = {
+    ...baseRow,
+    world: (world || '').trim() || null,
+    relation: (relation || '').trim() || null,
+    solo: !!solo,
+  };
+
+  const insert = (row: object) => supabase.from('v3_lane_items').insert(row).select(COLS).single();
+  const isMissingColumn = (msg: string) => /could not find|schema cache|column .* does not exist|PGRST204/i.test(msg);
+
+  let { data, error } = await insert(fullRow);
+  if (error && isMissingColumn(error.message)) {
+    // DB is behind on migrations — persist the object with the columns that exist.
+    console.warn('v3_lane_items: optional columns missing, saving base fields only —', error.message);
+    ({ data, error } = await insert(baseRow));
+  }
   if (error) throw new Error(error.message);
   return toItem(data as Row);
 }
