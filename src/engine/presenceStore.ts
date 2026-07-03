@@ -56,10 +56,16 @@ export async function initPresence(authUid: string, userId: string, name: string
   _currentStudio = undefined;
 
   const updateLastSeen = async () => {
-    await supabase
+    const { error } = await supabase
       .from('public_profiles')
       .update({ last_seen_at: new Date().toISOString() })
       .eq('user_id', userId);
+    if (error) {
+      // Column missing (migration 0017 not run) or RLS — stop the heartbeat so it
+      // can't hammer the endpoint and flood the console.
+      console.warn('[presence] last_seen heartbeat disabled —', error.message);
+      if (heartbeatTimer !== null) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    }
   };
 
   void updateLastSeen();
