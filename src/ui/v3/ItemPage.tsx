@@ -29,6 +29,8 @@ type ItemPageProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** edit this item — only offered to its author */
+  onEdit?: (id: string) => void;
   /** delete this item — only offered to its author */
   onDelete?: (id: string) => void;
 };
@@ -41,7 +43,7 @@ type Tab = 'gallery' | 'comments' | 'about';
  * clicking the item's image. Gallery, comments and ratings are real (Supabase),
  * keyed by the item id, exactly like a character's page.
  */
-export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onDelete }: ItemPageProps) {
+export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onEdit, onDelete }: ItemPageProps) {
   const isMine = Boolean(viewerAuthUid && subject.authorAuthUid && subject.authorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${subject.name}"? This can't be undone.`)) onDelete(subject.id);
@@ -114,6 +116,9 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
             <FollowButton creatorAuthUid={subject.authorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
+            {isMine && onEdit && (
+              <button type="button" className="v3-btn secondary" onClick={() => onEdit(subject.id)}>Edit</button>
+            )}
             {isMine && onDelete && (
               <button type="button" className="v3-btn danger" onClick={confirmDelete}>Delete</button>
             )}

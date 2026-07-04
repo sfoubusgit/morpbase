@@ -135,6 +135,56 @@ export async function createLaneItem(params: {
   return toItem(data as Row);
 }
 
+/** Authenticated — edit one of the caller's own lane items (owner-scoped via RLS). */
+export async function updateLaneItem(params: {
+  id: string;
+  authUid: string;
+  lane: string;
+  name: string;
+  summary: string;
+  phrases: string[];
+  world?: string;
+  relation?: string;
+  solo?: boolean;
+  /** new cover to upload (replaces existing); undefined = leave cover as-is */
+  coverBlob?: Blob | null;
+  /** true = the cover was cleared (set cover_url null) */
+  coverCleared?: boolean;
+}): Promise<RemoteLaneItem> {
+  const { id, authUid, lane, name, summary, phrases, world, relation, solo, coverBlob, coverCleared } = params;
+
+  // Cover handling: new blob → upload & set; cleared → null; otherwise untouched.
+  const coverPatch: { cover_url?: string | null; storage_path?: string | null } = {};
+  if (coverBlob) {
+    const path = `${authUid}/lane-${lane}-${Date.now()}.png`;
+    const up = await supabase.storage.from(BUCKET).upload(path, coverBlob, { contentType: 'image/png', upsert: false });
+    if (up.error) throw new Error(up.error.message);
+    coverPatch.cover_url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+    coverPatch.storage_path = path;
+  } else if (coverCleared) {
+    coverPatch.cover_url = null;
+    coverPatch.storage_path = null;
+  }
+
+  const basePatch = { name, summary, phrases, ...coverPatch };
+  const fullPatch = {
+    ...basePatch,
+    world: (world || '').trim() || null,
+    relation: (relation || '').trim() || null,
+    solo: !!solo,
+  };
+  const update = (patch: object) => supabase.from('v3_lane_items').update(patch).eq('id', id).select(COLS).single();
+  const isMissingColumn = (msg: string) => /could not find|schema cache|column .* does not exist|PGRST204/i.test(msg);
+
+  let { data, error } = await update(fullPatch);
+  if (error && isMissingColumn(error.message)) {
+    console.warn('[updateLaneItem] optional columns missing, saving base fields only —', error.message);
+    ({ data, error } = await update(basePatch));
+  }
+  if (error) throw new Error(error.message);
+  return toItem(data as Row);
+}
+
 /** Authenticated — delete one of the caller's own lane items. */
 export async function deleteLaneItem(id: string): Promise<void> {
   const { error } = await supabase.from('v3_lane_items').delete().eq('id', id);

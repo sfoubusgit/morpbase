@@ -114,6 +114,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [genPrompt, setGenPrompt] = useState('');
   const [createdLaneItems, setCreatedLaneItems] = useState<RemoteLaneItem[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
+  const [editItem, setEditItem] = useState<RemoteLaneItem | null>(null); // lane object being edited
   const [ads, setAds] = useState<AdItem[]>([]);
 
   useEffect(() => {
@@ -152,6 +153,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       doings: s.doings.filter(d => d.subject !== id && d.target !== id),
     })));
     try { await deleteLaneItem(id); } catch { /* RLS/offline — already removed from view */ }
+  };
+  // Open the composer in edit mode for one of the viewer's own created items.
+  const openEdit = (id: string) => {
+    const it = createdLaneItems.find(x => x.id === id);
+    if (it) setEditItem(it);
   };
 
   const viewer = viewerName?.trim() || 'you';
@@ -604,6 +610,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />
         ) : openSubject ? (
@@ -615,6 +622,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />
         ) : lane === 'characters' ? (
@@ -918,19 +926,28 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters') && (
-        <LaneItemComposer
-          lane={lane}
-          laneLabel={WALL_LANES[lane]?.label ?? 'Characters'}
-          accent={WALL_LANES[lane]?.accent ?? 'var(--la-character)'}
-          kind={lane === 'characters' ? 'character' : 'object'}
-          worlds={worlds}
-          viewerName={viewer}
-          viewerAuthUid={viewerAuthUid}
-          onClose={() => setComposerOpen(false)}
-          onCreated={item => { setCreatedLaneItems(prev => [item, ...prev]); setComposerOpen(false); }}
-        />
-      )}
+      {viewerAuthUid && (editItem || (composerOpen && (WALL_LANES[lane] || lane === 'characters'))) && (() => {
+        // Edit uses the item's own lane; create uses the current nav lane.
+        const cl = editItem ? editItem.lane : lane;
+        return (
+          <LaneItemComposer
+            lane={cl}
+            laneLabel={WALL_LANES[cl]?.label ?? 'Characters'}
+            accent={WALL_LANES[cl]?.accent ?? 'var(--la-character)'}
+            kind={cl === 'characters' ? 'character' : 'object'}
+            worlds={worlds}
+            editItem={editItem}
+            viewerName={viewer}
+            viewerAuthUid={viewerAuthUid}
+            onClose={() => { setComposerOpen(false); setEditItem(null); }}
+            onCreated={item => {
+              // upsert by id — replaces on edit, prepends on create
+              setCreatedLaneItems(prev => [item, ...prev.filter(x => x.id !== item.id)]);
+              setComposerOpen(false); setEditItem(null);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

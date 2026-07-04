@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { generationProvider, GENERATION_LIVE, type GenProgress } from './generation';
-import { createLaneItem, type RemoteLaneItem } from './laneItemsStore';
+import { createLaneItem, updateLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { nsfwMatch } from './contentRating';
 import { ContentRatingBadge } from './ContentRatingBadge';
 
@@ -11,6 +11,8 @@ type LaneItemComposerProps = {
   kind?: 'character' | 'object' | 'action';
   /** existing world names, for the autocomplete on the World field */
   worlds?: string[];
+  /** when set, the composer edits this item instead of creating a new one */
+  editItem?: RemoteLaneItem | null;
   viewerName: string;
   viewerAuthUid: string;
   onClose: () => void;
@@ -23,7 +25,8 @@ type LaneItemComposerProps = {
  * an optional cover, which can be uploaded or rendered on the spot with KREA2.
  * Saves to Supabase as public community content.
  */
-export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', worlds = [], viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
+export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', worlds = [], editItem = null, viewerName, viewerAuthUid, onClose, onCreated }: LaneItemComposerProps) {
+  const isEdit = !!editItem;
   const isChar = kind === 'character';
   const isAction = kind === 'action';
   const singular = isChar ? 'character' : isAction ? 'action' : laneLabel.toLowerCase().replace(/s$/, '');
@@ -34,14 +37,14 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
     : isAction
       ? 'mid-turn, hands clasped, a blur of motion\nleaning close, caught in the moment'
       : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
-  const [name, setName] = useState('');
-  const [summary, setSummary] = useState('');
-  const [world, setWorld] = useState('');
-  const [relation, setRelation] = useState('');
-  const [solo, setSolo] = useState(false); // action arity: solo (one char) vs pair (two)
-  const [phrasesText, setPhrasesText] = useState('');
+  const [name, setName] = useState(editItem?.name ?? '');
+  const [summary, setSummary] = useState(editItem?.summary ?? '');
+  const [world, setWorld] = useState(editItem?.world ?? '');
+  const [relation, setRelation] = useState(editItem?.relation ?? '');
+  const [solo, setSolo] = useState(editItem?.solo ?? false); // action arity: solo vs pair
+  const [phrasesText, setPhrasesText] = useState((editItem?.phrases ?? []).join('\n'));
   const [coverBlob, setCoverBlob] = useState<Blob | null>(null);
-  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(editItem?.coverUrl ?? null);
   const [rendering, setRendering] = useState(false);
   const [progress, setProgress] = useState<GenProgress | null>(null);
   const [saving, setSaving] = useState(false);
@@ -93,11 +96,18 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
     }
     setSaving(true); setError(null);
     try {
-      const item = await createLaneItem({
-        lane, authUid: viewerAuthUid, authorLabel: viewerName,
-        name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
-        relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined, coverBlob,
-      });
+      const item = editItem
+        ? await updateLaneItem({
+            id: editItem.id, authUid: viewerAuthUid, lane,
+            name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
+            relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined,
+            coverBlob, coverCleared: !coverBlob && !coverUrl && !!editItem.coverUrl,
+          })
+        : await createLaneItem({
+            lane, authUid: viewerAuthUid, authorLabel: viewerName,
+            name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
+            relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined, coverBlob,
+          });
       onCreated(item);
     } catch (e) {
       console.error('[composer] create failed —', e);
@@ -113,8 +123,8 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
       <div className="v3-modal" style={{ ['--c' as string]: accent }}>
         <div className="v3-modal-head">
           <div>
-            <div className="v3-eyebrow">New {singular} · {laneLabel} lane</div>
-            <h2>Create a {singular} <ContentRatingBadge rating={flaggedTerm ? 'nsfw' : 'sfw'} /></h2>
+            <div className="v3-eyebrow">{isEdit ? 'Edit' : 'New'} {singular} · {laneLabel} lane</div>
+            <h2>{isEdit ? 'Edit' : 'Create a'} {singular} <ContentRatingBadge rating={flaggedTerm ? 'nsfw' : 'sfw'} /></h2>
           </div>
           <button type="button" className="v3-modal-x" onClick={onClose} aria-label="Close">✕</button>
         </div>
@@ -192,7 +202,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
           <span className="v3-cmp-note">Shared publicly as community content · by @{viewerName.toLowerCase().replace(/\s+/g, '')}</span>
           <div className="v3-cmp-footacts">
             <button type="button" className="v3-btn secondary" onClick={onClose} disabled={saving}>Cancel</button>
-            <button type="button" className="v3-btn primary" onClick={save} disabled={saving}>{saving ? 'Publishing…' : `Publish ${singular}`}</button>
+            <button type="button" className="v3-btn primary" onClick={save} disabled={saving}>{saving ? (isEdit ? 'Saving…' : 'Publishing…') : isEdit ? 'Save changes' : `Publish ${singular}`}</button>
           </div>
         </div>
       </div>

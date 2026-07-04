@@ -17,6 +17,8 @@ type ItemChannelProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** edit this character — only offered to its author */
+  onEdit?: (id: string) => void;
   /** delete this character — only offered to its author */
   onDelete?: (id: string) => void;
 };
@@ -28,7 +30,7 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onDelete }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onEdit, onDelete }: ItemChannelProps) {
   const isMine = Boolean(viewerAuthUid && creatorAuthUid && creatorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${character.name}"? This can't be undone.`)) onDelete(character.id);
@@ -121,6 +123,9 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
             <FollowButton creatorAuthUid={creatorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
+            {isMine && onEdit && (
+              <button type="button" className="v3-btn secondary" onClick={() => onEdit(character.id)}>Edit</button>
+            )}
             {isMine && onDelete && (
               <button type="button" className="v3-btn danger" onClick={confirmDelete}>Delete</button>
             )}
