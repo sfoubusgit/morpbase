@@ -552,7 +552,6 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           ) : (
             // Logged out — show a clear "Sign in" affordance, never a fake "you" identity.
             <button type="button" className="v3-userchip guest" onClick={onLogin} title="Sign in">
-              <span className="av">?</span>
               <span className="nm">Sign in</span>
             </button>
           )}
