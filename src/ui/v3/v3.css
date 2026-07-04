@@ -434,7 +434,18 @@
   background: linear-gradient(135deg, rgba(110, 86, 249, 0.9), rgba(60, 40, 200, 0.9)); font: var(--font-weight-extrabold) 34px var(--font-primary);
 }
 .v3-prof-av.img { object-fit: cover; background: none; }
+.v3-prof-avwrap { position: relative; flex: none; display: inline-flex; }
 .v3-prof-id { flex: 1; min-width: 0; }
+
+/* presence indicator — online/offline dot */
+.v3-online { display: inline-flex; align-items: center; gap: 6px; vertical-align: middle; }
+.v3-online .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--text-muted); flex: none; }
+.v3-online.on .dot { background: var(--success-base); box-shadow: 0 0 8px rgba(106, 159, 122, 0.75); }
+.v3-online .lbl { font: var(--font-weight-semibold) 12.5px var(--font-primary); color: var(--text-tertiary); }
+.v3-online.on .lbl { color: var(--success-base); }
+/* avatar-corner variant */
+.v3-online.av-dot { position: absolute; bottom: 5px; right: 5px; }
+.v3-online.av-dot .dot { width: 16px; height: 16px; border: 3px solid #14151b; }
 .v3-prof-id h2 { margin: 4px 0 2px; font-size: 26px; font-weight: var(--font-weight-extrabold); }
 .v3-prof-handle { color: var(--text-tertiary); font-size: 13.5px; }
 .v3-prof-social { margin-top: 6px; color: var(--text-tertiary); font: var(--font-weight-regular) 13px var(--font-primary); }

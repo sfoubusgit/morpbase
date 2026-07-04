@@ -5,6 +5,8 @@ import { LaneWall } from './LaneWall';
 import { listMyGeneratedImages, type RemoteImage } from './channelImagesStore';
 import type { RemoteLaneItem } from './laneItemsStore';
 import { getFollowState, listFollowing } from './followStore';
+import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
+import { OnlineDot } from './OnlineDot';
 
 /** Favorites span every lane, so the profile renders them with the generic wall. */
 export type ProfileFavItem = { id: string; name: string; tint: number; image?: string | null; accent?: string; badge?: string; lane?: string };
@@ -91,6 +93,8 @@ export function V3Profile({
 
   const created = createdCharacters;
   const handle = viewerName.toLowerCase().replace(/\s+/g, '');
+  const onlineUids = useOnlineAuthUids();
+  const isOnline = !!viewerAuthUid && onlineUids.has(viewerAuthUid);
 
   // Group the viewer's lane objects by type → one tab per type they actually use.
   const byLane = useMemo(() => {
@@ -104,14 +108,20 @@ export function V3Profile({
     <div className="v3-prof">
       <div className="v3-prof-cover" />
       <div className="v3-prof-head">
-        {viewerAvatarUrl
-          ? <img className="v3-prof-av img" src={viewerAvatarUrl} alt={viewerName} />
-          : <span className="v3-prof-av">{viewerName[0]?.toUpperCase() ?? '?'}</span>}
+        <div className="v3-prof-avwrap">
+          {viewerAvatarUrl
+            ? <img className="v3-prof-av img" src={viewerAvatarUrl} alt={viewerName} />
+            : <span className="v3-prof-av">{viewerName[0]?.toUpperCase() ?? '?'}</span>}
+          {isLoggedIn && <OnlineDot online={isOnline} className="av-dot" />}
+        </div>
         <div className="v3-prof-id">
           <div className="v3-eyebrow">Creator</div>
           <h2>{viewerName}</h2>
           <div className="v3-prof-handle">@{handle}</div>
-          <div className="v3-prof-social"><b>{followers}</b> follower{followers === 1 ? '' : 's'} · <b>{following}</b> following</div>
+          <div className="v3-prof-social">
+            {isLoggedIn && <><OnlineDot online={isOnline} label /> · </>}
+            <b>{followers}</b> follower{followers === 1 ? '' : 's'} · <b>{following}</b> following
+          </div>
         </div>
         <div className="v3-prof-actions">
           {isLoggedIn
