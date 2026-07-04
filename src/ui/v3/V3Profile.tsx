@@ -16,6 +16,8 @@ type V3ProfileProps = {
   createdCharacters: CharacterIdentity[];
   /** this viewer's own non-character lane objects (scenery, actions, …) */
   createdItems: RemoteLaneItem[];
+  /** ids among the viewer's own items that are 18+ (badged, not hidden, on their own profile) */
+  adultIds?: string[];
   /** favorited items across every lane, ready for the generic wall */
   favItems: ProfileFavItem[];
   favorites: string[];
@@ -53,6 +55,7 @@ export function V3Profile({
   viewerAuthUid,
   createdCharacters,
   createdItems,
+  adultIds,
   favItems,
   favorites,
   scene,
@@ -155,6 +158,7 @@ export function V3Profile({
           onAdd={onAdd}
           onOpenChannel={onOpenChannel}
           onToggleFavorite={onToggleFavorite}
+          adultIds={adultIds}
           emptyHint="You haven’t created any characters yet."
         />
       ) : (
@@ -168,6 +172,7 @@ export function V3Profile({
           onAdd={onAdd}
           onOpen={onOpenChannel}
           onToggleFavorite={onToggleFavorite}
+          adultIds={adultIds}
           emptyHint={`No ${LANE_INFO[tab]?.label.toLowerCase() ?? 'items'} yet.`}
         />
       )}

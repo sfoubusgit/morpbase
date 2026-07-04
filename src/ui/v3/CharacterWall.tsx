@@ -14,6 +14,8 @@ type CharacterWallProps = {
   onToggleFavorite: (id: string) => void;
   ads?: AdItem[];
   adEvery?: number;
+  /** ids to mark with an "18+" overlay (the owner's own adult content) */
+  adultIds?: string[];
   emptyHint?: string;
 };
 
@@ -31,6 +33,7 @@ export function CharacterWall({
   onToggleFavorite,
   ads,
   adEvery = 12,
+  adultIds,
   emptyHint,
 }: CharacterWallProps) {
   if (characters.length === 0) {
@@ -72,6 +75,7 @@ export function CharacterWall({
             <div className={`v3-shot${img ? '' : ' v3-ph'}`} style={shotStyle}>
               {!img && <LanePlaceholder lane="character" />}
               <span className="v3-badge">Character</span>
+              {adultIds?.includes(c.id) && <span className="v3-shot-adult" title="Adult — hidden from public lanes until the 18+ section opens">18+</span>}
               <span
                 className={`v3-fav${fav ? ' on' : ''}`}
                 role="button"

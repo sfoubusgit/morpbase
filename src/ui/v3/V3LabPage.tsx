@@ -185,19 +185,28 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     [visibleCreatedItems],
   );
   const allCharacters = useMemo(() => [...createdChars, ...visibleCharacters], [createdChars, visibleCharacters]);
-  // The current viewer's own creations (Supabase-authored + legacy local), for the profile.
+  // The current viewer's own creations, for THEIR OWN profile. Unlike public
+  // browse surfaces, this is NOT SFW-filtered — a creator sees all their own
+  // content (their 18+ items are badged, not hidden — see myAdultIds).
   const myCreatedCharacters = useMemo(() => {
-    const mine = visibleCreatedItems
+    const mine = createdLaneItems
       .filter(it => it.lane === 'characters' && it.authorAuthUid && it.authorAuthUid === viewerAuthUid)
       .map(toCharacter);
-    const localOwn = visibleCharacters.filter(c => !c.id.startsWith('character_seed_'));
+    const localOwn = characters.filter(c => !c.id.startsWith('character_seed_'));
     return [...mine, ...localOwn];
-  }, [visibleCreatedItems, viewerAuthUid, visibleCharacters]);
+  }, [createdLaneItems, viewerAuthUid, characters]);
   // The viewer's own created lane objects (non-character lanes) — for the typed profile tabs.
   const myCreatedItems = useMemo(
-    () => visibleCreatedItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters'),
-    [visibleCreatedItems, viewerAuthUid],
+    () => createdLaneItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters'),
+    [createdLaneItems, viewerAuthUid],
   );
+  // Which of the viewer's own items are 18+ — so the profile can badge (not hide) them.
+  const myAdultIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const it of myCreatedItems) if (ratingForText(itemText(it)) === 'nsfw') ids.push(it.id);
+    for (const c of myCreatedCharacters) if (ratingForText(charText(c)) === 'nsfw') ids.push(c.id);
+    return ids;
+  }, [myCreatedItems, myCreatedCharacters]);
 
   const byId = (id: string) => allCharacters.find(c => c.id === id) ?? null;
   const channelChar = channelId ? byId(channelId) : null;
@@ -578,6 +587,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerAuthUid={viewerAuthUid}
             createdCharacters={myCreatedCharacters}
             createdItems={myCreatedItems}
+            adultIds={myAdultIds}
             favItems={favItems}
             favorites={favorites}
             scene={scene}

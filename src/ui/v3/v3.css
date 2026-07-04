@@ -175,6 +175,13 @@
   background: rgba(var(--c), 0.18); border: 1px solid rgba(var(--c), 0.4); color: rgb(var(--c));
   font: var(--font-weight-extrabold) 9px var(--font-primary); letter-spacing: 0.05em; text-transform: uppercase;
 }
+/* "18+" overlay — the creator's own adult content, hidden from public lanes */
+.v3-shot-adult {
+  position: absolute; top: 36px; left: 10px; z-index: 2; display: inline-flex; align-items: center;
+  padding: 3px 7px; border-radius: var(--radius-pill);
+  background: rgba(224, 132, 72, 0.92); color: #1a1206;
+  font: var(--font-weight-extrabold) 9px var(--font-primary); letter-spacing: 0.05em;
+}
 .v3-who { position: absolute; left: 11px; bottom: 10px; z-index: 2; display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #e8e9f5; transition: opacity var(--motion-fast); }
 .v3-who .a { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #36d3c4, var(--accent-primary)); }
 .v3-acts { position: absolute; inset: auto 10px 10px 10px; z-index: 3; display: flex; gap: 7px; opacity: 0; transform: translateY(6px); transition: all var(--motion-fast) var(--motion-ease); }

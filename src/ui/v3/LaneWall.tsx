@@ -31,6 +31,8 @@ type LaneWallProps = {
   ads?: AdItem[];
   /** insert one ad after every N items (default 12) */
   adEvery?: number;
+  /** ids to mark with an "18+" overlay (the owner's own adult content) */
+  adultIds?: string[];
   emptyHint?: string;
 };
 
@@ -51,6 +53,7 @@ export function LaneWall({
   onOpen,
   ads,
   adEvery = 12,
+  adultIds,
   emptyHint,
 }: LaneWallProps) {
   if (items.length === 0) {
@@ -92,6 +95,7 @@ export function LaneWall({
             <div className={`v3-shot${img ? '' : ' v3-ph'}`} style={shotStyle}>
               {!img && <LanePlaceholder lane={ln} />}
               <span className="v3-badge">{bdg}</span>
+              {adultIds?.includes(item.id) && <span className="v3-shot-adult" title="Adult — hidden from public lanes until the 18+ section opens">18+</span>}
               <span
                 className={`v3-fav${fav ? ' on' : ''}`}
                 role="button"
