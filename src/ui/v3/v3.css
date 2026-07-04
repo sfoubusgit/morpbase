@@ -361,6 +361,11 @@
 .v3-userchip .av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(110, 86, 249, 0.85), rgba(60, 40, 200, 0.85)); font: var(--font-weight-extrabold) 11px var(--font-primary); color: #fff; flex: none; }
 .v3-userchip .av.img { object-fit: cover; background: none; }
 .v3-userchip .nm { font: var(--font-weight-semibold) 12.5px var(--font-primary); color: var(--text-primary); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* logged-out "Sign in" chip — a call to action, not a fake identity */
+.v3-userchip.guest { padding: 4px 12px; border: 1px solid var(--border-medium); }
+.v3-userchip.guest:hover { border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
+.v3-userchip.guest .av { background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); }
+.v3-userchip.guest .nm { color: var(--text-secondary); }
 
 .v3-authbtn {
   flex-shrink: 0; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-strong);

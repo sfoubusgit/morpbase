@@ -538,16 +538,24 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
 
         <div className="v3-userbar">
-          <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); }} title="Your profile">
-            {viewerAvatarUrl
-              ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
-              : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
-            <span className="nm">{viewer}</span>
-          </button>
-          <span className="v3-userbar-sep" aria-hidden="true" />
-          {viewerAuthUid
-            ? <button type="button" className="v3-userbar-link" onClick={onLogout}>Log out</button>
-            : <button type="button" className="v3-userbar-link" onClick={onLogin}>Log in</button>}
+          {viewerAuthUid ? (
+            <>
+              <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); }} title="Your profile">
+                {viewerAvatarUrl
+                  ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
+                  : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
+                <span className="nm">{viewer}</span>
+              </button>
+              <span className="v3-userbar-sep" aria-hidden="true" />
+              <button type="button" className="v3-userbar-link" onClick={onLogout}>Log out</button>
+            </>
+          ) : (
+            // Logged out — show a clear "Sign in" affordance, never a fake "you" identity.
+            <button type="button" className="v3-userchip guest" onClick={onLogin} title="Sign in">
+              <span className="av">?</span>
+              <span className="nm">Sign in</span>
+            </button>
+          )}
         </div>
       </header>
 
