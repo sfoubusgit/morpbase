@@ -4000,7 +4000,7 @@ export function App() {
         authReady ? (
           <V3LabPage
             characters={characters}
-            viewerName={authUser?.name ?? null}
+            viewerName={authUser?.name?.trim() || authUser?.email?.split('@')[0] || null}
             viewerAvatarUrl={authUser?.avatarUrl ?? null}
             viewerAuthUid={authUser?.authUid ?? null}
             onLogout={handleLogout}

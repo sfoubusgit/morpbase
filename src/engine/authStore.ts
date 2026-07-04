@@ -86,21 +86,36 @@ const ensureProfile = async (): Promise<AuthUser> => {
     throw selectError;
   }
 
-  // OAuth providers (e.g. Google) hand us a profile picture in user_metadata.
+  // OAuth providers (e.g. Google) hand us a profile picture + name in user_metadata.
   const oauthAvatar =
     (typeof user.user_metadata?.avatar_url === 'string' && user.user_metadata.avatar_url) ||
     (typeof user.user_metadata?.picture === 'string' && user.user_metadata.picture) ||
     null;
+  const oauthName =
+    (typeof user.user_metadata?.display_name === 'string' && user.user_metadata.display_name.trim()) ||
+    (typeof user.user_metadata?.name === 'string' && user.user_metadata.name.trim()) ||
+    (typeof user.user_metadata?.full_name === 'string' && user.user_metadata.full_name.trim()) ||
+    '';
+  const emailName = user.email ? user.email.split('@')[0] : '';
 
   if (existing) {
-    await ensurePublicProfile(existing as ProfileRow);
+    const row = existing as ProfileRow;
+    await ensurePublicProfile(row);
     const { data: pub } = await supabase
       .from('public_profiles')
-      .select('avatar_url')
-      .eq('user_id', (existing as ProfileRow).id)
+      .select('avatar_url, display_name')
+      .eq('user_id', row.id)
       .maybeSingle();
+    const pubName = ((pub as { display_name?: string | null } | null)?.display_name ?? '').trim();
+    // Never surface an empty name (which the UI renders as the literal "you").
+    // Prefer the users row, then OAuth, then the public profile, then email.
+    const name = (row.display_name ?? '').trim() || oauthName || pubName || emailName || 'User';
+    // Heal a blank users.display_name so it's fixed for good, not just this session.
+    if (!(row.display_name ?? '').trim()) {
+      try { await supabase.from('users').update({ display_name: name }).eq('id', row.id); } catch { /* non-fatal */ }
+    }
     const avatarUrl = (pub as { avatar_url: string | null } | null)?.avatar_url ?? oauthAvatar;
-    return toAuthUser(existing as ProfileRow, user.id, avatarUrl);
+    return { ...toAuthUser(row, user.id, avatarUrl), name };
   }
 
   const displayName =
