@@ -138,17 +138,36 @@ const ensureProfile = async (): Promise<AuthUser> => {
   return toAuthUser(inserted as ProfileRow, user.id, oauthAvatar);
 };
 
+/** A minimal user built straight from the auth session (no DB rows needed). */
+const sessionUser = (user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }): AuthUser => {
+  const md = user.user_metadata ?? {};
+  const name =
+    (typeof md.display_name === 'string' && md.display_name.trim()) ||
+    (typeof md.name === 'string' && md.name.trim()) ||
+    (typeof md.full_name === 'string' && md.full_name.trim()) ||
+    (user.email ? user.email.split('@')[0] : '') ||
+    'User';
+  const avatarUrl =
+    (typeof md.avatar_url === 'string' && md.avatar_url) ||
+    (typeof md.picture === 'string' && md.picture) ||
+    null;
+  return { id: user.id, authUid: user.id, name, email: user.email ?? '', avatarUrl };
+};
+
 export const getCurrentUser = async (): Promise<AuthUser | null> => {
+  let sessionUserObj: { id: string; email?: string | null; user_metadata?: Record<string, unknown> } | null = null;
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) throw sessionError;
-    if (!sessionData.session?.user) return null;
+    if (!sessionData.session?.user) return null; // genuinely logged out
+    sessionUserObj = sessionData.session.user;
     return await ensureProfile();
   } catch (err) {
-    // Session exists but provisioning failed — surface it; this is the usual
-    // cause of "logged in to Supabase but the app shows logged out".
-    console.error('[auth] getCurrentUser failed:', err);
-    return null;
+    // A valid session must NOT appear logged out just because provisioning
+    // (users/public_profiles row or a missing column) hiccuped. Fall back to a
+    // session-only user so the person stays logged in with the right auth uid.
+    console.error('[auth] provisioning failed; using session fallback:', err);
+    return sessionUserObj ? sessionUser(sessionUserObj) : null;
   }
 };
 
