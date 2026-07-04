@@ -4,6 +4,7 @@ import { CharacterWall } from './CharacterWall';
 import { LaneWall } from './LaneWall';
 import { listMyGeneratedImages, type RemoteImage } from './channelImagesStore';
 import type { RemoteLaneItem } from './laneItemsStore';
+import { getFollowState, listFollowing } from './followStore';
 
 /** Favorites span every lane, so the profile renders them with the generic wall. */
 export type ProfileFavItem = { id: string; name: string; tint: number; image?: string | null; accent?: string; badge?: string; lane?: string };
@@ -68,12 +69,23 @@ export function V3Profile({
 }: V3ProfileProps) {
   const [tab, setTab] = useState<string>('characters');
   const [generated, setGenerated] = useState<RemoteImage[]>([]);
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
 
   // Pull the real images this user has generated + saved to channels.
   useEffect(() => {
     if (!viewerAuthUid) { setGenerated([]); return; }
     let live = true;
     listMyGeneratedImages(viewerAuthUid).then(v => { if (live) setGenerated(v); }).catch(() => { /* offline */ });
+    return () => { live = false; };
+  }, [viewerAuthUid]);
+
+  // Real follower / following counts (social proof).
+  useEffect(() => {
+    if (!viewerAuthUid) { setFollowers(0); setFollowing(0); return; }
+    let live = true;
+    getFollowState(viewerAuthUid).then(s => { if (live) setFollowers(s.count); }).catch(() => { /* offline */ });
+    listFollowing(viewerAuthUid).then(ids => { if (live) setFollowing(ids.length); }).catch(() => { /* offline */ });
     return () => { live = false; };
   }, [viewerAuthUid]);
 
@@ -99,6 +111,7 @@ export function V3Profile({
           <div className="v3-eyebrow">Creator</div>
           <h2>{viewerName}</h2>
           <div className="v3-prof-handle">@{handle}</div>
+          <div className="v3-prof-social"><b>{followers}</b> follower{followers === 1 ? '' : 's'} · <b>{following}</b> following</div>
         </div>
         <div className="v3-prof-actions">
           {isLoggedIn

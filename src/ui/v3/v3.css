@@ -432,6 +432,8 @@
 .v3-prof-id { flex: 1; min-width: 0; }
 .v3-prof-id h2 { margin: 4px 0 2px; font-size: 26px; font-weight: var(--font-weight-extrabold); }
 .v3-prof-handle { color: var(--text-tertiary); font-size: 13.5px; }
+.v3-prof-social { margin-top: 6px; color: var(--text-tertiary); font: var(--font-weight-regular) 13px var(--font-primary); }
+.v3-prof-social b { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
 .v3-prof-actions { display: flex; align-items: center; gap: 8px; flex: none; }
 .v3-prof-metrics { max-width: 456px; margin-bottom: 18px; padding: 0 4px; }
 
