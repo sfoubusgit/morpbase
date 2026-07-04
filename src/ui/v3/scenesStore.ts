@@ -16,16 +16,15 @@
 import type { SynthMethod } from './synthesis';
 
 /**
- * A character action in the scene. Pair actions link two items (from → to);
- * solo actions omit `to` (one subject, no target — "{from} kneels").
+ * A "doing" — what a character is doing in this scene. It hangs off the subject
+ * (not a library object, not a graph). Solo doings omit `target`; a doing that
+ * targets another cast member is an interaction ("{subject} chasing {target}").
+ * Scene-scoped and transient — the durable identity lives on the character.
  */
-export type SceneInteraction = {
-  from: string;            // subject item id, present in items[]
-  to?: string;             // target item id (pair only); absent for solo
-  verb: string;            // relation phrase, e.g. "is chasing" / "is kneeling"
-  emblem?: string;         // seeded action id (monochrome emblem)
-  cover?: string | null;   // user-created action cover (render cache)
-  actionId?: string;       // ref to the action lane item, so edits propagate
+export type SceneDoing = {
+  subject: string;         // subject item id, present in items[]
+  verb: string;            // free-text action phrase, e.g. "kneeling" / "chasing"
+  target?: string;         // another cast member's item id (interaction), else absent
 };
 
 /** A generated image tied to a scene (urls/ids only — never blobs in storage). */
@@ -36,7 +35,7 @@ export type Scene = {
 
   // ── v0: the arrangement ──
   items: string[];              // ordered element ids (characters + lane objects)
-  interactions: SceneInteraction[];
+  doings: SceneDoing[];         // what each character is doing (subject-scoped)
   name: string;
   createdAt: string;
   updatedAt: string;
@@ -76,9 +75,9 @@ const nowISO = () => new Date().toISOString();
 const genId = () => `scene_${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36)}`;
 
 /** A fresh empty scene. */
-export function makeScene(name: string, items: string[] = [], interactions: SceneInteraction[] = []): Scene {
+export function makeScene(name: string, items: string[] = [], doings: SceneDoing[] = []): Scene {
   const t = nowISO();
-  return { id: genId(), items: [...items], interactions: interactions.map(r => ({ ...r })), name, createdAt: t, updatedAt: t };
+  return { id: genId(), items: [...items], doings: doings.map(d => ({ ...d })), name, createdAt: t, updatedAt: t };
 }
 
 /** A duplicate for varying: same arrangement, fresh identity, no carried results. */
@@ -89,7 +88,7 @@ export function duplicateScene(src: Scene, name: string): Scene {
     id: genId(),
     name,
     items: [...src.items],
-    interactions: src.interactions.map(r => ({ ...r })),
+    doings: src.doings.map(d => ({ ...d })),
     parentId: src.id,           // lineage breadcrumb (informational, not ownership)
     axisGroupId: undefined,     // a plain duplicate is standalone
     generations: undefined,     // fresh canvas for results
@@ -107,9 +106,14 @@ function migrate(payload: unknown): Scene[] {
     .map((s): Scene => ({
       id: s.id as string,
       items: (s.items as unknown[]).filter((x): x is string => typeof x === 'string'),
-      interactions: Array.isArray(s.interactions)
-        ? (s.interactions as SceneInteraction[]).filter(r => r && r.from && r.verb) // solo has no `to`
-        : [],
+      // Prefer new `doings`; migrate legacy `interactions` ({from,to,verb}) → doings.
+      doings: Array.isArray(s.doings)
+        ? (s.doings as SceneDoing[]).filter(d => d && d.subject && d.verb)
+        : Array.isArray(s.interactions)
+          ? (s.interactions as Array<{ from?: string; to?: string; verb?: string }>)
+              .filter(r => r && r.from && r.verb)
+              .map(r => ({ subject: r.from as string, verb: r.verb as string, target: r.to }))
+          : [],
       name: typeof s.name === 'string' ? s.name : 'Scene',
       createdAt: typeof s.createdAt === 'string' ? s.createdAt : nowISO(),
       updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : nowISO(),

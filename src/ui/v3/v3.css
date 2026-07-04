@@ -449,9 +449,39 @@
   background: rgba(17, 18, 24, 0.96); backdrop-filter: blur(12px);
   border: 1px solid var(--border-accent); border-radius: var(--radius-lg); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
 }
-.v3-dock-main { display: flex; align-items: center; gap: 14px; }
+.v3-dock-main { position: relative; display: flex; align-items: center; gap: 14px; }
 .v3-dock .dock-lbl { flex: none; }
 .v3-dock-empty { font: var(--font-weight-medium) 12.5px var(--font-primary); color: var(--text-muted); }
+
+/* a character chip is tappable to set what they're "doing" */
+.v3-dock-chip.actionable { cursor: pointer; }
+.v3-dock-chip.actionable:hover { border-color: var(--border-accent); }
+.v3-dock-chip.editing { border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
+.v3-dock-chip .t .doing { margin-left: 4px; color: var(--text-tertiary); font-weight: var(--font-weight-medium); }
+
+/* doing editor — what is this character doing (optionally toward another) */
+.v3-doing-pop { position: absolute; bottom: calc(100% + 12px); left: 0; width: 340px; z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
+.v3-doing-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; font: var(--font-weight-medium) 13px var(--font-primary); color: var(--text-secondary); margin-bottom: 10px; }
+.v3-doing-hd b { color: #fff; font-weight: var(--font-weight-semibold); }
+.v3-doing-x { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; }
+.v3-doing-x:hover { color: #fff; }
+.v3-doing-input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 9px 11px; color: #fff; font: var(--font-weight-medium) 13px var(--font-primary); outline: none; }
+.v3-doing-input:focus { border-color: var(--border-accent-strong); }
+.v3-doing-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; max-height: 128px; overflow-y: auto; scrollbar-width: none; }
+.v3-doing-chips::-webkit-scrollbar { display: none; }
+.v3-doing-chip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 4px 10px; cursor: pointer; color: var(--text-secondary); font: var(--font-weight-medium) 11.5px var(--font-primary); }
+.v3-doing-chip:hover { color: #fff; border-color: var(--border-accent); }
+.v3-doing-chip.on { color: #fff; border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
+.v3-doing-target { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-subtle); }
+.v3-doing-target .lbl { font: var(--font-weight-semibold) 11px var(--font-primary); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; margin-right: 2px; }
+.v3-doing-tchip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 4px 10px; cursor: pointer; color: var(--text-secondary); font: var(--font-weight-semibold) 11.5px var(--font-primary); }
+.v3-doing-tchip:hover { color: #fff; border-color: var(--border-accent); }
+.v3-doing-tchip.on { color: #fff; border-color: rgb(var(--la-character)); background: rgba(var(--la-character), 0.16); }
+.v3-doing-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+.v3-doing-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); }
+.v3-doing-clear:hover { color: var(--error-base); }
+.v3-doing-done { background: var(--accent-primary); border: none; border-radius: var(--radius-sm); padding: 7px 16px; color: #fff; cursor: pointer; font: var(--font-weight-semibold) 12.5px var(--font-primary); }
+.v3-doing-done:hover { filter: brightness(1.1); }
 
 /* scene switcher — compact stepper + dropdown (scales past a strip of tabs) */
 .v3-scene-nav { position: relative; flex: none; display: flex; align-items: center; gap: 6px; }

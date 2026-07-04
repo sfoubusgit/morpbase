@@ -12,13 +12,12 @@ import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
-import { scenesStore, type Scene, type SceneInteraction } from './scenesStore';
+import { scenesStore, type Scene, type SceneDoing } from './scenesStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
 import { quickPrompt } from './synthesis';
 import type { SynthElement, SynthRelation } from './synthesis';
-import { INTERACTIONS } from './interactions';
-import { ActionEmblem } from './ActionEmblem';
+import { DOING_SUGGESTIONS, DOING_INTERACTIONS } from './doings';
 import { SCENERY_ITEMS } from './scenery';
 import { OBJECT_ITEMS } from './objects';
 import { MOOD_ITEMS } from './mood';
@@ -46,7 +45,6 @@ type LaneDef = { key: string; label: string; accent: string; status: 'live' | 's
 
 const LANES: LaneDef[] = [
   { key: 'characters', label: 'Characters', accent: 'var(--la-character)', status: 'live' },
-  { key: 'actions', label: 'Actions', accent: 'var(--la-mood)', status: 'live', isNew: true },
   { key: 'scenery', label: 'Scenery', accent: 'var(--la-scenery)', status: 'live' },
   { key: 'objects', label: 'Objects', accent: 'var(--la-objects)', status: 'live' },
   { key: 'environment', label: 'Environment', accent: 'var(--la-environment)', status: 'live' },
@@ -102,13 +100,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [activeId, setActiveId] = useState<string>(boot.activeId);
   const active = scenes.find(s => s.id === activeId) ?? scenes[0];
   const scene = active.items;
-  const interactions = active.interactions;
+  const doings = active.doings;
   const updateActive = (fn: (s: Scene) => Scene) =>
     setScenes(list => list.map(s => (s.id === active.id ? { ...fn(s), updatedAt: new Date().toISOString() } : s)));
   const setScene = (upd: string[] | ((prev: string[]) => string[])) =>
     updateActive(s => ({ ...s, items: typeof upd === 'function' ? upd(s.items) : upd }));
-  const setInteractions = (upd: SceneInteraction[] | ((prev: SceneInteraction[]) => SceneInteraction[])) =>
-    updateActive(s => ({ ...s, interactions: typeof upd === 'function' ? upd(s.interactions) : upd }));
+  const setDoings = (upd: SceneDoing[] | ((prev: SceneDoing[]) => SceneDoing[])) =>
+    updateActive(s => ({ ...s, doings: typeof upd === 'function' ? upd(s.doings) : upd }));
 
   const [favorites, setFavorites] = useState<string[]>(() => favoritesStore.list());
   const [showProfile, setShowProfile] = useState(false);
@@ -147,11 +145,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const deleteCreatedItem = async (id: string) => {
     setCreatedLaneItems(prev => prev.filter(it => it.id !== id)); // optimistic
     setChannelId(null);
-    // prune the deleted library item (and any interaction using it) from every scene
+    // prune the deleted library item (and any doing using it) from every scene
     setScenes(list => list.map(s => ({
       ...s,
       items: s.items.filter(x => x !== id),
-      interactions: s.interactions.filter(r => r.from !== id && r.to !== id),
+      doings: s.doings.filter(d => d.subject !== id && d.target !== id),
     })));
     try { await deleteLaneItem(id); } catch { /* RLS/offline — already removed from view */ }
   };
@@ -197,7 +195,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   }, [createdLaneItems, viewerAuthUid, characters]);
   // The viewer's own created lane objects (non-character lanes) — for the typed profile tabs.
   const myCreatedItems = useMemo(
-    () => createdLaneItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters'),
+    () => createdLaneItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters' && it.lane !== 'actions'),
     [createdLaneItems, viewerAuthUid],
   );
   // Which of the viewer's own items are 18+ — so the profile can badge (not hide) them.
@@ -275,16 +273,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const addToScene = (id: string) => setScene(s => (s.includes(id) ? s : [...s, id]));
   const removeFromScene = (id: string) => {
     setScene(s => s.filter(x => x !== id));
-    // drop any interaction that referenced the removed element
-    setInteractions(list => list.filter(x => x.from !== id && x.to !== id));
+    // drop the removed character's doing, and clear it as anyone's target
+    setDoings(list => list.filter(d => d.subject !== id).map(d => (d.target === id ? { ...d, target: undefined } : d)));
   };
 
-  // `interactions` (directed A→action→B links) lives on the ACTIVE scene — see
-  // the scenes block above for the derived `interactions` + `setInteractions`.
-  // Tap-to-link builder: null = idle; otherwise a partial link being assembled.
-  // Phase is derived — no `from` → pick who; `from` but no `action` → pick action;
-  // both set → pick whom. Guides the user through an explicit A → action → B link.
-  const [linkStep, setLinkStep] = useState<null | { from?: string; action?: PickAction }>(null);
+  // Doing editor: the subject (character id) whose doing is currently being edited.
+  const [doingEdit, setDoingEdit] = useState<string | null>(null);
   const [sceneMenu, setSceneMenu] = useState(false); // scene switcher dropdown
   const [renamingId, setRenamingId] = useState<string | null>(null); // scene being renamed
   const [renameText, setRenameText] = useState('');
@@ -354,59 +348,34 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const sceneCharItems = scene.map(id => registry[id]).filter((s): s is SceneItem => !!s && s.lane === 'character');
   // actions → the relations synthesis understands (resolve names). Solo actions
   // have no `to`; pair actions carry the target's name.
-  const sceneRelations: SynthRelation[] = interactions
-    .map(x => {
-      const from = registry[x.from]?.name;
-      if (!from || !x.verb) return null;
-      if (!x.to) return { from, verb: x.verb };            // solo
-      const to = registry[x.to]?.name;
-      return to ? { from, verb: x.verb, to } : null;       // pair
+  // Doings → synthesis relations. A doing is subject-scoped; a targeted doing
+  // becomes an interaction ("{subject} {verb} {target}").
+  const sceneRelations: SynthRelation[] = doings
+    .map(d => {
+      const from = registry[d.subject]?.name;
+      const verb = d.verb.trim();
+      if (!from || !verb) return null;
+      if (!d.target) return { from, verb };                 // solo doing
+      const to = registry[d.target]?.name;
+      return to ? { from, verb, to } : { from, verb };      // targeted → interaction (drop dangling target)
     })
     .filter((r): r is SynthRelation => !!r);
-  // Actions available to pick: seeded emblems + user-created action cards.
-  type PickAction = { key: string; label: string; verb: string; solo?: boolean; emblem?: string; cover?: string | null };
-  const pickActions: PickAction[] = [
-    ...INTERACTIONS.map(i => ({ key: i.id, label: i.label, verb: i.rel, solo: i.solo, emblem: i.id })),
-    ...visibleCreatedItems
-      .filter(it => it.lane === 'actions' && it.relation)
-      .map(it => ({ key: it.id, label: it.name, verb: it.relation, solo: it.solo, cover: it.coverUrl })),
-  ];
-  // Action builder. Tap a character (subject), pick an action; a SOLO action
-  // commits right there, a PAIR action then asks you to tap a second character.
-  const startLink = () => setLinkStep({});
-  const cancelLink = () => setLinkStep(null);
-  const pickLinkAction = (a: PickAction) => {
-    setLinkStep(s => {
-      if (!s || !s.from) return s;
-      if (a.solo) {
-        // solo → commit immediately, no target
-        const from = s.from;
-        setInteractions(list =>
-          list.some(x => x.from === from && !x.to && x.verb === a.verb)
-            ? list
-            : [...list, { from, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
-        return null;
-      }
-      return { ...s, action: a };
+  // The doing for a given character (or undefined).
+  const doingOf = (subjectId: string) => doings.find(d => d.subject === subjectId);
+  // Set/replace a character's doing (empty verb clears it).
+  const setDoing = (subjectId: string, verb: string, target?: string) => {
+    const v = verb.trim();
+    setDoings(list => {
+      const rest = list.filter(d => d.subject !== subjectId);
+      // keep the row if there's a verb OR a target (allows picking "toward X" first);
+      // a target-only doing just isn't synthesized until a verb is added.
+      return v || target ? [...rest, { subject: subjectId, verb: v, target: target || undefined }] : rest;
     });
   };
-  // Tapping a character chip while building: sets `from`, or completes a pair as `to`.
-  const tapCharForLink = (id: string) => {
-    setLinkStep(s => {
-      if (!s) return s;
-      if (!s.from) return { from: id };            // step 1 → picked subject
-      if (s.from && s.action && id !== s.from) {   // step 3 (pair) → picked target → commit
-        const a = s.action;
-        setInteractions(list =>
-          list.some(x => x.from === s.from && x.to === id && x.verb === a.verb)
-            ? list
-            : [...list, { from: s.from!, to: id, verb: a.verb, emblem: a.emblem, cover: a.cover }]);
-        return null;
-      }
-      return s;
-    });
+  const setDoingTarget = (subjectId: string, target?: string) => {
+    setDoings(list => list.map(d => (d.subject === subjectId ? { ...d, target: target || undefined } : d)));
   };
-  const removeInteraction = (i: number) => setInteractions(list => list.filter((_, idx) => idx !== i));
+  const clearDoing = (subjectId: string) => setDoings(list => list.filter(d => d.subject !== subjectId));
 
   // ── scene operations (swap / new / duplicate / close) ──
   // Auto-name off the highest existing "Scene N" so numbers don't collide after deletes.
@@ -416,7 +385,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     return `Scene ${max + 1}`;
   };
   const closeSceneMenu = () => { setSceneMenu(false); setRenamingId(null); };
-  const switchScene = (id: string) => { setActiveId(id); setLinkStep(null); closeSceneMenu(); };
+  const switchScene = (id: string) => { setActiveId(id); setDoingEdit(null); closeSceneMenu(); };
   const renameScene = (id: string, name: string) => {
     const n = name.trim();
     setScenes(list => list.map(s => (s.id === id ? { ...s, name: n || s.name, updatedAt: new Date().toISOString() } : s)));
@@ -433,13 +402,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const newScene = () => {
     const s = scenesStore.make(nextSceneName());
     setScenes(list => [...list, s]);
-    setActiveId(s.id); setLinkStep(null); closeSceneMenu();
+    setActiveId(s.id); setDoingEdit(null); closeSceneMenu();
   };
   const duplicateScene = (id: string) => {
     const src = scenes.find(s => s.id === id); if (!src) return;
     const copy = scenesStore.duplicate(src, `${src.name} copy`);
     setScenes(list => { const i = list.findIndex(s => s.id === id); const next = [...list]; next.splice(i + 1, 0, copy); return next; });
-    setActiveId(copy.id); setLinkStep(null); closeSceneMenu();
+    setActiveId(copy.id); setDoingEdit(null); closeSceneMenu();
   };
   const deleteScene = (id: string) => {
     const idx = scenes.findIndex(s => s.id === id);
@@ -447,7 +416,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     const next = filtered.length ? filtered : [scenesStore.make('Scene 1')]; // always keep ≥1
     setScenes(next);
     if (id === activeId) setActiveId(next[Math.min(idx, next.length - 1)].id);
-    setLinkStep(null);
+    setDoingEdit(null);
   };
 
   // ── variation engine: fan the current scene across one lane's objects ──
@@ -470,13 +439,16 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     const built = varyPick.map(objId => {
       const items = [...kept, objId];
       const alive = new Set(items);
-      const interactions = base.interactions.filter(r => alive.has(r.from) && alive.has(r.to));
-      const s = scenesStore.make(`${base.name} · ${registry[objId]?.name ?? 'variant'}`, items, interactions);
+      // carry doings whose subject survives; drop a target that no longer exists
+      const keptDoings = base.doings
+        .filter(d => alive.has(d.subject))
+        .map(d => (d.target && !alive.has(d.target) ? { ...d, target: undefined } : d));
+      const s = scenesStore.make(`${base.name} · ${registry[objId]?.name ?? 'variant'}`, items, keptDoings);
       return { ...s, parentId: base.id, axisGroupId: groupId };
     });
     setScenes(list => { const i = list.findIndex(x => x.id === base.id); const next = [...list]; next.splice(i + 1, 0, ...built); return next; });
     setActiveId(built[0].id);
-    setVaryOpen(false); setVaryPick([]); setLinkStep(null);
+    setVaryOpen(false); setVaryPick([]); setDoingEdit(null);
   };
 
   // ── quick prompt: instant local-heuristic prompt (no AI) ──
@@ -496,7 +468,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   };
 
   return (
-    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); if (varyOpen) closeVary(); if (quickOpen) setQuickOpen(false); }}>
+    <div className="v3" onClick={() => { if (uniOpen) setUniOpen(false); if (sceneMenu) closeSceneMenu(); if (varyOpen) closeVary(); if (quickOpen) setQuickOpen(false); if (doingEdit) setDoingEdit(null); }}>
       {/* ── top bar: brand · universe (above lanes) · global search · profile ── */}
       <header className="v3-topbar">
         <button type="button" className="v3-brand" onClick={goWorkspace} title="Workspace">
@@ -711,46 +683,6 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               emptyHint={q ? `No ${WALL_LANES[lane].label.toLowerCase()} matches your search.` : `No ${WALL_LANES[lane].label.toLowerCase()} yet.`}
             />
           </>
-        ) : lane === 'actions' ? (
-          <>
-            <div className="v3-head">
-              <div>
-                <div className="v3-eyebrow">Actions lane</div>
-                <h2>Actions</h2>
-                <div className="v3-sub">
-                  {pickActions.length} action{pickActions.length === 1 ? '' : 's'} · interactions you can place between two characters in a scene.
-                </div>
-              </div>
-              <button
-                type="button"
-                className="v3-create-btn"
-                style={cssVar('var(--la-mood)')}
-                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
-                title={viewerAuthUid ? 'Create a new action' : 'Log in to create'}
-              >
-                <span className="pl">＋</span> Create
-              </button>
-            </div>
-            <div className="v3-actwall">
-              {pickActions.map(a => {
-                const mine = createdLaneItems.find(it => it.id === a.key && it.lane === 'actions' && it.authorAuthUid && it.authorAuthUid === viewerAuthUid);
-                return (
-                  <div key={a.key} className="v3-actwall-card">
-                    <span className="art" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
-                      {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
-                    </span>
-                    <div className="meta">
-                      <div className="nm">{a.label}</div>
-                      <div className="rel">A <b>{a.verb}</b>{a.solo ? '' : ' B'}</div>
-                    </div>
-                    {mine && (
-                      <button type="button" className="del" onClick={() => deleteCreatedItem(a.key)} title="Delete this action" aria-label="Delete">✕</button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
         ) : lane === 'favorites' ? (
           <>
             <div className="v3-head">
@@ -891,96 +823,74 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               const item = registry[id];
               if (!item) return null;
               const isChar = item.lane === 'character';
-              // Which character chips are tappable right now depends on the link phase.
-              const pickFrom = !!linkStep && !linkStep.from && isChar;
-              const pickTo = !!linkStep && !!linkStep.from && !!linkStep.action && isChar && id !== linkStep.from;
-              const linkable = pickFrom || pickTo;
-              const isFrom = linkStep?.from === id;
-              const dim = !!linkStep && !linkable && !isFrom;
+              const doing = isChar ? doingOf(id) : undefined;
+              const targetName = doing?.target ? registry[doing.target]?.name : undefined;
               return (
                 <span
                   key={id}
-                  className={`v3-dock-chip${linkable ? ' linkable' : ''}${isFrom ? ' isfrom' : ''}${dim ? ' dim' : ''}`}
+                  className={`v3-dock-chip${isChar ? ' actionable' : ''}${doingEdit === id ? ' editing' : ''}`}
                   style={cssVar(item.accent)}
-                  onClick={linkable ? () => tapCharForLink(id) : undefined}
-                  role={linkable ? 'button' : undefined}
-                  title={pickFrom ? `Link from ${item.name}` : pickTo ? `Link to ${item.name}` : undefined}
+                  onClick={isChar ? () => setDoingEdit(prev => (prev === id ? null : id)) : undefined}
+                  role={isChar ? 'button' : undefined}
+                  title={isChar ? `What is ${item.name} doing?` : undefined}
                 >
                   <span className={`sw${item.image ? '' : ' v3-ph'}`} style={item.image ? { backgroundImage: `url(${item.image})` } : undefined}>
                     {!item.image && <LanePlaceholder lane={item.lane} />}
                   </span>
-                  <span className="t">{item.name}</span>
-                  {!linkStep && <button type="button" className="x" onClick={() => removeFromScene(id)} aria-label="Remove">✕</button>}
+                  <span className="t">
+                    {item.name}
+                    {doing?.verb && <span className="doing">· {doing.verb}{targetName ? ` ${targetName}` : ''}</span>}
+                  </span>
+                  <button type="button" className="x" onClick={(e) => { e.stopPropagation(); removeFromScene(id); }} aria-label="Remove">✕</button>
                 </span>
               );
             })}
           </div>
 
-          {/* actions — what each character is doing (solo or between two), built by tapping */}
-          {sceneCharItems.length >= 1 && (
-            <div className="v3-dock-actions">
-              {interactions.map((x, i) => {
-                const from = registry[x.from];
-                if (!from) return null;
-                const to = x.to ? registry[x.to] : null;
-                if (x.to && !to) return null; // dangling pair target
-                return (
-                  <span key={i} className={`v3-sentence${to ? '' : ' solo'}`} title={`${from.name} ${x.verb}${to ? ` ${to.name}` : ''}`}>
-                    <span className="ep">
-                      <span className={`sw${from.image ? '' : ' v3-ph'}`} style={from.image ? { backgroundImage: `url(${from.image})` } : undefined}>{!from.image && <LanePlaceholder lane={from.lane} />}</span>
-                      <span className="nm">{from.name}</span>
-                    </span>
-                    <span className="v3-link">
-                      <span className="v3-actemb" style={x.cover ? { backgroundImage: `url(${x.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
-                        {!x.cover && <ActionEmblem id={x.emblem ?? ''} />}
-                      </span>
-                      <span className="vb">{x.verb}</span>
-                    </span>
-                    {to && (
-                      <span className="ep">
-                        <span className={`sw${to.image ? '' : ' v3-ph'}`} style={to.image ? { backgroundImage: `url(${to.image})` } : undefined}>{!to.image && <LanePlaceholder lane={to.lane} />}</span>
-                        <span className="nm">{to.name}</span>
-                      </span>
-                    )}
-                    <button type="button" className="x" onClick={() => removeInteraction(i)} aria-label="Remove">✕</button>
-                  </span>
-                );
-              })}
-
-              {/* guided action builder */}
-              {!linkStep ? (
-                <button type="button" className="v3-actadd" onClick={startLink} title="Add an action to a character">＋ action</button>
-              ) : (
-                <div className="v3-linkbar">
-                  <div className="v3-linkbar-hd">
-                    <span className="v3-linkstep">
-                      {!linkStep.from ? (
-                        <><b>1</b> Tap a character above</>
-                      ) : !linkStep.action ? (
-                        <><b>2</b> Pick an action for <em>{registry[linkStep.from]?.name}</em></>
-                      ) : (
-                        <><b>3</b> Tap who <em>{registry[linkStep.from]?.name} {linkStep.action.verb}</em></>
-                      )}
-                    </span>
-                    <button type="button" className="v3-linkcancel" onClick={cancelLink}>Cancel</button>
-                  </div>
-                  {/* action picker — pair actions only when a second character exists */}
-                  {linkStep.from && !linkStep.action && (
-                    <div className="v3-actpick-grid">
-                      {pickActions.filter(a => a.solo || sceneCharItems.length >= 2).map(a => (
-                        <button type="button" key={a.key} className={`v3-actcard${a.solo ? ' solo' : ''}`} onClick={() => pickLinkAction(a)} title={a.solo ? `${a.label} (solo)` : a.label}>
-                          <span className="em" style={a.cover ? { backgroundImage: `url(${a.cover})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}>
-                            {!a.cover && <ActionEmblem id={a.emblem ?? ''} />}
-                          </span>
-                          <span className="lb">{a.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+          {/* doing editor — what the tapped character is doing (optionally toward another) */}
+          {doingEdit && registry[doingEdit] && (() => {
+            const subj = registry[doingEdit];
+            const cur = doingOf(doingEdit);
+            const verb = cur?.verb ?? '';
+            const target = cur?.target;
+            const others = sceneCharItems.filter(c => c.id !== doingEdit);
+            const suggestions = target ? DOING_INTERACTIONS : DOING_SUGGESTIONS;
+            return (
+              <div className="v3-doing-pop">
+                <div className="v3-doing-hd">
+                  <span>What is <b>{subj.name}</b> doing?</span>
+                  <button type="button" className="v3-doing-x" onClick={() => setDoingEdit(null)} aria-label="Close">✕</button>
                 </div>
-              )}
-            </div>
-          )}
+                <input
+                  className="v3-doing-input"
+                  autoFocus
+                  value={verb}
+                  maxLength={80}
+                  placeholder={target ? 'e.g. chasing' : 'e.g. kneeling in the rain'}
+                  onChange={e => setDoing(doingEdit, e.target.value, target)}
+                  onKeyDown={e => { if (e.key === 'Enter') setDoingEdit(null); }}
+                />
+                <div className="v3-doing-chips">
+                  {suggestions.map(s => (
+                    <button type="button" key={s} className={`v3-doing-chip${verb === s ? ' on' : ''}`} onClick={() => setDoing(doingEdit, s, target)}>{s}</button>
+                  ))}
+                </div>
+                {others.length > 0 && (
+                  <div className="v3-doing-target">
+                    <span className="lbl">toward</span>
+                    <button type="button" className={`v3-doing-tchip${!target ? ' on' : ''}`} onClick={() => setDoing(doingEdit, verb, undefined)}>no one</button>
+                    {others.map(c => (
+                      <button type="button" key={c.id} className={`v3-doing-tchip${target === c.id ? ' on' : ''}`} onClick={() => setDoing(doingEdit, verb, c.id)}>{c.name}</button>
+                    ))}
+                  </div>
+                )}
+                <div className="v3-doing-foot">
+                  {cur ? <button type="button" className="v3-doing-clear" onClick={() => { clearDoing(doingEdit); setDoingEdit(null); }}>Clear</button> : <span />}
+                  <button type="button" className="v3-doing-done" onClick={() => setDoingEdit(null)}>Done</button>
+                </div>
+              </div>
+            );
+          })()}
 
           {scene.length > 0 && (
             <div className="v3-quick-wrap">
@@ -1009,12 +919,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters' || lane === 'actions') && (
+      {composerOpen && viewerAuthUid && (WALL_LANES[lane] || lane === 'characters') && (
         <LaneItemComposer
           lane={lane}
-          laneLabel={WALL_LANES[lane]?.label ?? (lane === 'actions' ? 'Actions' : 'Characters')}
-          accent={WALL_LANES[lane]?.accent ?? (lane === 'actions' ? 'var(--la-mood)' : 'var(--la-character)')}
-          kind={lane === 'characters' ? 'character' : lane === 'actions' ? 'action' : 'object'}
+          laneLabel={WALL_LANES[lane]?.label ?? 'Characters'}
+          accent={WALL_LANES[lane]?.accent ?? 'var(--la-character)'}
+          kind={lane === 'characters' ? 'character' : 'object'}
           worlds={worlds}
           viewerName={viewer}
           viewerAuthUid={viewerAuthUid}
