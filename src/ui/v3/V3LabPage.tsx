@@ -364,12 +364,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const doingOf = (subjectId: string) => doings.find(d => d.subject === subjectId);
   // Set/replace a character's doing (empty verb clears it).
   const setDoing = (subjectId: string, verb: string, target?: string) => {
-    const v = verb.trim();
     setDoings(list => {
       const rest = list.filter(d => d.subject !== subjectId);
-      // keep the row if there's a verb OR a target (allows picking "toward X" first);
-      // a target-only doing just isn't synthesized until a verb is added.
-      return v || target ? [...rest, { subject: subjectId, verb: v, target: target || undefined }] : rest;
+      // Store the RAW text (don't trim here, or spaces vanish as you type). Keep the
+      // row if there's any text or a target; sceneRelations trims at synthesis time.
+      return verb.length > 0 || target ? [...rest, { subject: subjectId, verb, target: target || undefined }] : rest;
     });
   };
   const setDoingTarget = (subjectId: string, target?: string) => {
