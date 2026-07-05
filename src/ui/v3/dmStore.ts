@@ -58,9 +58,12 @@ export type CreatorHit = { authUid: string; name: string; avatarUrl: string | nu
 export async function searchCreators(query: string, myAuthUid: string): Promise<CreatorHit[]> {
   const q = query.trim();
   if (q.length < 2) return [];
+  // Honor the same privacy toggle as the rest of the app: users who opted out of
+  // search discovery (discoverable_in_search = false) are not surfaced here.
   const { data: profs, error } = await supabase
     .from('public_profiles')
     .select('user_id, display_name, avatar_url')
+    .eq('discoverable_in_search', true)
     .ilike('display_name', `%${q}%`)
     .limit(12);
   if (error || !profs || profs.length === 0) return [];
