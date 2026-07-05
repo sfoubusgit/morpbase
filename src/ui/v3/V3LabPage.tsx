@@ -13,6 +13,7 @@ import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
 import { V3Footer } from './V3Footer';
+import { V3LegalPage, type LegalKey } from './V3LegalPage';
 import { scenesStore, type Scene, type SceneDoing } from './scenesStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
@@ -116,6 +117,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [createdLaneItems, setCreatedLaneItems] = useState<RemoteLaneItem[]>([]);
   const [composerOpen, setComposerOpen] = useState(false);
   const [editItem, setEditItem] = useState<RemoteLaneItem | null>(null); // lane object being edited
+  const [legalPage, setLegalPage] = useState<LegalKey | null>(null); // footer legal/info page
   const [ads, setAds] = useState<AdItem[]>([]);
 
   useEffect(() => {
@@ -139,10 +141,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // Persist scenes locally so they survive a refresh (debounced in the store).
   useEffect(() => { scenesStore.save(scenes, activeId); }, [scenes, activeId]);
 
-  const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); };
-  const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLane(key); };
+  const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(null); };
+  const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(null); setLane(key); };
   // Open an item's page (clicking its image), from anywhere — exits profile/flow.
-  const openItem = (id: string) => { setShowProfile(false); setFlow(null); setChannelId(id); };
+  const openItem = (id: string) => { setShowProfile(false); setFlow(null); setLegalPage(null); setChannelId(id); };
   // Delete a user-created item (RLS enforces author-only); drop it locally + go back.
   const deleteCreatedItem = async (id: string) => {
     setCreatedLaneItems(prev => prev.filter(it => it.id !== id)); // optimistic
@@ -518,7 +520,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         <div className="v3-userbar">
           {viewerAuthUid ? (
             <>
-              <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); }} title="Your profile">
+              <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); setLegalPage(null); }} title="Your profile">
                 {viewerAvatarUrl
                   ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
                   : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
@@ -565,7 +567,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
       {/* ── content ── */}
       <main className="v3-content">
-        {showProfile ? (
+        {legalPage ? (
+          <V3LegalPage page={legalPage} onBack={() => setLegalPage(null)} />
+        ) : showProfile ? (
           <V3Profile
             viewerName={viewer}
             viewerAvatarUrl={viewerAvatarUrl}
@@ -724,7 +728,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         )}
       </main>
 
-      <V3Footer />
+      <V3Footer onOpenLegal={(p) => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(p); }} />
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
       {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && (
