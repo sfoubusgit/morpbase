@@ -52,6 +52,29 @@ const toMsg = (r: MsgRow): DmMessage => ({
   createdAt: r.created_at,
 });
 
+export type CreatorHit = { authUid: string; name: string; avatarUrl: string | null };
+
+/** Search people by display name to start a conversation. Excludes yourself. */
+export async function searchCreators(query: string, myAuthUid: string): Promise<CreatorHit[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const { data: profs, error } = await supabase
+    .from('public_profiles')
+    .select('user_id, display_name, avatar_url')
+    .ilike('display_name', `%${q}%`)
+    .limit(12);
+  if (error || !profs || profs.length === 0) return [];
+  const rows = profs as Array<{ user_id: string; display_name: string | null; avatar_url: string | null }>;
+  const { data: users } = await supabase
+    .from('user_profiles')
+    .select('id, auth_uid')
+    .in('id', rows.map(r => r.user_id));
+  const idToAuth = new Map((users as Array<{ id: string; auth_uid: string }> ?? []).map(u => [u.id, u.auth_uid]));
+  return rows
+    .map(r => ({ authUid: idToAuth.get(r.user_id) ?? '', name: (r.display_name ?? '').trim() || 'creator', avatarUrl: r.avatar_url ?? null }))
+    .filter(h => h.authUid && h.authUid !== myAuthUid);
+}
+
 /** Find or create the 1:1 thread with another user; returns the thread id. */
 export async function getOrCreateThread(otherAuthUid: string): Promise<string> {
   const { data, error } = await supabase.rpc('v3_dm_get_or_create_thread', { p_other: otherAuthUid });

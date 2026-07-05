@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import {
   listThreads, listMessages, sendMessage, markRead, acceptRequest, blockUser,
-  getOrCreateThread, subscribeThread, subscribeInbox,
-  type DmThreadSummary, type DmMessage,
+  getOrCreateThread, subscribeThread, subscribeInbox, searchCreators,
+  type DmThreadSummary, type DmMessage, type CreatorHit,
 } from './dmStore';
 
 type MessagesPanelProps = {
@@ -43,12 +43,43 @@ export function MessagesPanel({ viewerAuthUid, viewerName, target, onClearTarget
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [results, setResults] = useState<CreatorHit[]>([]);
+  const [searching, setSearching] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const refreshThreads = async () => {
     if (!viewerAuthUid) return;
     try { setThreads(await listThreads(viewerAuthUid)); } catch { /* offline */ }
   };
+
+  // open (or create) a thread with someone, then select it
+  const openThread = async (authUid: string) => {
+    if (!viewerAuthUid) return;
+    try {
+      const tid = await getOrCreateThread(authUid);
+      await refreshThreads();
+      setActiveId(tid);
+      setSearch(''); setResults([]);
+    } catch {
+      setErr('Couldn’t open that conversation.');
+    }
+  };
+
+  // debounced people search
+  useEffect(() => {
+    const q = search.trim();
+    if (q.length < 2 || !viewerAuthUid) { setResults([]); setSearching(false); return; }
+    setSearching(true);
+    let live = true;
+    const t = window.setTimeout(() => {
+      searchCreators(q, viewerAuthUid)
+        .then(r => { if (live) setResults(r); })
+        .catch(() => { if (live) setResults([]); })
+        .finally(() => { if (live) setSearching(false); });
+    }, 250);
+    return () => { live = false; window.clearTimeout(t); };
+  }, [search, viewerAuthUid]);
 
   // initial load + realtime inbox refresh
   useEffect(() => {
@@ -63,16 +94,7 @@ export function MessagesPanel({ viewerAuthUid, viewerName, target, onClearTarget
   // open (or start) a thread with a target creator, then clear it
   useEffect(() => {
     if (!target || !viewerAuthUid) return;
-    let live = true;
-    getOrCreateThread(target.authUid)
-      .then(async tid => {
-        if (!live) return;
-        await refreshThreads();
-        setActiveId(tid);
-        onClearTarget();
-      })
-      .catch(() => { setErr('Couldn’t open that conversation.'); onClearTarget(); });
-    return () => { live = false; };
+    void openThread(target.authUid).finally(onClearTarget);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [target, viewerAuthUid]);
 
@@ -146,6 +168,34 @@ export function MessagesPanel({ viewerAuthUid, viewerName, target, onClearTarget
       <aside className={`v3-dm-list${activeId ? ' has-active' : ''}`}>
         <div className="v3-dm-listhd">
           <h2>Messages</h2>
+          <div className="v3-dm-search">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+              <path d="M21 21l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search people to message…"
+            />
+            {search && <button type="button" className="clr" onClick={() => { setSearch(''); setResults([]); }} aria-label="Clear">✕</button>}
+            {search.trim().length >= 2 && (
+              <div className="v3-dm-results">
+                {searching ? (
+                  <div className="v3-dm-results-empty">Searching…</div>
+                ) : results.length === 0 ? (
+                  <div className="v3-dm-results-empty">No people match “{search.trim()}”.</div>
+                ) : (
+                  results.map(r => (
+                    <button key={r.authUid} type="button" className="v3-dm-result" onClick={() => openThread(r.authUid)}>
+                      <span className="av">{r.avatarUrl ? <img src={r.avatarUrl} alt={r.name} /> : initial(r.name)}</span>
+                      <span className="nm">{r.name}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
           <div className="v3-dm-tabs">
             <button type="button" className={`v3-dm-tab${tab === 'primary' ? ' on' : ''}`} onClick={() => setTab('primary')}>Primary{primary.length > 0 && ` · ${primary.length}`}</button>
             <button type="button" className={`v3-dm-tab${tab === 'requests' ? ' on' : ''}`} onClick={() => setTab('requests')}>Requests{requests.length > 0 && ` · ${requests.length}`}</button>
