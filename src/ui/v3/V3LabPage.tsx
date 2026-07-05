@@ -804,7 +804,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   const mine = a.authorAuthUid && a.authorAuthUid === viewerAuthUid;
                   const inUse = active.styleId === a.id;
                   return (
-                    <div key={a.id} className={`v3-card v3-actioncard${inUse ? ' v3-stylecard-on' : ''}`} style={cssVar('var(--la-lighting)')}>
+                    <div key={a.id} className={`v3-card v3-actioncard v3-stylecard${inUse ? ' v3-stylecard-on' : ''}`} style={cssVar('var(--la-lighting)')}>
                       <div className={`v3-shot${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined}>
                         {!a.coverUrl && <LanePlaceholder lane="lighting" />}
                         <span className="v3-badge">Style</span>
@@ -823,7 +823,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                         </div>
                         <button
                           type="button"
-                          className={`v3-btn ${inUse ? 'secondary' : 'utility'}`}
+                          className={`v3-btn ${inUse ? 'secondary' : 'utility'} v3-stylecard-use`}
                           onClick={() => setStyle(inUse ? undefined : a.id)}
                           title={inUse ? 'Remove from the current scene' : 'Apply to the current scene'}
                         >

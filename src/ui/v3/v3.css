@@ -553,6 +553,11 @@
 .v3-actioncard .v3-cmeta { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
 .v3-actioncard .v3-cmeta > div { min-width: 0; }
 .v3-actioncard .v3-cmeta > .v3-btn { flex: none; }
+/* style card: stack meta vertically so the title/summary get the full card
+   width and the "Use in scene" toggle sits full-width below (not beside them) */
+.v3-stylecard .v3-cmeta { flex-direction: column; align-items: stretch; gap: 9px; }
+.v3-stylecard .v3-cmeta > div { width: 100%; }
+.v3-stylecard-use { width: 100%; justify-content: center; }
 .v3-badge.v3-badge-on { background: rgba(var(--la-lighting), 0.9); color: #10131a; border-color: transparent; }
 /* the dock chip showing the scene's active style */
 .v3-dock-style { cursor: pointer; }
