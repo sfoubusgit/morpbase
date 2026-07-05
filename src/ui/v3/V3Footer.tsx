@@ -26,13 +26,13 @@ export function V3Footer({ onOpenLegal }: { onOpenLegal: (page: LegalKey) => voi
       </nav>
 
       <span className="right">
-        <a href="#" onClick={stub} className="soc" aria-label="Discord" title="Discord">
+        <a href="https://discord.gg/4DhRBapvP" target="_blank" rel="noopener noreferrer" className="soc" aria-label="Discord" title="Discord">
           <svg viewBox="0 0 24 24" aria-hidden="true" className="ic"><path d={DISCORD_D} /></svg>
         </a>
-        <a href="#" onClick={stub} className="soc" aria-label="X" title="X">
+        <a href="#" onClick={stub} className="soc" aria-label="X" title="X (coming soon)">
           <svg viewBox="0 0 24 24" aria-hidden="true" className="ic"><path d={X_D} /></svg>
         </a>
-        <a href="#" onClick={stub} className="soc" aria-label="Instagram" title="Instagram">
+        <a href="https://www.instagram.com/morpbase/" target="_blank" rel="noopener noreferrer" className="soc" aria-label="Instagram" title="Instagram">
           <svg viewBox="0 0 24 24" aria-hidden="true" className="ic"><path d={INSTAGRAM_D} /></svg>
         </a>
         <span className="copy">© {year}</span>
