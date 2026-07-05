@@ -395,6 +395,26 @@
 
 /* content scroll area */
 .v3-content { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 48px 90px; }
+
+/* footer — the "SFW-forward" lean bar, always present at the bottom of the shell */
+.v3-footer {
+  flex-shrink: 0; z-index: 16; position: relative;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap;
+  padding: 10px 22px; border-top: 1px solid var(--border-subtle);
+  background: rgba(10, 11, 16, 0.72); backdrop-filter: blur(12px);
+  font: var(--font-weight-medium) 12.5px var(--font-primary); color: var(--text-secondary);
+}
+.v3-footer .lead { display: inline-flex; align-items: center; gap: 11px; }
+.v3-footer .v3-wordmark { font-size: 14px; }
+.v3-footer .sfw { font: var(--font-weight-semibold) 10px var(--font-primary); letter-spacing: 0.05em; color: var(--success-base); background: rgba(106, 159, 122, 0.14); border: 1px solid rgba(106, 159, 122, 0.4); padding: 4px 8px; border-radius: var(--radius-pill); }
+.v3-footer .links { color: var(--text-muted); }
+.v3-footer .links a { color: var(--text-secondary); text-decoration: none; transition: color var(--motion-fast) var(--motion-ease); }
+.v3-footer .links a:hover { color: #fff; }
+.v3-footer .right { display: inline-flex; align-items: center; gap: 8px; }
+.v3-footer .copy { color: var(--text-tertiary); font-variant-numeric: tabular-nums; margin-left: 4px; }
+.v3-footer .soc { width: 28px; height: 28px; display: grid; place-items: center; border-radius: var(--radius-sm); color: var(--text-tertiary); transition: color var(--motion-fast), background var(--motion-fast); }
+.v3-footer .soc .ic { width: 15px; height: 15px; fill: currentColor; display: block; }
+.v3-footer .soc:hover { color: #fff; background: rgba(255, 255, 255, 0.07); }
 .v3-lane-soon { max-width: 560px; margin: 60px auto; text-align: center; }
 .v3-lane-soon h2 { font-size: 26px; margin: 8px 0 10px; }
 .v3-lane-soon p { color: var(--text-secondary); line-height: var(--line-height-relaxed); }
@@ -455,7 +475,7 @@
 
 /* floating scene dock (replaces the right sidebar) */
 .v3-dock {
-  position: absolute; left: 0; right: 0; bottom: 16px; margin: 0 48px; z-index: 15;
+  position: absolute; left: 0; right: 0; bottom: 62px; margin: 0 48px; z-index: 15;
   display: flex; flex-direction: column; align-items: stretch; gap: 10px; padding: 10px 16px 12px;
   background: rgba(17, 18, 24, 0.96); backdrop-filter: blur(12px);
   border: 1px solid var(--border-accent); border-radius: var(--radius-lg); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);

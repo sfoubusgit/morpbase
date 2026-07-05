@@ -12,6 +12,7 @@ import { V3Profile } from './V3Profile';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
+import { V3Footer } from './V3Footer';
 import { scenesStore, type Scene, type SceneDoing } from './scenesStore';
 import { listAds, type AdItem } from './adsStore';
 import { ratingForText, ratingVisible } from './contentRating';
@@ -722,6 +723,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           </div>
         )}
       </main>
+
+      <V3Footer />
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
       {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && (
