@@ -41,6 +41,9 @@ export type Scene = {
   createdAt: string;
   updatedAt: string;
 
+  // ── style: the render layer applied to the whole scene (a Style lane item id) ──
+  styleId?: string;
+
   // ── v1: presentation & synthesis cache ──
   pinned?: boolean;
   color?: string;
@@ -118,6 +121,7 @@ function migrate(payload: unknown): Scene[] {
       name: typeof s.name === 'string' ? s.name : 'Scene',
       createdAt: typeof s.createdAt === 'string' ? s.createdAt : nowISO(),
       updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : nowISO(),
+      styleId: s.styleId as string | undefined,
       pinned: s.pinned as boolean | undefined,
       color: s.color as string | undefined,
       method: s.method as SynthMethod | undefined,

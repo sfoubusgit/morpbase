@@ -54,6 +54,7 @@ const LANES: LaneDef[] = [
   { key: 'mood', label: 'Mood', accent: 'var(--la-mood)', status: 'live' },
   { key: 'lighting', label: 'Lighting', accent: 'var(--la-lighting)', status: 'live' },
   { key: 'composition', label: 'Composition', accent: 'var(--la-composition)', status: 'live' },
+  { key: 'style', label: 'Style', accent: 'var(--la-lighting)', status: 'live', isNew: true },
 ];
 
 const cssVar = (v: string) => ({ ['--c' as string]: v });
@@ -110,6 +111,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     updateActive(s => ({ ...s, items: typeof upd === 'function' ? upd(s.items) : upd }));
   const setDoings = (upd: SceneDoing[] | ((prev: SceneDoing[]) => SceneDoing[])) =>
     updateActive(s => ({ ...s, doings: typeof upd === 'function' ? upd(s.doings) : upd }));
+  const setStyle = (id?: string) => updateActive(s => ({ ...s, styleId: id || undefined }));
 
   const [favorites, setFavorites] = useState<string[]>(() => favoritesStore.list());
   const [showProfile, setShowProfile] = useState(false);
@@ -190,6 +192,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // Shared, user-created Actions — reusable "moments" applied to a character in a scene.
   const actionItems = useMemo(() => visibleCreatedItems.filter(it => it.lane === 'actions' && it.phrases.length > 0), [visibleCreatedItems]);
   const actionById = (id: string) => actionItems.find(a => a.id === id) ?? createdLaneItems.find(a => a.id === id);
+  // Shared, user-created Styles — the render "look" applied to the whole scene.
+  const styleItems = useMemo(() => visibleCreatedItems.filter(it => it.lane === 'style' && it.phrases.length > 0), [visibleCreatedItems]);
+  const styleById = (id: string) => styleItems.find(s => s.id === id) ?? createdLaneItems.find(s => s.id === id);
 
   const createdChars = useMemo(
     () => visibleCreatedItems.filter(it => it.lane === 'characters').map(toCharacter),
@@ -208,7 +213,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   }, [createdLaneItems, viewerAuthUid, characters]);
   // The viewer's own created lane objects (non-character lanes) — for the typed profile tabs.
   const myCreatedItems = useMemo(
-    () => createdLaneItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters' && it.lane !== 'actions'),
+    () => createdLaneItems.filter(it => it.authorAuthUid && it.authorAuthUid === viewerAuthUid && it.lane !== 'characters' && it.lane !== 'actions' && it.lane !== 'style'),
     [createdLaneItems, viewerAuthUid],
   );
   // Which of the viewer's own items are 18+ — so the profile can badge (not hide) them.
@@ -373,6 +378,17 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       return to ? { from, verb, to } : { from, verb };      // targeted → interaction (drop dangling target)
     })
     .filter((r): r is SynthRelation => !!r);
+  // The scene's Style — the render "look" applied to the whole image. Unlike the
+  // per-item phrases the synthesizer weaves, the style is appended verbatim as a
+  // final render layer (the synthesizer deliberately ignores medium/style).
+  const activeStyle = active.styleId ? styleById(active.styleId) : null;
+  const styleText = activeStyle && activeStyle.phrases.length ? activeStyle.phrases.join(', ') : '';
+  // Quick prompt = local heuristic + the scene's style appended as a render layer.
+  const buildQuick = () => {
+    const base = quickPrompt(sceneElements, 'faithful', sceneRelations).trim();
+    if (!base) return '';
+    return styleText ? `${base}, ${styleText}` : base;
+  };
   // The doing for a given character (or undefined).
   const doingOf = (subjectId: string) => doings.find(d => d.subject === subjectId);
   // Set/replace a character's doing from free text (clears any saved-action link).
@@ -474,7 +490,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   // ── quick prompt: instant local-heuristic prompt (no AI) ──
   const copyQuick = async () => {
-    const text = quickPrompt(sceneElements, 'faithful', sceneRelations).trim();
+    const text = buildQuick();
     if (!text) return;
     try {
       await navigator.clipboard.writeText(text);
@@ -605,6 +621,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           <SynthesizePanel
             elements={sceneElements}
             relations={sceneRelations}
+            styleName={activeStyle?.name ?? ''}
+            styleSuffix={styleText}
             onBack={() => setFlow(null)}
             onGenerate={(p) => { setGenPrompt(p); setFlow('generate'); }}
           />
@@ -751,6 +769,66 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                           <div className="nm">{a.name}</div>
                           <div className="st">{a.summary || a.phrases.join(', ')}</div>
                         </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        ) : lane === 'style' ? (
+          <>
+            <div className="v3-head">
+              <div>
+                <div className="v3-eyebrow">Style lane</div>
+                <h2>Style</h2>
+                <div className="v3-sub">
+                  {styleItems.length} style{styleItems.length === 1 ? '' : 's'} · the render look — medium, texture, palette — applied to your whole scene. Pick one per scene. Community-made and reusable.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="v3-create-btn"
+                style={cssVar('var(--la-lighting)')}
+                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
+                title={viewerAuthUid ? 'Create a new style' : 'Log in to create'}
+              >
+                <span className="pl">＋</span> Create
+              </button>
+            </div>
+            {styleItems.filter(a => !q || a.name.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q)).length === 0 ? (
+              <div className="v3-empty">{q ? 'No styles match your search.' : 'No styles yet — create one, then apply it to a scene as its render look.'}</div>
+            ) : (
+              <div className="v3-grid">
+                {styleItems.filter(a => !q || a.name.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q)).map(a => {
+                  const mine = a.authorAuthUid && a.authorAuthUid === viewerAuthUid;
+                  const inUse = active.styleId === a.id;
+                  return (
+                    <div key={a.id} className={`v3-card v3-actioncard${inUse ? ' v3-stylecard-on' : ''}`} style={cssVar('var(--la-lighting)')}>
+                      <div className={`v3-shot${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined}>
+                        {!a.coverUrl && <LanePlaceholder lane="lighting" />}
+                        <span className="v3-badge">Style</span>
+                        {inUse && <span className="v3-badge v3-badge-on" style={{ top: 'auto', bottom: 10 }}>In scene</span>}
+                        {mine && (
+                          <div className="v3-actioncard-own">
+                            <button type="button" onClick={() => openEdit(a.id)} title="Edit" aria-label="Edit">✎</button>
+                            <button type="button" onClick={() => deleteCreatedItem(a.id)} title="Delete" aria-label="Delete">✕</button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="v3-cmeta">
+                        <div>
+                          <div className="nm">{a.name}</div>
+                          <div className="st">{a.summary || a.phrases.join(', ')}</div>
+                        </div>
+                        <button
+                          type="button"
+                          className={`v3-btn ${inUse ? 'secondary' : 'utility'}`}
+                          onClick={() => setStyle(inUse ? undefined : a.id)}
+                          title={inUse ? 'Remove from the current scene' : 'Apply to the current scene'}
+                        >
+                          {inUse ? '✓ In scene' : 'Use in scene'}
+                        </button>
                       </div>
                     </div>
                   );
@@ -924,6 +1002,13 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                 </span>
               );
             })}
+            {activeStyle && (
+              <span className="v3-dock-chip v3-dock-style" style={cssVar('var(--la-lighting)')} onClick={() => openLane('style')} role="button" title={`Style: ${activeStyle.name} — applied to the whole scene`}>
+                <span className="sw" aria-hidden="true">◆</span>
+                <span className="t">Style · {activeStyle.name}</span>
+                <button type="button" className="x" onClick={(e) => { e.stopPropagation(); setStyle(undefined); }} aria-label="Remove style">✕</button>
+              </span>
+            )}
           </div>
 
           {/* doing editor — what the tapped character is doing (optionally toward another) */}
@@ -997,7 +1082,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                     <span>Prompt <em>instant · no AI</em></span>
                     <button type="button" className="v3-quick-x" onClick={() => setQuickOpen(false)} aria-label="Close">✕</button>
                   </div>
-                  <textarea className="v3-quick-text" readOnly rows={4} value={quickPrompt(sceneElements, 'faithful', sceneRelations)} onFocus={e => e.currentTarget.select()} />
+                  <textarea className="v3-quick-text" readOnly rows={4} value={buildQuick()} onFocus={e => e.currentTarget.select()} />
                   <div className="v3-quick-acts">
                     <button type="button" className={`v3-btn utility${quickCopied ? ' ok' : ''}`} onClick={copyQuick}>{quickCopied ? '✓ Copied' : '⧉ Copy'}</button>
                     <button type="button" className="v3-btn secondary" onClick={() => { setQuickOpen(false); setFlow('synthesize'); }}>Synthesize instead →</button>
@@ -1015,17 +1100,17 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {viewerAuthUid && (editItem || (composerOpen && (WALL_LANES[lane] || lane === 'characters' || lane === 'actions'))) && (() => {
+      {viewerAuthUid && (editItem || (composerOpen && (WALL_LANES[lane] || lane === 'characters' || lane === 'actions' || lane === 'style'))) && (() => {
         // Edit uses the item's own lane; create uses the current nav lane.
         const cl = editItem ? editItem.lane : lane;
-        const label = WALL_LANES[cl]?.label ?? (cl === 'actions' ? 'Actions' : 'Characters');
-        const acc = WALL_LANES[cl]?.accent ?? (cl === 'actions' ? 'var(--la-mood)' : 'var(--la-character)');
+        const label = WALL_LANES[cl]?.label ?? (cl === 'actions' ? 'Actions' : cl === 'style' ? 'Style' : 'Characters');
+        const acc = WALL_LANES[cl]?.accent ?? (cl === 'actions' ? 'var(--la-mood)' : cl === 'style' ? 'var(--la-lighting)' : 'var(--la-character)');
         return (
           <LaneItemComposer
             lane={cl}
             laneLabel={label}
             accent={acc}
-            kind={cl === 'characters' ? 'character' : cl === 'actions' ? 'action' : 'object'}
+            kind={cl === 'characters' ? 'character' : cl === 'actions' ? 'action' : cl === 'style' ? 'style' : 'object'}
             worlds={worlds}
             editItem={editItem}
             viewerName={viewer}

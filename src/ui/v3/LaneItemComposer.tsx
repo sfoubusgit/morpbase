@@ -8,7 +8,7 @@ type LaneItemComposerProps = {
   lane: string;        // lane key, e.g. 'scenery'
   laneLabel: string;   // 'Scenery'
   accent: string;      // rgb-triplet var, e.g. 'var(--la-scenery)'
-  kind?: 'character' | 'object' | 'action';
+  kind?: 'character' | 'object' | 'action' | 'style';
   /** existing world names, for the autocomplete on the World field */
   worlds?: string[];
   /** when set, the composer edits this item instead of creating a new one */
@@ -29,14 +29,17 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const isEdit = !!editItem;
   const isChar = kind === 'character';
   const isAction = kind === 'action';
-  const singular = isChar ? 'character' : isAction ? 'action' : laneLabel.toLowerCase().replace(/s$/, '');
-  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : isAction ? 'e.g. Skating a halfpipe' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
-  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : isAction ? 'the action as one self-contained moment · applied to a character' : 'one per line · fed into synthesis';
+  const isStyle = kind === 'style';
+  const singular = isChar ? 'character' : isAction ? 'action' : isStyle ? 'style' : laneLabel.toLowerCase().replace(/s$/, '');
+  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : isAction ? 'e.g. Skating a halfpipe' : isStyle ? 'e.g. Whimsical folk-art' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
+  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : isAction ? 'the action as one self-contained moment · applied to a character' : isStyle ? 'the look — medium, texture, palette, mood · applied to the whole image' : 'one per line · fed into synthesis';
   const phrasesPlaceholder = isChar
     ? 'tall woman with sharp features and a long black coat\nsilver undercut, calm grey eyes, a faint scar over one brow'
     : isAction
       ? 'riding a big skateboard up the steep wall of a massive concrete halfpipe, launching off the lip into a soaring mid-air trick, arms flung wide, grinning with pure exhilaration'
-      : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
+      : isStyle
+        ? 'a whimsical folk-art illustration, heavy grainy oil-pastel and wax-crayon textures on canvas, bright even lighting, a saturated color palette, simplified geometric shapes and bold flat compositions, a cheerful imaginative mood'
+        : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
   const [name, setName] = useState(editItem?.name ?? '');
   const [summary, setSummary] = useState(editItem?.summary ?? '');
   const [world, setWorld] = useState(editItem?.world ?? '');

@@ -541,6 +541,17 @@
 .v3-actioncard-own button:hover { color: #fff; background: rgba(0, 0, 0, 0.85); }
 .v3-actioncard-own button:last-child:hover { background: rgba(220, 60, 60, 0.85); }
 
+/* style lane card — the "Use in scene" toggle sits under the meta; selected = ring */
+.v3-stylecard-on { border-color: rgb(var(--la-lighting)); box-shadow: 0 0 0 1px rgba(var(--la-lighting), 0.55), 0 8px 26px rgba(0, 0, 0, 0.28); }
+.v3-actioncard .v3-cmeta { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; }
+.v3-actioncard .v3-cmeta > div { min-width: 0; }
+.v3-actioncard .v3-cmeta > .v3-btn { flex: none; }
+.v3-badge.v3-badge-on { background: rgba(var(--la-lighting), 0.9); color: #10131a; border-color: transparent; }
+/* the dock chip showing the scene's active style */
+.v3-dock-style { cursor: pointer; }
+.v3-dock-style .sw { display: inline-flex; align-items: center; justify-content: center; background: rgba(var(--la-lighting), 0.16); color: rgb(var(--la-lighting)); font-size: 13px; }
+.v3-dock-style:hover { border-color: var(--border-accent); }
+
 .v3-doing-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
 .v3-doing-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); }
 .v3-doing-clear:hover { color: var(--error-base); }

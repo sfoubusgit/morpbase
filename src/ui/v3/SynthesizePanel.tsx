@@ -6,6 +6,9 @@ type SynthesizePanelProps = {
   elements: SynthElement[];
   /** interactions authored in the main scene flow, folded into synthesis */
   relations?: SynthRelation[];
+  /** the scene's Style — a render "look" appended verbatim after synthesis */
+  styleName?: string;
+  styleSuffix?: string;
   onBack: () => void;
   onGenerate: (prompt: string) => void;
 };
@@ -31,7 +34,7 @@ const KIND_ACCENT: Record<string, string> = {
  * a synthesis method, and the composed (editable) prompt. Calls the synthesis
  * provider seam; a real LLM swaps in behind it.
  */
-export function SynthesizePanel({ elements, relations = [], onBack, onGenerate }: SynthesizePanelProps) {
+export function SynthesizePanel({ elements, relations = [], styleName = '', styleSuffix = '', onBack, onGenerate }: SynthesizePanelProps) {
   const [method, setMethod] = useState<SynthMethod>('faithful');
   const [prompt, setPrompt] = useState('');
   const [working, setWorking] = useState(false);
@@ -60,12 +63,15 @@ export function SynthesizePanel({ elements, relations = [], onBack, onGenerate }
   const run = async (m: SynthMethod) => {
     setWorking(true);
     const res = await synthesisProvider.synthesize(elements, m, relations);
-    setPrompt(res.text);
+    // The synthesizer deliberately ignores medium/style, so the scene's Style is
+    // appended verbatim as a final render layer once the scene is composed.
+    const suffix = styleSuffix.trim();
+    setPrompt(suffix ? `${res.text.trim()}, ${suffix}` : res.text);
     setSource(res.source);
     setWorking(false);
   };
 
-  useEffect(() => { void run(method); /* re-run on method, scene, or interaction change */ }, [method, elements.length, relKey]);
+  useEffect(() => { void run(method); /* re-run on method, scene, interaction, or style change */ }, [method, elements.length, relKey, styleSuffix]);
 
   return (
     <div className="v3-flow">
@@ -98,6 +104,10 @@ export function SynthesizePanel({ elements, relations = [], onBack, onGenerate }
 
         {relations.length > 0 && (
           <div className="ph" style={{ marginTop: 14 }}>Interactions <span className="v3-int-hint">{relations.map(r => `${r.from} ${r.verb} ${r.to}`).join(' · ')}</span></div>
+        )}
+
+        {styleName && (
+          <div className="ph" style={{ marginTop: 14 }}>Style <span className="v3-int-hint" style={{ ['--c' as string]: 'var(--la-lighting)' }}>{styleName} · applied to the whole image</span></div>
         )}
 
         <div className="ph" style={{ marginTop: 20 }}>
