@@ -173,7 +173,9 @@ export async function updateLaneItem(params: {
     relation: (relation || '').trim() || null,
     solo: !!solo,
   };
-  const update = (patch: object) => supabase.from('v3_lane_items').update(patch).eq('id', id).select(COLS).single();
+  // maybeSingle (not single) so an RLS-blocked update returns null instead of the
+  // cryptic "Cannot coerce the result to a single JSON object" error.
+  const update = (patch: object) => supabase.from('v3_lane_items').update(patch).eq('id', id).select(COLS).maybeSingle();
   const isMissingColumn = (msg: string) => /could not find|schema cache|column .* does not exist|PGRST204/i.test(msg);
 
   let { data, error } = await update(fullPatch);
@@ -182,6 +184,10 @@ export async function updateLaneItem(params: {
     ({ data, error } = await update(basePatch));
   }
   if (error) throw new Error(error.message);
+  if (!data) {
+    // 0 rows updated → RLS blocked it (no owner update policy) or it isn't yours.
+    throw new Error('Couldn’t save — the database is missing the edit permission (run migration 0037), or this isn’t your item.');
+  }
   return toItem(data as Row);
 }
 
