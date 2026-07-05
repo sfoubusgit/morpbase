@@ -98,9 +98,9 @@ export function CharacterWall({
             <div className="v3-cmeta">
               <div>
                 <div className="nm">{c.name}</div>
-                <div className="st">{compact(stats.scenesMade)} scenes</div>
+                <div className="st">{stats.scenesMade > 0 ? `${compact(stats.scenesMade)} scene${stats.scenesMade === 1 ? '' : 's'} made` : 'New character'}</div>
               </div>
-              <div className="heart">♥ {compact(stats.likes)}</div>
+              {stats.likes > 0 && <div className="heart">♥ {compact(stats.likes)}</div>}
             </div>
           </button>
         );

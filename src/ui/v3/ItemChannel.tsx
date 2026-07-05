@@ -109,8 +109,14 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
           <h2>{character.name}</h2>
           <div className="by">
             by <b>@{character.tags?.[0] ?? 'community'}</b> ·{' '}
-            <span className="v3-stars">{'★'.repeat(Math.round(realRating))}{'☆'.repeat(5 - Math.round(realRating))}</span>{' '}
-            {realRating.toFixed(1)}{ratings.count > 0 && <span className="dim"> ({ratings.count})</span>}
+            {ratings.count > 0 ? (
+              <>
+                <span className="v3-stars">{'★'.repeat(Math.round(realRating))}{'☆'.repeat(5 - Math.round(realRating))}</span>{' '}
+                {realRating.toFixed(1)}<span className="dim"> ({ratings.count})</span>
+              </>
+            ) : (
+              <span className="dim">Not yet rated</span>
+            )}
           </div>
 
           <div className="v3-metrics">
@@ -158,6 +164,9 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
       {tab === 'gallery' && (
         <>
           <div className="v3-eyebrow" style={{ marginBottom: 12 }}>What people made with {character.name}</div>
+          {data.gallery.length + remote.length === 0 && (
+            <div className="v3-empty">Nothing here yet — images saved from Generate with {character.name} will show up here.</div>
+          )}
           <div className="v3-gal">
             {remote.map(ri => (
               <div key={ri.id} className="g" style={{ backgroundImage: `url(${ri.url})` }}><small>@{ri.author}</small></div>
@@ -184,6 +193,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
             <button type="submit" className="v3-btn primary" disabled={posting}>{posting ? 'Posting…' : 'Post'}</button>
           </form>
           {cmtError && <div className="v3-cmp-error" style={{ marginTop: 0, marginBottom: 14 }}>{cmtError}</div>}
+          {commentCount === 0 && <div className="v3-empty">No comments yet — be the first to share how you used {character.name}.</div>}
           {remoteComments.map(c => (
             <div key={c.id} className="v3-cmt">
               <div className="a" />

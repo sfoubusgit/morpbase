@@ -9,8 +9,10 @@
  * interface below, so the real Supabase-backed implementation (gallery Storage
  * bucket + comments/ratings tables) can drop in later without the UI changing.
  *
- * Data is seeded deterministically from the subject id so channels look lived-in,
- * and mutations persist to localStorage.
+ * Numbers are REAL, never fabricated: a fresh channel starts empty (no likes,
+ * no scenes, no rating, no gallery, no comments). Everything shown is something
+ * that actually happened — an image saved from Generate, a real rating, a real
+ * comment. Mutations persist to localStorage.
  */
 
 export type GalleryImage = {
@@ -58,75 +60,17 @@ export interface ChannelBackend {
   addGalleryImage(subjectId: string, author: string, url: string): ItemChannel;
 }
 
-const STORAGE_KEY = 'morpbase:v3:channels:v1';
+// Bumped from v1 → v2 to discard the old fabricated (seeded) channels, so every
+// channel re-materialises empty and only fills with real activity.
+const STORAGE_KEY = 'morpbase:v3:channels:v2';
 
-const SEED_AUTHORS = ['atlas', 'mei', 'kuro', 'ren', 'iyo', 'nox', 'soraya', 'dust', 'vela', 'kite'];
-const SEED_COMMENTS = [
-  'the rim lighting on this one is unreal',
-  'added to my Deep Signal world, fits perfectly',
-  'this is exactly the energy i was missing',
-  'the coat detail holds up so well across scenes',
-  'rendered four variations, every one usable',
-  'best base character in this universe imo',
-];
-const SEED_AGOS = ['just now', '2h', '5h', '1d', '3d', '1w'];
-
-/** small deterministic string hash → uint32 */
-function hash(str: string): number {
-  let h = 2166136261;
-  for (let i = 0; i < str.length; i++) {
-    h ^= str.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
-
-/** seeded PRNG (mulberry32) so a given subject always seeds the same channel */
-function rng(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function seedChannel(subjectId: string): ItemChannel {
-  const r = rng(hash(subjectId));
-  const pick = <T,>(arr: T[]) => arr[Math.floor(r() * arr.length)] as T;
-
-  const galleryCount = 6 + Math.floor(r() * 13); // 6–18
-  const gallery: GalleryImage[] = Array.from({ length: galleryCount }, (_, i) => ({
-    id: `${subjectId}_g${i}`,
-    author: pick(SEED_AUTHORS),
-    tint: Math.floor(r() * 10),
-  }));
-
-  const commentCount = 2 + Math.floor(r() * 4); // 2–5
-  const comments: ChannelComment[] = Array.from({ length: commentCount }, (_, i) => ({
-    id: `${subjectId}_c${i}`,
-    author: pick(SEED_AUTHORS),
-    body: pick(SEED_COMMENTS),
-    likes: Math.floor(r() * 18),
-    ago: pick(SEED_AGOS),
-  }));
-
-  const ratingCount = 20 + Math.floor(r() * 400);
-  const rating = Math.round((3.8 + r() * 1.1) * 10) / 10; // 3.8–4.9
-
+/** A fresh, real channel — empty until actual activity fills it. */
+function emptyChannel(subjectId: string): ItemChannel {
   return {
     subjectId,
-    stats: {
-      likes: 200 + Math.floor(r() * 2200),
-      scenesMade: galleryCount + Math.floor(r() * 380),
-      followers: 20 + Math.floor(r() * 300),
-      rating,
-      ratingCount,
-    },
-    gallery,
-    comments,
+    stats: { likes: 0, scenesMade: 0, followers: 0, rating: 0, ratingCount: 0 },
+    gallery: [],
+    comments: [],
     myRating: null,
     following: false,
   };
@@ -157,7 +101,7 @@ class LocalChannelStore implements ChannelBackend {
   private ensure(subjectId: string): ItemChannel {
     let ch = this.cache[subjectId];
     if (!ch) {
-      ch = seedChannel(subjectId);
+      ch = emptyChannel(subjectId);
       this.cache[subjectId] = ch;
       writeAll(this.cache);
     }
