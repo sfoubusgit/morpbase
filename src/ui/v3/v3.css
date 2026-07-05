@@ -619,7 +619,8 @@
 
 /* quick prompt — instant local-heuristic prompt, no AI */
 .v3-quick-wrap { position: relative; flex: none; }
-.v3-quick-btn { display: inline-flex; align-items: center; gap: 5px; padding: 9px 14px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); color: var(--text-secondary); cursor: pointer; font: var(--font-weight-semibold) 12.5px var(--font-primary); white-space: nowrap; }
+.v3-quick-btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 15px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-medium); border-radius: var(--radius-pill); color: var(--text-secondary); cursor: pointer; font: var(--font-weight-semibold) 12.5px var(--font-primary); white-space: nowrap; }
+.v3-quick-btn .qic { width: 15px; height: 15px; flex: none; opacity: 0.85; }
 .v3-quick-btn:hover, .v3-quick-btn.on { color: #fff; border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
 .v3-quick-pop { position: absolute; bottom: calc(100% + 12px); right: 0; width: 340px; z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-medium); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
 .v3-quick-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); }

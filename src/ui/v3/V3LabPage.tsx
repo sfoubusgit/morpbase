@@ -987,11 +987,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
           {scene.length > 0 && (
             <div className="v3-quick-wrap">
-              <button type="button" className={`v3-quick-btn${quickOpen ? ' on' : ''}`} onClick={() => setQuickOpen(o => !o)} title="Instant prompt — no AI">⚡ Quick</button>
+              <button type="button" className={`v3-quick-btn${quickOpen ? ' on' : ''}`} onClick={() => setQuickOpen(o => !o)} title="Instant prompt — no AI">
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="qic"><path d="M5 7h14M5 12h14M5 17h9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Prompt
+              </button>
               {quickOpen && (
                 <div className="v3-quick-pop">
                   <div className="v3-quick-hd">
-                    <span>Quick prompt <em>instant · no AI</em></span>
+                    <span>Prompt <em>instant · no AI</em></span>
                     <button type="button" className="v3-quick-x" onClick={() => setQuickOpen(false)} aria-label="Close">✕</button>
                   </div>
                   <textarea className="v3-quick-text" readOnly rows={4} value={quickPrompt(sceneElements, 'faithful', sceneRelations)} onFocus={e => e.currentTarget.select()} />
