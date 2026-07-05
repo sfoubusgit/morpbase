@@ -4,7 +4,7 @@ import { channelStore, type ItemChannel as ItemChannelData } from './channelStor
 import { listGeneratedImages, type RemoteImage } from './channelImagesStore';
 import { listComments, addComment, getRatings, setRating, type RemoteComment, type RatingSummary } from './channelSocialStore';
 import { LanePlaceholder } from './LanePlaceholder';
-import { FollowButton } from './FollowButton';
+import { CreatorLink } from './CreatorLink';
 import { characterImage, promptElement, compact } from './media';
 
 type ItemChannelProps = {
@@ -17,6 +17,8 @@ type ItemChannelProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** open the creator's profile (where you can follow / message them) */
+  onViewCreator?: (authUid: string, name: string) => void;
   /** edit this character — only offered to its author */
   onEdit?: (id: string) => void;
   /** delete this character — only offered to its author */
@@ -30,7 +32,7 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onEdit, onDelete }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onViewCreator, onEdit, onDelete }: ItemChannelProps) {
   const isMine = Boolean(viewerAuthUid && creatorAuthUid && creatorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${character.name}"? This can't be undone.`)) onDelete(character.id);
@@ -108,7 +110,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
           <div className="v3-eyebrow">Character</div>
           <h2>{character.name}</h2>
           <div className="by">
-            by <b>@{character.tags?.[0] ?? 'community'}</b> ·{' '}
+            by <CreatorLink authUid={creatorAuthUid} name={character.tags?.[0] ?? 'community'} onViewCreator={onViewCreator} /> ·{' '}
             {ratings.count > 0 ? (
               <>
                 <span className="v3-stars">{'★'.repeat(Math.round(realRating))}{'☆'.repeat(5 - Math.round(realRating))}</span>{' '}
@@ -128,7 +130,6 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
             <button type="button" className="v3-btn primary" onClick={() => onAdd(character.id)} disabled={inScene}>
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
-            <FollowButton creatorAuthUid={creatorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
             {isMine && onEdit && (
               <button type="button" className="v3-btn secondary" onClick={() => onEdit(character.id)}>Edit</button>
             )}

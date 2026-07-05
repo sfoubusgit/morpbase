@@ -9,6 +9,10 @@ import { SynthesizePanel } from './SynthesizePanel';
 import { GeneratePanel } from './GeneratePanel';
 import { consistencySeed } from './generation';
 import { V3Profile } from './V3Profile';
+import { PublicCreatorProfile } from './PublicCreatorProfile';
+import { MessagesPanel } from './MessagesPanel';
+import { listFollowing } from './followStore';
+import { countUnreadThreads, subscribeInbox } from './dmStore';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
@@ -122,6 +126,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [editItem, setEditItem] = useState<RemoteLaneItem | null>(null); // lane object being edited
   const [legalPage, setLegalPage] = useState<LegalKey | null>(null); // footer legal/info page
   const [ads, setAds] = useState<AdItem[]>([]);
+  // ── social: viewing another creator, and the DM surface ──
+  const [viewCreator, setViewCreator] = useState<{ authUid: string; name: string } | null>(null);
+  const [showMessages, setShowMessages] = useState(false);
+  const [dmTarget, setDmTarget] = useState<{ authUid: string; name: string } | null>(null); // start/open a thread with them
+  const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());                   // creators the viewer follows (feed)
+  const [dmUnread, setDmUnread] = useState(0);                                                 // unread DM badge
 
   useEffect(() => {
     let live = true;
@@ -144,10 +154,25 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   // Persist scenes locally so they survive a refresh (debounced in the store).
   useEffect(() => { scenesStore.save(scenes, activeId); }, [scenes, activeId]);
 
-  const goWorkspace = () => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(null); };
-  const openLane = (key: string) => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(null); setLane(key); };
+  // The creators the viewer follows — powers the Following feed.
+  useEffect(() => {
+    if (!viewerAuthUid) { setFollowingSet(new Set()); return; }
+    let live = true;
+    listFollowing(viewerAuthUid).then(ids => { if (live) setFollowingSet(new Set(ids)); }).catch(() => { /* offline */ });
+    return () => { live = false; };
+  }, [viewerAuthUid, viewCreator, showMessages]);
+
+  // Clear every "page" overlay so a nav action lands on a clean surface.
+  const clearPages = () => { setChannelId(null); setFlow(null); setLegalPage(null); setViewCreator(null); setShowMessages(false); };
+  const goWorkspace = () => { setShowProfile(false); clearPages(); };
+  const openLane = (key: string) => { setShowProfile(false); clearPages(); setLane(key); };
   // Open an item's page (clicking its image), from anywhere — exits profile/flow.
-  const openItem = (id: string) => { setShowProfile(false); setFlow(null); setLegalPage(null); setChannelId(id); };
+  const openItem = (id: string) => { setShowProfile(false); setFlow(null); setLegalPage(null); setViewCreator(null); setShowMessages(false); setChannelId(id); };
+  // View another creator's public profile — the one place you follow/message them.
+  const openCreator = (authUid: string, name: string) => { setShowProfile(false); clearPages(); setViewCreator({ authUid, name }); };
+  // Open the Messages surface (inbox), optionally straight into a thread with someone.
+  const openMessages = () => { setShowProfile(false); clearPages(); setDmTarget(null); setShowMessages(true); };
+  const openThreadWith = (authUid: string, name: string) => { setShowProfile(false); clearPages(); setDmTarget({ authUid, name }); setShowMessages(true); };
   // Delete a user-created item (RLS enforces author-only); drop it locally + go back.
   const deleteCreatedItem = async (id: string) => {
     setCreatedLaneItems(prev => prev.filter(it => it.id !== id)); // optimistic
@@ -308,6 +333,36 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [quickOpen, setQuickOpen] = useState(false);
   const [quickCopied, setQuickCopied] = useState(false);
   const toggleFavorite = (id: string) => setFavorites(favoritesStore.toggle(id, viewerAuthUid));
+
+  // The viewed creator's public content (only computed while viewing a profile).
+  const creatorCharacters = useMemo(
+    () => (viewCreator ? visibleCreatedItems.filter(it => it.lane === 'characters' && it.authorAuthUid === viewCreator.authUid).map(toCharacter) : []),
+    [viewCreator, visibleCreatedItems],
+  );
+  const creatorItems = useMemo(
+    () => (viewCreator ? visibleCreatedItems.filter(it => it.lane !== 'characters' && it.authorAuthUid === viewCreator.authUid) : []),
+    [viewCreator, visibleCreatedItems],
+  );
+
+  // Following feed — new characters + lane objects from creators the viewer follows.
+  const followingChars = useMemo(
+    () => visibleCreatedItems.filter(it => it.lane === 'characters' && it.authorAuthUid && followingSet.has(it.authorAuthUid)).map(toCharacter),
+    [visibleCreatedItems, followingSet],
+  );
+  const followingItems = useMemo(
+    () => visibleCreatedItems.filter(it => it.lane !== 'characters' && it.authorAuthUid && followingSet.has(it.authorAuthUid)),
+    [visibleCreatedItems, followingSet],
+  );
+
+  // Unread DM badge + realtime bump when a new message lands in any of my threads.
+  useEffect(() => {
+    if (!viewerAuthUid) { setDmUnread(0); return; }
+    let live = true;
+    const refresh = () => countUnreadThreads(viewerAuthUid).then(n => { if (live) setDmUnread(n); }).catch(() => {});
+    refresh();
+    const unsub = subscribeInbox(viewerAuthUid, refresh);
+    return () => { live = false; unsub(); };
+  }, [viewerAuthUid, showMessages]);
 
   // On login, merge the user's remote favorites into the local set so they
   // follow the user across devices.
@@ -549,7 +604,11 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         <div className="v3-userbar">
           {viewerAuthUid ? (
             <>
-              <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { setShowProfile(true); setChannelId(null); setFlow(null); setLegalPage(null); }} title="Your profile">
+              <button type="button" className={`v3-msgbtn${showMessages ? ' active' : ''}`} onClick={openMessages} title="Messages" aria-label="Messages">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M4 5h16v11H8l-4 3V5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
+                {dmUnread > 0 && <span className="v3-msg-badge">{dmUnread > 9 ? '9+' : dmUnread}</span>}
+              </button>
+              <button type="button" className={`v3-userchip${showProfile ? ' active' : ''}`} onClick={() => { clearPages(); setShowProfile(true); }} title="Your profile">
                 {viewerAvatarUrl
                   ? <img className="av img" src={viewerAvatarUrl} alt={viewer} />
                   : <span className="av">{viewer[0]?.toUpperCase() ?? '?'}</span>}
@@ -585,9 +644,18 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             </button>
           ))}
         </div>
+        {viewerAuthUid && (
+          <button
+            type="button"
+            className={`v3-lanetab favtab${lane === 'following' && !showProfile && !viewCreator && !showMessages ? ' active' : ''}`}
+            onClick={() => openLane('following')}
+          >
+            ⊕ Following{followingSet.size > 0 && <span className="cnt">{followingSet.size}</span>}
+          </button>
+        )}
         <button
           type="button"
-          className={`v3-lanetab favtab${lane === 'favorites' && !showProfile ? ' active' : ''}`}
+          className={`v3-lanetab favtab${lane === 'favorites' && !showProfile && !viewCreator && !showMessages ? ' active' : ''}`}
           onClick={() => openLane('favorites')}
         >
           ★ Favorites{favorites.length > 0 && <span className="cnt">{favorites.length}</span>}
@@ -598,6 +666,31 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       <main className="v3-content">
         {legalPage ? (
           <V3LegalPage page={legalPage} onBack={() => setLegalPage(null)} />
+        ) : showMessages ? (
+          <MessagesPanel
+            viewerAuthUid={viewerAuthUid}
+            viewerName={viewer}
+            target={dmTarget}
+            onClearTarget={() => setDmTarget(null)}
+            onViewCreator={openCreator}
+            onLogin={onLogin}
+          />
+        ) : viewCreator ? (
+          <PublicCreatorProfile
+            authUid={viewCreator.authUid}
+            name={viewCreator.name}
+            viewerAuthUid={viewerAuthUid}
+            characters={creatorCharacters}
+            items={creatorItems}
+            scene={scene}
+            favorites={favorites}
+            onBack={goWorkspace}
+            onAdd={addToScene}
+            onOpenChannel={openItem}
+            onToggleFavorite={toggleFavorite}
+            onMessage={openThreadWith}
+            onLogin={onLogin}
+          />
         ) : showProfile ? (
           <V3Profile
             viewerName={viewer}
@@ -646,6 +739,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onViewCreator={openCreator}
             onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />
@@ -658,6 +752,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={() => setChannelId(null)}
             onAdd={addToScene}
             onLogin={onLogin}
+            onViewCreator={openCreator}
             onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />
@@ -836,6 +931,59 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               </div>
             )}
           </>
+        ) : lane === 'following' ? (
+          <>
+            <div className="v3-head">
+              <div>
+                <div className="v3-eyebrow">Following</div>
+                <h2>Following</h2>
+                <div className="v3-sub">
+                  {followingSet.size === 0
+                    ? 'Follow creators to fill this feed with their new blocks.'
+                    : `New characters & objects from the ${followingSet.size} creator${followingSet.size === 1 ? '' : 's'} you follow.`}
+                </div>
+              </div>
+            </div>
+            {followingSet.size === 0 ? (
+              <div className="v3-empty">You’re not following anyone yet. Open a creator (tap their @name on any card), hit <b>Follow</b>, and their new characters and objects will land here.</div>
+            ) : followingChars.length + followingItems.length === 0 ? (
+              <div className="v3-empty">Nothing new from the creators you follow yet — check back after they publish.</div>
+            ) : (
+              <>
+                {followingChars.length > 0 && (
+                  <>
+                    <div className="v3-eyebrow" style={{ marginBottom: 12 }}>Characters</div>
+                    <CharacterWall
+                      characters={followingChars}
+                      selectedIds={scene}
+                      favorites={favorites}
+                      onAdd={addToScene}
+                      onOpenChannel={openItem}
+                      onToggleFavorite={toggleFavorite}
+                      emptyHint=""
+                    />
+                  </>
+                )}
+                {followingItems.length > 0 && (
+                  <>
+                    <div className="v3-eyebrow" style={{ margin: '22px 0 12px' }}>Objects, styles & more</div>
+                    <LaneWall
+                      items={followingItems.map(it => ({ id: it.id, name: it.name, subtitle: it.summary, tint: tintIndex(it.id), image: it.coverUrl }))}
+                      accent="var(--la-character)"
+                      badge="Item"
+                      lane="character"
+                      selectedIds={scene}
+                      favorites={favorites}
+                      onAdd={addToScene}
+                      onOpen={openItem}
+                      onToggleFavorite={toggleFavorite}
+                      emptyHint=""
+                    />
+                  </>
+                )}
+              </>
+            )}
+          </>
         ) : lane === 'favorites' ? (
           <>
             <div className="v3-head">
@@ -869,10 +1017,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         )}
       </main>
 
-      <V3Footer onOpenLegal={(p) => { setShowProfile(false); setChannelId(null); setFlow(null); setLegalPage(p); }} />
+      <V3Footer onOpenLegal={(p) => { setShowProfile(false); clearPages(); setLegalPage(p); }} />
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
-      {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && (
+      {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && !showMessages && !legalPage && (
         <div className="v3-dock" onClick={e => e.stopPropagation()}>
           <div className="v3-dock-main">
           {/* scene switcher — step through scenes, or open the dropdown for direct access */}

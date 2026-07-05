@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { listGeneratedImages, type RemoteImage } from './channelImagesStore';
 import { listComments, addComment, getRatings, setRating, type RemoteComment, type RatingSummary } from './channelSocialStore';
 import { LanePlaceholder } from './LanePlaceholder';
-import { FollowButton } from './FollowButton';
+import { CreatorLink } from './CreatorLink';
 
 export type ItemSubject = {
   id: string;
@@ -29,6 +29,8 @@ type ItemPageProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onLogin?: () => void;
+  /** open the creator's profile (where you can follow / message them) */
+  onViewCreator?: (authUid: string, name: string) => void;
   /** edit this item — only offered to its author */
   onEdit?: (id: string) => void;
   /** delete this item — only offered to its author */
@@ -43,7 +45,7 @@ type Tab = 'gallery' | 'comments' | 'about';
  * clicking the item's image. Gallery, comments and ratings are real (Supabase),
  * keyed by the item id, exactly like a character's page.
  */
-export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onEdit, onDelete }: ItemPageProps) {
+export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onViewCreator, onEdit, onDelete }: ItemPageProps) {
   const isMine = Boolean(viewerAuthUid && subject.authorAuthUid && subject.authorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${subject.name}"? This can't be undone.`)) onDelete(subject.id);
@@ -105,7 +107,7 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
           <div className="v3-eyebrow">{subject.laneLabel}</div>
           <h2>{subject.name}</h2>
           <div className="by">
-            by <b>@{subject.author}</b>
+            by <CreatorLink authUid={subject.authorAuthUid} name={subject.author} onViewCreator={onViewCreator} />
             {rated
               ? <> · <span className="v3-stars">{'★'.repeat(Math.round(ratings.avg))}{'☆'.repeat(5 - Math.round(ratings.avg))}</span> {ratings.avg.toFixed(1)} <span className="dim">({ratings.count})</span></>
               : <span className="dim"> · not rated yet</span>}
@@ -115,7 +117,6 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
             <button type="button" className="v3-btn primary" onClick={() => onAdd(subject.id)} disabled={inScene}>
               {inScene ? 'In your scene' : '＋ Add to your scene'}
             </button>
-            <FollowButton creatorAuthUid={subject.authorAuthUid} viewerAuthUid={viewerAuthUid} showCount onRequireLogin={onLogin} />
             {isMine && onEdit && (
               <button type="button" className="v3-btn secondary" onClick={() => onEdit(subject.id)}>Edit</button>
             )}
