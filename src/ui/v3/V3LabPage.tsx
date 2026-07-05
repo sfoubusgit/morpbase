@@ -47,6 +47,7 @@ type LaneDef = { key: string; label: string; accent: string; status: 'live' | 's
 
 const LANES: LaneDef[] = [
   { key: 'characters', label: 'Characters', accent: 'var(--la-character)', status: 'live' },
+  { key: 'actions', label: 'Actions', accent: 'var(--la-mood)', status: 'live', isNew: true },
   { key: 'scenery', label: 'Scenery', accent: 'var(--la-scenery)', status: 'live' },
   { key: 'objects', label: 'Objects', accent: 'var(--la-objects)', status: 'live' },
   { key: 'environment', label: 'Environment', accent: 'var(--la-environment)', status: 'live' },
@@ -186,6 +187,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const itemText = (it: RemoteLaneItem) => `${it.name} ${it.summary} ${it.phrases.join(' ')}`;
   const visibleCharacters = useMemo(() => characters.filter(c => ratingVisible(ratingForText(charText(c)))), [characters]);
   const visibleCreatedItems = useMemo(() => createdLaneItems.filter(it => ratingVisible(ratingForText(itemText(it)))), [createdLaneItems]);
+  // Shared, user-created Actions — reusable "moments" applied to a character in a scene.
+  const actionItems = useMemo(() => visibleCreatedItems.filter(it => it.lane === 'actions' && it.phrases.length > 0), [visibleCreatedItems]);
+  const actionById = (id: string) => actionItems.find(a => a.id === id) ?? createdLaneItems.find(a => a.id === id);
 
   const createdChars = useMemo(
     () => visibleCreatedItems.filter(it => it.lane === 'characters').map(toCharacter),
@@ -371,13 +375,22 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     .filter((r): r is SynthRelation => !!r);
   // The doing for a given character (or undefined).
   const doingOf = (subjectId: string) => doings.find(d => d.subject === subjectId);
-  // Set/replace a character's doing (empty verb clears it).
+  // Set/replace a character's doing from free text (clears any saved-action link).
   const setDoing = (subjectId: string, verb: string, target?: string) => {
     setDoings(list => {
       const rest = list.filter(d => d.subject !== subjectId);
       // Store the RAW text (don't trim here, or spaces vanish as you type). Keep the
       // row if there's any text or a target; sceneRelations trims at synthesis time.
       return verb.length > 0 || target ? [...rest, { subject: subjectId, verb, target: target || undefined }] : rest;
+    });
+  };
+  // Apply a saved/shared Action to a character (verb = the action text, keep the link).
+  const applyAction = (subjectId: string, action: RemoteLaneItem) => {
+    const verb = action.phrases.join(', ');
+    setDoings(list => {
+      const target = list.find(d => d.subject === subjectId)?.target;
+      const rest = list.filter(d => d.subject !== subjectId);
+      return [...rest, { subject: subjectId, verb, target, actionId: action.id }];
     });
   };
   const setDoingTarget = (subjectId: string, target?: string) => {
@@ -695,6 +708,56 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               emptyHint={q ? `No ${WALL_LANES[lane].label.toLowerCase()} matches your search.` : `No ${WALL_LANES[lane].label.toLowerCase()} yet.`}
             />
           </>
+        ) : lane === 'actions' ? (
+          <>
+            <div className="v3-head">
+              <div>
+                <div className="v3-eyebrow">Actions lane</div>
+                <h2>Actions</h2>
+                <div className="v3-sub">
+                  {actionItems.length} action{actionItems.length === 1 ? '' : 's'} · self-contained moments you apply to a character in a scene. Community-made and reusable.
+                </div>
+              </div>
+              <button
+                type="button"
+                className="v3-create-btn"
+                style={cssVar('var(--la-mood)')}
+                onClick={() => (viewerAuthUid ? setComposerOpen(true) : onLogin?.())}
+                title={viewerAuthUid ? 'Create a new action' : 'Log in to create'}
+              >
+                <span className="pl">＋</span> Create
+              </button>
+            </div>
+            {actionItems.filter(a => !q || a.name.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q)).length === 0 ? (
+              <div className="v3-empty">{q ? 'No actions match your search.' : 'No actions yet — create one, then apply it to a character in a scene.'}</div>
+            ) : (
+              <div className="v3-grid">
+                {actionItems.filter(a => !q || a.name.toLowerCase().includes(q) || a.summary.toLowerCase().includes(q)).map(a => {
+                  const mine = a.authorAuthUid && a.authorAuthUid === viewerAuthUid;
+                  return (
+                    <div key={a.id} className="v3-card v3-actioncard" style={cssVar('var(--la-mood)')}>
+                      <div className={`v3-shot${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined}>
+                        {!a.coverUrl && <LanePlaceholder lane="mood" />}
+                        <span className="v3-badge">Action</span>
+                        {mine && (
+                          <div className="v3-actioncard-own">
+                            <button type="button" onClick={() => openEdit(a.id)} title="Edit" aria-label="Edit">✎</button>
+                            <button type="button" onClick={() => deleteCreatedItem(a.id)} title="Delete" aria-label="Delete">✕</button>
+                          </div>
+                        )}
+                      </div>
+                      <div className="v3-cmeta">
+                        <div>
+                          <div className="nm">{a.name}</div>
+                          <div className="st">{a.summary || a.phrases.join(', ')}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         ) : lane === 'favorites' ? (
           <>
             <div className="v3-head">
@@ -839,6 +902,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
               const isChar = item.lane === 'character';
               const doing = isChar ? doingOf(id) : undefined;
               const targetName = doing?.target ? registry[doing.target]?.name : undefined;
+              // a doing from a saved action shows the action's name (not its long text)
+              const doingLabel = doing ? (doing.actionId ? (actionById(doing.actionId)?.name ?? doing.verb) : doing.verb) : '';
               return (
                 <span
                   key={id}
@@ -853,7 +918,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   </span>
                   <span className="t">
                     {item.name}
-                    {doing?.verb && <span className="doing">· {doing.verb}{targetName ? ` ${targetName}` : ''}</span>}
+                    {doing?.verb && <span className="doing">· {doingLabel}{targetName ? ` ${targetName}` : ''}</span>}
                   </span>
                   <button type="button" className="x" onClick={(e) => { e.stopPropagation(); removeFromScene(id); }} aria-label="Remove">✕</button>
                 </span>
@@ -890,6 +955,19 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                     <button type="button" key={s} className={`v3-doing-chip${verb === s ? ' on' : ''}`} onClick={() => setDoing(doingEdit, s, target)}>{s}</button>
                   ))}
                 </div>
+                {actionItems.length > 0 && (
+                  <div className="v3-doing-actions">
+                    <span className="lbl">Saved actions</span>
+                    <div className="v3-doing-agrid">
+                      {actionItems.map(a => (
+                        <button type="button" key={a.id} className={`v3-doing-acard${cur?.actionId === a.id ? ' on' : ''}`} title={a.phrases.join(', ')} onClick={() => applyAction(doingEdit, a)}>
+                          <span className="ac" style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined} />
+                          <span className="anm">{a.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {others.length > 0 && (
                   <div className="v3-doing-target">
                     <span className="lbl">toward</span>
@@ -934,15 +1012,17 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         </div>
       )}
 
-      {viewerAuthUid && (editItem || (composerOpen && (WALL_LANES[lane] || lane === 'characters'))) && (() => {
+      {viewerAuthUid && (editItem || (composerOpen && (WALL_LANES[lane] || lane === 'characters' || lane === 'actions'))) && (() => {
         // Edit uses the item's own lane; create uses the current nav lane.
         const cl = editItem ? editItem.lane : lane;
+        const label = WALL_LANES[cl]?.label ?? (cl === 'actions' ? 'Actions' : 'Characters');
+        const acc = WALL_LANES[cl]?.accent ?? (cl === 'actions' ? 'var(--la-mood)' : 'var(--la-character)');
         return (
           <LaneItemComposer
             lane={cl}
-            laneLabel={WALL_LANES[cl]?.label ?? 'Characters'}
-            accent={WALL_LANES[cl]?.accent ?? 'var(--la-character)'}
-            kind={cl === 'characters' ? 'character' : 'object'}
+            laneLabel={label}
+            accent={acc}
+            kind={cl === 'characters' ? 'character' : cl === 'actions' ? 'action' : 'object'}
             worlds={worlds}
             editItem={editItem}
             viewerName={viewer}

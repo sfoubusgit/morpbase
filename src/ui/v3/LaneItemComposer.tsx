@@ -30,18 +30,16 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const isChar = kind === 'character';
   const isAction = kind === 'action';
   const singular = isChar ? 'character' : isAction ? 'action' : laneLabel.toLowerCase().replace(/s$/, '');
-  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : isAction ? 'e.g. Dancing' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
-  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : isAction ? 'optional · how the interaction looks' : 'one per line · fed into synthesis';
+  const namePlaceholder = isChar ? 'e.g. Yumi Kurosawa' : isAction ? 'e.g. Skating a halfpipe' : `e.g. ${laneLabel === 'Scenery' ? 'Rooftop standoff' : 'A short, memorable name'}`;
+  const phrasesHint = isChar ? 'one per line · the character’s look & feel' : isAction ? 'the action as one self-contained moment · applied to a character' : 'one per line · fed into synthesis';
   const phrasesPlaceholder = isChar
     ? 'tall woman with sharp features and a long black coat\nsilver undercut, calm grey eyes, a faint scar over one brow'
     : isAction
-      ? 'mid-turn, hands clasped, a blur of motion\nleaning close, caught in the moment'
+      ? 'riding a big skateboard up the steep wall of a massive concrete halfpipe, launching off the lip into a soaring mid-air trick, arms flung wide, grinning with pure exhilaration'
       : 'a tense standoff on a rain-slicked neon rooftop\nthe city glowing far below, rain hanging in the cold air';
   const [name, setName] = useState(editItem?.name ?? '');
   const [summary, setSummary] = useState(editItem?.summary ?? '');
   const [world, setWorld] = useState(editItem?.world ?? '');
-  const [relation, setRelation] = useState(editItem?.relation ?? '');
-  const [solo, setSolo] = useState(editItem?.solo ?? false); // action arity: solo vs pair
   const [phrasesText, setPhrasesText] = useState((editItem?.phrases ?? []).join('\n'));
   const [coverBlob, setCoverBlob] = useState<Blob | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(editItem?.coverUrl ?? null);
@@ -54,7 +52,7 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
   const phrases = phrasesText.split('\n').map(p => p.trim()).filter(Boolean);
   // Live SFW rating of the draft — so the creator sees, before publishing, whether
   // it'll be visible on public lanes (and exactly which word flags it if not).
-  const flaggedTerm = nsfwMatch(`${name} ${summary} ${relation} ${phrasesText}`);
+  const flaggedTerm = nsfwMatch(`${name} ${summary} ${phrasesText}`);
   const pct = progress && progress.max > 0 ? Math.round((progress.value / progress.max) * 100) : null;
 
   const setCover = (blob: Blob) => {
@@ -88,10 +86,10 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
     if (saving) return;
     // Validate with a clear reason instead of a silently-disabled button.
     if (!name.trim()) { setError('Add a name first.'); return; }
-    if (isAction) {
-      if (!relation.trim()) { setError(solo ? 'Add the verb (e.g. “is kneeling”).' : 'Add the relation (e.g. “is chasing”).'); return; }
-    } else if (phrases.length === 0) {
-      setError(`Add at least one phrase for this ${singular} (one per line) — it’s what synthesis uses.`);
+    if (phrases.length === 0) {
+      setError(isAction
+        ? 'Describe the action — one self-contained moment. It’s what gets applied to the character.'
+        : `Add at least one phrase for this ${singular} (one per line) — it’s what synthesis uses.`);
       return;
     }
     setSaving(true); setError(null);
@@ -100,13 +98,11 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
         ? await updateLaneItem({
             id: editItem.id, authUid: viewerAuthUid, lane,
             name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
-            relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined,
             coverBlob, coverCleared: !coverBlob && !coverUrl && !!editItem.coverUrl,
           })
         : await createLaneItem({
             lane, authUid: viewerAuthUid, authorLabel: viewerName,
-            name: name.trim(), summary: summary.trim(), phrases, world: world.trim(),
-            relation: isAction ? relation.trim() : undefined, solo: isAction ? solo : undefined, coverBlob,
+            name: name.trim(), summary: summary.trim(), phrases, world: world.trim(), coverBlob,
           });
       onCreated(item);
     } catch (e) {
@@ -161,19 +157,6 @@ export function LaneItemComposer({ lane, laneLabel, accent, kind = 'object', wor
               <label className="v3-cmp-field">Summary <span className="opt">optional</span>
                 <input value={summary} onChange={e => setSummary(e.target.value)} placeholder="One line describing it." maxLength={160} />
               </label>
-              {isAction && (
-                <div className="v3-cmp-field">Applies to
-                  <div className="v3-cmp-arity">
-                    <button type="button" className={`v3-cmp-aritybtn${solo ? ' on' : ''}`} onClick={() => setSolo(true)}>One character <span>solo</span></button>
-                    <button type="button" className={`v3-cmp-aritybtn${!solo ? ' on' : ''}`} onClick={() => setSolo(false)}>Two characters <span>interaction</span></button>
-                  </div>
-                </div>
-              )}
-              {isAction && (
-                <label className="v3-cmp-field">{solo ? 'Verb' : 'Relation'} <span className="opt">reads as: A <b>___</b>{solo ? '' : ' B'}</span>
-                  <input value={relation} onChange={e => setRelation(e.target.value)} placeholder={solo ? 'e.g. is kneeling' : 'e.g. is dancing with'} maxLength={40} />
-                </label>
-              )}
               <label className="v3-cmp-field">World <span className="opt">optional · groups your related items</span>
                 <input value={world} onChange={e => setWorld(e.target.value)} placeholder="e.g. Neon District — type a new one or pick an existing" list="v3-world-list" maxLength={60} />
                 <datalist id="v3-world-list">{worlds.map(w => <option key={w} value={w} />)}</datalist>

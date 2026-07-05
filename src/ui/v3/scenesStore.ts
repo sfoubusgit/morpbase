@@ -23,8 +23,9 @@ import type { SynthMethod } from './synthesis';
  */
 export type SceneDoing = {
   subject: string;         // subject item id, present in items[]
-  verb: string;            // free-text action phrase, e.g. "kneeling" / "chasing"
+  verb: string;            // free-text action phrase (the full text fed to synthesis)
   target?: string;         // another cast member's item id (interaction), else absent
+  actionId?: string;       // id of a saved/shared Action this doing came from (for display + reuse)
 };
 
 /** A generated image tied to a scene (urls/ids only — never blobs in storage). */

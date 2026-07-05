@@ -523,6 +523,24 @@
 .v3-doing-tchip { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 4px 10px; cursor: pointer; color: var(--text-secondary); font: var(--font-weight-semibold) 11.5px var(--font-primary); }
 .v3-doing-tchip:hover { color: #fff; border-color: var(--border-accent); }
 .v3-doing-tchip.on { color: #fff; border-color: rgb(var(--la-character)); background: rgba(var(--la-character), 0.16); }
+/* saved-actions picker inside the doing editor */
+.v3-doing-actions { margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--border-subtle); }
+.v3-doing-actions .lbl { display: block; font: var(--font-weight-semibold) 11px var(--font-primary); color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.v3-doing-agrid { display: flex; flex-wrap: wrap; gap: 6px; max-height: 132px; overflow-y: auto; scrollbar-width: none; }
+.v3-doing-agrid::-webkit-scrollbar { display: none; }
+.v3-doing-acard { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px 4px 4px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); cursor: pointer; color: var(--text-secondary); font: var(--font-weight-semibold) 12px var(--font-primary); }
+.v3-doing-acard:hover { color: #fff; border-color: var(--border-accent); }
+.v3-doing-acard.on { color: #fff; border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
+.v3-doing-acard .ac { width: 22px; height: 22px; border-radius: 50%; flex: none; background: rgba(255, 179, 198, 0.18) center/cover; border: 1px solid var(--border-medium); }
+.v3-doing-acard .anm { white-space: nowrap; max-width: 130px; overflow: hidden; text-overflow: ellipsis; }
+
+/* action lane card — owner edit/delete overlay */
+.v3-actioncard-own { position: absolute; top: 8px; right: 8px; z-index: 3; display: none; gap: 5px; }
+.v3-actioncard:hover .v3-actioncard-own { display: inline-flex; }
+.v3-actioncard-own button { width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.6); border: none; border-radius: 50%; color: rgba(255, 255, 255, 0.85); cursor: pointer; font-size: 11px; }
+.v3-actioncard-own button:hover { color: #fff; background: rgba(0, 0, 0, 0.85); }
+.v3-actioncard-own button:last-child:hover { background: rgba(220, 60, 60, 0.85); }
+
 .v3-doing-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
 .v3-doing-clear { background: none; border: none; color: var(--text-muted); cursor: pointer; font: var(--font-weight-semibold) 12px var(--font-primary); }
 .v3-doing-clear:hover { color: var(--error-base); }
