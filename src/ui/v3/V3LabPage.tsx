@@ -1233,15 +1233,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   <textarea className="v3-quick-text" readOnly rows={4} value={buildQuick()} onFocus={e => e.currentTarget.select()} />
                   <div className="v3-quick-acts">
                     <button type="button" className={`v3-btn utility${quickCopied ? ' ok' : ''}`} onClick={copyQuick}>{quickCopied ? '✓ Copied' : '⧉ Copy'}</button>
-                    <button type="button" className="v3-btn secondary" onClick={() => { setQuickOpen(false); setFlow('synthesize'); }}>Synthesize instead →</button>
+                    <button type="button" className="v3-btn secondary" disabled title="AI synthesis is coming soon">🔒 Synthesize · soon</button>
                   </div>
                 </div>
               )}
             </div>
           )}
           {scene.length > 0 && (
-            <button type="button" className="v3-syn" onClick={() => setFlow('synthesize')}>
-              Synthesize ({scene.length})
+            <button type="button" className="v3-syn locked" disabled title="AI synthesis is coming soon">
+              🔒 Synthesize · soon
             </button>
           )}
           </div>
