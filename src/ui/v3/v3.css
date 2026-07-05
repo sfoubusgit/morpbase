@@ -468,15 +468,15 @@
 .v3-dock-chip.actionable { cursor: pointer; }
 .v3-dock-chip.actionable:hover { border-color: var(--border-accent); }
 .v3-dock-chip.editing { border-color: var(--border-accent-strong); background: var(--accent-primary-bg); }
-.v3-dock-chip .t .doing { margin-left: 4px; color: var(--text-tertiary); font-weight: var(--font-weight-medium); }
+.v3-dock-chip .t .doing { margin-left: 4px; color: var(--text-tertiary); font-weight: var(--font-weight-medium); display: inline-block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 
 /* doing editor — what is this character doing (optionally toward another) */
-.v3-doing-pop { position: absolute; bottom: calc(100% + 12px); left: 0; width: 340px; z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
+.v3-doing-pop { position: absolute; bottom: calc(100% + 12px); left: 0; width: 380px; max-width: calc(100vw - 96px); z-index: 30; background: rgba(17, 18, 24, 0.98); backdrop-filter: blur(12px); border: 1px solid var(--border-accent); border-radius: var(--radius-lg); padding: 12px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55); }
 .v3-doing-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; font: var(--font-weight-medium) 13px var(--font-primary); color: var(--text-secondary); margin-bottom: 10px; }
 .v3-doing-hd b { color: #fff; font-weight: var(--font-weight-semibold); }
 .v3-doing-x { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 12px; }
 .v3-doing-x:hover { color: #fff; }
-.v3-doing-input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 9px 11px; color: #fff; font: var(--font-weight-medium) 13px var(--font-primary); outline: none; }
+.v3-doing-input { width: 100%; box-sizing: border-box; resize: vertical; min-height: 70px; line-height: 1.5; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-medium); border-radius: var(--radius-sm); padding: 9px 11px; color: #fff; font: var(--font-weight-medium) 13px var(--font-primary); outline: none; }
 .v3-doing-input:focus { border-color: var(--border-accent-strong); }
 .v3-doing-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; max-height: 128px; overflow-y: auto; scrollbar-width: none; }
 .v3-doing-chips::-webkit-scrollbar { display: none; }

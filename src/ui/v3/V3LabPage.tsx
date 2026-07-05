@@ -868,14 +868,15 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   <span>What is <b>{subj.name}</b> doing?</span>
                   <button type="button" className="v3-doing-x" onClick={() => setDoingEdit(null)} aria-label="Close">✕</button>
                 </div>
-                <input
+                <textarea
                   className="v3-doing-input"
                   autoFocus
+                  rows={3}
                   value={verb}
-                  maxLength={80}
-                  placeholder={target ? 'e.g. chasing' : 'e.g. kneeling in the rain'}
+                  maxLength={400}
+                  placeholder={target ? 'e.g. chasing them across the neon rooftops in the pouring rain' : 'e.g. skating up a huge halfpipe on a big skateboard, grinning with pure pleasure'}
                   onChange={e => setDoing(doingEdit, e.target.value, target)}
-                  onKeyDown={e => { if (e.key === 'Enter') setDoingEdit(null); }}
+                  onKeyDown={e => { if (e.key === 'Escape') setDoingEdit(null); }}
                 />
                 <div className="v3-doing-chips">
                   {suggestions.map(s => (

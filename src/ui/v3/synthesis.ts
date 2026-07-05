@@ -51,11 +51,48 @@ function uniquePhrases(els: SynthElement[]): string[] {
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-// Light per-call variation so Re-synthesize visibly changes even offline.
-function shuffle<T>(arr: T[]): T[] {
-  const x = arr.slice();
-  for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; }
-  return x;
+const NUM_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
+const castPhrases = (c: SynthElement, brief: boolean): string => {
+  const ph = uniquePhrases([c]);
+  return (brief ? ph.slice(0, 2) : ph).join(', ');
+};
+
+/**
+ * Describe the cast with each character's attributes BOUND to that character (plus
+ * a spatial slot for 2–3), so a diffusion model keeps them as separate figures
+ * instead of smearing one character's features onto another. The core fix for
+ * multi-character prompts — works identically in the Quick (offline) path.
+ */
+function describeCast(chars: SynthElement[], brief = false): string {
+  if (chars.length === 0) return 'the scene';
+  if (chars.length === 1) {
+    const ph = castPhrases(chars[0], brief);
+    return chars[0].name + (ph ? `: ${ph}` : '');
+  }
+  const slots = chars.length === 2 ? ['on the left', 'on the right']
+    : chars.length === 3 ? ['on the left', 'in the center', 'on the right'] : [];
+  const blocks = chars.map((c, i) => {
+    const ph = castPhrases(c, brief);
+    const pos = slots[i] ? ` (${slots[i]})` : '';
+    return `${c.name}${pos}${ph ? ` — ${ph}` : ''}`;
+  });
+  const count = NUM_WORDS[chars.length] ?? String(chars.length);
+  return `${cap(count)} distinct characters in one frame — ${blocks.join('; ')}`;
+}
+
+/**
+ * A composition authored for one subject ("a single central subject") must not
+ * collapse several characters into one figure — soften its count-specific
+ * language when the scene actually has 2+ characters.
+ */
+function countAwareComposition(compText: string, charCount: number): string {
+  if (charCount < 2 || !compText) return compText;
+  const n = NUM_WORDS[charCount] ?? String(charCount);
+  return compText
+    .replace(/\ba single (?:central )?subject\b/gi, `all ${n} subjects together`)
+    .replace(/\bsingle (?:central )?subject\b/gi, 'the subjects side by side')
+    .replace(/\bthe central subject\b/gi, 'the subjects')
+    .replace(/\bon the central vertical axis\b/gi, 'arranged across the frame');
 }
 
 function compose(elements: SynthElement[], method: SynthMethod, relations?: SynthRelation[]): string {
@@ -70,17 +107,20 @@ function compose(elements: SynthElement[], method: SynthMethod, relations?: Synt
   const lighting = byKind(elements, 'lighting');
   const composition = byKind(elements, 'composition');
 
-  const subject = chars.length ? joinNames(chars) : 'the scene';
-  const charDetails = shuffle(uniquePhrases(chars));
+  // Each character's attributes are bound to that character (with a spatial slot
+  // for 2–3) so they render as distinct figures instead of merging.
+  const castFull = describeCast(chars, false);
+  const castBrief = describeCast(chars, true);
   const sceneryText = uniquePhrases(scenery).join(', ') || joinNames(scenery);
   const envText = uniquePhrases(environment).join(', ') || joinNames(environment);
   const moodText = uniquePhrases(mood).join(', ') || joinNames(mood);
   const objText = uniquePhrases(objects).join(', ') || joinNames(objects);
   const lightText = uniquePhrases(lighting).join(', ') || joinNames(lighting);
-  const compText = uniquePhrases(composition).join(', ') || joinNames(composition);
+  // Reconcile a single-subject composition against the actual cast size.
+  const compText = countAwareComposition(uniquePhrases(composition).join(', ') || joinNames(composition), chars.length);
 
   if (method === 'minimal') {
-    const bits = [subject, charDetails.slice(0, 3).join(', ')].filter(Boolean);
+    const bits = [castBrief].filter(Boolean);
     if (sceneryText) bits.push(sceneryText);
     if (lightText) bits.push(lightText);
     if (compText) bits.push(compText);
@@ -88,8 +128,7 @@ function compose(elements: SynthElement[], method: SynthMethod, relations?: Synt
   }
 
   if (method === 'cinematic') {
-    let s = `A cinematic frame — ${subject}`;
-    if (charDetails.length) s += `, ${charDetails.join(', ')}`;
+    let s = `A cinematic frame — ${castFull}`;
     if (sceneryText) s += `. ${cap(sceneryText)}`;
     if (envText) s += `, set in ${envText}`;
     if (objText) s += `, ${objText} in view`;
@@ -101,8 +140,7 @@ function compose(elements: SynthElement[], method: SynthMethod, relations?: Synt
   }
 
   // faithful
-  let s = subject;
-  if (charDetails.length) s += `: ${charDetails.join(', ')}`;
+  let s = castFull;
   if (sceneryText) s += `. ${cap(sceneryText)}`;
   if (envText) s += `, in ${envText}`;
   if (objText) s += `, with ${objText}`;
@@ -150,6 +188,11 @@ const SYSTEM_PROMPT =
   'the mood through it. If Actions are given — whether solo (e.g. "A is kneeling") or ' +
   'between characters (e.g. "A is kissing B") — make them the FOCUS of the moment and ' +
   'stage the characters accordingly. ' +
+  'CRITICAL for multiple characters: render each as a DISTINCT figure. Keep every ' +
+  'character\'s described features bound to that character, place them separately in ' +
+  'the frame (e.g. one on the left, one on the right), and NEVER blend one character\'s ' +
+  'traits onto another. If a composition/framing describes a single subject but several ' +
+  'characters are present, show them all together instead of collapsing them into one. ' +
   '1–3 sentences, present tense, concrete, describing only what is seen. ' +
   'Do not specify art medium or style — that is chosen separately. ' +
   'Output ONLY the prompt text: no preamble, labels, options, or quotes.';
