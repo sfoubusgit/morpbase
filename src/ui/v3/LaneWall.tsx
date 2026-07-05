@@ -115,7 +115,8 @@ export function LaneWall({
             <div className="v3-cmeta">
               <div>
                 <div className="nm">{item.name}</div>
-                {item.subtitle && <div className="st">{item.subtitle}</div>}
+                {/* always render (even empty) so the card height stays fixed */}
+                <div className="st">{item.subtitle || ' '}</div>
               </div>
             </div>
           </button>
