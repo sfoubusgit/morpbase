@@ -1030,6 +1030,19 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
 .v3-post-thumbs .th { position: relative; width: 92px; height: 92px; border-radius: var(--radius-sm); background-size: cover; background-position: center; background-color: #202027; border: 1px solid var(--border-medium); }
 .v3-post-thumbs .th button { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.7); color: #fff; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; }
 .v3-post-thumbs .th.add { display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); color: var(--text-tertiary); font-size: 24px; cursor: pointer; }
+/* scene picker — one tap credits everything a scene used */
+.v3-post-scenes { margin-top: 16px; }
+.v3-post-scenerow { display: flex; gap: 9px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.v3-post-scene { display: flex; align-items: center; gap: 10px; flex: none; max-width: 230px; padding: 8px 13px 8px 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: pointer; color: var(--text-secondary); text-align: left; }
+.v3-post-scene:hover { border-color: var(--border-accent); color: #fff; }
+.v3-post-scene.on { border-color: rgb(var(--la-character)); background: var(--accent-primary-bg); color: #fff; }
+.v3-post-scene .avs { display: inline-flex; flex: none; }
+.v3-post-scene .avs .a { width: 26px; height: 26px; border-radius: 50%; margin-left: -8px; border: 2px solid var(--surface-overlay); background: #2a2b33 center/cover; display: inline-flex; align-items: center; justify-content: center; font: var(--font-weight-bold) 10px var(--font-primary); color: var(--text-secondary); }
+.v3-post-scene .avs .a:first-child { margin-left: 0; }
+.v3-post-scene .meta { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.v3-post-scene .nm { font: var(--font-weight-semibold) 13px var(--font-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v3-post-scene .sub { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.v3-post-scene.on .sub { color: rgba(255,255,255,0.7); }
 .v3-post-attach { margin-top: 16px; }
 .v3-post-attach-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
 .v3-post-attach-hd .req { color: var(--text-muted); font-weight: var(--font-weight-regular); text-transform: none; letter-spacing: 0; }

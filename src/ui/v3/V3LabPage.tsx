@@ -420,12 +420,29 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     const add = (id: string, name: string, itemLane: string, image?: string | null) => {
       if (id && name && !map.has(id)) map.set(id, { id, name, lane: itemLane, image: image ?? null });
     };
-    for (const id of scene) { const it = registry[id]; if (it) add(it.id, it.name, it.lane, it.image); }
+    // every item across every scene (so any scene's credits are pickable), then
+    // the viewer's own creations and favorites
+    for (const s of scenes) for (const id of s.items) { const it = registry[id]; if (it) add(it.id, it.name, it.lane, it.image); }
     for (const c of myCreatedCharacters) add(c.id, c.name, 'characters', c.coverImageUrl ?? null);
     for (const it of myCreatedItems) add(it.id, it.name, it.lane, it.coverUrl);
     for (const f of favItems) add(f.id, f.name, f.lane ?? 'characters', f.image ?? null);
     return [...map.values()];
-  }, [scene, registry, myCreatedCharacters, myCreatedItems, favItems]);
+  }, [scenes, registry, myCreatedCharacters, myCreatedItems, favItems]);
+
+  // Scenes offered in the Post composer — each a one-tap bundle of what it used.
+  // Empty scenes are hidden; most-recently-used (prompt copied) first.
+  const postScenes = useMemo(
+    () => scenes
+      .map(s => ({
+        id: s.id,
+        name: s.name,
+        lastUsedAt: s.lastUsedAt,
+        subjects: s.items.map(id => registry[id]).filter((it): it is SceneItem => Boolean(it)).map(it => ({ id: it.id, name: it.name, lane: it.lane, image: it.image })),
+      }))
+      .filter(s => s.subjects.length > 0)
+      .sort((a, b) => (b.lastUsedAt ?? '').localeCompare(a.lastUsedAt ?? '')),
+    [scenes, registry],
+  );
 
   // Load the Following feed's posts (from creators the viewer follows).
   const reloadFeed = () => {
@@ -585,6 +602,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       try { document.execCommand('copy'); } catch { /* ignore */ }
       document.body.removeChild(ta);
     }
+    // Copying the prompt = "I'm taking this off to render it" — the honest "used"
+    // signal (while generation is locked). Surfaces this scene in the Post composer.
+    updateActive(s => ({ ...s, lastUsedAt: new Date().toISOString() }));
     setQuickCopied(true); window.setTimeout(() => setQuickCopied(false), 1600);
   };
 
@@ -1344,6 +1364,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           viewerAuthUid={viewerAuthUid}
           viewerName={viewer}
           attachable={attachable}
+          scenes={postScenes}
+          activeSceneId={activeId}
           preselectedIds={scene}
           onClose={() => setPostComposerOpen(false)}
           onPosted={() => { reloadFeed(); }}

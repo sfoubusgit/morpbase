@@ -4,16 +4,30 @@ import { nsfwMatch } from './contentRating';
 import { LanePlaceholder } from './LanePlaceholder';
 
 export type AttachSubject = { id: string; name: string; lane: string; image?: string | null };
+export type PostScene = { id: string; name: string; lastUsedAt?: string; subjects: AttachSubject[] };
 
 type PostComposerProps = {
   viewerAuthUid: string;
   viewerName: string;
   /** everything the viewer can credit — scene items, their creations, favorites */
   attachable: AttachSubject[];
+  /** the viewer's scenes (one-tap credit bundles), recently-used first */
+  scenes?: PostScene[];
+  /** the currently-open scene id (pre-selected in the picker) */
+  activeSceneId?: string;
   /** ids pre-checked (e.g. the current scene's items) */
   preselectedIds?: string[];
   onClose: () => void;
   onPosted: () => void;
+};
+
+const relUsed = (iso?: string): string => {
+  if (!iso) return '';
+  const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+  if (s < 3600) return 'used just now';
+  if (s < 86400) return `used ${Math.floor(s / 3600)}h ago`;
+  if (s < 604800) return `used ${Math.floor(s / 86400)}d ago`;
+  return '';
 };
 
 const MAX_IMAGES = 8;
@@ -26,11 +40,16 @@ const ACCEPT = ['image/png', 'image/jpeg', 'image/webp'];
  * post lands in every credited item's gallery and in your followers' feed. SFW:
  * you attest before posting and the caption is rated like every other surface.
  */
-export function PostComposer({ viewerAuthUid, viewerName, attachable, preselectedIds = [], onClose, onPosted }: PostComposerProps) {
+export function PostComposer({ viewerAuthUid, viewerName, attachable, scenes = [], activeSceneId, preselectedIds = [], onClose, onPosted }: PostComposerProps) {
+  // start on the active scene if it has items, else the most-recently-used one
+  const initialScene = scenes.find(s => s.id === activeSceneId) ?? scenes[0] ?? null;
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [caption, setCaption] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set(preselectedIds));
+  const [sceneId, setSceneId] = useState<string | null>(initialScene?.id ?? null);
+  const [selected, setSelected] = useState<Set<string>>(
+    new Set(initialScene ? initialScene.subjects.map(s => s.id) : preselectedIds),
+  );
   const [search, setSearch] = useState('');
   const [agree, setAgree] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -66,7 +85,11 @@ export function PostComposer({ viewerAuthUid, viewerName, attachable, preselecte
     setFiles(prev => prev.filter((_, x) => x !== i));
     setPreviews(prev => { const u = prev[i]; if (u) URL.revokeObjectURL(u); return prev.filter((_, x) => x !== i); });
   };
-  const toggle = (id: string) => setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  const toggle = (id: string) => {
+    setSceneId(null); // manual edit → no longer "exactly a scene"
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  };
+  const pickScene = (s: PostScene) => { setSceneId(s.id); setSelected(new Set(s.subjects.map(x => x.id))); };
 
   const shown = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -144,10 +167,38 @@ export function PostComposer({ viewerAuthUid, viewerName, attachable, preselecte
             <textarea value={caption} onChange={e => setCaption(e.target.value)} rows={2} placeholder="Say something about it…" maxLength={400} />
           </label>
 
-          {/* credit / attach */}
+          {/* pick a scene → auto-credit everything it used (no hunting) */}
+          {scenes.length > 0 && (
+            <div className="v3-post-scenes">
+              <div className="v3-post-attach-hd"><span>From which scene?</span></div>
+              <div className="v3-post-scenerow">
+                {scenes.map(s => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    className={`v3-post-scene${sceneId === s.id ? ' on' : ''}`}
+                    onClick={() => pickScene(s)}
+                    title={s.subjects.map(x => x.name).join(', ')}
+                  >
+                    <span className="avs">
+                      {s.subjects.slice(0, 3).map(x => (
+                        <span key={x.id} className="a" style={x.image ? { backgroundImage: `url(${x.image})` } : undefined}>{!x.image && (x.name[0]?.toUpperCase() ?? '?')}</span>
+                      ))}
+                    </span>
+                    <span className="meta">
+                      <span className="nm">{s.name}</span>
+                      <span className="sub">{s.subjects.length} item{s.subjects.length === 1 ? '' : 's'}{relUsed(s.lastUsedAt) ? ` · ${relUsed(s.lastUsedAt)}` : ''}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* credit / attach — pre-filled from the chosen scene, tweakable */}
           <div className="v3-post-attach">
             <div className="v3-post-attach-hd">
-              <span>Made with <span className="req">· credit at least one</span></span>
+              <span>{scenes.length > 0 ? 'Credited items' : 'Made with'} <span className="req">· {scenes.length > 0 ? 'from your scene — adjust if needed' : 'credit at least one'}</span></span>
               {attachable.length > 6 && (
                 <input className="v3-post-attach-search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search your library…" />
               )}

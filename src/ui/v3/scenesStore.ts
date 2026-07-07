@@ -44,6 +44,10 @@ export type Scene = {
   // ── style: the render layer applied to the whole scene (a Style lane item id) ──
   styleId?: string;
 
+  // ── "used" signal: stamped when the scene's prompt is copied (taken off to
+  //    render), so the Post composer can list recently-used scenes first ──
+  lastUsedAt?: string;
+
   // ── v1: presentation & synthesis cache ──
   pinned?: boolean;
   color?: string;
@@ -122,6 +126,7 @@ function migrate(payload: unknown): Scene[] {
       createdAt: typeof s.createdAt === 'string' ? s.createdAt : nowISO(),
       updatedAt: typeof s.updatedAt === 'string' ? s.updatedAt : nowISO(),
       styleId: s.styleId as string | undefined,
+      lastUsedAt: s.lastUsedAt as string | undefined,
       pinned: s.pinned as boolean | undefined,
       color: s.color as string | undefined,
       method: s.method as SynthMethod | undefined,
