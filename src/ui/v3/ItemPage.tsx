@@ -72,11 +72,12 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
   const displayRating = ratings.mine ?? (rated ? Math.round(ratings.avg) : 0);
 
   const handleRate = async (r: number) => {
-    if (!viewerAuthUid) { setRatings(prev => ({ ...prev, mine: r })); return; }
+    setRatings(prev => ({ ...prev, mine: r })); // optimistic — the star lights immediately
+    if (!viewerAuthUid) return;
     try {
       await setRating({ subjectId: subject.id, authUid: viewerAuthUid, rating: r });
       setRatings(await getRatings(subject.id, viewerAuthUid));
-    } catch { /* offline */ }
+    } catch { /* keep the optimistic value */ }
   };
 
   const handleSubmit = async (e: FormEvent) => {

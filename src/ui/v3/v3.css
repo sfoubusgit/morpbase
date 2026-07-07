@@ -272,9 +272,9 @@
 .v3-follow { display: inline-flex; align-items: center; gap: 9px; }
 .v3-follow-count { font: var(--font-weight-medium) 12.5px var(--font-primary); color: var(--text-tertiary); }
 .v3-rate { display: inline-flex; gap: 2px; align-items: center; }
-.v3-rate button { background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--text-muted); padding: 0 1px; }
-.v3-rate button.lit { color: var(--text-secondary); }
-.v3-rate button:hover { color: var(--text-primary); }
+.v3-rate button { background: none; border: none; cursor: pointer; font-size: 20px; line-height: 1; color: var(--text-muted); padding: 0 1px; transition: color var(--motion-fast), transform var(--motion-fast); }
+.v3-rate button.lit { color: #f6c14b; }
+.v3-rate button:hover { color: #f6c14b; transform: scale(1.15); }
 .v3-panel { background: var(--surface-overlay); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 16px 18px; }
 .v3-panel .ph { margin: 0 0 8px; font: var(--font-weight-extrabold) 11px var(--font-primary); letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-accent); }
 .v3-panel .body { color: var(--text-secondary); font-size: 13.5px; line-height: var(--line-height-normal); }

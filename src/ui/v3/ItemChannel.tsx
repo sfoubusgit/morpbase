@@ -68,14 +68,13 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
   const commentCount = remoteComments.length + data.comments.length;
 
   const handleRate = async (r: number) => {
-    setData(channelStore.rate(character.id, r)); // optimistic / offline
+    setRatings(prev => ({ ...prev, mine: r }));    // optimistic — the star lights immediately
+    setData(channelStore.rate(character.id, r));   // local / offline mirror
     if (viewerAuthUid) {
       try {
         await setRating({ subjectId: character.id, authUid: viewerAuthUid, rating: r });
         setRatings(await getRatings(character.id, viewerAuthUid));
-      } catch { /* kept local */ }
-    } else {
-      setRatings(prev => ({ ...prev, mine: r }));
+      } catch { /* keep the optimistic value */ }
     }
   };
   const handleSubmit = async (e: FormEvent) => {
