@@ -31,7 +31,8 @@ const relUsed = (iso?: string): string => {
 };
 
 const MAX_IMAGES = 8;
-const MAX_BYTES = 20 * 1024 * 1024; // 20 MB / file
+const MAX_MB = 50;
+const MAX_BYTES = MAX_MB * 1024 * 1024; // per file
 const ACCEPT = ['image/png', 'image/jpeg', 'image/webp'];
 
 /**
@@ -65,7 +66,7 @@ export function PostComposer({ viewerAuthUid, viewerName, attachable, scenes = [
     const accepted: File[] = [];
     for (const f of list) {
       if (!ACCEPT.includes(f.type)) { setError('Only PNG, JPEG or WebP images are accepted.'); continue; }
-      if (f.size > MAX_BYTES) { setError(`“${f.name}” is over 20 MB.`); continue; }
+      if (f.size > MAX_BYTES) { setError(`“${f.name}” is over ${MAX_MB} MB.`); continue; }
       accepted.push(f);
     }
     setFiles(prev => {
@@ -145,7 +146,7 @@ export function PostComposer({ viewerAuthUid, viewerName, attachable, scenes = [
               <>
                 <div className="ic" aria-hidden="true">⬆</div>
                 <div className="t">Drag images here or click to select</div>
-                <div className="s">PNG, JPEG or WebP · up to {MAX_IMAGES} images · 20 MB each</div>
+                <div className="s">PNG, JPEG or WebP · up to {MAX_IMAGES} images · {MAX_MB} MB each</div>
               </>
             ) : (
               <div className="v3-post-thumbs" onClick={e => e.stopPropagation()}>
