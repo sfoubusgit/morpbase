@@ -172,7 +172,7 @@ export function V3Profile({
         ) : (
           <div className="v3-feed">
             {posts.map(p => (
-              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpen={onOpenPost} />
+              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpenSubject={onOpenChannel} onOpen={onOpenPost} />
             ))}
           </div>
         )

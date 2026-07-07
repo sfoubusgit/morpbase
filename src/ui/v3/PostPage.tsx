@@ -9,8 +9,10 @@ type PostPageProps = {
   postId: string;
   viewerName: string;
   viewerAuthUid?: string | null;
-  /** resolve a credited subject id → name (shown as plain text, not a link) */
+  /** resolve a credited subject id → name */
   nameOf?: (id: string) => string | undefined;
+  /** open a credited lane object's page */
+  onOpenSubject: (id: string) => void;
   onBack: () => void;
   onViewCreator: (authUid: string, name: string) => void;
   onMessage: (authUid: string, name: string) => void;
@@ -35,7 +37,7 @@ const relTime = (iso: string): string => {
  * to the lane objects it was made with — a post is its own thing; the credits
  * are shown as plain attribution text.
  */
-export function PostPage({ postId, viewerName, viewerAuthUid, nameOf, onBack, onViewCreator, onMessage, onLogin, onDeleted }: PostPageProps) {
+export function PostPage({ postId, viewerName, viewerAuthUid, nameOf, onOpenSubject, onBack, onViewCreator, onMessage, onLogin, onDeleted }: PostPageProps) {
   const [post, setPost] = useState<FeedPost | null>(null);
   const [loading, setLoading] = useState(true);
   const [active, setActive] = useState(0);
@@ -102,7 +104,9 @@ export function PostPage({ postId, viewerName, viewerAuthUid, nameOf, onBack, on
     onDeleted();
   };
 
-  const creditNames = (post?.subjectIds ?? []).map(id => nameOf?.(id)).filter((n): n is string => !!n);
+  const credits = (post?.subjectIds ?? [])
+    .map(id => ({ id, name: nameOf?.(id) }))
+    .filter((c): c is { id: string; name: string } => !!c.name);
 
   if (loading) return <div className="v3-chan v3-postpage"><button type="button" className="v3-chan-back" onClick={onBack}>← Back</button><div className="v3-empty">Loading…</div></div>;
   if (!post) return <div className="v3-chan v3-postpage"><button type="button" className="v3-chan-back" onClick={onBack}>← Back</button><div className="v3-empty">This post isn’t available — it may have been deleted.</div></div>;
@@ -150,8 +154,16 @@ export function PostPage({ postId, viewerName, viewerAuthUid, nameOf, onBack, on
             <span className="v3-postpage-ratenote">{rated ? `${ratings.avg.toFixed(1)} · ${ratings.count} rating${ratings.count === 1 ? '' : 's'}` : 'Not yet rated'}</span>
           </div>
 
-          {creditNames.length > 0 && (
-            <div className="v3-postpage-credits">Made with <span>{creditNames.join(', ')}</span></div>
+          {credits.length > 0 && (
+            <div className="v3-postpage-credits">
+              Made with{' '}
+              {credits.map((c, i) => (
+                <span key={c.id}>
+                  <button type="button" className="v3-creatorlink" onClick={() => onOpenSubject(c.id)}>{c.name}</button>
+                  {i < credits.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>

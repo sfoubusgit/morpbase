@@ -68,6 +68,13 @@ const LANES: LaneDef[] = [
 const cssVar = (v: string) => ({ ['--c' as string]: v });
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Page metadata for lanes that aren't LaneWall-driven (Actions, Style) so their
+// items still resolve to a detail page like every other lane object.
+const LANE_PAGE_META: Record<string, { label: string; accent: string; ph: string }> = {
+  actions: { label: 'Actions', accent: 'var(--la-mood)', ph: 'mood' },
+  style: { label: 'Style', accent: 'var(--la-lighting)', ph: 'lighting' },
+};
+
 // Data-driven config for the LaneWall-powered lanes (everything except Characters).
 type WallSeed = { id: string; name: string; summary: string; phrases: string[]; tint: number };
 type WallLaneCfg = { label: string; accent: string; badge: string; kind: string; ph: string; sub: string; items: WallSeed[] };
@@ -311,8 +318,12 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
     }
     for (const it of visibleCreatedItems) {
       const wl = WALL_LANES[it.lane];
-      if (!wl) continue; // skip created characters (handled by ItemChannel)
-      m[it.id] = { id: it.id, name: it.name, kind: wl.ph, laneLabel: wl.label, accent: wl.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author, authorAuthUid: it.authorAuthUid };
+      // Actions & Styles aren't wall lanes, but still get a page like everything else.
+      const meta = wl
+        ? { label: wl.label, accent: wl.accent, ph: wl.ph }
+        : LANE_PAGE_META[it.lane];
+      if (!meta) continue; // characters are handled by ItemChannel
+      m[it.id] = { id: it.id, name: it.name, kind: meta.ph, laneLabel: meta.label, accent: meta.accent, image: it.coverUrl, phrases: it.phrases, summary: it.summary, author: it.author, authorAuthUid: it.authorAuthUid };
     }
     return m;
   }, [visibleCreatedItems]);
@@ -730,6 +741,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             viewerName={viewer}
             viewerAuthUid={viewerAuthUid}
             nameOf={id => registry[id]?.name}
+            onOpenSubject={openItem}
             onBack={() => setPostId(null)}
             onViewCreator={openCreator}
             onMessage={openThreadWith}
@@ -923,17 +935,17 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   const mine = a.authorAuthUid && a.authorAuthUid === viewerAuthUid;
                   return (
                     <div key={a.id} className="v3-card v3-actioncard" style={cssVar('var(--la-mood)')}>
-                      <div className={`v3-shot${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined}>
+                      <div className={`v3-shot v3-shot-link${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined} onClick={() => openItem(a.id)} role="button" title={`Open ${a.name}`}>
                         {!a.coverUrl && <LanePlaceholder lane="mood" />}
                         <span className="v3-badge">Action</span>
                         {mine && (
                           <div className="v3-actioncard-own">
-                            <button type="button" onClick={() => openEdit(a.id)} title="Edit" aria-label="Edit">✎</button>
-                            <button type="button" onClick={() => deleteCreatedItem(a.id)} title="Delete" aria-label="Delete">✕</button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); openEdit(a.id); }} title="Edit" aria-label="Edit">✎</button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); deleteCreatedItem(a.id); }} title="Delete" aria-label="Delete">✕</button>
                           </div>
                         )}
                       </div>
-                      <div className="v3-cmeta">
+                      <div className="v3-cmeta v3-cmeta-link" onClick={() => openItem(a.id)} role="button">
                         <div>
                           <div className="nm">{a.name}</div>
                           <div className="st">{a.summary || a.phrases.join(', ')}</div>
@@ -974,19 +986,19 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                   const inUse = active.styleId === a.id;
                   return (
                     <div key={a.id} className={`v3-card v3-actioncard v3-stylecard${inUse ? ' v3-stylecard-on' : ''}`} style={cssVar('var(--la-lighting)')}>
-                      <div className={`v3-shot${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined}>
+                      <div className={`v3-shot v3-shot-link${a.coverUrl ? '' : ' v3-ph'}`} style={a.coverUrl ? { backgroundImage: `url(${a.coverUrl})` } : undefined} onClick={() => openItem(a.id)} role="button" title={`Open ${a.name}`}>
                         {!a.coverUrl && <LanePlaceholder lane="lighting" />}
                         <span className="v3-badge">Style</span>
                         {inUse && <span className="v3-badge v3-badge-on" style={{ top: 'auto', bottom: 10 }}>In scene</span>}
                         {mine && (
                           <div className="v3-actioncard-own">
-                            <button type="button" onClick={() => openEdit(a.id)} title="Edit" aria-label="Edit">✎</button>
-                            <button type="button" onClick={() => deleteCreatedItem(a.id)} title="Delete" aria-label="Delete">✕</button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); openEdit(a.id); }} title="Edit" aria-label="Edit">✎</button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); deleteCreatedItem(a.id); }} title="Delete" aria-label="Delete">✕</button>
                           </div>
                         )}
                       </div>
                       <div className="v3-cmeta">
-                        <div>
+                        <div className="v3-cmeta-link" onClick={() => openItem(a.id)} role="button">
                           <div className="nm">{a.name}</div>
                           <div className="st">{a.summary || a.phrases.join(', ')}</div>
                         </div>
@@ -1035,6 +1047,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                           showAuthor
                           onViewCreator={openCreator}
                           nameOf={id => registry[id]?.name}
+                          onOpenSubject={openItem}
                           onOpen={openPost}
                         />
                       ))}
