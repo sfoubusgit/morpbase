@@ -1003,3 +1003,66 @@ textarea.v3-prompt-edit:focus { border-color: var(--border-accent); }
   .v3-dm-thread.has-active { display: flex; }
   .v3-dm-back { display: inline-block; }
 }
+
+/* ── posts: "Share what you made" ───────────────────────────────────────────── */
+.v3-postbtn {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px;
+  border-radius: var(--radius-pill); border: 1px solid var(--border-accent);
+  background: var(--accent-primary-bg); color: #fff; cursor: pointer;
+  font: var(--font-weight-semibold) 13px var(--font-primary);
+  transition: filter var(--motion-fast), border-color var(--motion-fast);
+}
+.v3-postbtn:hover { filter: brightness(1.12); }
+.v3-postbtn .lbl { line-height: 1; }
+@media (max-width: 560px) { .v3-postbtn .lbl { display: none; } .v3-postbtn { padding: 0; width: 36px; justify-content: center; } }
+
+/* composer */
+.v3-modal.v3-post { max-width: 640px; }
+.v3-post-drop {
+  border: 1.5px dashed var(--border-medium); border-radius: var(--radius-md); padding: 26px 16px;
+  text-align: center; cursor: pointer; transition: border-color var(--motion-fast), background var(--motion-fast); background: rgba(255, 255, 255, 0.02);
+}
+.v3-post-drop:hover, .v3-post-drop.over { border-color: rgb(var(--la-character)); background: var(--accent-primary-bg); }
+.v3-post-drop .ic { font-size: 26px; color: var(--text-tertiary); }
+.v3-post-drop .t { margin-top: 6px; font: var(--font-weight-semibold) 14px var(--font-primary); color: var(--text-secondary); }
+.v3-post-drop .s { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+.v3-post-thumbs { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.v3-post-thumbs .th { position: relative; width: 92px; height: 92px; border-radius: var(--radius-sm); background-size: cover; background-position: center; background-color: #202027; border: 1px solid var(--border-medium); }
+.v3-post-thumbs .th button { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,0.7); color: #fff; cursor: pointer; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; }
+.v3-post-thumbs .th.add { display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.04); color: var(--text-tertiary); font-size: 24px; cursor: pointer; }
+.v3-post-attach { margin-top: 16px; }
+.v3-post-attach-hd { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; font: var(--font-weight-semibold) 12px var(--font-primary); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+.v3-post-attach-hd .req { color: var(--text-muted); font-weight: var(--font-weight-regular); text-transform: none; letter-spacing: 0; }
+.v3-post-attach-search { flex: none; width: 190px; max-width: 50%; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); padding: 6px 12px; color: var(--text-primary); font: var(--font-weight-regular) 12px var(--font-primary); text-transform: none; letter-spacing: 0; }
+.v3-post-attach-search:focus { outline: none; border-color: var(--border-accent); }
+.v3-post-attach-grid { display: flex; flex-wrap: wrap; gap: 8px; max-height: 168px; overflow-y: auto; scrollbar-width: thin; }
+.v3-post-chip { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 5px; background: rgba(255,255,255,0.04); border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); cursor: pointer; color: var(--text-secondary); font: var(--font-weight-semibold) 12.5px var(--font-primary); }
+.v3-post-chip:hover { color: #fff; border-color: var(--border-accent); }
+.v3-post-chip.on { color: #fff; border-color: rgb(var(--la-character)); background: var(--accent-primary-bg); }
+.v3-post-chip .sw { width: 26px; height: 26px; border-radius: 50%; flex: none; overflow: hidden; background-size: cover; background-position: center; background-color: #202027; position: relative; }
+.v3-post-chip .nm { white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.v3-post-chip .ck { color: rgb(var(--la-character)); font-size: 12px; }
+.v3-post-consent { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); cursor: pointer; }
+.v3-post-consent input { margin-top: 2px; flex: none; }
+.v3-post-consent b { color: var(--text-primary); font-weight: var(--font-weight-semibold); }
+
+/* feed post cards (Following) */
+.v3-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 26px; }
+.v3-postcard { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-overlay); display: flex; flex-direction: column; }
+.v3-postcard-hd { padding: 10px 12px; }
+.v3-postcard-hd .who { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; color: inherit; padding: 0; }
+.v3-postcard-hd .av { width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #36d3c4, var(--accent-primary)); color: #fff; font: var(--font-weight-bold) 12px var(--font-primary); }
+.v3-postcard-hd .nm { font: var(--font-weight-semibold) 13px var(--font-primary); }
+.v3-postcard-hd .who:hover .nm { text-decoration: underline; }
+.v3-postcard-imgs { display: grid; gap: 2px; cursor: pointer; background: #0c0d12; }
+.v3-postcard-imgs .im { background-size: cover; background-position: center; aspect-ratio: 1; }
+.v3-postcard-imgs.n1 { grid-template-columns: 1fr; }
+.v3-postcard-imgs.n1 .im { aspect-ratio: 4 / 3; }
+.v3-postcard-imgs.n2 { grid-template-columns: 1fr 1fr; }
+.v3-postcard-imgs.n3 { grid-template-columns: 1fr 1fr; }
+.v3-postcard-imgs.n3 .im:first-child { grid-row: span 2; aspect-ratio: auto; }
+.v3-postcard-imgs.n4 { grid-template-columns: 1fr 1fr; }
+.v3-postcard-cap { padding: 10px 12px 4px; font-size: 13px; line-height: 1.45; color: var(--text-secondary); }
+.v3-postcard-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px 12px; }
+.v3-postcard-tags .tag { font: var(--font-weight-semibold) 11.5px var(--font-primary); padding: 3px 9px; border-radius: var(--radius-pill); border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.03); color: var(--text-tertiary); cursor: pointer; }
+.v3-postcard-tags .tag:hover { color: #fff; border-color: var(--border-accent); }

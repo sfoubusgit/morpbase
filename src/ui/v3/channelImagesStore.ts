@@ -28,21 +28,113 @@ export async function listGeneratedImages(subjectId: string): Promise<RemoteImag
   }));
 }
 
-/** Public — list every image a given user has generated, newest first. */
+/** Public — list every image a given user has generated, newest first.
+ * Deduped by url: a post attached to N subjects writes N rows sharing one url,
+ * so the profile grid would otherwise show the same image N times. */
 export async function listMyGeneratedImages(authUid: string): Promise<RemoteImage[]> {
   const { data, error } = await supabase
     .from('v3_channel_images')
     .select('id, author_label, url, created_at')
     .eq('author_auth_uid', authUid)
     .order('created_at', { ascending: false })
-    .limit(120);
+    .limit(300);
   if (error || !data) return [];
-  return data.map((r: { id: string; author_label: string | null; url: string; created_at: string }) => ({
-    id: r.id,
-    author: r.author_label || 'creator',
-    url: r.url,
-    createdAt: r.created_at,
-  }));
+  const seen = new Set<string>();
+  const out: RemoteImage[] = [];
+  for (const r of data as Array<{ id: string; author_label: string | null; url: string; created_at: string }>) {
+    if (seen.has(r.url)) continue;
+    seen.add(r.url);
+    out.push({ id: r.id, author: r.author_label || 'creator', url: r.url, createdAt: r.created_at });
+  }
+  return out;
+}
+
+export type FeedPost = {
+  postId: string;
+  author: string;
+  authorAuthUid: string;
+  caption: string;
+  createdAt: string;
+  images: string[];        // unique image urls in the post
+  subjectIds: string[];    // the characters/objects this post was made with
+};
+
+/** Recent posts from a set of creators (the Following feed), newest first.
+ * Groups the flat image rows back into posts by post_id (legacy rows without a
+ * post_id become single-image posts keyed by their own id). */
+export async function listFeedPosts(authUids: string[], limit = 40): Promise<FeedPost[]> {
+  if (authUids.length === 0) return [];
+  const { data, error } = await supabase
+    .from('v3_channel_images')
+    .select('id, subject_id, author_auth_uid, author_label, url, caption, post_id, created_at')
+    .in('author_auth_uid', authUids)
+    .order('created_at', { ascending: false })
+    .limit(400);
+  if (error || !data) return [];
+  const rows = data as Array<{ id: string; subject_id: string; author_auth_uid: string; author_label: string | null; url: string; caption: string | null; post_id: string | null; created_at: string }>;
+  const byPost = new Map<string, FeedPost>();
+  const order: string[] = [];
+  for (const r of rows) {
+    const key = r.post_id || r.id;
+    let p = byPost.get(key);
+    if (!p) {
+      p = { postId: key, author: r.author_label || 'creator', authorAuthUid: r.author_auth_uid, caption: r.caption || '', createdAt: r.created_at, images: [], subjectIds: [] };
+      byPost.set(key, p);
+      order.push(key);
+    }
+    if (!p.images.includes(r.url)) p.images.push(r.url);
+    if (r.subject_id && !p.subjectIds.includes(r.subject_id)) p.subjectIds.push(r.subject_id);
+    if (!p.caption && r.caption) p.caption = r.caption;
+  }
+  return order.map(k => byPost.get(k) as FeedPost).slice(0, limit);
+}
+
+/** Authenticated — create a post: upload each image once, then write one row per
+ * (image × attached subject) sharing a post_id, so every subject's gallery gets
+ * the image via the existing subject_id read path. */
+export async function createPost(params: {
+  authUid: string;
+  authorLabel: string;
+  caption: string;
+  subjectIds: string[];      // at least one — a post is attributed to what it used
+  blobs: Blob[];             // at least one image
+}): Promise<void> {
+  const { authUid, authorLabel, caption, subjectIds, blobs } = params;
+  if (subjectIds.length === 0) throw new Error('Attach at least one character or object you used.');
+  if (blobs.length === 0) throw new Error('Add at least one image.');
+  const postId = crypto.randomUUID();
+
+  // upload each image once
+  const uploaded: { url: string; path: string }[] = [];
+  for (let i = 0; i < blobs.length; i++) {
+    const path = `${authUid}/post-${postId}-${i}.png`;
+    const up = await supabase.storage.from(BUCKET).upload(path, blobs[i], { contentType: blobs[i].type || 'image/png', upsert: false });
+    if (up.error) throw new Error(up.error.message);
+    const { data: pub } = supabase.storage.from(BUCKET).getPublicUrl(path);
+    uploaded.push({ url: pub.publicUrl, path });
+  }
+
+  // one row per (subject × image)
+  const fullRows = subjectIds.flatMap(subjectId =>
+    uploaded.map(u => ({
+      subject_id: subjectId,
+      author_auth_uid: authUid,
+      author_label: authorLabel,
+      url: u.url,
+      storage_path: u.path,
+      caption: caption.trim() || null,
+      post_id: postId,
+    })),
+  );
+  let { error } = await supabase.from('v3_channel_images').insert(fullRows);
+  // If migration 0039 hasn't run yet, caption/post_id don't exist — degrade to the
+  // base columns so the images still land in each subject's gallery (as single-
+  // image posts) rather than failing the whole post.
+  if (error && /could not find|schema cache|column .* does not exist|PGRST204/i.test(error.message)) {
+    const baseRows = fullRows.map(({ caption: _c, post_id: _p, ...base }) => base);
+    ({ error } = await supabase.from('v3_channel_images').insert(baseRows));
+  }
+  if (error) throw new Error(error.message);
 }
 
 /** Authenticated — upload a generated image blob and record it on the channel. */

@@ -11,8 +11,10 @@ import { consistencySeed } from './generation';
 import { V3Profile } from './V3Profile';
 import { PublicCreatorProfile } from './PublicCreatorProfile';
 import { MessagesPanel } from './MessagesPanel';
+import { PostComposer, type AttachSubject } from './PostComposer';
 import { listFollowing } from './followStore';
 import { countUnreadThreads, subscribeInbox } from './dmStore';
+import { listFeedPosts, type FeedPost } from './channelImagesStore';
 import { LaneItemComposer } from './LaneItemComposer';
 import { listLaneItems, deleteLaneItem, type RemoteLaneItem } from './laneItemsStore';
 import { DEV_LANE_ITEMS } from './laneItemSeed';
@@ -132,6 +134,8 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [dmTarget, setDmTarget] = useState<{ authUid: string; name: string } | null>(null); // start/open a thread with them
   const [followingSet, setFollowingSet] = useState<Set<string>>(new Set());                   // creators the viewer follows (feed)
   const [dmUnread, setDmUnread] = useState(0);                                                 // unread DM badge
+  const [postComposerOpen, setPostComposerOpen] = useState(false);                             // "Share what you made"
+  const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);                                  // posts in the Following feed
 
   useEffect(() => {
     let live = true;
@@ -409,6 +413,31 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
 
   const laneLabel = LANES.find(l => l.key === lane)?.label ?? 'Characters';
 
+  // Everything the viewer can credit on a post — scene items first (most likely
+  // what they just rendered), then their own creations and favorites. Deduped.
+  const attachable = useMemo<AttachSubject[]>(() => {
+    const map = new Map<string, AttachSubject>();
+    const add = (id: string, name: string, itemLane: string, image?: string | null) => {
+      if (id && name && !map.has(id)) map.set(id, { id, name, lane: itemLane, image: image ?? null });
+    };
+    for (const id of scene) { const it = registry[id]; if (it) add(it.id, it.name, it.lane, it.image); }
+    for (const c of myCreatedCharacters) add(c.id, c.name, 'characters', c.coverImageUrl ?? null);
+    for (const it of myCreatedItems) add(it.id, it.name, it.lane, it.coverUrl);
+    for (const f of favItems) add(f.id, f.name, f.lane ?? 'characters', f.image ?? null);
+    return [...map.values()];
+  }, [scene, registry, myCreatedCharacters, myCreatedItems, favItems]);
+
+  // Load the Following feed's posts (from creators the viewer follows).
+  const reloadFeed = () => {
+    if (!viewerAuthUid || followingSet.size === 0) { setFeedPosts([]); return; }
+    listFeedPosts([...followingSet]).then(setFeedPosts).catch(() => { /* offline */ });
+  };
+  useEffect(() => {
+    if (lane !== 'following') return;
+    reloadFeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lane, viewerAuthUid, followingSet]);
+
   const sceneElements: SynthElement[] = scene
     .map(id => registry[id])
     .filter((s): s is SceneItem => Boolean(s))
@@ -604,6 +633,10 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
         <div className="v3-userbar">
           {viewerAuthUid ? (
             <>
+              <button type="button" className="v3-postbtn" onClick={() => setPostComposerOpen(true)} title="Share what you made">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true"><path d="M4 16l4.5-5 3 3.5L15 10l5 6M4 5h16v14H4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
+                <span className="lbl">Post</span>
+              </button>
               <button type="button" className={`v3-msgbtn${showMessages ? ' active' : ''}`} onClick={openMessages} title="Messages" aria-label="Messages">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" aria-hidden="true"><path d="M4 5h16v11H8l-4 3V5z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/></svg>
                 {dmUnread > 0 && <span className="v3-msg-badge">{dmUnread > 9 ? '9+' : dmUnread}</span>}
@@ -939,17 +972,50 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                 <h2>Following</h2>
                 <div className="v3-sub">
                   {followingSet.size === 0
-                    ? 'Follow creators to fill this feed with their new blocks.'
-                    : `New characters & objects from the ${followingSet.size} creator${followingSet.size === 1 ? '' : 's'} you follow.`}
+                    ? 'Follow creators to fill this feed with their posts and new blocks.'
+                    : `Posts, characters & objects from the ${followingSet.size} creator${followingSet.size === 1 ? '' : 's'} you follow.`}
                 </div>
               </div>
             </div>
             {followingSet.size === 0 ? (
               <div className="v3-empty">You’re not following anyone yet. Open a creator (tap their @name on any card), hit <b>Follow</b>, and their new characters and objects will land here.</div>
-            ) : followingChars.length + followingItems.length === 0 ? (
-              <div className="v3-empty">Nothing new from the creators you follow yet — check back after they publish.</div>
+            ) : followingChars.length + followingItems.length + feedPosts.length === 0 ? (
+              <div className="v3-empty">Nothing new from the creators you follow yet — check back after they post or publish.</div>
             ) : (
               <>
+                {feedPosts.length > 0 && (
+                  <>
+                    <div className="v3-eyebrow" style={{ marginBottom: 12 }}>Recent posts</div>
+                    <div className="v3-feed">
+                      {feedPosts.map(p => (
+                        <div key={p.postId} className="v3-postcard">
+                          <div className="v3-postcard-hd">
+                            <button type="button" className="who" onClick={() => openCreator(p.authorAuthUid, p.author)}>
+                              <span className="av">{p.author[0]?.toUpperCase() ?? '?'}</span>
+                              <span className="nm">@{p.author.toLowerCase().replace(/\s+/g, '')}</span>
+                            </button>
+                          </div>
+                          <div
+                            className={`v3-postcard-imgs n${Math.min(p.images.length, 4)}`}
+                            onClick={() => { if (p.subjectIds[0]) openItem(p.subjectIds[0]); }}
+                            role="button"
+                          >
+                            {p.images.slice(0, 4).map((u, i) => <span key={i} className="im" style={{ backgroundImage: `url(${u})` }} />)}
+                          </div>
+                          {p.caption && <div className="v3-postcard-cap">{p.caption}</div>}
+                          {p.subjectIds.length > 0 && (
+                            <div className="v3-postcard-tags">
+                              {p.subjectIds.map(sid => {
+                                const it = registry[sid];
+                                return it ? <button key={sid} type="button" className="tag" onClick={() => openItem(sid)}>{it.name}</button> : null;
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
                 {followingChars.length > 0 && (
                   <>
                     <div className="v3-eyebrow" style={{ marginBottom: 12 }}>Characters</div>
@@ -1272,6 +1338,17 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
           />
         );
       })()}
+
+      {postComposerOpen && viewerAuthUid && (
+        <PostComposer
+          viewerAuthUid={viewerAuthUid}
+          viewerName={viewer}
+          attachable={attachable}
+          preselectedIds={scene}
+          onClose={() => setPostComposerOpen(false)}
+          onPosted={() => { reloadFeed(); }}
+        />
+      )}
     </div>
   );
 }
