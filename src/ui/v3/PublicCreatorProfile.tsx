@@ -40,6 +40,7 @@ type PublicCreatorProfileProps = {
   onBack: () => void;
   onAdd: (id: string) => void;
   onOpenChannel: (id: string) => void;
+  onOpenPost: (postId: string) => void;
   onToggleFavorite: (id: string) => void;
   onMessage: (authUid: string, name: string) => void;
   onLogin?: () => void;
@@ -62,6 +63,7 @@ export function PublicCreatorProfile({
   onBack,
   onAdd,
   onOpenChannel,
+  onOpenPost,
   onToggleFavorite,
   onMessage,
   onLogin,
@@ -160,7 +162,7 @@ export function PublicCreatorProfile({
         ) : (
           <div className="v3-feed">
             {posts.map(p => (
-              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpenSubject={onOpenChannel} />
+              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpen={onOpenPost} />
             ))}
           </div>
         )

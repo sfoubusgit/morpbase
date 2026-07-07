@@ -13,6 +13,7 @@ import { PublicCreatorProfile } from './PublicCreatorProfile';
 import { MessagesPanel } from './MessagesPanel';
 import { PostComposer, type AttachSubject } from './PostComposer';
 import { PostCard } from './PostCard';
+import { PostPage } from './PostPage';
 import { listFollowing } from './followStore';
 import { countUnreadThreads, subscribeInbox } from './dmStore';
 import { listFeedPosts, type FeedPost } from './channelImagesStore';
@@ -137,6 +138,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   const [dmUnread, setDmUnread] = useState(0);                                                 // unread DM badge
   const [postComposerOpen, setPostComposerOpen] = useState(false);                             // "Share what you made"
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([]);                                  // posts in the Following feed
+  const [postId, setPostId] = useState<string | null>(null);                                   // a post's own page
 
   useEffect(() => {
     let live = true;
@@ -168,7 +170,9 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
   }, [viewerAuthUid, viewCreator, showMessages]);
 
   // Clear every "page" overlay so a nav action lands on a clean surface.
-  const clearPages = () => { setChannelId(null); setFlow(null); setLegalPage(null); setViewCreator(null); setShowMessages(false); };
+  const clearPages = () => { setChannelId(null); setFlow(null); setLegalPage(null); setViewCreator(null); setShowMessages(false); setPostId(null); };
+  // Open a post's own page (from a feed/profile card).
+  const openPost = (id: string) => { setShowProfile(false); clearPages(); setPostId(id); };
   const goWorkspace = () => { setShowProfile(false); clearPages(); };
   const openLane = (key: string) => { setShowProfile(false); clearPages(); setLane(key); };
   // Open an item's page (clicking its image), from anywhere — exits profile/flow.
@@ -720,6 +724,18 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       <main className="v3-content">
         {legalPage ? (
           <V3LegalPage page={legalPage} onBack={() => setLegalPage(null)} />
+        ) : postId ? (
+          <PostPage
+            postId={postId}
+            viewerName={viewer}
+            viewerAuthUid={viewerAuthUid}
+            nameOf={id => registry[id]?.name}
+            onBack={() => setPostId(null)}
+            onViewCreator={openCreator}
+            onMessage={openThreadWith}
+            onLogin={onLogin}
+            onDeleted={() => { setPostId(null); reloadFeed(); }}
+          />
         ) : showMessages ? (
           <MessagesPanel
             viewerAuthUid={viewerAuthUid}
@@ -741,6 +757,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onBack={goWorkspace}
             onAdd={addToScene}
             onOpenChannel={openItem}
+            onOpenPost={openPost}
             onToggleFavorite={toggleFavorite}
             onMessage={openThreadWith}
             onLogin={onLogin}
@@ -758,6 +775,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             scene={scene}
             onAdd={addToScene}
             onOpenChannel={openItem}
+            onOpenPost={openPost}
             onToggleFavorite={toggleFavorite}
             isLoggedIn={Boolean(viewerAuthUid)}
             onLogout={onLogout}
@@ -1015,7 +1033,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                           showAuthor
                           onViewCreator={openCreator}
                           nameOf={id => registry[id]?.name}
-                          onOpenSubject={openItem}
+                          onOpen={openPost}
                         />
                       ))}
                     </div>
@@ -1091,7 +1109,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
       <V3Footer onOpenLegal={(p) => { setShowProfile(false); clearPages(); setLegalPage(p); }} />
 
       {/* ── floating scene dock (replaces the old right sidebar) ── */}
-      {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && !showMessages && !legalPage && (
+      {(scenes.length > 1 || scene.length > 0) && !channelChar && !showProfile && !flow && !showMessages && !legalPage && !postId && !viewCreator && (
         <div className="v3-dock" onClick={e => e.stopPropagation()}>
           <div className="v3-dock-main">
           {/* scene switcher — step through scenes, or open the dropdown for direct access */}

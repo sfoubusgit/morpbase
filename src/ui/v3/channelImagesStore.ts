@@ -89,6 +89,39 @@ export async function listFeedPosts(authUids: string[], limit = 40): Promise<Fee
   return order.map(k => byPost.get(k) as FeedPost).slice(0, limit);
 }
 
+/** A single post by id (its own page). Groups the flat rows sharing this post_id
+ * (or a legacy single-image row whose own id is the post id). */
+export async function getPost(postId: string): Promise<FeedPost | null> {
+  const { data, error } = await supabase
+    .from('v3_channel_images')
+    .select('id, subject_id, author_auth_uid, author_label, url, caption, post_id, created_at')
+    .or(`post_id.eq.${postId},id.eq.${postId}`)
+    .order('created_at', { ascending: true });
+  if (error || !data || data.length === 0) return null;
+  const rows = data as Array<{ id: string; subject_id: string; author_auth_uid: string; author_label: string | null; url: string; caption: string | null; post_id: string | null; created_at: string }>;
+  const first = rows[0];
+  const post: FeedPost = { postId, author: first.author_label || 'creator', authorAuthUid: first.author_auth_uid, caption: '', createdAt: first.created_at, images: [], subjectIds: [] };
+  for (const r of rows) {
+    if (!post.images.includes(r.url)) post.images.push(r.url);
+    if (r.subject_id && !post.subjectIds.includes(r.subject_id)) post.subjectIds.push(r.subject_id);
+    if (!post.caption && r.caption) post.caption = r.caption;
+  }
+  return post;
+}
+
+/** Authenticated — delete a post (RLS scopes the delete to the owner's rows).
+ * Best-effort removal of the underlying storage files too. */
+export async function deletePost(postId: string): Promise<void> {
+  const { data } = await supabase
+    .from('v3_channel_images')
+    .select('storage_path')
+    .or(`post_id.eq.${postId},id.eq.${postId}`);
+  const paths = ((data ?? []) as Array<{ storage_path: string | null }>).map(r => r.storage_path).filter((p): p is string => !!p);
+  const { error } = await supabase.from('v3_channel_images').delete().or(`post_id.eq.${postId},id.eq.${postId}`);
+  if (error) throw new Error(error.message);
+  if (paths.length) { try { await supabase.storage.from(BUCKET).remove([...new Set(paths)]); } catch { /* non-fatal */ } }
+}
+
 /** Authenticated — create a post: upload each image once, then write one row per
  * (image × attached subject) sharing a post_id, so every subject's gallery gets
  * the image via the existing subject_id read path. */

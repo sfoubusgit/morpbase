@@ -2,9 +2,9 @@ import type { FeedPost } from './channelImagesStore';
 
 type PostCardProps = {
   post: FeedPost;
-  /** open a credited item's channel (image / tag click) */
-  onOpenSubject: (id: string) => void;
-  /** resolve a credited subject id → display name (unresolved tags are hidden) */
+  /** open the post's own page */
+  onOpen: (postId: string) => void;
+  /** resolve a credited subject id → name (shown as plain text, not a link) */
   nameOf?: (id: string) => string | undefined;
   /** show the author header (feed); omit on a profile that already is the author */
   showAuthor?: boolean;
@@ -13,12 +13,13 @@ type PostCardProps = {
 };
 
 /**
- * One post — image(s), caption, and the characters/objects it was made with.
- * Shared by the Following feed and the profile "Posts" gallery so they stay
- * visually identical.
+ * One post — image(s), caption, and (as plain text) what it was made with.
+ * The whole card opens the post's own page; it never links to a lane object.
+ * Shared by the Following feed and the profile "Posts" gallery.
  */
-export function PostCard({ post, onOpenSubject, nameOf, showAuthor = false, onViewCreator }: PostCardProps) {
+export function PostCard({ post, onOpen, nameOf, showAuthor = false, onViewCreator }: PostCardProps) {
   const n = Math.min(post.images.length, 4);
+  const creditNames = post.subjectIds.map(id => (nameOf ? nameOf(id) : undefined)).filter((x): x is string => !!x);
   return (
     <div className="v3-postcard">
       {showAuthor && (
@@ -31,19 +32,15 @@ export function PostCard({ post, onOpenSubject, nameOf, showAuthor = false, onVi
       )}
       <div
         className={`v3-postcard-imgs n${n}`}
-        onClick={() => { if (post.subjectIds[0]) onOpenSubject(post.subjectIds[0]); }}
+        onClick={() => onOpen(post.postId)}
         role="button"
+        title="Open post"
       >
         {post.images.slice(0, 4).map((u, i) => <span key={i} className="im" style={{ backgroundImage: `url(${u})` }} />)}
       </div>
-      {post.caption && <div className="v3-postcard-cap">{post.caption}</div>}
-      {post.subjectIds.length > 0 && (
-        <div className="v3-postcard-tags">
-          {post.subjectIds.map(sid => {
-            const name = nameOf ? nameOf(sid) : undefined;
-            return name ? <button key={sid} type="button" className="tag" onClick={() => onOpenSubject(sid)}>{name}</button> : null;
-          })}
-        </div>
+      {post.caption && <button type="button" className="v3-postcard-cap as-link" onClick={() => onOpen(post.postId)}>{post.caption}</button>}
+      {creditNames.length > 0 && (
+        <div className="v3-postcard-credits">Made with {creditNames.join(', ')}</div>
       )}
     </div>
   );

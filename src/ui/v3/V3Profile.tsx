@@ -28,6 +28,7 @@ type V3ProfileProps = {
   scene: string[];
   onAdd: (id: string) => void;
   onOpenChannel: (id: string) => void;
+  onOpenPost: (postId: string) => void;
   onToggleFavorite: (id: string) => void;
   isLoggedIn?: boolean;
   onLogout?: () => void;
@@ -65,6 +66,7 @@ export function V3Profile({
   scene,
   onAdd,
   onOpenChannel,
+  onOpenPost,
   onToggleFavorite,
   isLoggedIn = true,
   onLogin,
@@ -170,7 +172,7 @@ export function V3Profile({
         ) : (
           <div className="v3-feed">
             {posts.map(p => (
-              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpenSubject={onOpenChannel} />
+              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpen={onOpenPost} />
             ))}
           </div>
         )
