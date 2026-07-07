@@ -12,6 +12,7 @@ import { V3Profile } from './V3Profile';
 import { PublicCreatorProfile } from './PublicCreatorProfile';
 import { MessagesPanel } from './MessagesPanel';
 import { PostComposer, type AttachSubject } from './PostComposer';
+import { PostCard } from './PostCard';
 import { listFollowing } from './followStore';
 import { countUnreadThreads, subscribeInbox } from './dmStore';
 import { listFeedPosts, type FeedPost } from './channelImagesStore';
@@ -1008,30 +1009,14 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
                     <div className="v3-eyebrow" style={{ marginBottom: 12 }}>Recent posts</div>
                     <div className="v3-feed">
                       {feedPosts.map(p => (
-                        <div key={p.postId} className="v3-postcard">
-                          <div className="v3-postcard-hd">
-                            <button type="button" className="who" onClick={() => openCreator(p.authorAuthUid, p.author)}>
-                              <span className="av">{p.author[0]?.toUpperCase() ?? '?'}</span>
-                              <span className="nm">@{p.author.toLowerCase().replace(/\s+/g, '')}</span>
-                            </button>
-                          </div>
-                          <div
-                            className={`v3-postcard-imgs n${Math.min(p.images.length, 4)}`}
-                            onClick={() => { if (p.subjectIds[0]) openItem(p.subjectIds[0]); }}
-                            role="button"
-                          >
-                            {p.images.slice(0, 4).map((u, i) => <span key={i} className="im" style={{ backgroundImage: `url(${u})` }} />)}
-                          </div>
-                          {p.caption && <div className="v3-postcard-cap">{p.caption}</div>}
-                          {p.subjectIds.length > 0 && (
-                            <div className="v3-postcard-tags">
-                              {p.subjectIds.map(sid => {
-                                const it = registry[sid];
-                                return it ? <button key={sid} type="button" className="tag" onClick={() => openItem(sid)}>{it.name}</button> : null;
-                              })}
-                            </div>
-                          )}
-                        </div>
+                        <PostCard
+                          key={p.postId}
+                          post={p}
+                          showAuthor
+                          onViewCreator={openCreator}
+                          nameOf={id => registry[id]?.name}
+                          onOpenSubject={openItem}
+                        />
                       ))}
                     </div>
                   </>

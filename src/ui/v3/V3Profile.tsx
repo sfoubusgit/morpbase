@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CharacterIdentity } from '../../types/characters';
 import { CharacterWall } from './CharacterWall';
 import { LaneWall } from './LaneWall';
-import { listMyGeneratedImages, type RemoteImage } from './channelImagesStore';
+import { listMyGeneratedImages, listFeedPosts, type RemoteImage, type FeedPost } from './channelImagesStore';
 import type { RemoteLaneItem } from './laneItemsStore';
 import { getFollowState, listFollowing } from './followStore';
 import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
 import { OnlineDot } from './OnlineDot';
+import { PostCard } from './PostCard';
 
 /** Favorites span every lane, so the profile renders them with the generic wall. */
 export type ProfileFavItem = { id: string; name: string; tint: number; image?: string | null; accent?: string; badge?: string; lane?: string };
@@ -71,14 +72,17 @@ export function V3Profile({
 }: V3ProfileProps) {
   const [tab, setTab] = useState<string>('characters');
   const [generated, setGenerated] = useState<RemoteImage[]>([]);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
 
-  // Pull the real images this user has generated + saved to channels.
+  // Pull the real images this user has generated + saved to channels, and the
+  // posts they've shared (grouped).
   useEffect(() => {
-    if (!viewerAuthUid) { setGenerated([]); return; }
+    if (!viewerAuthUid) { setGenerated([]); setPosts([]); return; }
     let live = true;
     listMyGeneratedImages(viewerAuthUid).then(v => { if (live) setGenerated(v); }).catch(() => { /* offline */ });
+    listFeedPosts([viewerAuthUid]).then(v => { if (live) setPosts(v); }).catch(() => { /* offline */ });
     return () => { live = false; };
   }, [viewerAuthUid]);
 
@@ -103,6 +107,15 @@ export function V3Profile({
     return m;
   }, [createdItems]);
   const laneTabs = LANE_ORDER.filter(l => byLane[l]?.length);
+
+  // Resolve a credited subject id → name for a post's tags.
+  const nameOf = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of createdCharacters) m.set(c.id, c.name);
+    for (const it of createdItems) m.set(it.id, it.name);
+    for (const f of favItems) m.set(f.id, f.name);
+    return (id: string) => m.get(id);
+  }, [createdCharacters, createdItems, favItems]);
 
   return (
     <div className="v3-prof">
@@ -138,6 +151,7 @@ export function V3Profile({
       </div>
 
       <div className="v3-tabs">
+        <button type="button" className={`v3-tab2${tab === 'posts' ? ' on' : ''}`} onClick={() => setTab('posts')}>Posts{posts.length > 0 ? ` · ${posts.length}` : ''}</button>
         <button type="button" className={`v3-tab2${tab === 'characters' ? ' on' : ''}`} onClick={() => setTab('characters')}>Characters · {created.length}</button>
         {laneTabs.map(l => (
           <button type="button" key={l} className={`v3-tab2${tab === l ? ' on' : ''}`} onClick={() => setTab(l)}>{LANE_INFO[l].label} · {byLane[l].length}</button>
@@ -146,7 +160,21 @@ export function V3Profile({
         <button type="button" className={`v3-tab2${tab === 'generated' ? ' on' : ''}`} onClick={() => setTab('generated')}>Generated{generated.length > 0 ? ` · ${generated.length}` : ''}</button>
       </div>
 
-      {tab === 'generated' ? (
+      {tab === 'posts' ? (
+        posts.length === 0 ? (
+          <div className="v3-empty">
+            {viewerAuthUid
+              ? 'No posts yet. Hit “Post” in the top bar to share what you made — it’ll show up here and in your followers’ feed.'
+              : 'Log in to share posts.'}
+          </div>
+        ) : (
+          <div className="v3-feed">
+            {posts.map(p => (
+              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpenSubject={onOpenChannel} />
+            ))}
+          </div>
+        )
+      ) : tab === 'generated' ? (
         generated.length === 0 ? (
           <div className="v3-empty">
             {viewerAuthUid

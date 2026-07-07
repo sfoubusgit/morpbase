@@ -5,6 +5,8 @@ import { CharacterWall } from './CharacterWall';
 import { LaneWall } from './LaneWall';
 import { FollowButton } from './FollowButton';
 import { listFollowing } from './followStore';
+import { listFeedPosts, type FeedPost } from './channelImagesStore';
+import { PostCard } from './PostCard';
 import { getPublicProfileByAuthUid } from '../../engine/profileStore';
 import type { PublicProfile } from '../../types';
 import { useOnlineAuthUids } from '../hooks/useOnlineAuthUids';
@@ -67,12 +69,14 @@ export function PublicCreatorProfile({
   const [tab, setTab] = useState<string>('characters');
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [following, setFollowing] = useState(0);
+  const [posts, setPosts] = useState<FeedPost[]>([]);
 
   useEffect(() => {
     let live = true;
-    setProfile(null);
+    setProfile(null); setPosts([]);
     getPublicProfileByAuthUid(authUid).then(p => { if (live) setProfile(p); }).catch(() => { /* offline */ });
     listFollowing(authUid).then(ids => { if (live) setFollowing(ids.length); }).catch(() => { /* offline */ });
+    listFeedPosts([authUid]).then(v => { if (live) setPosts(v); }).catch(() => { /* offline */ });
     return () => { live = false; };
   }, [authUid]);
 
@@ -90,6 +94,14 @@ export function PublicCreatorProfile({
     return m;
   }, [items]);
   const laneTabs = LANE_ORDER.filter(l => byLane[l]?.length);
+
+  // Resolve a credited subject id → name for post tags (this creator's items).
+  const nameOf = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const c of characters) m.set(c.id, c.name);
+    for (const it of items) m.set(it.id, it.name);
+    return (id: string) => m.get(id);
+  }, [characters, items]);
 
   return (
     <div className="v3-prof">
@@ -135,13 +147,24 @@ export function PublicCreatorProfile({
       </div>
 
       <div className="v3-tabs">
+        <button type="button" className={`v3-tab2${tab === 'posts' ? ' on' : ''}`} onClick={() => setTab('posts')}>Posts{posts.length > 0 ? ` · ${posts.length}` : ''}</button>
         <button type="button" className={`v3-tab2${tab === 'characters' ? ' on' : ''}`} onClick={() => setTab('characters')}>Characters · {characters.length}</button>
         {laneTabs.map(l => (
           <button type="button" key={l} className={`v3-tab2${tab === l ? ' on' : ''}`} onClick={() => setTab(l)}>{LANE_INFO[l].label} · {byLane[l].length}</button>
         ))}
       </div>
 
-      {tab === 'characters' ? (
+      {tab === 'posts' ? (
+        posts.length === 0 ? (
+          <div className="v3-empty">@{handle} hasn’t posted anything yet.</div>
+        ) : (
+          <div className="v3-feed">
+            {posts.map(p => (
+              <PostCard key={p.postId} post={p} nameOf={nameOf} onOpenSubject={onOpenChannel} />
+            ))}
+          </div>
+        )
+      ) : tab === 'characters' ? (
         <CharacterWall
           characters={characters}
           selectedIds={scene}
