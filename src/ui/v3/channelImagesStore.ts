@@ -9,19 +9,22 @@ import { supabase } from '../../engine/supabaseClient';
 
 const BUCKET = 'gen-images';
 
-export type RemoteImage = { id: string; author: string; url: string; createdAt: string };
+// postId is the id of the post this image belongs to (its own page). Legacy
+// single-image rows have no post_id, so they act as their own post (row id).
+export type RemoteImage = { id: string; postId: string; author: string; url: string; createdAt: string };
 
 /** Public — list the generated images shared to a subject's channel. */
 export async function listGeneratedImages(subjectId: string): Promise<RemoteImage[]> {
   const { data, error } = await supabase
     .from('v3_channel_images')
-    .select('id, author_label, url, created_at')
+    .select('id, post_id, author_label, url, created_at')
     .eq('subject_id', subjectId)
     .order('created_at', { ascending: false })
     .limit(60);
   if (error || !data) return [];
-  return data.map((r: { id: string; author_label: string | null; url: string; created_at: string }) => ({
+  return data.map((r: { id: string; post_id: string | null; author_label: string | null; url: string; created_at: string }) => ({
     id: r.id,
+    postId: r.post_id || r.id,
     author: r.author_label || 'creator',
     url: r.url,
     createdAt: r.created_at,
@@ -34,17 +37,17 @@ export async function listGeneratedImages(subjectId: string): Promise<RemoteImag
 export async function listMyGeneratedImages(authUid: string): Promise<RemoteImage[]> {
   const { data, error } = await supabase
     .from('v3_channel_images')
-    .select('id, author_label, url, created_at')
+    .select('id, post_id, author_label, url, created_at')
     .eq('author_auth_uid', authUid)
     .order('created_at', { ascending: false })
     .limit(300);
   if (error || !data) return [];
   const seen = new Set<string>();
   const out: RemoteImage[] = [];
-  for (const r of data as Array<{ id: string; author_label: string | null; url: string; created_at: string }>) {
+  for (const r of data as Array<{ id: string; post_id: string | null; author_label: string | null; url: string; created_at: string }>) {
     if (seen.has(r.url)) continue;
     seen.add(r.url);
-    out.push({ id: r.id, author: r.author_label || 'creator', url: r.url, createdAt: r.created_at });
+    out.push({ id: r.id, postId: r.post_id || r.id, author: r.author_label || 'creator', url: r.url, createdAt: r.created_at });
   }
   return out;
 }
@@ -193,5 +196,5 @@ export async function saveGeneratedImage(params: {
     .single();
   if (error) throw new Error(error.message);
 
-  return { id: data.id as string, author: authorLabel, url, createdAt: data.created_at as string };
+  return { id: data.id as string, postId: data.id as string, author: authorLabel, url, createdAt: data.created_at as string };
 }

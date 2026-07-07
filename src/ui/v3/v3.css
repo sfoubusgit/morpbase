@@ -286,6 +286,8 @@
 .v3-gal .g { aspect-ratio: 1; border-radius: var(--radius-md); background-size: cover; border: 1px solid var(--border-subtle); position: relative; cursor: pointer; transition: all var(--motion-fast); }
 .v3-gal .g:hover { border-color: var(--border-accent); transform: scale(1.03); }
 .v3-gal .g small { position: absolute; left: 7px; bottom: 6px; font: var(--font-weight-medium) 10px var(--font-primary); background: rgba(8, 9, 14, 0.6); padding: 2px 7px; border-radius: var(--radius-xs); }
+/* clickable gallery tile (opens the post) — button reset over the .g tile */
+.v3-gal button.g-link { padding: 0; margin: 0; background-color: #202027; color: inherit; display: block; width: 100%; }
 .v3-comment-form { display: flex; gap: 10px; margin: 4px 0 16px; }
 .v3-comment-form input { flex: 1; background: rgba(8, 9, 14, 0.82); border: 1px solid var(--border-medium); border-radius: var(--radius-md); color: var(--text-primary); padding: 10px 14px; font: 13.5px var(--font-primary); }
 .v3-comment-form input:focus { outline: none; border-color: var(--border-accent); }

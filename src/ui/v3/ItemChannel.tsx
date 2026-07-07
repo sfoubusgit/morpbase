@@ -19,6 +19,8 @@ type ItemChannelProps = {
   onLogin?: () => void;
   /** open the creator's profile (where you can follow / message them) */
   onViewCreator?: (authUid: string, name: string) => void;
+  /** open a gallery image's post page */
+  onOpenPost?: (postId: string) => void;
   /** edit this character — only offered to its author */
   onEdit?: (id: string) => void;
   /** delete this character — only offered to its author */
@@ -32,7 +34,7 @@ type ChanTab = 'gallery' | 'comments' | 'about';
  * a gallery of community results, a rating, and a comment thread, all attached
  * to this one reusable item. Social data comes from the local channel seam.
  */
-export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onViewCreator, onEdit, onDelete }: ItemChannelProps) {
+export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, creatorAuthUid, onBack, onAdd, onLogin, onViewCreator, onOpenPost, onEdit, onDelete }: ItemChannelProps) {
   const isMine = Boolean(viewerAuthUid && creatorAuthUid && creatorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${character.name}"? This can't be undone.`)) onDelete(character.id);
@@ -169,7 +171,7 @@ export function ItemChannel({ character, inScene, viewerName, viewerAuthUid, cre
           )}
           <div className="v3-gal">
             {remote.map(ri => (
-              <div key={ri.id} className="g" style={{ backgroundImage: `url(${ri.url})` }}><small>@{ri.author}</small></div>
+              <button type="button" key={ri.id} className="g g-link" style={{ backgroundImage: `url(${ri.url})` }} onClick={() => onOpenPost?.(ri.postId)} title="Open post"><small>@{ri.author}</small></button>
             ))}
             {data.gallery.map(gi => (
               <div

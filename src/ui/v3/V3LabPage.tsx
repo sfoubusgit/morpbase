@@ -812,6 +812,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onAdd={addToScene}
             onLogin={onLogin}
             onViewCreator={openCreator}
+            onOpenPost={openPost}
             onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />
@@ -825,6 +826,7 @@ export function V3LabPage({ characters, viewerName, viewerAvatarUrl, viewerAuthU
             onAdd={addToScene}
             onLogin={onLogin}
             onViewCreator={openCreator}
+            onOpenPost={openPost}
             onEdit={openEdit}
             onDelete={deleteCreatedItem}
           />

@@ -186,7 +186,7 @@ export function V3Profile({
         ) : (
           <div className="v3-gal">
             {generated.map(g => (
-              <div key={g.id} className="g" style={{ backgroundImage: `url(${g.url})` }}><small>@{g.author}</small></div>
+              <button type="button" key={g.id} className="g g-link" style={{ backgroundImage: `url(${g.url})` }} onClick={() => onOpenPost(g.postId)} title="Open post"><small>@{g.author}</small></button>
             ))}
           </div>
         )

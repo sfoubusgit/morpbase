@@ -31,6 +31,8 @@ type ItemPageProps = {
   onLogin?: () => void;
   /** open the creator's profile (where you can follow / message them) */
   onViewCreator?: (authUid: string, name: string) => void;
+  /** open a gallery image's post page */
+  onOpenPost?: (postId: string) => void;
   /** edit this item — only offered to its author */
   onEdit?: (id: string) => void;
   /** delete this item — only offered to its author */
@@ -45,7 +47,7 @@ type Tab = 'gallery' | 'comments' | 'about';
  * clicking the item's image. Gallery, comments and ratings are real (Supabase),
  * keyed by the item id, exactly like a character's page.
  */
-export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onViewCreator, onEdit, onDelete }: ItemPageProps) {
+export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, onAdd, onLogin, onViewCreator, onOpenPost, onEdit, onDelete }: ItemPageProps) {
   const isMine = Boolean(viewerAuthUid && subject.authorAuthUid && subject.authorAuthUid === viewerAuthUid);
   const confirmDelete = () => {
     if (onDelete && window.confirm(`Delete "${subject.name}"? This can't be undone.`)) onDelete(subject.id);
@@ -152,7 +154,7 @@ export function ItemPage({ subject, inScene, viewerName, viewerAuthUid, onBack, 
             : (
               <div className="v3-gal">
                 {remote.map(ri => (
-                  <div key={ri.id} className="g" style={{ backgroundImage: `url(${ri.url})` }}><small>@{ri.author}</small></div>
+                  <button type="button" key={ri.id} className="g g-link" style={{ backgroundImage: `url(${ri.url})` }} onClick={() => onOpenPost?.(ri.postId)} title="Open post"><small>@{ri.author}</small></button>
                 ))}
               </div>
             )}
